@@ -7,6 +7,7 @@ use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Contrôleur CRUD des items.
@@ -143,16 +144,129 @@ class ItemController extends Controller
     // ─────────────────────────────────────────────
 
     /**
+     * Affiche le formulaire d'import CSV.
+     */
+    public function showImportForm(Module $module)
+    {
+        $this->authorizeOwner($module);
+        return view('items.import', compact('module'));
+    }
+
+    /**
+     * Traite l'import CSV.
+     * Format attendu : name_fr,name_en,function_text (sans en-tête ou avec)
+     * La colonne photo est ignorée (import texte uniquement).
+     */
+    public function importCsv(Request $request, Module $module)
+    {
+        $this->authorizeOwner($module);
+
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+
+        $file    = $request->file('csv_file');
+        $handle  = fopen($file->getRealPath(), 'r');
+        $count   = 0;
+        $errors  = [];
+        $lineNum = 0;
+
+        while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+            $lineNum++;
+
+            // Ignorer la ligne d'en-tête si elle commence par "name_fr" ou "nom"
+            if ($lineNum === 1 && in_array(strtolower(trim($row[0] ?? '')), ['name_fr', 'nom', 'nom_fr'])) {
+                continue;
+            }
+
+            // Nettoyer les valeurs
+            $nameFr   = trim($row[0] ?? '');
+            $nameEn   = trim($row[1] ?? '');
+            $function = trim($row[2] ?? '');
+
+            if (empty($nameFr) || empty($nameEn) || empty($function)) {
+                $errors[] = "Ligne {$lineNum} ignorée : champs incomplets.";
+                continue;
+            }
+
+            $module->items()->create([
+                'name_fr'       => mb_substr($nameFr, 0, 255),
+                'name_en'       => mb_substr($nameEn, 0, 255),
+                'function_text' => mb_substr($function, 0, 2000),
+                'photo_path'    => null,
+            ]);
+            $count++;
+        }
+
+        fclose($handle);
+
+        $message = "{$count} item(s) importé(s) avec succès.";
+        if (!empty($errors)) {
+            $message .= ' ' . count($errors) . ' ligne(s) ignorée(s).';
+            session(['import_errors' => $errors]);
+        }
+
+        return redirect()->route('modules.show', $module)->with('success', $message);
+    }
+
+    // ─────────────────────────────────────────────
+    // Méthodes privées utilitaires
+    // ─────────────────────────────────────────────
+
+    /**
      * Stocke une photo uploadée dans storage/public/items.
-     * Utilise le stockage natif Laravel (pas de compression côté serveur).
-     * Retourne le chemin relatif enregistré en base (ex : "items/abc123.jpg").
+     * Compresse et redimensionne l'image avec la librairie GD de PHP.
+     * Retourne le chemin relatif enregistré en base (ex : "items/uuid.jpg").
      */
     private function storePhoto($file): string
     {
-        // putFile génère un nom unique et stocke le fichier tel quel
-        $path = $file->store('items', 'public');
+        $maxWidth  = 1200;
+        $maxHeight = 1200;
+        $quality   = 80; // qualité JPEG 0-100
 
-        return $path;
+        $mime    = $file->getMimeType();
+        $tmpPath = $file->getRealPath();
+
+        // Créer l'image source selon le format
+        $source = match ($mime) {
+            'image/jpeg' => imagecreatefromjpeg($tmpPath),
+            'image/png'  => imagecreatefrompng($tmpPath),
+            'image/webp' => imagecreatefromwebp($tmpPath),
+            default      => imagecreatefromjpeg($tmpPath),
+        };
+
+        [$origW, $origH] = getimagesize($tmpPath);
+
+        // Calculer les nouvelles dimensions en conservant le ratio
+        $ratio = min($maxWidth / $origW, $maxHeight / $origH, 1.0);
+        $newW  = (int) round($origW * $ratio);
+        $newH  = (int) round($origH * $ratio);
+
+        // Créer l'image redimensionnée
+        $resized = imagecreatetruecolor($newW, $newH);
+
+        // Préserver la transparence pour PNG
+        if ($mime === 'image/png') {
+            imagealphablending($resized, false);
+            imagesavealpha($resized, true);
+        }
+
+        imagecopyresampled($resized, $source, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+
+        // Sauvegarder en JPEG dans un fichier temporaire
+        $tmpOutput = tempnam(sys_get_temp_dir(), 'mnemo_') . '.jpg';
+        imagejpeg($resized, $tmpOutput, $quality);
+
+        // Libérer la mémoire
+        imagedestroy($source);
+        imagedestroy($resized);
+
+        // Générer un nom unique et déplacer dans storage/public/items
+        $filename = 'items/' . Str::uuid() . '.jpg';
+        Storage::disk('public')->put($filename, file_get_contents($tmpOutput));
+        unlink($tmpOutput);
+
+        return $filename;
     }
 
     /**

@@ -49,6 +49,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('modules.items', ItemController::class)
         ->except(['index', 'show']); // Ces actions redirigent vers la page du module
 
+    // Import CSV d'items en masse
+    Route::get('/modules/{module}/items/import', [ItemController::class, 'showImportForm'])->name('modules.items.import.form');
+    Route::post('/modules/{module}/items/import', [ItemController::class, 'importCsv'])->name('modules.items.import');
+
     // ─── Mode Test (nombre fixe de questions) ───
     Route::get('/modules/{module}/test', [TestController::class, 'show'])->name('test.show');
     Route::post('/modules/{module}/test/start', [TestController::class, 'start'])->name('test.start');
@@ -61,6 +65,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/modules/{module}/anki/question', [AnkiController::class, 'question'])->name('anki.question');
     Route::post('/modules/{module}/anki/submit', [AnkiController::class, 'submit'])->name('anki.submit');
     Route::post('/modules/{module}/anki/quit', [AnkiController::class, 'quit'])->name('anki.quit');
+
+    // Dupliquer un module public dans son espace personnel
+    Route::post('/modules/{module}/duplicate', [ModuleController::class, 'duplicate'])->name('modules.duplicate');
 
     // ─── Bibliothèque publique ───
     Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');

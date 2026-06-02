@@ -60,7 +60,47 @@ class AnkiController extends Controller
         $types = QuizGenerator::getQuestionTypes();
         $questionType = $types[array_rand($types)];
 
-        $question = QuizGenerator::generateQuestion($module, $questionType);
+        // --- Priorisation des items ratés (ANKI-3) ---
+        // Au lieu d'un tirage purement aléatoire, on pondère les items
+        // selon la progression de l'utilisateur : les items ratés reviennent plus souvent.
+        $allItems = $module->items()->get();
+
+        // Récupérer toutes les progressions de l'utilisateur pour ce module
+        $progressMap = Progress::where('user_id', Auth::id())
+            ->whereIn('item_id', $allItems->pluck('id'))
+            ->get()
+            ->keyBy('item_id');
+
+        // Construire une liste pondérée : items ratés et items dus (SM-2) apparaissent plus souvent
+        $weightedPool = [];
+        foreach ($allItems as $item) {
+            $prog = $progressMap->get($item->id);
+            if (!$prog) {
+                // Jamais vu : poids élevé (priorité haute)
+                $weight = 5;
+            } elseif ($prog->isMastered() && !$prog->isDueForReview()) {
+                // Maîtrisé et pas encore dû : poids très faible
+                $weight = 1;
+            } elseif ($prog->isDueForReview() && !$prog->isMastered()) {
+                // Dû pour révision et non maîtrisé : poids très élevé (SM-2 priorité)
+                $weight = max(5, $prog->fail_count - $prog->success_count + 5);
+            } elseif ($prog->isDueForReview()) {
+                // Dû pour révision (même si maîtrisé) : poids moyen
+                $weight = 3;
+            } else {
+                // En cours mais pas encore dû : poids selon les erreurs
+                $weight = max(1, $prog->fail_count - $prog->success_count + 3);
+            }
+            for ($i = 0; $i < $weight; $i++) {
+                $weightedPool[] = $item;
+            }
+        }
+
+        // Tirer l'item cible selon les poids calculés
+        $targetItem = $weightedPool[array_rand($weightedPool)];
+        // --- Fin priorisation ---
+
+        $question = QuizGenerator::generateQuestion($module, $questionType, $targetItem);
 
         if (isset($question['error'])) {
             return redirect()
@@ -135,6 +175,11 @@ class AnkiController extends Controller
         }
 
         $progress->last_seen = now();
+
+        // Appliquer l'algorithme SM-2 (qualité 5 si correct, 1 si incorrect)
+        $quality = $isCorrect ? 5 : 1;
+        $progress->applySM2($quality);
+
         $progress->save();
 
         // Retourner le feedback
