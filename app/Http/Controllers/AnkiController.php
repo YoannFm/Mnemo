@@ -225,17 +225,9 @@ class AnkiController extends Controller
                 'interval_days' => $progress->interval_days,
             ]);
 
-            if ($isCorrect) {
-                $progress->success_count++;
-                $progress->streak++;
-            } else {
-                $progress->fail_count++;
-                $progress->streak = 0; // Réinitialiser la série en cas d'erreur
-            }
-
             $progress->last_seen = now();
 
-            // Appliquer l'algorithme SM-2 (qualité 5 si correct, 1 si incorrect)
+            // SM-2 doit lire success_count AVANT l'incrément pour calculer le bon intervalle
             $quality = $isCorrect ? 5 : 1;
 
             \Log::info('DEBUG: Avant applySM2', [
@@ -245,6 +237,14 @@ class AnkiController extends Controller
             ]);
 
             $progress->applySM2($quality);
+
+            if ($isCorrect) {
+                $progress->success_count++;
+                $progress->streak++;
+            } else {
+                $progress->fail_count++;
+                $progress->streak = 0;
+            }
 
             \Log::info('DEBUG: Après applySM2', [
                 'easiness_factor' => $progress->easiness_factor,
