@@ -69,4 +69,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/progression', [ProgressController::class, 'index'])->name('progress.index');
 });
 
+// ─── Sitemap XML dynamique ───
+// Accessible publiquement pour les moteurs de recherche
+Route::get('/sitemap.xml', function () {
+    $content = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $content .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    $content .= '  <url><loc>' . url('/') . '</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>' . "\n";
+    $content .= '  <url><loc>' . url('/bibliotheque') . '</loc><changefreq>daily</changefreq><priority>0.8</priority></url>' . "\n";
+    $content .= '</urlset>';
+    return response($content, 200)->header('Content-Type', 'application/xml');
+})->name('sitemap');
+
 require __DIR__.'/auth.php';
