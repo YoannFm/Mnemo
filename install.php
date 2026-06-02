@@ -142,7 +142,10 @@ if ($action === 'install') {
         }
 
         try {
-            $dbPath = __DIR__ . '/database/database.sqlite';
+            $dbPath = realpath('database/database.sqlite');
+            if (!$dbPath) {
+                $dbPath = 'database/database.sqlite';
+            }
             $pdo = new PDO('sqlite:' . $dbPath);
 
             $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
