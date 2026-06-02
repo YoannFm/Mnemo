@@ -173,43 +173,66 @@ if ($action === 'install') {
         $driver = get_input('db_driver') ?? 'mysql';
         $host   = get_input('db_host') ?? '127.0.0.1';
         $port   = get_input('db_port') ?? '3306';
-        $name   = get_input('db_name') ?? 'mnemo';
-        $user   = get_input('db_user') ?? 'root';
+        $name   = get_input('db_name') ?? '';
+        $user   = get_input('db_user') ?? '';
         $pass   = get_input('db_pass') ?? '';
-        $appUrl = get_input('app_url') ?? 'http://localhost';
+        $appUrl = rtrim(get_input('app_url') ?? 'http://localhost', '/');
         $debug  = get_input('app_debug') ? 'true' : 'false';
 
-        if (!file_exists(ROOT . '/.env.example')) {
-            json_response(['success' => false, 'error' => 'Fichier .env.example introuvable'], 400);
-        }
-
-        $env = file_get_contents(ROOT . '/.env.example');
-
         if ($driver === 'sqlite') {
-            $env = preg_replace('/^DB_CONNECTION=.*/m', 'DB_CONNECTION=sqlite', $env);
-            $env = preg_replace('/^DB_HOST=.*/m', '#DB_HOST=127.0.0.1', $env);
-            $env = preg_replace('/^DB_PORT=.*/m', '#DB_PORT=3306', $env);
-            $env = preg_replace('/^DB_DATABASE=.*/m', 'DB_DATABASE=' . ROOT . '/database/database.sqlite', $env);
-            $env = preg_replace('/^DB_USERNAME=.*/m', '#DB_USERNAME=', $env);
-            $env = preg_replace('/^DB_PASSWORD=.*/m', '#DB_PASSWORD=', $env);
-            // Creer le fichier SQLite
             $sqlitePath = ROOT . '/database/database.sqlite';
             if (!file_exists($sqlitePath)) touch($sqlitePath);
+            $dbConnection = 'sqlite';
+            $dbDatabase   = $sqlitePath;
+            $dbHost = $dbPort = $dbUser = $dbPass = '';
         } else {
-            $env = preg_replace('/^DB_CONNECTION=.*/m', 'DB_CONNECTION=mysql', $env);
-            $env = preg_replace('/^DB_HOST=.*/m', 'DB_HOST=' . $host, $env);
-            $env = preg_replace('/^DB_PORT=.*/m', 'DB_PORT=' . $port, $env);
-            $env = preg_replace('/^DB_DATABASE=.*/m', 'DB_DATABASE=' . $name, $env);
-            $env = preg_replace('/^DB_USERNAME=.*/m', 'DB_USERNAME=' . $user, $env);
-            $env = preg_replace('/^DB_PASSWORD=.*/m', 'DB_PASSWORD=' . $pass, $env);
+            $dbConnection = 'mysql';
+            $dbDatabase   = $name;
+            $dbHost       = $host;
+            $dbPort       = $port;
+            $dbUser       = $user;
+            $dbPass       = $pass;
         }
 
-        $env = preg_replace('/^APP_URL=.*/m', 'APP_URL=' . $appUrl, $env);
-        $env = preg_replace('/^APP_DEBUG=.*/m', 'APP_DEBUG=' . $debug, $env);
-        $env = preg_replace('/^APP_LOCALE=.*/m', 'APP_LOCALE=fr', $env);
+        $envContent = "APP_NAME=Mnemo\n"
+            . "APP_ENV=production\n"
+            . "APP_KEY=\n"
+            . "APP_DEBUG=$debug\n"
+            . "APP_TIMEZONE=UTC\n"
+            . "APP_URL=$appUrl\n"
+            . "APP_LOCALE=fr\n"
+            . "APP_FALLBACK_LOCALE=fr\n"
+            . "APP_FAKER_LOCALE=fr_FR\n"
+            . "\n"
+            . "LOG_CHANNEL=stack\n"
+            . "LOG_DEPRECATIONS_CHANNEL=null\n"
+            . "LOG_LEVEL=debug\n"
+            . "\n"
+            . "DB_CONNECTION=$dbConnection\n"
+            . ($dbHost ? "DB_HOST=$dbHost\n" : "")
+            . ($dbPort ? "DB_PORT=$dbPort\n" : "")
+            . "DB_DATABASE=$dbDatabase\n"
+            . ($dbUser ? "DB_USERNAME=$dbUser\n" : "")
+            . ($dbPass !== '' ? "DB_PASSWORD=$dbPass\n" : "DB_PASSWORD=\n")
+            . "\n"
+            . "SESSION_DRIVER=database\n"
+            . "SESSION_LIFETIME=120\n"
+            . "SESSION_ENCRYPT=false\n"
+            . "SESSION_PATH=/\n"
+            . "SESSION_DOMAIN=null\n"
+            . "\n"
+            . "BROADCAST_CONNECTION=log\n"
+            . "FILESYSTEM_DISK=local\n"
+            . "QUEUE_CONNECTION=database\n"
+            . "\n"
+            . "CACHE_STORE=database\n"
+            . "\n"
+            . "MAIL_MAILER=log\n"
+            . "MAIL_FROM_ADDRESS=hello@example.com\n"
+            . "MAIL_FROM_NAME=\"Mnemo\"\n";
 
-        if (!file_put_contents(ROOT . '/.env', $env)) {
-            json_response(['success' => false, 'error' => 'Impossible d\'ecrire le fichier .env'], 400);
+        if (!file_put_contents(ROOT . '/.env', $envContent)) {
+            json_response(['success' => false, 'error' => 'Impossible d\'ecrire le fichier .env - verifiez les permissions'], 400);
         }
 
         json_response(['success' => true]);
@@ -246,6 +269,8 @@ if ($action === 'install') {
             require_once ROOT . '/vendor/autoload.php';
             $app = require ROOT . '/bootstrap/app.php';
             $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
+            // Vider le cache de config pour s'assurer que le .env est bien lu
+            $kernel->call('config:clear');
             $status = $kernel->call('migrate', ['--force' => true]);
             $output = ob_get_clean();
             if ($status !== 0) {
