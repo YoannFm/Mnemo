@@ -99,23 +99,23 @@ class AnkiController extends Controller
         $this->authorize($module);
 
         if (!session()->has('anki_module_id') || session('anki_module_id') !== $module->id) {
-            return redirect()->route('modules.show', $module)->with('error', 'Aucune session Anki en cours.');
+            return response()->json(['error' => 'Aucune session Anki en cours.'], 403);
         }
 
         // Valider la réponse
+        // Laravel parse automatiquement le body JSON quand Content-Type: application/json
+        // 'question' arrive comme array, pas comme string JSON
         $data = $request->validate([
-            'item_id'   => 'required|integer',
-            'answer'    => 'required|integer|min:0|max:3',
-            'question'  => 'required|json', // Question encodée en JSON
+            'item_id'  => 'required|integer',
+            'answer'   => 'required|integer|min:0|max:3',
+            'question' => 'required|array',
         ]);
 
-        // Décoder la question
-        $question = json_decode($data['question'], true);
+        // La question est déjà un array (décodé par Laravel)
+        $question = $data['question'];
 
-        if (!$question) {
-            return redirect()
-                ->route('anki.question', $module)
-                ->with('error', 'Erreur lors du traitement de la réponse.');
+        if (empty($question)) {
+            return response()->json(['error' => 'Erreur lors du traitement de la réponse.'], 422);
         }
 
         // Valider la réponse
