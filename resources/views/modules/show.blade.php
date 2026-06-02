@@ -59,6 +59,26 @@
         @endif
     </div>
 
+    {{-- ── Boutons d'entraînement (Test / Anki) ── --}}
+    @if ($items->count() > 0)
+        <div class="d-grid gap-2 mb-4" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+            <a href="{{ route('test.show', $module) }}" class="btn btn-primary" style="height:auto;padding:1rem;">
+                <div style="font-size:1.5rem;margin-bottom:.25rem;">
+                    <i class="bi bi-lightning-charge"></i>
+                </div>
+                <div style="font-weight:600;font-size:.9rem;">Mode Test</div>
+                <div style="font-size:.75rem;color:rgba(255,255,255,.7);">Score final</div>
+            </a>
+            <a href="{{ route('anki.show', $module) }}" class="btn btn-outline-primary" style="height:auto;padding:1rem;border-width:2px;">
+                <div style="font-size:1.5rem;margin-bottom:.25rem;">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <div style="font-weight:600;font-size:.9rem;">Mode Anki</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">Infini</div>
+            </a>
+        </div>
+    @endif
+
     {{-- ── Liste des items ── --}}
     @if ($items->isEmpty())
         {{-- État vide — aucun item dans le module --}}
