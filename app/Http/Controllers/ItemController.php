@@ -50,15 +50,11 @@ class ItemController extends Controller
             'name_fr'       => 'required|string|max:255',
             'name_en'       => 'required|string|max:255',
             'function_text' => 'required|string|max:2000',
-            'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo'         => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $photoPath = null;
-
-        // Si une photo est fournie, on la compresse et on la stocke
-        if ($request->hasFile('photo')) {
-            $photoPath = $this->storePhoto($request->file('photo'));
-        }
+        // La photo est obligatoire - on la compresse et on la stocke
+        $photoPath = $this->storePhoto($request->file('photo'));
 
         // Création de l'item lié au module
         $module->items()->create([
