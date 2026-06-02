@@ -87,22 +87,31 @@
                 </div>
             </div>
 
-            {{-- Options interactives --}}
-            <div id="options-container" class="mb-4">
+            {{-- Options interactives — grille 2x2 --}}
+            <div id="options-container" class="mb-4"
+                 style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
                 @foreach ($question['options'] as $index => $option)
                     <button type="button"
-                            class="btn w-100 mb-2 anki-option"
+                            class="btn anki-option"
                             data-index="{{ $index }}"
                             onclick="submitAnswer({{ $index }}, event)"
-                            style="text-align:left;padding:1rem;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-primary);transition:.2s;display:flex;align-items:center;">
-                        {{-- Affichage basique ou photo selon le type de réponse --}}
+                            style="padding:.75rem;background:var(--card-bg);border:2px solid var(--card-border);
+                                   color:var(--text-primary);transition:.2s;border-radius:12px;
+                                   display:flex;flex-direction:column;align-items:center;
+                                   justify-content:center;gap:.5rem;min-height:80px;">
+
                         @if ($question['field_answer'] === 'photo_path')
+                            {{-- Réponse = photo --}}
                             <img src="{{ $option }}"
                                  alt="Option {{ $index + 1 }}"
-                                 style="width:80px;height:80px;border-radius:8px;object-fit:cover;margin-right:1rem;flex-shrink:0;">
+                                 style="width:100%;height:120px;border-radius:8px;object-fit:cover;">
                         @else
-                            <span>{{ $option }}</span>
+                            {{-- Réponse = texte --}}
+                            <span style="font-size:.9rem;text-align:center;word-break:break-word;">
+                                {{ $option }}
+                            </span>
                         @endif
+
                     </button>
                 @endforeach
             </div>
