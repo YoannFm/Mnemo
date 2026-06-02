@@ -27,7 +27,7 @@ class Progress extends Model
     ];
 
     /**
-     * Valeurs par défaut PHP — garantit que les champs SM-2 sont initialisés
+     * Valeurs par défaut PHP - garantit que les champs SM-2 sont initialisés
      * même quand Laravel ne relit pas les DEFAULT de la BDD après un INSERT.
      */
     protected $attributes = [

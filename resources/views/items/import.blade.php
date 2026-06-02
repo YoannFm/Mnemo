@@ -28,7 +28,7 @@
                             </p>
                             <p style="color:var(--text-muted);margin:.5rem 0 0;font-size:.78rem;">
                                 La première ligne peut contenir des en-têtes (elle sera ignorée automatiquement).<br>
-                                Les photos ne sont pas importables via CSV — à ajouter manuellement après.
+                                Les photos ne sont pas importables via CSV - à ajouter manuellement après.
                             </p>
                         </div>
                     </div>

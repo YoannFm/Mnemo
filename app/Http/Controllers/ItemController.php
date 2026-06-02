@@ -217,8 +217,8 @@ class ItemController extends Controller
     private function storePhoto($file): string
     {
         // Dimensions cibles : carré 800×800
-        // — assez grand pour le zoom modal, assez petit pour le réseau
-        // — crop centré pour que toutes les options Anki soient uniformes
+        // - assez grand pour le zoom modal, assez petit pour le réseau
+        // - crop centré pour que toutes les options Anki soient uniformes
         $targetSize = 800;
         $quality    = 85;
 

@@ -16,7 +16,7 @@ if (file_exists(LOCK_FILE)) {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Mnémo — Déjà installé</title>
+        <title>Mnémo - Déjà installé</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <style>
@@ -363,7 +363,7 @@ $allOk        = ($step === 1) ? allRequirementsMet($requirements) : true;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mnémo — Installation</title>
+    <title>Mnémo - Installation</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -915,11 +915,11 @@ $allOk        = ($step === 1) ? allRequirementsMet($requirements) : true;
             <div class="row g-2" style="font-size:.875rem;">
                 <div class="col-sm-6">
                     <span style="color:var(--text-muted)">Nom :</span>
-                    <strong><?= htmlspecialchars($cfg['app_name'] ?? '—') ?></strong>
+                    <strong><?= htmlspecialchars($cfg['app_name'] ?? '-') ?></strong>
                 </div>
                 <div class="col-sm-6">
                     <span style="color:var(--text-muted)">URL :</span>
-                    <strong><?= htmlspecialchars($cfg['app_url'] ?? '—') ?></strong>
+                    <strong><?= htmlspecialchars($cfg['app_url'] ?? '-') ?></strong>
                 </div>
                 <div class="col-sm-6">
                     <span style="color:var(--text-muted)">Base de données :</span>
