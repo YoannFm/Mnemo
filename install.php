@@ -121,7 +121,8 @@ function createAdmin($name, $email, $password) {
 
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
-        $pdo = new PDO('sqlite:database/database.sqlite');
+        $dbPath = __DIR__ . '/database/database.sqlite';
+        $pdo = new PDO('sqlite:' . $dbPath);
         $stmt = $pdo->prepare('
             INSERT INTO users (name, email, password, email_verified_at, created_at, updated_at)
             VALUES (?, ?, ?, ?, ?, ?)
