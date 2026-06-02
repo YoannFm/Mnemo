@@ -1,219 +1,170 @@
 <?php
 /**
- * Mnemo Installation Wizard
- * Single-file installer - No dependencies required
- * Delete this file after installation is complete
+ * Mnemo - Standalone Installer
+ * No dependencies. No commands. Just open and install.
+ * Based on Azuriom's simplicity approach.
  */
 
-const MIN_PHP_VERSION = '8.3';
+const VERSION = '1.0.0';
+const MIN_PHP = '8.3.0';
 
-$requiredExtensions = ['curl', 'fileinfo', 'json', 'mbstring', 'openssl', 'pdo', 'tokenizer', 'xml', 'gd', 'zip'];
+set_time_limit(300);
+ini_set('max_execution_time', 300);
 
-set_error_handler(function ($level, $message, $file = 'unknown', $line = 0) {
-    http_response_code(500);
-    exit(json_encode(['error' => "Error: {$message} ({$file}:{$line})"]));
-});
+// Check if already installed
+if (file_exists('.env') && file_exists('vendor/autoload.php') && file_exists('database/database.sqlite')) {
+    header('Location: /');
+    exit;
+}
 
-// ===== Helper Functions =====
-
-function sendJson($data, $status = 200) {
-    http_response_code($status);
+// Helper: Send JSON response
+function json_response($data, $code = 200) {
+    http_response_code($code);
     header('Content-Type: application/json');
     exit(json_encode($data));
 }
 
-function getInput($key, $default = null) {
+// Helper: Get input
+function get_input($key) {
     $data = json_decode(file_get_contents('php://input'), true) ?? [];
-    return $data[$key] ?? $_GET[$key] ?? $default;
+    return $data[$key] ?? null;
 }
 
-function isInstalled() {
-    return file_exists('.env') && file_exists('vendor/autoload.php');
-}
-
-function checkPrerequisites() {
-    $checks = [
-        'php_version' => [
-            'name' => 'PHP ' . MIN_PHP_VERSION . '+',
-            'passed' => version_compare(PHP_VERSION, MIN_PHP_VERSION, '>='),
-            'value' => PHP_VERSION,
-        ],
-    ];
-
-    foreach ($requiredExtensions as $ext) {
-        $checks["ext_$ext"] = [
-            'name' => "Extension: $ext",
-            'passed' => extension_loaded($ext),
-        ];
-    }
-
-    $checks['writable_storage'] = [
-        'name' => 'Writable: storage/',
-        'passed' => is_writable('storage'),
-    ];
-
-    $checks['writable_bootstrap'] = [
-        'name' => 'Writable: bootstrap/',
-        'passed' => is_writable('bootstrap'),
-    ];
-
-    return $checks;
-}
-
-function runComposer() {
-    if (file_exists('vendor/autoload.php')) {
-        return ['success' => true, 'message' => 'Dependencies already installed'];
-    }
-
-    $output = [];
-    $return = 0;
-
-    exec('composer install 2>&1', $output, $return);
-
-    if ($return !== 0) {
-        return ['success' => false, 'error' => implode("\n", $output)];
-    }
-
-    return ['success' => true, 'message' => 'Dependencies installed successfully'];
-}
-
-function setupEnv() {
-    if (file_exists('.env')) {
-        return ['success' => true];
-    }
-
-    if (!copy('.env.example', '.env')) {
-        return ['success' => false, 'error' => 'Failed to create .env file'];
-    }
-
-    return ['success' => true];
-}
-
-function generateKey() {
-    require 'vendor/autoload.php';
-
-    try {
-        $app = require 'bootstrap/app.php';
-        $app->make('Illuminate\Contracts\Console\Kernel')->call('key:generate', ['--force' => true]);
-        return ['success' => true];
-    } catch (Exception $e) {
-        return ['success' => false, 'error' => $e->getMessage()];
-    }
-}
-
-function runMigrations() {
-    require 'vendor/autoload.php';
-
-    try {
-        $app = require 'bootstrap/app.php';
-        $app->make('Illuminate\Contracts\Console\Kernel')->call('migrate', ['--force' => true]);
-        return ['success' => true];
-    } catch (Exception $e) {
-        return ['success' => false, 'error' => $e->getMessage()];
-    }
-}
-
-function createAdmin($name, $email, $password) {
-    require 'vendor/autoload.php';
-
-    try {
-        $app = require 'bootstrap/app.php';
-
-        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-
-        $rootPath = dirname(__DIR__);
-        if (basename($rootPath) === 'public') {
-            $rootPath = dirname($rootPath);
-        }
-        $dbPath = $rootPath . '/database/database.sqlite';
-        $pdo = new PDO('sqlite:' . $dbPath);
-        $stmt = $pdo->prepare('
-            INSERT INTO users (name, email, password, email_verified_at, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ');
-
-        $now = date('Y-m-d H:i:s');
-        $stmt->execute([$name, $email, $hashedPassword, $now, $now, $now]);
-
-        return ['success' => true];
-    } catch (Exception $e) {
-        return ['success' => false, 'error' => $e->getMessage()];
-    }
-}
-
-function deleteInstaller() {
-    return unlink(__FILE__);
-}
-
-// ===== API Endpoints =====
-
-$action = getInput('action');
+// API Routes
+$action = get_input('action') ?? ($_GET['action'] ?? null);
 
 if ($action === 'check') {
-    sendJson(['checks' => checkPrerequisites()]);
+    $checks = [
+        'php_version' => [
+            'name' => 'PHP 8.3+',
+            'passed' => version_compare(PHP_VERSION, MIN_PHP, '>='),
+            'value' => PHP_VERSION,
+        ],
+        'gd' => ['name' => 'GD Extension', 'passed' => extension_loaded('gd')],
+        'curl' => ['name' => 'cURL Extension', 'passed' => extension_loaded('curl')],
+        'json' => ['name' => 'JSON Extension', 'passed' => extension_loaded('json')],
+        'pdo' => ['name' => 'PDO Extension', 'passed' => extension_loaded('pdo')],
+        'zip' => ['name' => 'ZIP Extension', 'passed' => extension_loaded('zip')],
+        'mbstring' => ['name' => 'mbstring Extension', 'passed' => extension_loaded('mbstring')],
+        'openssl' => ['name' => 'OpenSSL Extension', 'passed' => extension_loaded('openssl')],
+        'storage' => ['name' => 'storage/ writable', 'passed' => is_writable('storage')],
+        'bootstrap' => ['name' => 'bootstrap/ writable', 'passed' => is_writable('bootstrap')],
+    ];
+
+    $allPassed = array_reduce($checks, fn($c, $check) => $c && $check['passed'], true);
+    json_response(['checks' => $checks, 'all_passed' => $allPassed]);
 }
 
 if ($action === 'install') {
-    $step = getInput('step');
+    $step = get_input('step');
 
-    switch ($step) {
-        case 'composer':
-            sendJson(runComposer());
-        case 'env':
-            sendJson(setupEnv());
-        case 'key':
-            sendJson(generateKey());
-        case 'migrate':
-            sendJson(runMigrations());
-        case 'admin':
-            $name = getInput('name');
-            $email = getInput('email');
-            $password = getInput('password');
-
-            if (!$name || !$email || !$password) {
-                sendJson(['success' => false, 'error' => 'Missing fields'], 400);
+    if ($step === 'composer') {
+        // Download and run composer
+        if (!file_exists('composer.phar')) {
+            if (!function_exists('curl_init')) {
+                json_response(['success' => false, 'error' => 'cURL not available'], 400);
             }
 
-            sendJson(createAdmin($name, $email, $password));
-        case 'complete':
-            if (deleteInstaller()) {
-                sendJson(['success' => true, 'message' => 'Installation complete']);
-            } else {
-                sendJson(['success' => false, 'error' => 'Could not delete installer']);
+            $ch = curl_init('https://getcomposer.org/installer');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $installer = curl_exec($ch);
+
+            if (!$installer) {
+                json_response(['success' => false, 'error' => 'Failed to download composer'], 400);
             }
-        default:
-            sendJson(['error' => 'Unknown step'], 400);
+
+            file_put_contents('composer_installer.php', $installer);
+
+            // Run installer
+            ob_start();
+            system('php composer_installer.php --quiet 2>&1', $ret);
+            $output = ob_get_clean();
+
+            @unlink('composer_installer.php');
+
+            if ($ret !== 0 && !file_exists('composer.phar')) {
+                json_response(['success' => false, 'error' => 'Failed to install composer: ' . $output], 400);
+            }
+        }
+
+        // Install dependencies
+        $composer = file_exists('composer.phar') ? 'php composer.phar' : 'composer';
+        ob_start();
+        system($composer . ' install --no-dev --optimize-autoloader 2>&1', $ret);
+        $output = ob_get_clean();
+
+        if ($ret !== 0) {
+            json_response(['success' => false, 'error' => 'Composer install failed: ' . $output], 400);
+        }
+
+        json_response(['success' => true]);
     }
-}
 
-// ===== HTML UI =====
+    if ($step === 'env') {
+        if (!file_exists('.env')) {
+            if (!copy('.env.example', '.env')) {
+                json_response(['success' => false, 'error' => 'Failed to create .env'], 400);
+            }
+        }
+        json_response(['success' => true]);
+    }
 
-if (isInstalled()) {
-    http_response_code(200);
-    ?>
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Mnemo - Already Installed</title>
-        <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0f172a; color: #e5e7eb; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-            .container { background: #1a1a1a; border: 1px solid #374151; border-radius: 12px; padding: 3rem; max-width: 500px; text-align: center; }
-            h1 { color: #10b981; }
-            a { color: #6366f1; text-decoration: none; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>✓ Mnemo is Already Installed</h1>
-            <p>This installer file can be safely deleted.</p>
-            <p><a href="/">Go to Mnemo</a></p>
-        </div>
-    </body>
-    </html>
-    <?php
-    exit;
+    if ($step === 'key') {
+        require 'vendor/autoload.php';
+        try {
+            $app = require 'bootstrap/app.php';
+            $app->make('Illuminate\Contracts\Console\Kernel')->call('key:generate', ['--force' => true]);
+            json_response(['success' => true]);
+        } catch (Exception $e) {
+            json_response(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    if ($step === 'migrate') {
+        require 'vendor/autoload.php';
+        try {
+            $app = require 'bootstrap/app.php';
+            $app->make('Illuminate\Contracts\Console\Kernel')->call('migrate', ['--force' => true]);
+            json_response(['success' => true]);
+        } catch (Exception $e) {
+            json_response(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    if ($step === 'admin') {
+        $name = get_input('name');
+        $email = get_input('email');
+        $password = get_input('password');
+
+        if (!$name || !$email || !$password) {
+            json_response(['success' => false, 'error' => 'Missing fields'], 400);
+        }
+
+        try {
+            $dbPath = __DIR__ . '/database/database.sqlite';
+            $pdo = new PDO('sqlite:' . $dbPath);
+
+            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+            $now = date('Y-m-d H:i:s');
+
+            $stmt = $pdo->prepare('
+                INSERT INTO users (name, email, password, email_verified_at, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ');
+            $stmt->execute([$name, $email, $hashedPassword, $now, $now, $now]);
+
+            json_response(['success' => true]);
+        } catch (Exception $e) {
+            json_response(['success' => false, 'error' => $e->getMessage()], 400);
+        }
+    }
+
+    if ($step === 'cleanup') {
+        // Remove this installer
+        @unlink(__FILE__);
+        json_response(['success' => true]);
+    }
 }
 
 ?>
@@ -226,24 +177,21 @@ if (isInstalled()) {
     <style>
         :root {
             --accent: #6366f1;
-            --card-bg: #1a1a1a;
-            --text-primary: #e5e7eb;
-            --text-muted: #9ca3af;
-            --card-border: #374151;
+            --bg: #0f172a;
+            --card: #1a1a1a;
+            --border: #374151;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
             --success: #10b981;
             --error: #ef4444;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -252,13 +200,13 @@ if (isInstalled()) {
         }
 
         .container {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 2rem;
-            max-width: 700px;
+            padding: 2.5rem;
+            max-width: 600px;
             width: 100%;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.5);
         }
 
         .header {
@@ -267,7 +215,7 @@ if (isInstalled()) {
         }
 
         .logo {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
             color: var(--accent);
             margin-bottom: 0.5rem;
@@ -279,28 +227,22 @@ if (isInstalled()) {
         }
 
         .subtitle {
-            color: var(--text-muted);
+            color: var(--muted);
             font-size: 0.9rem;
         }
 
         .step {
             display: none;
-            animation: slideIn 0.3s ease;
         }
 
         .step.active {
             display: block;
+            animation: slideIn 0.3s ease;
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .progress {
@@ -309,50 +251,51 @@ if (isInstalled()) {
             margin-bottom: 2rem;
         }
 
-        .progress-bar {
+        .progress-item {
             flex: 1;
             height: 4px;
-            background: var(--card-border);
+            background: var(--border);
             border-radius: 2px;
             overflow: hidden;
         }
 
-        .progress-bar.active {
+        .progress-item.active {
             background: var(--accent);
         }
 
-        .progress-bar.done {
+        .progress-item.done {
             background: var(--success);
         }
 
-        .check-list {
+        .checks {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
             margin-bottom: 2rem;
         }
 
-        .check-item {
+        .check {
             display: flex;
             align-items: center;
             padding: 0.75rem;
             background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--card-border);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            margin-bottom: 0.5rem;
             justify-content: space-between;
         }
 
-        .check-item.pass {
+        .check.pass {
             border-color: rgba(16, 185, 129, 0.3);
         }
 
-        .check-item.fail {
+        .check.fail {
             border-color: rgba(239, 68, 68, 0.3);
         }
 
-        .check-label {
+        .check-left {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            flex: 1;
         }
 
         .check-icon {
@@ -361,20 +304,25 @@ if (isInstalled()) {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
+            font-size: 1.2rem;
         }
 
-        .check-item.pass .check-icon {
-            color: var(--success);
+        .check.pass .check-icon { color: var(--success); }
+        .check.fail .check-icon { color: var(--error); }
+
+        .check-text {
+            display: flex;
+            flex-direction: column;
         }
 
-        .check-item.fail .check-icon {
-            color: var(--error);
+        .check-name {
+            font-weight: 500;
+            font-size: 0.9rem;
         }
 
-        .check-status {
-            font-size: 0.85rem;
-            color: var(--text-muted);
+        .check-value {
+            font-size: 0.8rem;
+            color: var(--muted);
         }
 
         .form-group {
@@ -392,9 +340,9 @@ if (isInstalled()) {
             width: 100%;
             padding: 0.75rem;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--card-border);
+            border: 1px solid var(--border);
             border-radius: 8px;
-            color: var(--text-primary);
+            color: var(--text);
             font-size: 1rem;
         }
 
@@ -409,6 +357,7 @@ if (isInstalled()) {
             border-radius: 8px;
             margin-bottom: 1.5rem;
             display: none;
+            animation: slideIn 0.3s ease;
         }
 
         .message.show {
@@ -427,39 +376,6 @@ if (isInstalled()) {
             color: #fca5a5;
         }
 
-        .buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        button {
-            flex: 1;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1rem;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            background: #4f46e5;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .loading {
             display: inline-block;
             width: 16px;
@@ -475,11 +391,48 @@ if (isInstalled()) {
             to { transform: rotate(360deg); }
         }
 
-        .step-number {
-            color: var(--text-muted);
+        .button {
+            width: 100%;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .button:hover:not(:disabled) {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            color: var(--success);
+            text-align: center;
+            margin: 2rem 0;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .step-info {
+            text-align: center;
+            color: var(--muted);
             font-size: 0.85rem;
             margin-top: 1.5rem;
-            text-align: center;
         }
     </style>
 </head>
@@ -487,167 +440,147 @@ if (isInstalled()) {
     <div class="container">
         <div class="header">
             <div class="logo">📚 Mnemo</div>
-            <h1>Installation</h1>
-            <p class="subtitle">Welcome to Mnemo! Let's get you set up.</p>
+            <h1>Installation Wizard</h1>
+            <p class="subtitle">Welcome! Let's get Mnemo ready.</p>
         </div>
 
         <div class="progress">
-            <div class="progress-bar active" id="progress-1"></div>
-            <div class="progress-bar" id="progress-2"></div>
-            <div class="progress-bar" id="progress-3"></div>
-            <div class="progress-bar" id="progress-4"></div>
-            <div class="progress-bar" id="progress-5"></div>
+            <div class="progress-item active" id="p-1"></div>
+            <div class="progress-item" id="p-2"></div>
+            <div class="progress-item" id="p-3"></div>
+            <div class="progress-item" id="p-4"></div>
+            <div class="progress-item" id="p-5"></div>
         </div>
 
-        <!-- Step 1: Prerequisites -->
+        <!-- Step 1: Check -->
         <div class="step active" id="step-1">
             <h2>System Requirements</h2>
-            <div class="check-list" id="checks-list"></div>
-            <div class="message" id="message-1"></div>
-            <div class="buttons">
-                <button class="btn-primary" onclick="checkRequirements()">Check Requirements</button>
-            </div>
+            <div class="checks" id="checks-list"></div>
+            <div class="message" id="msg-1"></div>
+            <button class="button" onclick="checkRequirements()">Check & Continue</button>
+            <div class="step-info">Step 1 of 5</div>
         </div>
 
-        <!-- Step 2: Dependencies -->
+        <!-- Step 2: Install -->
         <div class="step" id="step-2">
-            <h2>Installing Dependencies</h2>
-            <div class="message success show">
-                <strong>Installing composer packages...</strong><br>
-                This may take a few minutes
-            </div>
-            <div id="composer-progress"></div>
-            <div class="step-number">Step 2/5</div>
+            <h2>Installing...</h2>
+            <div id="install-progress"></div>
+            <div class="step-info">Step 2 of 5 - This may take a minute</div>
         </div>
 
-        <!-- Step 3: Configuration -->
+        <!-- Step 3: Admin -->
         <div class="step" id="step-3">
-            <h2>Configuring Application</h2>
-            <div id="config-progress"></div>
-            <div class="step-number">Step 3/5</div>
-        </div>
-
-        <!-- Step 4: Admin Account -->
-        <div class="step" id="step-4">
             <h2>Create Admin Account</h2>
             <form onsubmit="createAdmin(event)">
                 <div class="form-group">
                     <label>Full Name</label>
-                    <input type="text" id="admin-name" placeholder="John Doe" required>
+                    <input type="text" id="name" placeholder="John Doe" required>
                 </div>
                 <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="admin-email" placeholder="admin@mnemo.local" required>
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="admin@mnemo.local" required>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
-                    <input type="password" id="admin-password" placeholder="••••••••" required minlength="8">
+                    <input type="password" id="password" placeholder="••••••••" required minlength="8">
                 </div>
                 <div class="form-group">
                     <label>Confirm Password</label>
-                    <input type="password" id="admin-password-confirm" placeholder="••••••••" required minlength="8">
+                    <input type="password" id="password_confirm" placeholder="••••••••" required minlength="8">
                 </div>
-                <div class="message" id="message-4"></div>
-                <div class="buttons">
-                    <button type="submit" class="btn-primary">Create Account</button>
-                </div>
+                <div class="message" id="msg-3"></div>
+                <button type="submit" class="button">Create Account</button>
             </form>
-            <div class="step-number">Step 4/5</div>
+            <div class="step-info">Step 3 of 5</div>
         </div>
 
-        <!-- Step 5: Complete -->
-        <div class="step" id="step-5">
-            <div style="text-align: center; padding: 2rem 0;">
-                <div style="font-size: 3rem; color: var(--success); margin-bottom: 1rem;">✓</div>
-                <h2>Installation Complete!</h2>
-                <p style="color: var(--text-muted); margin-top: 1rem;">Your Mnemo instance is ready to use.</p>
-            </div>
-            <div class="buttons">
-                <button class="btn-primary" onclick="goToApp()">Go to Mnemo</button>
-            </div>
+        <!-- Step 4: Complete -->
+        <div class="step" id="step-4">
+            <div class="success-icon">✓</div>
+            <h2 style="text-align: center; margin-bottom: 1rem;">Installation Complete!</h2>
+            <p style="text-align: center; color: var(--muted); margin-bottom: 1.5rem;">Your Mnemo instance is ready to use.</p>
+            <button class="button" onclick="window.location='/'">Open Mnemo</button>
+            <div class="step-info">Step 4 of 5</div>
         </div>
     </div>
 
     <script>
         let currentStep = 1;
-        let installationSteps = ['composer', 'env', 'key', 'migrate'];
-        let currentInstallStep = 0;
+        const steps = ['composer', 'env', 'key', 'migrate'];
+        let stepIndex = 0;
 
         function updateProgress() {
             for (let i = 1; i <= 5; i++) {
-                const bar = document.getElementById(`progress-${i}`);
+                const el = document.getElementById(`p-${i}`);
                 if (i < currentStep) {
-                    bar.className = 'progress-bar done';
+                    el.className = 'progress-item done';
                 } else if (i === currentStep) {
-                    bar.className = 'progress-bar active';
+                    el.className = 'progress-item active';
                 } else {
-                    bar.className = 'progress-bar';
+                    el.className = 'progress-item';
                 }
             }
         }
 
-        function goToStep(step) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById(`step-${step}`).classList.add('active');
-            currentStep = step;
+        function goToStep(n) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${n}`).classList.add('active');
+            currentStep = n;
             updateProgress();
+            window.scrollTo(0, 0);
         }
 
-        function showMessage(stepId, text, type = 'error') {
-            const msg = document.getElementById(`message-${stepId}`);
-            msg.className = `message show ${type}`;
-            msg.innerHTML = text;
+        function showMsg(stepId, text, type = 'error') {
+            const el = document.getElementById(`msg-${stepId}`);
+            el.className = `message show ${type}`;
+            el.innerHTML = text;
         }
 
         async function checkRequirements() {
-            try {
-                const res = await fetch('?action=check');
-                const data = await res.json();
+            const res = await fetch('?action=check');
+            const data = await res.json();
 
-                const list = document.getElementById('checks-list');
-                let allPass = true;
+            const list = document.getElementById('checks-list');
+            list.innerHTML = '';
 
-                list.innerHTML = '';
-                for (const [key, check] of Object.entries(data.checks)) {
-                    const div = document.createElement('div');
-                    div.className = `check-item ${check.passed ? 'pass' : 'fail'}`;
-                    div.innerHTML = `
-                        <div class="check-label">
-                            <div class="check-icon">${check.passed ? '✓' : '✗'}</div>
-                            <span>${check.name}</span>
+            for (const [key, check] of Object.entries(data.checks)) {
+                const div = document.createElement('div');
+                div.className = `check ${check.passed ? 'pass' : 'fail'}`;
+                div.innerHTML = `
+                    <div class="check-left">
+                        <div class="check-icon">${check.passed ? '✓' : '✗'}</div>
+                        <div class="check-text">
+                            <div class="check-name">${check.name}</div>
+                            ${check.value ? `<div class="check-value">${check.value}</div>` : ''}
                         </div>
-                        <div class="check-status">${check.value || (check.passed ? 'OK' : 'FAIL')}</div>
-                    `;
-                    list.appendChild(div);
-                    if (!check.passed) allPass = false;
-                }
+                    </div>
+                `;
+                list.appendChild(div);
+            }
 
-                if (allPass) {
-                    showMessage(1, '✓ All requirements met! Starting installation...', 'success');
-                    setTimeout(() => startInstallation(), 1500);
-                } else {
-                    showMessage(1, '✗ Some requirements are not met. Please check your server setup.', 'error');
-                }
-            } catch (e) {
-                showMessage(1, 'Error: ' + e.message, 'error');
+            if (data.all_passed) {
+                showMsg(1, '✓ All requirements met! Starting installation...', 'success');
+                setTimeout(startInstall, 1500);
+            } else {
+                showMsg(1, '✗ Some requirements not met. Check your server setup.', 'error');
             }
         }
 
-        async function startInstallation() {
+        async function startInstall() {
             goToStep(2);
-            await runInstallationStep();
+            await runStep();
         }
 
-        async function runInstallationStep() {
-            if (currentInstallStep >= installationSteps.length) {
-                goToStep(4);
+        async function runStep() {
+            if (stepIndex >= steps.length) {
+                goToStep(3);
                 return;
             }
 
-            const step = installationSteps[currentInstallStep];
-            const progress = document.getElementById('composer-progress');
+            const step = steps[stepIndex];
+            const progress = document.getElementById('install-progress');
 
-            progress.innerHTML = `<div style="padding: 1rem 0;"><div class="loading"></div> Running: ${step}...</div>`;
+            progress.innerHTML += `<p><span class="loading"></span>${step}...</p>`;
 
             try {
                 const res = await fetch('?action=install', {
@@ -659,33 +592,27 @@ if (isInstalled()) {
                 const data = await res.json();
 
                 if (data.success) {
-                    progress.innerHTML += `<div style="color: var(--success);">✓ ${step} completed</div>`;
-                    currentInstallStep++;
-
-                    if (currentInstallStep >= installationSteps.length) {
-                        goToStep(3);
-                        setTimeout(() => goToStep(4), 1500);
-                    } else {
-                        setTimeout(runInstallationStep, 500);
-                    }
+                    progress.innerHTML = progress.innerHTML.replace('<span class="loading"></span>', '✓ ');
+                    stepIndex++;
+                    setTimeout(runStep, 500);
                 } else {
-                    progress.innerHTML = `<div style="color: var(--error);">Error: ${data.error}</div>`;
+                    progress.innerHTML += `<p style="color: var(--error);">✗ Error: ${data.error}</p>`;
                 }
             } catch (e) {
-                progress.innerHTML = `<div style="color: var(--error);">Error: ${e.message}</div>`;
+                progress.innerHTML += `<p style="color: var(--error);">✗ ${e.message}</p>`;
             }
         }
 
         function createAdmin(e) {
             e.preventDefault();
 
-            const name = document.getElementById('admin-name').value;
-            const email = document.getElementById('admin-email').value;
-            const password = document.getElementById('admin-password').value;
-            const confirm = document.getElementById('admin-password-confirm').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('password_confirm').value;
 
             if (password !== confirm) {
-                showMessage(4, 'Passwords do not match', 'error');
+                showMsg(3, 'Passwords do not match', 'error');
                 return;
             }
 
@@ -699,20 +626,13 @@ if (isInstalled()) {
                 if (data.success) {
                     fetch('?action=install', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ step: 'complete' })
-                    })
-                    .then(() => goToStep(5))
-                    .catch(e => showMessage(4, e.message, 'error'));
+                        body: JSON.stringify({ step: 'cleanup' })
+                    }).then(() => goToStep(4));
                 } else {
-                    showMessage(4, data.error || 'Failed to create admin', 'error');
+                    showMsg(3, data.error || 'Failed to create account', 'error');
                 }
             })
-            .catch(e => showMessage(4, e.message, 'error'));
-        }
-
-        function goToApp() {
-            window.location.href = '/';
+            .catch(e => showMsg(3, e.message, 'error'));
         }
     </script>
 </body>
