@@ -216,9 +216,11 @@ class ItemController extends Controller
      */
     private function storePhoto($file): string
     {
-        $maxWidth  = 1200;
-        $maxHeight = 1200;
-        $quality   = 80; // qualité JPEG 0-100
+        // Dimensions cibles : carré 800×800
+        // — assez grand pour le zoom modal, assez petit pour le réseau
+        // — crop centré pour que toutes les options Anki soient uniformes
+        $targetSize = 800;
+        $quality    = 85;
 
         $mime    = $file->getMimeType();
         $tmpPath = $file->getRealPath();
@@ -233,31 +235,36 @@ class ItemController extends Controller
 
         [$origW, $origH] = getimagesize($tmpPath);
 
-        // Calculer les nouvelles dimensions en conservant le ratio
-        $ratio = min($maxWidth / $origW, $maxHeight / $origH, 1.0);
-        $newW  = (int) round($origW * $ratio);
-        $newH  = (int) round($origH * $ratio);
+        // 1. Redimensionner pour que le plus petit côté fasse exactement $targetSize
+        //    (scale up uniquement si l'image est plus petite)
+        $scale = $targetSize / min($origW, $origH);
+        $scaledW = (int) round($origW * $scale);
+        $scaledH = (int) round($origH * $scale);
 
-        // Créer l'image redimensionnée
-        $resized = imagecreatetruecolor($newW, $newH);
+        $scaled = imagecreatetruecolor($scaledW, $scaledH);
 
-        // Préserver la transparence pour PNG
         if ($mime === 'image/png') {
-            imagealphablending($resized, false);
-            imagesavealpha($resized, true);
+            imagealphablending($scaled, false);
+            imagesavealpha($scaled, true);
         }
 
-        imagecopyresampled($resized, $source, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
-
-        // Sauvegarder en JPEG dans un fichier temporaire
-        $tmpOutput = tempnam(sys_get_temp_dir(), 'mnemo_') . '.jpg';
-        imagejpeg($resized, $tmpOutput, $quality);
-
-        // Libérer la mémoire
+        imagecopyresampled($scaled, $source, 0, 0, 0, 0, $scaledW, $scaledH, $origW, $origH);
         imagedestroy($source);
-        imagedestroy($resized);
 
-        // Générer un nom unique et déplacer dans storage/public/items
+        // 2. Crop centré pour obtenir $targetSize × $targetSize
+        $cropX  = (int) round(($scaledW - $targetSize) / 2);
+        $cropY  = (int) round(($scaledH - $targetSize) / 2);
+
+        $canvas = imagecreatetruecolor($targetSize, $targetSize);
+        imagecopy($canvas, $scaled, 0, 0, $cropX, $cropY, $targetSize, $targetSize);
+        imagedestroy($scaled);
+
+        // 3. Sauvegarder en JPEG
+        $tmpOutput = tempnam(sys_get_temp_dir(), 'mnemo_') . '.jpg';
+        imagejpeg($canvas, $tmpOutput, $quality);
+        imagedestroy($canvas);
+
+        // 4. Stocker dans storage/public/items
         $filename = 'items/' . Str::uuid() . '.jpg';
         Storage::disk('public')->put($filename, file_get_contents($tmpOutput));
         unlink($tmpOutput);
