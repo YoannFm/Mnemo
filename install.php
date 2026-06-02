@@ -87,8 +87,8 @@ if ($action === 'check') {
         'zip'      => ['name' => 'Extension ZIP',      'passed' => extension_loaded('zip')],
         'mbstring' => ['name' => 'Extension mbstring', 'passed' => extension_loaded('mbstring')],
         'openssl'  => ['name' => 'Extension OpenSSL',  'passed' => extension_loaded('openssl')],
-        'storage'  => ['name' => 'storage/ accessible','passed' => is_writable('storage')],
-        'bootstrap'=> ['name' => 'bootstrap/ accessible','passed' => is_writable('bootstrap')],
+        'storage'  => ['name' => 'storage/ accessible','passed' => is_writable(__DIR__ . '/storage')],
+        'bootstrap'=> ['name' => 'bootstrap/ accessible','passed' => is_writable(__DIR__ . '/bootstrap/cache')],
     ];
 
     $phpCli = find_php_cli();
