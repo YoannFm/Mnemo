@@ -5,6 +5,8 @@ use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\AnkiController;
+use App\Http\Controllers\LibraryController;
+use App\Http\Controllers\ProgressController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -59,6 +61,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/modules/{module}/anki/question', [AnkiController::class, 'question'])->name('anki.question');
     Route::post('/modules/{module}/anki/submit', [AnkiController::class, 'submit'])->name('anki.submit');
     Route::post('/modules/{module}/anki/quit', [AnkiController::class, 'quit'])->name('anki.quit');
+
+    // ─── Bibliothèque publique ───
+    Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');
+
+    // ─── Progression et historique ───
+    Route::get('/progression', [ProgressController::class, 'index'])->name('progress.index');
 });
 
 require __DIR__.'/auth.php';
