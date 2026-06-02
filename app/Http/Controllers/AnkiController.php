@@ -161,10 +161,11 @@ class AnkiController extends Controller
         // Valider la réponse
         $isCorrect = QuizGenerator::validateAnswer($question, $data['answer']);
 
-        // Mettre à jour la progression
-        $progress = Progress::where('user_id', Auth::id())
-            ->where('item_id', $data['item_id'])
-            ->firstOrFail();
+        // Récupérer ou créer la progression (firstOrCreate évite un 404 si la session a été perdue)
+        $progress = Progress::firstOrCreate(
+            ['user_id' => Auth::id(), 'item_id' => $data['item_id']],
+            ['success_count' => 0, 'fail_count' => 0, 'streak' => 0, 'easiness_factor' => 2.5, 'interval_days' => 1]
+        );
 
         if ($isCorrect) {
             $progress->success_count++;

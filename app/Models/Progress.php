@@ -27,11 +27,28 @@ class Progress extends Model
     ];
 
     /**
+     * Valeurs par défaut PHP — garantit que les champs SM-2 sont initialisés
+     * même quand Laravel ne relit pas les DEFAULT de la BDD après un INSERT.
+     */
+    protected $attributes = [
+        'success_count'   => 0,
+        'fail_count'      => 0,
+        'streak'          => 0,
+        'easiness_factor' => 2.5,
+        'interval_days'   => 1,
+    ];
+
+    /**
      * Cast de la date last_seen en objet Carbon pour faciliter les comparaisons.
      */
     protected $casts = [
-        'last_seen'   => 'datetime',
-        'next_review' => 'date',
+        'last_seen'       => 'datetime',
+        'next_review'     => 'date',
+        'easiness_factor' => 'float',
+        'interval_days'   => 'integer',
+        'success_count'   => 'integer',
+        'fail_count'      => 'integer',
+        'streak'          => 'integer',
     ];
 
     // ─────────────────────────────────────────────
