@@ -74,11 +74,17 @@ class AnkiController extends Controller
 
         $modeMap = [
             'photo_to_name_fr'    => ['Q1'],
+            'photo_to_name_en'    => ['Q8'],
             'photo_to_function'   => ['Q2'],
             'function_to_photo'   => ['Q3'],
-            'name_fr_to_name_en'  => ['Q4'],
-            'name_en_to_photo'    => ['Q5'],
             'function_to_name_fr' => ['Q6'],
+            'function_to_name_en' => ['Q11'],
+            'name_fr_to_name_en'  => ['Q4'],
+            'name_fr_to_photo'    => ['Q9'],
+            'name_fr_to_function' => ['Q10'],
+            'name_en_to_photo'    => ['Q5'],
+            'name_en_to_function' => ['Q11'],
+            'name_en_to_name_fr'  => ['Q7'],
         ];
 
         if ($mode === 'random' || !isset($modeMap[$mode])) {

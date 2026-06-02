@@ -66,6 +66,21 @@ class QuizGenerator
             'field_answer'   => 'name_en',
             'question_text'  => 'Quel est le nom anglais de cet élément ?',
         ],
+        'Q9' => [
+            'field_question' => 'name_fr',
+            'field_answer'   => 'photo_path',
+            'question_text'  => 'Quelle photo correspond à ce nom français ?',
+        ],
+        'Q10' => [
+            'field_question' => 'name_fr',
+            'field_answer'   => 'function_text',
+            'question_text'  => 'Quelle est la fonction correspondant à ce nom français ?',
+        ],
+        'Q11' => [
+            'field_question' => 'name_en',
+            'field_answer'   => 'function_text',
+            'question_text'  => 'Quelle est la fonction correspondant à ce terme anglais ?',
+        ],
     ];
 
     /**
