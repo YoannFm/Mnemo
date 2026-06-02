@@ -342,6 +342,10 @@ if ($action === 'install') {
                 'updated_at'         => $now,
             ]);
 
+            // Marquer l'installation comme terminee (requis par CheckInstallation middleware)
+            $db->table('installation')->truncate();
+            $db->table('installation')->insert(['completed' => true]);
+
             json_response(['success' => true]);
         } catch (Throwable $e) {
             ob_end_clean();
