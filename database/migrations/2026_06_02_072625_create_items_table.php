@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Migration — Table des items.
+ * Migration - Table des items.
  * Un item représente un élément à mémoriser (photo + nom FR + nom EN + fonction).
  */
 return new class extends Migration

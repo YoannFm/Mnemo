@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Modèle Score — historique des sessions de test.
+ * Modèle Score - historique des sessions de test.
  * Chaque ligne représente une session de test terminée par un utilisateur sur un module.
  */
 class Score extends Model

@@ -7,7 +7,6 @@ use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Laravel\Facades\Image;
 
 /**
  * Contrôleur CRUD des items.
@@ -144,22 +143,16 @@ class ItemController extends Controller
     // ─────────────────────────────────────────────
 
     /**
-     * Compresse et stocke une photo uploadée dans storage/public/items.
-     * Redimensionne à 800px max en conservant les proportions.
+     * Stocke une photo uploadée dans storage/public/items.
+     * Utilise le stockage natif Laravel (pas de compression côté serveur).
      * Retourne le chemin relatif enregistré en base (ex : "items/abc123.jpg").
      */
     private function storePhoto($file): string
     {
-        $filename = 'items/' . uniqid() . '.jpg';
+        // putFile génère un nom unique et stocke le fichier tel quel
+        $path = $file->store('items', 'public');
 
-        // Compression via Intervention Image : max 800px de large, qualité 80%
-        $image = Image::read($file->getRealPath())
-            ->scaleDown(width: 800)
-            ->toJpeg(quality: 80);
-
-        Storage::disk('public')->put($filename, (string) $image);
-
-        return $filename;
+        return $path;
     }
 
     /**

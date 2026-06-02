@@ -59,9 +59,38 @@
         @endif
     </div>
 
+    {{-- ── Boutons d'entraînement (Test / Anki) - nécessite au moins 4 items ── --}}
+    @if ($items->total() >= 4)
+        <div class="d-grid gap-2 mb-4" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+            <a href="{{ route('test.show', $module) }}" class="btn btn-primary" style="height:auto;padding:1rem;">
+                <div style="font-size:1.5rem;margin-bottom:.25rem;">
+                    <i class="bi bi-lightning-charge"></i>
+                </div>
+                <div style="font-weight:600;font-size:.9rem;">Mode Test</div>
+                <div style="font-size:.75rem;color:rgba(255,255,255,.7);">Score final</div>
+            </a>
+            <a href="{{ route('anki.show', $module) }}" class="btn btn-outline-primary" style="height:auto;padding:1rem;border-width:2px;">
+                <div style="font-size:1.5rem;margin-bottom:.25rem;">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+                <div style="font-weight:600;font-size:.9rem;">Mode Anki</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">Infini</div>
+            </a>
+        </div>
+    @elseif ($items->total() > 0 && $items->total() < 4)
+        <div class="alert d-flex align-items-center gap-2 mb-4"
+             style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:#fbbf24;border-radius:10px;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span style="font-size:.875rem;">
+                Il faut au moins <strong>4 items</strong> pour s'entraîner.
+                Encore {{ 4 - $items->total() }} à ajouter !
+            </span>
+        </div>
+    @endif
+
     {{-- ── Liste des items ── --}}
     @if ($items->isEmpty())
-        {{-- État vide — aucun item dans le module --}}
+        {{-- État vide - aucun item dans le module --}}
         <div class="card text-center py-5">
             <i class="bi bi-image" style="font-size:3rem;color:var(--text-muted);"></i>
             <h6 class="mt-3">Aucun item dans ce module</h6>
