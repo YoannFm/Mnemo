@@ -142,55 +142,65 @@ class AnkiController extends Controller
             return response()->json(['error' => 'Aucune session Anki en cours.'], 403);
         }
 
-        // Valider la réponse
-        // Laravel parse automatiquement le body JSON quand Content-Type: application/json
-        // 'question' arrive comme array, pas comme string JSON
-        $data = $request->validate([
-            'item_id'  => 'required|integer',
-            'answer'   => 'required|integer|min:0|max:3',
-            'question' => 'required|array',
-        ]);
+        try {
+            // Valider la réponse
+            // Laravel parse automatiquement le body JSON quand Content-Type: application/json
+            // 'question' arrive comme array, pas comme string JSON
+            $data = $request->validate([
+                'item_id'  => 'required|integer',
+                'answer'   => 'required|integer|min:0|max:3',
+                'question' => 'required|array',
+            ]);
 
-        // La question est déjà un array (décodé par Laravel)
-        $question = $data['question'];
+            // La question est déjà un array (décodé par Laravel)
+            $question = $data['question'];
 
-        if (empty($question)) {
-            return response()->json(['error' => 'Erreur lors du traitement de la réponse.'], 422);
+            if (empty($question)) {
+                return response()->json(['error' => 'Erreur lors du traitement de la réponse.'], 422);
+            }
+
+            // Valider la réponse
+            $isCorrect = QuizGenerator::validateAnswer($question, $data['answer']);
+
+            // Récupérer ou créer la progression (firstOrCreate évite un 404 si la session a été perdue)
+            $progress = Progress::firstOrCreate(
+                ['user_id' => Auth::id(), 'item_id' => $data['item_id']],
+                ['success_count' => 0, 'fail_count' => 0, 'streak' => 0, 'easiness_factor' => 2.5, 'interval_days' => 1]
+            );
+
+            if ($isCorrect) {
+                $progress->success_count++;
+                $progress->streak++;
+            } else {
+                $progress->fail_count++;
+                $progress->streak = 0; // Réinitialiser la série en cas d'erreur
+            }
+
+            $progress->last_seen = now();
+
+            // Appliquer l'algorithme SM-2 (qualité 5 si correct, 1 si incorrect)
+            $quality = $isCorrect ? 5 : 1;
+            $progress->applySM2($quality);
+
+            $progress->save();
+
+            // Retourner le feedback
+            return response()->json([
+                'is_correct'  => $isCorrect,
+                'correct_answer' => $question['correct_answer'],
+                'user_answer' => $question['options'][$data['answer']],
+                'streak'      => $progress->streak,
+                'is_mastered' => $progress->isMastered(),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('Anki submit error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'user_id' => Auth::id(),
+                'module_id' => $module->id,
+                'request_data' => $request->all(),
+            ]);
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        // Valider la réponse
-        $isCorrect = QuizGenerator::validateAnswer($question, $data['answer']);
-
-        // Récupérer ou créer la progression (firstOrCreate évite un 404 si la session a été perdue)
-        $progress = Progress::firstOrCreate(
-            ['user_id' => Auth::id(), 'item_id' => $data['item_id']],
-            ['success_count' => 0, 'fail_count' => 0, 'streak' => 0, 'easiness_factor' => 2.5, 'interval_days' => 1]
-        );
-
-        if ($isCorrect) {
-            $progress->success_count++;
-            $progress->streak++;
-        } else {
-            $progress->fail_count++;
-            $progress->streak = 0; // Réinitialiser la série en cas d'erreur
-        }
-
-        $progress->last_seen = now();
-
-        // Appliquer l'algorithme SM-2 (qualité 5 si correct, 1 si incorrect)
-        $quality = $isCorrect ? 5 : 1;
-        $progress->applySM2($quality);
-
-        $progress->save();
-
-        // Retourner le feedback
-        return response()->json([
-            'is_correct'  => $isCorrect,
-            'correct_answer' => $question['correct_answer'],
-            'user_answer' => $question['options'][$data['answer']],
-            'streak'      => $progress->streak,
-            'is_mastered' => $progress->isMastered(),
-        ]);
     }
 
     /**
