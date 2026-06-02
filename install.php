@@ -10,9 +10,12 @@ const MIN_PHP = '8.3.0';
 set_time_limit(300);
 ini_set('max_execution_time', 300);
 
+// Racine du projet Laravel (un niveau au-dessus de public/)
+define('ROOT', rtrim(realpath(__DIR__ . '/..'), '/'));
+
 // Deja installe
-if (file_exists('.env') && file_exists('vendor/autoload.php')) {
-    $env = parse_ini_file('.env');
+if (file_exists(ROOT . '/.env') && file_exists(ROOT . '/vendor/autoload.php')) {
+    $env = parse_ini_file(ROOT . '/.env');
     if (!empty($env['APP_KEY'])) {
         header('Location: /');
         exit;
@@ -87,8 +90,8 @@ if ($action === 'check') {
         'zip'      => ['name' => 'Extension ZIP',      'passed' => extension_loaded('zip')],
         'mbstring' => ['name' => 'Extension mbstring', 'passed' => extension_loaded('mbstring')],
         'openssl'  => ['name' => 'Extension OpenSSL',  'passed' => extension_loaded('openssl')],
-        'storage'  => ['name' => 'storage/ accessible','passed' => is_writable(__DIR__ . '/storage')],
-        'bootstrap'=> ['name' => 'bootstrap/ accessible','passed' => is_writable(__DIR__ . '/bootstrap/cache')],
+        'storage'  => ['name' => 'storage/ accessible','passed' => is_writable(ROOT . '/storage')],
+        'bootstrap'=> ['name' => 'bootstrap/ accessible','passed' => is_writable(ROOT . '/bootstrap/cache')],
     ];
 
     $phpCli = find_php_cli();
@@ -113,7 +116,7 @@ if ($action === 'test_db') {
 
     try {
         if ($driver === 'sqlite') {
-            $path = realpath('database') . '/database.sqlite';
+            $path = ROOT . '/database/database.sqlite';
             if (!file_exists($path)) {
                 touch($path);
             }
@@ -134,11 +137,11 @@ if ($action === 'install') {
 
     // Etape : telecharger et installer Composer
     if ($step === 'composer') {
-        if (!file_exists('vendor/autoload.php')) {
+        if (!file_exists(ROOT . '/vendor/autoload.php')) {
             $phpCli = find_php_cli();
 
             // Telecharger composer.phar directement (sans passer par l'installeur)
-            if (!file_exists('composer.phar')) {
+            if (!file_exists(ROOT . '/composer.phar')) {
                 $ch = curl_init('https://getcomposer.org/composer-stable.phar');
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -150,15 +153,15 @@ if ($action === 'install') {
                 if (!$phar || $httpCode !== 200) {
                     json_response(['success' => false, 'error' => 'Impossible de telecharger composer.phar (HTTP ' . $httpCode . ')'], 400);
                 }
-                file_put_contents('composer.phar', $phar);
+                file_put_contents(ROOT . '/composer.phar', $phar);
             }
 
             ob_start();
-            $cmd = escapeshellarg($phpCli) . ' composer.phar install --no-dev --optimize-autoloader --no-interaction 2>&1';
+            $cmd = 'cd ' . escapeshellarg(ROOT) . ' && ' . escapeshellarg($phpCli) . ' composer.phar install --no-dev --optimize-autoloader --no-interaction 2>&1';
             system($cmd, $ret);
             $output = ob_get_clean();
 
-            if ($ret !== 0 || !file_exists('vendor/autoload.php')) {
+            if ($ret !== 0 || !file_exists(ROOT . '/vendor/autoload.php')) {
                 json_response(['success' => false, 'error' => 'composer install a echoue : ' . $output], 400);
             }
         }
@@ -176,21 +179,21 @@ if ($action === 'install') {
         $appUrl = get_input('app_url') ?? 'http://localhost';
         $debug  = get_input('app_debug') ? 'true' : 'false';
 
-        if (!file_exists('.env.example')) {
+        if (!file_exists(ROOT . '/.env.example')) {
             json_response(['success' => false, 'error' => 'Fichier .env.example introuvable'], 400);
         }
 
-        $env = file_get_contents('.env.example');
+        $env = file_get_contents(ROOT . '/.env.example');
 
         if ($driver === 'sqlite') {
             $env = preg_replace('/^DB_CONNECTION=.*/m', 'DB_CONNECTION=sqlite', $env);
             $env = preg_replace('/^DB_HOST=.*/m', '#DB_HOST=127.0.0.1', $env);
             $env = preg_replace('/^DB_PORT=.*/m', '#DB_PORT=3306', $env);
-            $env = preg_replace('/^DB_DATABASE=.*/m', 'DB_DATABASE=' . realpath('database') . '/database.sqlite', $env);
+            $env = preg_replace('/^DB_DATABASE=.*/m', 'DB_DATABASE=' . ROOT . '/database/database.sqlite', $env);
             $env = preg_replace('/^DB_USERNAME=.*/m', '#DB_USERNAME=', $env);
             $env = preg_replace('/^DB_PASSWORD=.*/m', '#DB_PASSWORD=', $env);
             // Creer le fichier SQLite
-            $sqlitePath = realpath('database') . '/database.sqlite';
+            $sqlitePath = ROOT . '/database/database.sqlite';
             if (!file_exists($sqlitePath)) touch($sqlitePath);
         } else {
             $env = preg_replace('/^DB_CONNECTION=.*/m', 'DB_CONNECTION=mysql', $env);
@@ -205,7 +208,7 @@ if ($action === 'install') {
         $env = preg_replace('/^APP_DEBUG=.*/m', 'APP_DEBUG=' . $debug, $env);
         $env = preg_replace('/^APP_LOCALE=.*/m', 'APP_LOCALE=fr', $env);
 
-        if (!file_put_contents('.env', $env)) {
+        if (!file_put_contents(ROOT . '/.env', $env)) {
             json_response(['success' => false, 'error' => 'Impossible d\'ecrire le fichier .env'], 400);
         }
 
@@ -214,14 +217,14 @@ if ($action === 'install') {
 
     // Etape : generer la cle APP_KEY
     if ($step === 'key') {
-        if (!file_exists('vendor/autoload.php')) {
+        if (!file_exists(ROOT . '/vendor/autoload.php')) {
             json_response(['success' => false, 'error' => 'Les dependances ne sont pas installees'], 400);
         }
         try {
             fix_php_binary();
             ob_start();
-            require_once 'vendor/autoload.php';
-            $app = require 'bootstrap/app.php';
+            require_once ROOT . '/vendor/autoload.php';
+            $app = require ROOT . '/bootstrap/app.php';
             $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
             $kernel->call('key:generate', ['--force' => true]);
             ob_end_clean();
@@ -234,14 +237,14 @@ if ($action === 'install') {
 
     // Etape : migrations
     if ($step === 'migrate') {
-        if (!file_exists('vendor/autoload.php')) {
+        if (!file_exists(ROOT . '/vendor/autoload.php')) {
             json_response(['success' => false, 'error' => 'Les dependances ne sont pas installees'], 400);
         }
         try {
             fix_php_binary();
             ob_start();
-            require_once 'vendor/autoload.php';
-            $app = require 'bootstrap/app.php';
+            require_once ROOT . '/vendor/autoload.php';
+            $app = require ROOT . '/bootstrap/app.php';
             $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
             $status = $kernel->call('migrate', ['--force' => true]);
             $output = ob_get_clean();
@@ -257,14 +260,14 @@ if ($action === 'install') {
 
     // Etape : lien de stockage
     if ($step === 'storage') {
-        if (!file_exists('vendor/autoload.php')) {
+        if (!file_exists(ROOT . '/vendor/autoload.php')) {
             json_response(['success' => false, 'error' => 'Les dependances ne sont pas installees'], 400);
         }
         try {
             fix_php_binary();
             ob_start();
-            require_once 'vendor/autoload.php';
-            $app = require 'bootstrap/app.php';
+            require_once ROOT . '/vendor/autoload.php';
+            $app = require ROOT . '/bootstrap/app.php';
             $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
             $kernel->call('storage:link');
             ob_end_clean();
@@ -286,14 +289,14 @@ if ($action === 'install') {
             json_response(['success' => false, 'error' => 'Tous les champs sont obligatoires'], 400);
         }
 
-        if (!file_exists('vendor/autoload.php')) {
+        if (!file_exists(ROOT . '/vendor/autoload.php')) {
             json_response(['success' => false, 'error' => 'Les dependances ne sont pas installees'], 400);
         }
 
         try {
             ob_start();
-            require_once 'vendor/autoload.php';
-            $app = require 'bootstrap/app.php';
+            require_once ROOT . '/vendor/autoload.php';
+            $app = require ROOT . '/bootstrap/app.php';
             ob_end_clean();
 
             $db = $app->make('db');
