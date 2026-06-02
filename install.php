@@ -58,6 +58,16 @@ function find_php_cli() {
     return PHP_BINARY;
 }
 
+// --- Helper : forcer PHP_BINARY vers le CLI (evite que le kernel Artisan utilise php-fpm) ---
+function fix_php_binary() {
+    $cli = find_php_cli();
+    if ($cli && strpos($cli, 'fpm') === false) {
+        putenv('PHP_BINARY=' . $cli);
+        $_SERVER['PHP_BINARY'] = $cli;
+        $_ENV['PHP_BINARY']    = $cli;
+    }
+}
+
 // --- API ---
 $action = get_input('action') ?? ($_GET['action'] ?? null);
 
@@ -208,6 +218,7 @@ if ($action === 'install') {
             json_response(['success' => false, 'error' => 'Les dependances ne sont pas installees'], 400);
         }
         try {
+            fix_php_binary();
             ob_start();
             require_once 'vendor/autoload.php';
             $app = require 'bootstrap/app.php';
@@ -227,6 +238,7 @@ if ($action === 'install') {
             json_response(['success' => false, 'error' => 'Les dependances ne sont pas installees'], 400);
         }
         try {
+            fix_php_binary();
             ob_start();
             require_once 'vendor/autoload.php';
             $app = require 'bootstrap/app.php';
@@ -249,6 +261,7 @@ if ($action === 'install') {
             json_response(['success' => false, 'error' => 'Les dependances ne sont pas installees'], 400);
         }
         try {
+            fix_php_binary();
             ob_start();
             require_once 'vendor/autoload.php';
             $app = require 'bootstrap/app.php';
