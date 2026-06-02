@@ -95,6 +95,12 @@ class QuizGenerator
         $allAnswers = array_merge([$correctAnswer], $wrongAnswers);
         shuffle($allAnswers);
 
+        // Si les réponses sont des photos, les convertir en URLs complètes
+        if ($type['field_answer'] === 'photo_path') {
+            $allAnswers = array_map(fn($path) => asset('storage/' . $path), $allAnswers);
+            $correctAnswer = asset('storage/' . $correctAnswer);
+        }
+
         // Trouver l'indice de la bonne réponse après mélange
         $correctIndex = array_search($correctAnswer, $allAnswers, true);
 
