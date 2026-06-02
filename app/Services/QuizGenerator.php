@@ -102,8 +102,9 @@ class QuizGenerator
             'item_id'         => $targetItem->id,
             'question_text'   => $type['question_text'],
             'question_type'   => $questionType,
+            'field_question'  => $type['field_question'], // Ce qui est affiché (photo ou texte)
+            'field_answer'    => $type['field_answer'], // Ce qu'il faut répondre
             'question_content'=> $questionContent, // URL de photo ou texte
-            'field_answer'    => $type['field_answer'], // Pour savoir quel champ valider côté serveur
             'options'         => $allAnswers,
             'correct_answer'  => $correctAnswer,
             'correct_index'   => $correctIndex, // Indice de la bonne réponse (0-2)
