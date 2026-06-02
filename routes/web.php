@@ -78,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
 
     // ─── Mode Anki (questions infinies avec progression) ───
     Route::get('/modules/{module}/anki', [AnkiController::class, 'show'])->name('anki.show');
+    Route::post('/modules/{module}/anki/start', [AnkiController::class, 'start'])->name('anki.start');
     Route::get('/modules/{module}/anki/question', [AnkiController::class, 'question'])->name('anki.question');
     Route::post('/modules/{module}/anki/submit', [AnkiController::class, 'submit'])->name('anki.submit');
     Route::post('/modules/{module}/anki/quit', [AnkiController::class, 'quit'])->name('anki.quit');
