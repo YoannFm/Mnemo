@@ -79,11 +79,14 @@
 
                     {{-- Contenu de la question selon le type - photo ou texte --}}
                     @if ($question['field_question'] === 'photo_path')
-                        {{-- Si question est une photo, l'afficher --}}
+                        {{-- Si question est une photo, l'afficher avec zoom possible --}}
                         <div style="text-align:center;margin:1.5rem 0;">
                             <img src="{{ $question['question_content'] }}"
                                  alt="Question"
-                                 style="max-width:100%;max-height:300px;border-radius:12px;object-fit:cover;">
+                                 style="max-width:100%;max-height:300px;border-radius:12px;object-fit:cover;cursor:pointer;"
+                                 data-bs-toggle="modal"
+                                 data-bs-target="#zoomModal"
+                                 onclick="setZoomImage(this.src)">
                         </div>
                     @else
                         {{-- Si question est du texte (fonction/description), l'afficher stylisé --}}
@@ -114,10 +117,13 @@
 
                         {{-- Affichage du contenu de l'option selon le type (photo ou texte) --}}
                         @if ($question['field_answer'] === 'photo_path')
-                            {{-- Option = photo (ex: Q3 - répondre par une photo) --}}
+                            {{-- Option = photo (ex: Q3 - répondre par une photo) avec zoom possible --}}
                             <img src="{{ $option }}"
                                  alt="Option {{ $index + 1 }}"
-                                 style="width:100%;height:120px;border-radius:8px;object-fit:cover;">
+                                 style="width:100%;height:120px;border-radius:8px;object-fit:cover;cursor:pointer;"
+                                 data-bs-toggle="modal"
+                                 data-bs-target="#zoomModal"
+                                 onclick="setZoomImage(this.src)">
                         @else
                             {{-- Option = texte (ex: Q1 ou Q4 - répondre par le nom) --}}
                             <span style="font-size:.9rem;text-align:center;word-break:break-word;">
@@ -148,6 +154,27 @@
         </div>
     </div>
 
+    {{-- Modal de zoom pour les images --}}
+    <div class="modal fade" id="zoomModal" tabindex="-1" aria-labelledby="zoomModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--card-border);">
+                <div class="modal-header" style="border-bottom:1px solid var(--card-border);">
+                    <h5 class="modal-title" id="zoomModalLabel" style="color:var(--text-primary);">Aperçu de l'image</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" style="text-align:center;">
+                    <img id="zoomImage" src="" alt="Zoom" style="max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function setZoomImage(src) {
+            document.getElementById('zoomImage').src = src;
+        }
+    </script>
+
     <script>
         /**
          * Soumet la réponse au serveur en AJAX et affiche le feedback immédiatement.
@@ -165,11 +192,23 @@
         function submitAnswer(optionIndex, event) {
             event.preventDefault();
 
+            console.log('=== DEBUG: Soumission réponse ===');
+            console.log('optionIndex:', optionIndex);
+            console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').content);
+
             // Désactiver tous les boutons d'option pour éviter les soumissions multiples
             // pendant que la requête est en cours
             document.querySelectorAll('.anki-option').forEach(btn => {
                 btn.disabled = true;
             });
+
+            const payload = {
+                item_id: {{ $question['item_id'] }},
+                answer: optionIndex,
+                question: @json($question),
+            };
+
+            console.log('Payload envoyé:', JSON.stringify(payload, null, 2));
 
             // Envoyer la réponse au serveur via requête AJAX (POST JSON)
             // Le serveur va mettre à jour la progression et retourner le feedback
@@ -180,24 +219,37 @@
                     // Token CSRF requis pour les requêtes POST sécurisées
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 },
-                body: JSON.stringify({
-                    item_id: {{ $question['item_id'] }},
-                    answer: optionIndex,
-                    question: @json($question),
-                }),
+                body: JSON.stringify(payload),
             })
             .then(response => {
-                if (!response.ok) throw new Error('Erreur serveur');
+                console.log('=== DEBUG: Réponse reçue ===');
+                console.log('Status:', response.status);
+                console.log('OK:', response.ok);
+                console.log('Headers:', {
+                    'Content-Type': response.headers.get('Content-Type'),
+                    'Content-Length': response.headers.get('Content-Length'),
+                });
+
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error('Erreur serveur (status ' + response.status + '):', text);
+                        throw new Error('Erreur serveur: ' + response.status);
+                    });
+                }
                 return response.json();
             })
             .then(data => {
+                console.log('=== DEBUG: Données JSON reçues ===');
+                console.log('Data:', JSON.stringify(data, null, 2));
                 // Afficher le feedback avec le résultat du serveur
                 displayFeedback(data, optionIndex);
             })
             .catch(error => {
                 // En cas d'erreur, afficher un message et réactiver les boutons
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue. Veuillez réessayer.');
+                console.error('=== DEBUG: Erreur dans le fetch ===');
+                console.error('Error:', error);
+                console.error('Stack:', error.stack);
+                alert('Une erreur est survenue. Veuillez réessayer.\n\nConsole (F12) pour détails.');
                 document.querySelectorAll('.anki-option').forEach(btn => {
                     btn.disabled = false;
                 });

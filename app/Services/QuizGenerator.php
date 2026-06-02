@@ -19,7 +19,7 @@ use App\Models\Module;
 class QuizGenerator
 {
     /**
-     * Types de questions supportés (Q1-Q4).
+     * Types de questions supportés (Q1-Q8).
      * Chaque type définit :
      *   - field_question : ce qui est affiché à l'utilisateur
      *   - field_answer : ce que l'utilisateur doit trouver
@@ -46,16 +46,52 @@ class QuizGenerator
             'field_answer'   => 'name_en',
             'question_text'  => 'Quel est le nom anglais ?',
         ],
+        'Q5' => [
+            'field_question' => 'name_en',
+            'field_answer'   => 'photo_path',
+            'question_text'  => 'Quelle photo correspond à ce nom anglais ?',
+        ],
+        'Q6' => [
+            'field_question' => 'function_text',
+            'field_answer'   => 'name_fr',
+            'question_text'  => 'Quel est le nom français correspondant à cette fonction ?',
+        ],
+        'Q7' => [
+            'field_question' => 'name_en',
+            'field_answer'   => 'name_fr',
+            'question_text'  => 'Quel est le nom français de ce terme anglais ?',
+        ],
+        'Q8' => [
+            'field_question' => 'photo_path',
+            'field_answer'   => 'name_en',
+            'question_text'  => 'Quel est le nom anglais de cet élément ?',
+        ],
+        'Q9' => [
+            'field_question' => 'name_fr',
+            'field_answer'   => 'photo_path',
+            'question_text'  => 'Quelle photo correspond à ce nom français ?',
+        ],
+        'Q10' => [
+            'field_question' => 'name_fr',
+            'field_answer'   => 'function_text',
+            'question_text'  => 'Quelle est la fonction correspondant à ce nom français ?',
+        ],
+        'Q11' => [
+            'field_question' => 'name_en',
+            'field_answer'   => 'function_text',
+            'question_text'  => 'Quelle est la fonction correspondant à ce terme anglais ?',
+        ],
     ];
 
     /**
-     * Génère une question aléatoire pour un module donné.
+     * Génère une question pour un module donné.
      *
      * @param Module $module Le module contenant les items
-     * @param string $questionType Code du type (Q1, Q2, Q3, Q4)
+     * @param string $questionType Code du type (Q1-Q8)
+     * @param Item|null $targetItem Item cible pré-sélectionné (ex : tirage pondéré par l'appelant). Si null, tirage aléatoire.
      * @return array La question complète : énoncé, options mélangées, réponse correcte
      */
-    public static function generateQuestion(Module $module, string $questionType = 'Q1'): array
+    public static function generateQuestion(Module $module, string $questionType = 'Q1', ?Item $targetItem = null): array
     {
         // Récupérer le type demandé, sinon Q1 par défaut
         $type = self::$questionTypes[$questionType] ?? self::$questionTypes['Q1'];
@@ -69,8 +105,8 @@ class QuizGenerator
             ];
         }
 
-        // Tirer un item cible aléatoire
-        $targetItem = $allItems->random();
+        // Utiliser l'item pré-sélectionné (ex : tirage pondéré) ou tirer aléatoirement
+        $targetItem = $targetItem ?? $allItems->random();
 
         // Récupérer 3 distracteurs (items différents du cible)
         $distractors = $allItems

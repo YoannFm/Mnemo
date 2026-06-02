@@ -7,6 +7,7 @@ use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Contrôleur CRUD des items.
@@ -49,15 +50,11 @@ class ItemController extends Controller
             'name_fr'       => 'required|string|max:255',
             'name_en'       => 'required|string|max:255',
             'function_text' => 'required|string|max:2000',
-            'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo'         => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $photoPath = null;
-
-        // Si une photo est fournie, on la compresse et on la stocke
-        if ($request->hasFile('photo')) {
-            $photoPath = $this->storePhoto($request->file('photo'));
-        }
+        // La photo est obligatoire - on la compresse et on la stocke
+        $photoPath = $this->storePhoto($request->file('photo'));
 
         // Création de l'item lié au module
         $module->items()->create([
@@ -143,16 +140,136 @@ class ItemController extends Controller
     // ─────────────────────────────────────────────
 
     /**
+     * Affiche le formulaire d'import CSV.
+     */
+    public function showImportForm(Module $module)
+    {
+        $this->authorizeOwner($module);
+        return view('items.import', compact('module'));
+    }
+
+    /**
+     * Traite l'import CSV.
+     * Format attendu : name_fr,name_en,function_text (sans en-tête ou avec)
+     * La colonne photo est ignorée (import texte uniquement).
+     */
+    public function importCsv(Request $request, Module $module)
+    {
+        $this->authorizeOwner($module);
+
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+        ]);
+
+        $file    = $request->file('csv_file');
+        $handle  = fopen($file->getRealPath(), 'r');
+        $count   = 0;
+        $errors  = [];
+        $lineNum = 0;
+
+        while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+            $lineNum++;
+
+            // Ignorer la ligne d'en-tête si elle commence par "name_fr" ou "nom"
+            if ($lineNum === 1 && in_array(strtolower(trim($row[0] ?? '')), ['name_fr', 'nom', 'nom_fr'])) {
+                continue;
+            }
+
+            // Nettoyer les valeurs
+            $nameFr   = trim($row[0] ?? '');
+            $nameEn   = trim($row[1] ?? '');
+            $function = trim($row[2] ?? '');
+
+            if (empty($nameFr) || empty($nameEn) || empty($function)) {
+                $errors[] = "Ligne {$lineNum} ignorée : champs incomplets.";
+                continue;
+            }
+
+            $module->items()->create([
+                'name_fr'       => mb_substr($nameFr, 0, 255),
+                'name_en'       => mb_substr($nameEn, 0, 255),
+                'function_text' => mb_substr($function, 0, 2000),
+                'photo_path'    => null,
+            ]);
+            $count++;
+        }
+
+        fclose($handle);
+
+        $message = "{$count} item(s) importé(s) avec succès.";
+        if (!empty($errors)) {
+            $message .= ' ' . count($errors) . ' ligne(s) ignorée(s).';
+            session(['import_errors' => $errors]);
+        }
+
+        return redirect()->route('modules.show', $module)->with('success', $message);
+    }
+
+    // ─────────────────────────────────────────────
+    // Méthodes privées utilitaires
+    // ─────────────────────────────────────────────
+
+    /**
      * Stocke une photo uploadée dans storage/public/items.
-     * Utilise le stockage natif Laravel (pas de compression côté serveur).
-     * Retourne le chemin relatif enregistré en base (ex : "items/abc123.jpg").
+     * Compresse et redimensionne l'image avec la librairie GD de PHP.
+     * Retourne le chemin relatif enregistré en base (ex : "items/uuid.jpg").
      */
     private function storePhoto($file): string
     {
-        // putFile génère un nom unique et stocke le fichier tel quel
-        $path = $file->store('items', 'public');
+        // Dimensions cibles : carré 800×800
+        // - assez grand pour le zoom modal, assez petit pour le réseau
+        // - crop centré pour que toutes les options Anki soient uniformes
+        $targetSize = 800;
+        $quality    = 85;
 
-        return $path;
+        $mime    = $file->getMimeType();
+        $tmpPath = $file->getRealPath();
+
+        // Créer l'image source selon le format
+        $source = match ($mime) {
+            'image/jpeg' => imagecreatefromjpeg($tmpPath),
+            'image/png'  => imagecreatefrompng($tmpPath),
+            'image/webp' => imagecreatefromwebp($tmpPath),
+            default      => imagecreatefromjpeg($tmpPath),
+        };
+
+        [$origW, $origH] = getimagesize($tmpPath);
+
+        // 1. Redimensionner pour que le plus petit côté fasse exactement $targetSize
+        //    (scale up uniquement si l'image est plus petite)
+        $scale = $targetSize / min($origW, $origH);
+        $scaledW = (int) round($origW * $scale);
+        $scaledH = (int) round($origH * $scale);
+
+        $scaled = imagecreatetruecolor($scaledW, $scaledH);
+
+        if ($mime === 'image/png') {
+            imagealphablending($scaled, false);
+            imagesavealpha($scaled, true);
+        }
+
+        imagecopyresampled($scaled, $source, 0, 0, 0, 0, $scaledW, $scaledH, $origW, $origH);
+        imagedestroy($source);
+
+        // 2. Crop centré pour obtenir $targetSize × $targetSize
+        $cropX  = (int) round(($scaledW - $targetSize) / 2);
+        $cropY  = (int) round(($scaledH - $targetSize) / 2);
+
+        $canvas = imagecreatetruecolor($targetSize, $targetSize);
+        imagecopy($canvas, $scaled, 0, 0, $cropX, $cropY, $targetSize, $targetSize);
+        imagedestroy($scaled);
+
+        // 3. Sauvegarder en JPEG
+        $tmpOutput = tempnam(sys_get_temp_dir(), 'mnemo_') . '.jpg';
+        imagejpeg($canvas, $tmpOutput, $quality);
+        imagedestroy($canvas);
+
+        // 4. Stocker dans storage/public/items
+        $filename = 'items/' . Str::uuid() . '.jpg';
+        Storage::disk('public')->put($filename, file_get_contents($tmpOutput));
+        unlink($tmpOutput);
+
+        return $filename;
     }
 
     /**
