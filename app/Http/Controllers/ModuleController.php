@@ -122,6 +122,38 @@ class ModuleController extends Controller
             ->with('success', 'Module supprimé.');
     }
 
+    /**
+     * Duplique un module public dans l'espace de l'utilisateur connecté.
+     * Copie le module et tous ses items (sans les photos).
+     */
+    public function duplicate(Module $module)
+    {
+        // On peut dupliquer uniquement si le module est public ou si on en est l'auteur
+        if (!$module->is_public && $module->owner_id !== Auth::id()) {
+            abort(403, 'Ce module est privé.');
+        }
+
+        // Créer une copie du module (privée par défaut)
+        $copy = Auth::user()->modules()->create([
+            'title'       => $module->title . ' (copie)',
+            'description' => $module->description,
+            'is_public'   => false,
+        ]);
+
+        // Copier tous les items (sans photo car les fichiers ne sont pas dupliqués)
+        foreach ($module->items as $item) {
+            $copy->items()->create([
+                'name_fr'       => $item->name_fr,
+                'name_en'       => $item->name_en,
+                'function_text' => $item->function_text,
+                'photo_path'    => $item->photo_path, // Partager le même chemin de photo
+            ]);
+        }
+
+        return redirect()->route('modules.show', $copy)
+            ->with('success', 'Module dupliqué dans votre espace ! Vous pouvez maintenant l\'enrichir.');
+    }
+
     // ─────────────────────────────────────────────
     // Méthodes privées de vérification d'accès
     // ─────────────────────────────────────────────

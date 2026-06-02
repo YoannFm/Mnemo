@@ -129,9 +129,11 @@ class TestController extends Controller
         }
 
         // Valider la réponse
-        $userAnswer = $request->validate([
-            'answer' => 'required|integer|min:0|max:3',
-        ])['answer'];
+        $validated = $request->validate([
+            'answer'          => 'required|integer|min:0|max:3',
+            'elapsed_seconds' => 'nullable|integer|min:0|max:3600',
+        ]);
+        $userAnswer = $validated['answer'];
 
         $currentIndex = session('test_current');
         $questions = session('test_questions');
@@ -143,11 +145,12 @@ class TestController extends Controller
         // Enregistrer la réponse
         $answers = session('test_answers', []);
         $answers[$currentIndex] = [
-            'item_id'       => $question['item_id'],
-            'question_type' => $question['question_type'],
-            'user_answer'   => $question['options'][$userAnswer],
-            'correct_answer'=> $question['correct_answer'],
-            'is_correct'    => $isCorrect,
+            'item_id'         => $question['item_id'],
+            'question_type'   => $question['question_type'],
+            'user_answer'     => $question['options'][$userAnswer],
+            'correct_answer'  => $question['correct_answer'],
+            'is_correct'      => $isCorrect,
+            'elapsed_seconds' => (int) ($validated['elapsed_seconds'] ?? 0),
         ];
 
         // Incrémenter le score si correct

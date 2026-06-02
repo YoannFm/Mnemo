@@ -7,7 +7,23 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\AnkiController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\InstallController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Routes d'installation (sans authentification)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('install')->group(function () {
+    Route::get('/', [InstallController::class, 'index'])->name('install.index');
+    Route::get('/prerequisites', [InstallController::class, 'checkPrerequisites'])->name('install.prerequisites');
+    Route::get('/database', [InstallController::class, 'setupDatabase'])->name('install.database');
+    Route::get('/admin', [InstallController::class, 'createAdmin'])->name('install.admin');
+    Route::post('/admin', [InstallController::class, 'storeAdmin'])->name('install.admin.store');
+    Route::get('/complete', [InstallController::class, 'complete'])->name('install.complete');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -49,6 +65,10 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('modules.items', ItemController::class)
         ->except(['index', 'show']); // Ces actions redirigent vers la page du module
 
+    // Import CSV d'items en masse
+    Route::get('/modules/{module}/items/import', [ItemController::class, 'showImportForm'])->name('modules.items.import.form');
+    Route::post('/modules/{module}/items/import', [ItemController::class, 'importCsv'])->name('modules.items.import');
+
     // ─── Mode Test (nombre fixe de questions) ───
     Route::get('/modules/{module}/test', [TestController::class, 'show'])->name('test.show');
     Route::post('/modules/{module}/test/start', [TestController::class, 'start'])->name('test.start');
@@ -58,9 +78,13 @@ Route::middleware(['auth'])->group(function () {
 
     // ─── Mode Anki (questions infinies avec progression) ───
     Route::get('/modules/{module}/anki', [AnkiController::class, 'show'])->name('anki.show');
+    Route::post('/modules/{module}/anki/start', [AnkiController::class, 'start'])->name('anki.start');
     Route::get('/modules/{module}/anki/question', [AnkiController::class, 'question'])->name('anki.question');
     Route::post('/modules/{module}/anki/submit', [AnkiController::class, 'submit'])->name('anki.submit');
     Route::post('/modules/{module}/anki/quit', [AnkiController::class, 'quit'])->name('anki.quit');
+
+    // Dupliquer un module public dans son espace personnel
+    Route::post('/modules/{module}/duplicate', [ModuleController::class, 'duplicate'])->name('modules.duplicate');
 
     // ─── Bibliothèque publique ───
     Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');

@@ -41,6 +41,12 @@
                 <a href="{{ route('modules.items.create', $module) }}" class="btn btn-primary">
                     <i class="bi bi-plus-lg me-1"></i> Ajouter un item
                 </a>
+                {{-- Bouton d'import CSV en masse --}}
+                <a href="{{ route('modules.items.import.form', $module) }}"
+                   class="btn"
+                   style="color:var(--accent);border:1px solid var(--accent);">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Import CSV
+                </a>
                 <a href="{{ route('modules.edit', $module) }}"
                    class="btn"
                    style="color:var(--text-muted);border:1px solid var(--card-border);">

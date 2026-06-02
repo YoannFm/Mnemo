@@ -21,13 +21,34 @@ class Progress extends Model
         'fail_count',
         'streak',
         'last_seen',
+        'easiness_factor',
+        'interval_days',
+        'next_review',
+    ];
+
+    /**
+     * Valeurs par défaut PHP - garantit que les champs SM-2 sont initialisés
+     * même quand Laravel ne relit pas les DEFAULT de la BDD après un INSERT.
+     */
+    protected $attributes = [
+        'success_count'   => 0,
+        'fail_count'      => 0,
+        'streak'          => 0,
+        'easiness_factor' => 2.5,
+        'interval_days'   => 1,
     ];
 
     /**
      * Cast de la date last_seen en objet Carbon pour faciliter les comparaisons.
      */
     protected $casts = [
-        'last_seen' => 'datetime',
+        'last_seen'       => 'datetime',
+        'next_review'     => 'date',
+        'easiness_factor' => 'float',
+        'interval_days'   => 'integer',
+        'success_count'   => 'integer',
+        'fail_count'      => 'integer',
+        'streak'          => 'integer',
     ];
 
     // ─────────────────────────────────────────────
@@ -61,5 +82,40 @@ class Progress extends Model
     public function isMastered(): bool
     {
         return $this->streak >= 3;
+    }
+
+    /**
+     * Met à jour la progression selon l'algorithme SM-2.
+     * @param int $quality Score de 0 à 5 (0-2 = raté, 3-5 = réussi)
+     */
+    public function applySM2(int $quality): void
+    {
+        // Mettre à jour l'easiness factor
+        $newEF = $this->easiness_factor + (0.1 - (5 - $quality) * (0.08 + (5 - $quality) * 0.02));
+        $this->easiness_factor = max(1.3, $newEF); // EF minimum de 1.3
+
+        if ($quality < 3) {
+            // Raté : on repart de l'intervalle 1
+            $this->interval_days = 1;
+        } else {
+            // Réussi : calculer le prochain intervalle
+            if ($this->success_count === 0) {
+                $this->interval_days = 1;
+            } elseif ($this->success_count === 1) {
+                $this->interval_days = 6;
+            } else {
+                $this->interval_days = (int) round($this->interval_days * $this->easiness_factor);
+            }
+        }
+
+        $this->next_review = now()->addDays($this->interval_days)->toDateString();
+    }
+
+    /**
+     * Retourne true si cet item est dû pour révision (next_review <= aujourd'hui ou jamais révisé).
+     */
+    public function isDueForReview(): bool
+    {
+        return $this->next_review === null || $this->next_review->isPast() || $this->next_review->isToday();
     }
 }

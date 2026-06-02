@@ -38,6 +38,17 @@
                         @endif
                     </div>
 
+                    {{-- Temps total du test --}}
+                    @php $totalSecs = collect($answers)->sum('elapsed_seconds') ?? 0; @endphp
+                    @if ($totalSecs > 0)
+                        <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1rem;">
+                            <i class="bi bi-clock me-1"></i>
+                            Durée totale : {{ floor($totalSecs / 60) }} min {{ $totalSecs % 60 }} sec
+                            &nbsp;·&nbsp;
+                            Temps moyen : {{ count($answers) > 0 ? round($totalSecs / count($answers)) : 0 }} sec/question
+                        </p>
+                    @endif
+
                     {{-- Boutons d'action --}}
                     <div class="d-grid gap-2" style="grid-template-columns: 1fr 1fr;">
                         <a href="{{ route('test.show', $module) }}" class="btn btn-primary">
@@ -82,6 +93,13 @@
                                 <div><strong>Votre réponse :</strong> {{ $answer['user_answer'] }}</div>
                                 @if (!$answer['is_correct'])
                                     <div><strong>Bonne réponse :</strong> {{ $answer['correct_answer'] }}</div>
+                                @endif
+                                {{-- Temps passé sur cette question --}}
+                                @if (isset($answer['elapsed_seconds']) && $answer['elapsed_seconds'] > 0)
+                                    <div style="font-size:.78rem;color:var(--text-muted);margin-top:.25rem;">
+                                        <i class="bi bi-clock me-1"></i>
+                                        {{ floor($answer['elapsed_seconds'] / 60) }}:{{ str_pad($answer['elapsed_seconds'] % 60, 2, '0', STR_PAD_LEFT) }}
+                                    </div>
                                 @endif
                             </div>
 

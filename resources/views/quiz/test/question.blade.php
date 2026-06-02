@@ -9,6 +9,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-2" style="font-size:.85rem;">
                     <span style="color:var(--text-muted);">Progression</span>
                     <span style="font-weight:600;">{{ $question['current'] }} / {{ $question['total'] }}</span>
+                    <span id="timer-display" style="font-weight:600;color:var(--accent);">0:00</span>
                 </div>
                 {{-- Barre de progression visuelle avec pourcentage calculé --}}
                 <div class="progress" style="height:8px;background:var(--card-border);">
@@ -91,6 +92,8 @@
                     @endforeach
                 </div>
 
+                <input type="hidden" name="elapsed_seconds" id="elapsed_seconds" value="0">
+
                 {{-- Bouton de validation - texte change selon si c'est la dernière question --}}
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="bi bi-check-lg me-1"></i>
@@ -107,5 +110,22 @@
 
         </div>
     </div>
+
+<script>
+let seconds = 0;
+const timerDisplay = document.getElementById('timer-display');
+const elapsedInput = document.getElementById('elapsed_seconds');
+
+const timer = setInterval(() => {
+    seconds++;
+    elapsedInput.value = seconds;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    timerDisplay.textContent = m + ':' + String(s).padStart(2, '0');
+}, 1000);
+
+// Arrête le timer quand le formulaire est soumis
+document.querySelector('form').addEventListener('submit', () => clearInterval(timer));
+</script>
 
 </x-app-layout>

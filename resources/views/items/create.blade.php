@@ -82,13 +82,12 @@
                             @enderror
                         </div>
 
-                        {{-- Upload de photo (facultatif) --}}
-                        {{-- La photo sera utilisée dans les questions Q1 et Q3 --}}
-                        {{-- Si pas de photo, une image placeholder est affichée --}}
+                        {{-- Upload de photo (obligatoire) --}}
+                        {{-- La photo sera utilisée dans les questions Q1, Q3, Q5, Q8 --}}
                         <div class="mb-4">
                             <label for="photo" class="form-label">
-                                Photo
-                                <span style="color:var(--text-muted);font-weight:400;">(facultative, max 2 Mo)</span>
+                                Photo <span style="color:#ef4444;">*</span>
+                                <span style="color:var(--text-muted);font-weight:400;">(max 2 Mo, sera compressée)</span>
                             </label>
 
                             {{-- Zone de prévisualisation de la photo avant upload --}}
@@ -101,12 +100,14 @@
                             </div>
 
                             {{-- Input file pour la sélection de la photo --}}
+                            {{-- required: la photo est obligatoire --}}
                             {{-- onchange appelle previewPhoto() pour montrer l'aperçu --}}
                             <input type="file"
                                    id="photo"
                                    name="photo"
                                    class="form-control @error('photo') is-invalid @enderror"
                                    accept="image/*"
+                                   required
                                    onchange="previewPhoto(this)">
                             @error('photo')
                                 <div class="invalid-feedback">{{ $message }}</div>
