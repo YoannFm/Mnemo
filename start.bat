@@ -64,15 +64,15 @@ if "!PHP_EXE!"=="" (
     exit /b 1
 )
 
-echo Starting server on http://localhost:8000
+echo Starting server on http://localhost
 echo.
 echo Opening browser in 5 seconds...
 timeout /t 5 /nobreak
 
 REM Open browser
-start http://localhost:8000/install.php
+start http://localhost/install.php
 
-REM Start PHP server
-php artisan serve
+REM Start PHP server on port 80
+php artisan serve --host=0.0.0.0 --port=80
 
 pause

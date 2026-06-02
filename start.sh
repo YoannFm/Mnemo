@@ -47,17 +47,17 @@ echo "   Starting PHP Development Server..."
 echo "========================================"
 echo ""
 
-echo "Starting server on http://localhost:8000"
+echo "Starting server on http://localhost"
 echo ""
 echo "Opening browser in 5 seconds..."
 sleep 5
 
 # Open browser
 if command -v xdg-open &> /dev/null; then
-    xdg-open "http://localhost:8000/install.php" &
+    xdg-open "http://localhost/install.php" &
 elif command -v open &> /dev/null; then
-    open "http://localhost:8000/install.php" &
+    open "http://localhost/install.php" &
 fi
 
-# Start PHP server
-php artisan serve
+# Start PHP server on port 80
+php artisan serve --host=0.0.0.0 --port=80
