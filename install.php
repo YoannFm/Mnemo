@@ -322,6 +322,8 @@ if ($action === 'install') {
             ob_start();
             require_once ROOT . '/vendor/autoload.php';
             $app = require ROOT . '/bootstrap/app.php';
+            $kernel = $app->make('Illuminate\Contracts\Console\Kernel');
+            $kernel->bootstrap();
             ob_end_clean();
 
             $db = $app->make('db');
