@@ -30,8 +30,8 @@
                     <h6 class="mb-3" style="font-size:1.1rem;">{{ $question['question_text'] }}</h6>
 
                     {{-- Affichage de la question (photo ou texte) --}}
-                    @if ($question['field_answer'] === 'photo_path')
-                        {{-- Question = Photo (options = textes) --}}
+                    @if ($question['field_question'] === 'photo_path')
+                        {{-- Question = Photo --}}
                         <div style="text-align:center;margin:1.5rem 0;">
                             <img src="{{ $question['question_content'] }}"
                                  alt="Question"
@@ -63,14 +63,14 @@
                                    value="{{ $index }}"
                                    class="form-check-input"
                                    required>
-                            <label for="option_{{ $index }}" class="form-check-label" style="cursor:pointer;font-size:.95rem;">
-                                {{-- Affichage basique ou photo selon le type --}}
+                            <label for="option_{{ $index }}" class="form-check-label" style="cursor:pointer;font-size:.95rem;display:flex;align-items:center;">
+                                {{-- Affichage basique ou photo selon le type de réponse --}}
                                 @if ($question['field_answer'] === 'photo_path')
                                     <img src="{{ $option }}"
                                          alt="Option {{ $index + 1 }}"
-                                         style="max-width:100px;max-height:100px;border-radius:8px;object-fit:cover;margin-right:1rem;vertical-align:middle;">
+                                         style="width:80px;height:80px;border-radius:8px;object-fit:cover;margin-right:1rem;flex-shrink:0;">
                                 @else
-                                    {{ $option }}
+                                    <span>{{ $option }}</span>
                                 @endif
                             </label>
                         </div>

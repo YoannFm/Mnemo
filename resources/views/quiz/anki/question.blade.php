@@ -70,7 +70,7 @@
                     <h6 class="mb-3" style="font-size:1.1rem;">{{ $question['question_text'] }}</h6>
 
                     {{-- Affichage de la question (photo ou texte) --}}
-                    @if ($question['field_answer'] === 'photo_path')
+                    @if ($question['field_question'] === 'photo_path')
                         <div style="text-align:center;margin:1.5rem 0;">
                             <img src="{{ $question['question_content'] }}"
                                  alt="Question"
@@ -94,14 +94,14 @@
                             class="btn w-100 mb-2 anki-option"
                             data-index="{{ $index }}"
                             onclick="submitAnswer({{ $index }}, event)"
-                            style="text-align:left;padding:1rem;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-primary);transition:.2s;">
-                        {{-- Affichage basique ou photo --}}
+                            style="text-align:left;padding:1rem;background:var(--card-bg);border:1px solid var(--card-border);color:var(--text-primary);transition:.2s;display:flex;align-items:center;">
+                        {{-- Affichage basique ou photo selon le type de réponse --}}
                         @if ($question['field_answer'] === 'photo_path')
                             <img src="{{ $option }}"
                                  alt="Option {{ $index + 1 }}"
-                                 style="max-width:80px;max-height:80px;border-radius:8px;object-fit:cover;margin-right:1rem;vertical-align:middle;">
+                                 style="width:80px;height:80px;border-radius:8px;object-fit:cover;margin-right:1rem;flex-shrink:0;">
                         @else
-                            {{ $option }}
+                            <span>{{ $option }}</span>
                         @endif
                     </button>
                 @endforeach
