@@ -373,22 +373,21 @@
         </a>
 
         <a href="{{ route('modules.index') }}"
-           class="sidebar-link {{ request()->routeIs('modules.*') ? 'active' : '' }}">
+           class="sidebar-link {{ request()->routeIs('modules.*') || request()->routeIs('test.*') || request()->routeIs('anki.*') ? 'active' : '' }}">
             <i class="bi bi-collection"></i>
             Mes modules
         </a>
 
-        {{-- Section entraînement (activée en S2) --}}
-        <p class="nav-section-title mt-3">Entraînement</p>
-
-        <a href="#" class="sidebar-link text-muted" style="opacity:.4; cursor:not-allowed;">
-            <i class="bi bi-lightning-charge"></i>
-            Mode Test
+        <a href="{{ route('library.index') }}"
+           class="sidebar-link {{ request()->routeIs('library.*') ? 'active' : '' }}">
+            <i class="bi bi-globe2"></i>
+            Bibliothèque
         </a>
 
-        <a href="#" class="sidebar-link text-muted" style="opacity:.4; cursor:not-allowed;">
-            <i class="bi bi-arrow-repeat"></i>
-            Mode Anki
+        <a href="{{ route('progress.index') }}"
+           class="sidebar-link {{ request()->routeIs('progress.*') ? 'active' : '' }}">
+            <i class="bi bi-bar-chart-line"></i>
+            Ma progression
         </a>
 
     </div>
