@@ -37,9 +37,18 @@ class AnkiController extends Controller
                 ->with('error', 'Vous devez d\'abord ajouter des items au module.');
         }
 
-        // Initialiser la session Anki
+        return view('quiz.anki.setup', compact('module'));
+    }
+
+    public function start(Request $request, Module $module)
+    {
+        $this->authorize($module);
+
+        $mode = $request->input('mode', 'random');
+
         session([
             'anki_module_id' => $module->id,
+            'anki_mode'      => $mode,
         ]);
 
         return redirect()->route('anki.question', $module);
@@ -60,8 +69,24 @@ class AnkiController extends Controller
             return redirect()->route('modules.show', $module)->with('error', 'Aucune session Anki en cours.');
         }
 
-        // Tirer aléatoirement un type de question
-        $types = QuizGenerator::getQuestionTypes();
+        // Filtrer les types de questions selon le mode choisi
+        $mode = session('anki_mode', 'random');
+
+        $modeMap = [
+            'photo_to_name_fr'    => ['Q1'],
+            'photo_to_function'   => ['Q2'],
+            'function_to_photo'   => ['Q3'],
+            'name_fr_to_name_en'  => ['Q4'],
+            'name_en_to_photo'    => ['Q5'],
+            'function_to_name_fr' => ['Q6'],
+        ];
+
+        if ($mode === 'random' || !isset($modeMap[$mode])) {
+            $types = QuizGenerator::getQuestionTypes();
+        } else {
+            $types = $modeMap[$mode];
+        }
+
         $questionType = $types[array_rand($types)];
 
         \Log::info('Question type sélectionné: ' . $questionType);
