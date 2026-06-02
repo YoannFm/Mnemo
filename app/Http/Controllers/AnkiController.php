@@ -115,9 +115,11 @@ class AnkiController extends Controller
                 'item_id' => $question['item_id'],
             ],
             [
-                'success_count' => 0,
-                'fail_count'    => 0,
-                'streak'        => 0,
+                'success_count'   => 0,
+                'fail_count'      => 0,
+                'streak'          => 0,
+                'easiness_factor' => 2.5,
+                'interval_days'   => 1,
             ]
         );
 
