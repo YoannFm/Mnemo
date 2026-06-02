@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('progress', function (Blueprint $table) {
-            $table->float('easiness_factor')->default(2.5)->after('streak');
+            $table->double('easiness_factor')->default(2.5)->after('streak');
             $table->integer('interval_days')->default(1)->after('easiness_factor');
             $table->date('next_review')->nullable()->after('interval_days');
         });
