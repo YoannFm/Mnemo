@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ isset($title) ? $title . ' — Mnémo' : 'Mnémo' }}</title>
+    <title>{{ isset($title) ? $title . ' - Mnémo' : 'Mnémo' }}</title>
 
     {{-- Google Fonts : Inter pour le corps, Poppins pour les titres --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,7 +19,7 @@
 
     <style>
         /* ============================================================
-           Variables CSS — palette inspirée ModernPro/Azurium
+           Variables CSS - palette inspirée ModernPro/Azurium
            Fond sombre avec accents bleu-violet (#6366f1 = Indigo)
            ============================================================ */
         :root {
@@ -317,7 +317,7 @@
         }
 
         /* ============================================================
-           Responsive — sidebar en drawer sur mobile
+           Responsive - sidebar en drawer sur mobile
            ============================================================ */
         @media (max-width: 991.98px) {
             #sidebar {

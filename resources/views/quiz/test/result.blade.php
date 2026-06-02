@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="pageTitle">Résultat — {{ $module->title }}</x-slot>
+    <x-slot name="pageTitle">Résultat - {{ $module->title }}</x-slot>
 
     <div class="row justify-content-center">
         <div class="col-12 col-lg-8">
@@ -64,7 +64,7 @@
                             <div class="d-flex align-items-start justify-content-between mb-2">
                                 <div>
                                     <div style="font-size:.8rem;color:var(--text-muted);">
-                                        Question {{ $index + 1 }} — {{ $answer['question_type'] }}
+                                        Question {{ $index + 1 }} - {{ $answer['question_type'] }}
                                     </div>
                                 </div>
                                 @if ($answer['is_correct'])

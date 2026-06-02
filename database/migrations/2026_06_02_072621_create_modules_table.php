@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Migration — Table des modules.
+ * Migration - Table des modules.
  * Un module regroupe un ensemble d'items qu'un utilisateur veut mémoriser.
  */
 return new class extends Migration
