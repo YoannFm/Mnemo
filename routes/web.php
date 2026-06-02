@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Page d'accueil — redirige vers le dashboard si connecté, sinon vers login
+// Page d'accueil - redirige vers le dashboard si connecté, sinon vers login
 Route::get('/', function () {
     return redirect()->route('dashboard');
 })->name('home');
@@ -28,7 +28,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    // Dashboard — tableau de bord de l'utilisateur
+    // Dashboard - tableau de bord de l'utilisateur
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');

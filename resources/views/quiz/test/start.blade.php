@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="pageTitle">Mode Test — {{ $module->title }}</x-slot>
+    <x-slot name="pageTitle">Mode Test - {{ $module->title }}</x-slot>
 
     {{-- Fil d'Ariane --}}
     <nav aria-label="breadcrumb" class="mb-4">
@@ -49,7 +49,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
-                                Items disponibles : {{ $module->items()->count() }} —
+                                Items disponibles : {{ $module->items()->count() }} -
                                 Vous pouvez choisir entre 1 et {{ $module->items()->count() }} questions.
                             </div>
                         </div>

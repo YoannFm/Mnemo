@@ -59,7 +59,7 @@
         @endif
     </div>
 
-    {{-- ── Boutons d'entraînement (Test / Anki) — nécessite au moins 4 items ── --}}
+    {{-- ── Boutons d'entraînement (Test / Anki) - nécessite au moins 4 items ── --}}
     @if ($items->total() >= 4)
         <div class="d-grid gap-2 mb-4" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
             <a href="{{ route('test.show', $module) }}" class="btn btn-primary" style="height:auto;padding:1rem;">
@@ -90,7 +90,7 @@
 
     {{-- ── Liste des items ── --}}
     @if ($items->isEmpty())
-        {{-- État vide — aucun item dans le module --}}
+        {{-- État vide - aucun item dans le module --}}
         <div class="card text-center py-5">
             <i class="bi bi-image" style="font-size:3rem;color:var(--text-muted);"></i>
             <h6 class="mt-3">Aucun item dans ce module</h6>
