@@ -53,27 +53,37 @@
             <form method="POST" action="{{ route('test.submit', $module) }}">
                 @csrf
 
-                {{-- Options (boutons radio) --}}
-                <div class="mb-4">
+                {{-- Options en grille 2x2 --}}
+                <div class="mb-4" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
                     @foreach ($question['options'] as $index => $option)
-                        <div class="form-check mb-3">
+                        <label for="option_{{ $index }}"
+                               style="cursor:pointer;background:var(--card-bg);border:2px solid var(--card-border);
+                                      border-radius:12px;padding:.75rem;display:flex;flex-direction:column;
+                                      align-items:center;justify-content:center;gap:.5rem;min-height:80px;
+                                      transition:.2s;"
+                               onclick="this.style.borderColor='var(--accent)'">
+
                             <input type="radio"
                                    id="option_{{ $index }}"
                                    name="answer"
                                    value="{{ $index }}"
                                    class="form-check-input"
+                                   style="display:none;"
                                    required>
-                            <label for="option_{{ $index }}" class="form-check-label" style="cursor:pointer;font-size:.95rem;display:flex;align-items:center;">
-                                {{-- Affichage basique ou photo selon le type de réponse --}}
-                                @if ($question['field_answer'] === 'photo_path')
-                                    <img src="{{ $option }}"
-                                         alt="Option {{ $index + 1 }}"
-                                         style="width:80px;height:80px;border-radius:8px;object-fit:cover;margin-right:1rem;flex-shrink:0;">
-                                @else
-                                    <span>{{ $option }}</span>
-                                @endif
-                            </label>
-                        </div>
+
+                            @if ($question['field_answer'] === 'photo_path')
+                                {{-- Réponse = photo --}}
+                                <img src="{{ $option }}"
+                                     alt="Option {{ $index + 1 }}"
+                                     style="width:100%;height:120px;border-radius:8px;object-fit:cover;">
+                            @else
+                                {{-- Réponse = texte --}}
+                                <span style="font-size:.9rem;text-align:center;color:var(--text-primary);word-break:break-word;">
+                                    {{ $option }}
+                                </span>
+                            @endif
+
+                        </label>
                     @endforeach
                 </div>
 
