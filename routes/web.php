@@ -3,6 +3,10 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\AnkiController;
+use App\Http\Controllers\LibraryController;
+use App\Http\Controllers\ProgressController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -11,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Page d'accueil — redirige vers le dashboard si connecté, sinon vers login
+// Page d'accueil - redirige vers le dashboard si connecté, sinon vers login
 Route::get('/', function () {
     return redirect()->route('dashboard');
 })->name('home');
@@ -24,7 +28,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    // Dashboard — tableau de bord de l'utilisateur
+    // Dashboard - tableau de bord de l'utilisateur
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
@@ -44,6 +48,36 @@ Route::middleware(['auth'])->group(function () {
     //          modules.items.edit, modules.items.update, modules.items.destroy
     Route::resource('modules.items', ItemController::class)
         ->except(['index', 'show']); // Ces actions redirigent vers la page du module
+
+    // ─── Mode Test (nombre fixe de questions) ───
+    Route::get('/modules/{module}/test', [TestController::class, 'show'])->name('test.show');
+    Route::post('/modules/{module}/test/start', [TestController::class, 'start'])->name('test.start');
+    Route::get('/modules/{module}/test/question', [TestController::class, 'question'])->name('test.question');
+    Route::post('/modules/{module}/test/submit', [TestController::class, 'submit'])->name('test.submit');
+    Route::get('/modules/{module}/test/result', [TestController::class, 'result'])->name('test.result');
+
+    // ─── Mode Anki (questions infinies avec progression) ───
+    Route::get('/modules/{module}/anki', [AnkiController::class, 'show'])->name('anki.show');
+    Route::get('/modules/{module}/anki/question', [AnkiController::class, 'question'])->name('anki.question');
+    Route::post('/modules/{module}/anki/submit', [AnkiController::class, 'submit'])->name('anki.submit');
+    Route::post('/modules/{module}/anki/quit', [AnkiController::class, 'quit'])->name('anki.quit');
+
+    // ─── Bibliothèque publique ───
+    Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');
+
+    // ─── Progression et historique ───
+    Route::get('/progression', [ProgressController::class, 'index'])->name('progress.index');
 });
+
+// ─── Sitemap XML dynamique ───
+// Accessible publiquement pour les moteurs de recherche
+Route::get('/sitemap.xml', function () {
+    $content = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $content .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    $content .= '  <url><loc>' . url('/') . '</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>' . "\n";
+    $content .= '  <url><loc>' . url('/bibliotheque') . '</loc><changefreq>daily</changefreq><priority>0.8</priority></url>' . "\n";
+    $content .= '</urlset>';
+    return response($content, 200)->header('Content-Type', 'application/xml');
+})->name('sitemap');
 
 require __DIR__.'/auth.php';

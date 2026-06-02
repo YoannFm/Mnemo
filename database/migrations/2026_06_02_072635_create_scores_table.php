@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Migration — Table des scores (mode Test).
+ * Migration - Table des scores (mode Test).
  * Historique de chaque session de test terminée par un utilisateur.
  */
 return new class extends Migration

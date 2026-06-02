@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Migration — Table de progression (mode Anki).
+ * Migration - Table de progression (mode Anki).
  * Enregistre pour chaque utilisateur le nombre de succès/échecs par item.
  */
 return new class extends Migration

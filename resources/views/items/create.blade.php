@@ -23,13 +23,15 @@
                 </div>
                 <div class="card-body p-4">
 
-                    {{-- enctype="multipart/form-data" obligatoire pour l'upload de fichier --}}
+                    {{-- Formulaire d'ajout d'item dans le module --}}
+                    {{-- enctype="multipart/form-data" obligatoire car on upload une photo --}}
                     <form method="POST"
                           action="{{ route('modules.items.store', $module) }}"
                           enctype="multipart/form-data">
                         @csrf
 
-                        {{-- Nom français --}}
+                        {{-- Nom français de l'item (obligatoire) --}}
+                        {{-- Sera utilisé dans les questions Q1 et Q4 en français --}}
                         <div class="mb-3">
                             <label for="name_fr" class="form-label">
                                 Nom français <span style="color:#ef4444;">*</span>
@@ -46,7 +48,8 @@
                             @enderror
                         </div>
 
-                        {{-- Nom anglais --}}
+                        {{-- Nom anglais de l'item (obligatoire) --}}
+                        {{-- Sera utilisé dans la question Q4 (traduction anglaise) --}}
                         <div class="mb-3">
                             <label for="name_en" class="form-label">
                                 Nom anglais <span style="color:#ef4444;">*</span>
@@ -62,7 +65,9 @@
                             @enderror
                         </div>
 
-                        {{-- Fonction / Description --}}
+                        {{-- Fonction / Description de l'item (obligatoire) --}}
+                        {{-- Sera utilisé dans la question Q2 et Q3 (description textuelle) --}}
+                        {{-- Max 2000 caractères pour une description détaillée --}}
                         <div class="mb-3">
                             <label for="function_text" class="form-label">
                                 Fonction / Description <span style="color:#ef4444;">*</span>
@@ -77,14 +82,17 @@
                             @enderror
                         </div>
 
-                        {{-- Upload photo --}}
+                        {{-- Upload de photo (facultatif) --}}
+                        {{-- La photo sera utilisée dans les questions Q1 et Q3 --}}
+                        {{-- Si pas de photo, une image placeholder est affichée --}}
                         <div class="mb-4">
                             <label for="photo" class="form-label">
                                 Photo
                                 <span style="color:var(--text-muted);font-weight:400;">(facultative, max 2 Mo)</span>
                             </label>
 
-                            {{-- Zone de prévisualisation de la photo --}}
+                            {{-- Zone de prévisualisation de la photo avant upload --}}
+                            {{-- Masquée par défaut, s'affiche quand l'utilisateur sélectionne une photo --}}
                             <div id="photo-preview"
                                  style="display:none;width:100%;height:180px;border-radius:10px;overflow:hidden;
                                         background:#0f1117;margin-bottom:.75rem;">
@@ -92,6 +100,8 @@
                                      style="width:100%;height:100%;object-fit:cover;">
                             </div>
 
+                            {{-- Input file pour la sélection de la photo --}}
+                            {{-- onchange appelle previewPhoto() pour montrer l'aperçu --}}
                             <input type="file"
                                    id="photo"
                                    name="photo"
@@ -102,11 +112,13 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                             <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
-                                Formats acceptés : JPEG, PNG, WebP — La photo sera compressée automatiquement.
+                                Formats acceptés : JPEG, PNG, WebP - La photo sera compressée automatiquement.
                             </div>
                         </div>
 
-                        {{-- Boutons --}}
+                        {{-- Boutons d'action du formulaire --}}
+                        {{-- "Ajouter l'item" envoie le formulaire et enregistre l'item --}}
+                        {{-- "Annuler" redirection vers la page du module --}}
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-plus-lg me-1"></i> Ajouter l'item
