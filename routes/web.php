@@ -7,7 +7,23 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\AnkiController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\ProgressController;
+use App\Http\Controllers\InstallController;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Routes d'installation (sans authentification)
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('install')->group(function () {
+    Route::get('/', [InstallController::class, 'index'])->name('install.index');
+    Route::get('/prerequisites', [InstallController::class, 'checkPrerequisites'])->name('install.prerequisites');
+    Route::get('/database', [InstallController::class, 'setupDatabase'])->name('install.database');
+    Route::get('/admin', [InstallController::class, 'createAdmin'])->name('install.admin');
+    Route::post('/admin', [InstallController::class, 'storeAdmin'])->name('install.admin.store');
+    Route::get('/complete', [InstallController::class, 'complete'])->name('install.complete');
+});
 
 /*
 |--------------------------------------------------------------------------
