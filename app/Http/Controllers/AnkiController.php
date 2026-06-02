@@ -50,6 +50,10 @@ class AnkiController extends Controller
      */
     public function question(Module $module)
     {
+        \Log::info('=== DEBUG: Anki question() appelé ===');
+        \Log::info('Module ID: ' . $module->id);
+        \Log::info('User ID: ' . Auth::id());
+
         $this->authorize($module);
 
         if (!session()->has('anki_module_id') || session('anki_module_id') !== $module->id) {
@@ -60,16 +64,22 @@ class AnkiController extends Controller
         $types = QuizGenerator::getQuestionTypes();
         $questionType = $types[array_rand($types)];
 
+        \Log::info('Question type sélectionné: ' . $questionType);
+
         // --- Priorisation des items ratés (ANKI-3) ---
         // Au lieu d'un tirage purement aléatoire, on pondère les items
         // selon la progression de l'utilisateur : les items ratés reviennent plus souvent.
         $allItems = $module->items()->get();
+
+        \Log::info('Nombre total d\'items: ' . $allItems->count());
 
         // Récupérer toutes les progressions de l'utilisateur pour ce module
         $progressMap = Progress::where('user_id', Auth::id())
             ->whereIn('item_id', $allItems->pluck('id'))
             ->get()
             ->keyBy('item_id');
+
+        \Log::info('Progressions existantes: ' . $progressMap->count());
 
         // Construire une liste pondérée : items ratés et items dus (SM-2) apparaissent plus souvent
         $weightedPool = [];
@@ -96,11 +106,16 @@ class AnkiController extends Controller
             }
         }
 
+        \Log::info('Taille du pool pondéré: ' . count($weightedPool));
+
         // Tirer l'item cible selon les poids calculés
         $targetItem = $weightedPool[array_rand($weightedPool)];
+        \Log::info('Item cible sélectionné: ' . $targetItem->id . ' - ' . $targetItem->name_fr);
         // --- Fin priorisation ---
 
         $question = QuizGenerator::generateQuestion($module, $questionType, $targetItem);
+
+        \Log::info('Question générée avec keys: ' . implode(', ', array_keys($question)));
 
         if (isset($question['error'])) {
             return redirect()
@@ -109,6 +124,8 @@ class AnkiController extends Controller
         }
 
         // Récupérer la progression actuelle de cet item
+        \Log::info('DEBUG: Créer/récupérer Progress pour item ' . $question['item_id']);
+
         $progress = Progress::firstOrCreate(
             [
                 'user_id' => Auth::id(),
@@ -122,6 +139,15 @@ class AnkiController extends Controller
                 'interval_days'   => 1,
             ]
         );
+
+        \Log::info('Progress chargé/créé', [
+            'id' => $progress->id,
+            'success_count' => $progress->success_count,
+            'fail_count' => $progress->fail_count,
+            'streak' => $progress->streak,
+            'easiness_factor' => $progress->easiness_factor,
+            'interval_days' => $progress->interval_days,
+        ]);
 
         $question['progress'] = [
             'success_count' => $progress->success_count,
@@ -138,13 +164,21 @@ class AnkiController extends Controller
      */
     public function submit(Request $request, Module $module)
     {
+        \Log::info('=== DEBUG: Anki submit() appelé ===');
+        \Log::info('Module ID: ' . $module->id);
+        \Log::info('User ID: ' . Auth::id());
+        \Log::info('Request body: ' . $request->getContent());
+
         $this->authorize($module);
 
         if (!session()->has('anki_module_id') || session('anki_module_id') !== $module->id) {
+            \Log::warning('Session Anki invalide ou manquante');
             return response()->json(['error' => 'Aucune session Anki en cours.'], 403);
         }
 
         try {
+            \Log::info('DEBUG: Validation des données');
+
             // Valider la réponse
             // Laravel parse automatiquement le body JSON quand Content-Type: application/json
             // 'question' arrive comme array, pas comme string JSON
@@ -154,21 +188,42 @@ class AnkiController extends Controller
                 'question' => 'required|array',
             ]);
 
+            \Log::info('DEBUG: Validation réussie');
+            \Log::info('item_id: ' . $data['item_id']);
+            \Log::info('answer: ' . $data['answer']);
+            \Log::info('question keys: ' . implode(', ', array_keys($data['question'])));
+
             // La question est déjà un array (décodé par Laravel)
             $question = $data['question'];
 
             if (empty($question)) {
+                \Log::error('DEBUG: Question vide');
                 return response()->json(['error' => 'Erreur lors du traitement de la réponse.'], 422);
             }
+
+            \Log::info('DEBUG: Validation de la réponse');
 
             // Valider la réponse
             $isCorrect = QuizGenerator::validateAnswer($question, $data['answer']);
 
+            \Log::info('DEBUG: isCorrect = ' . ($isCorrect ? 'true' : 'false'));
+            \Log::info('DEBUG: correct_index = ' . ($question['correct_index'] ?? 'MISSING'));
+
             // Récupérer ou créer la progression (firstOrCreate évite un 404 si la session a été perdue)
+            \Log::info('DEBUG: Créer/récupérer Progress');
             $progress = Progress::firstOrCreate(
                 ['user_id' => Auth::id(), 'item_id' => $data['item_id']],
                 ['success_count' => 0, 'fail_count' => 0, 'streak' => 0, 'easiness_factor' => 2.5, 'interval_days' => 1]
             );
+
+            \Log::info('DEBUG: Progress créé/récupéré', [
+                'id' => $progress->id,
+                'success_count' => $progress->success_count,
+                'fail_count' => $progress->fail_count,
+                'streak' => $progress->streak,
+                'easiness_factor' => $progress->easiness_factor,
+                'interval_days' => $progress->interval_days,
+            ]);
 
             if ($isCorrect) {
                 $progress->success_count++;
@@ -182,21 +237,44 @@ class AnkiController extends Controller
 
             // Appliquer l'algorithme SM-2 (qualité 5 si correct, 1 si incorrect)
             $quality = $isCorrect ? 5 : 1;
+
+            \Log::info('DEBUG: Avant applySM2', [
+                'quality' => $quality,
+                'easiness_factor' => $progress->easiness_factor,
+                'interval_days' => $progress->interval_days,
+            ]);
+
             $progress->applySM2($quality);
+
+            \Log::info('DEBUG: Après applySM2', [
+                'easiness_factor' => $progress->easiness_factor,
+                'interval_days' => $progress->interval_days,
+                'next_review' => $progress->next_review,
+            ]);
 
             $progress->save();
 
+            \Log::info('DEBUG: Progress sauvegardé avec succès');
+
             // Retourner le feedback
-            return response()->json([
+            $response = [
                 'is_correct'  => $isCorrect,
                 'correct_answer' => $question['correct_answer'],
                 'user_answer' => $question['options'][$data['answer']],
                 'streak'      => $progress->streak,
                 'is_mastered' => $progress->isMastered(),
-            ]);
+            ];
+
+            \Log::info('DEBUG: Réponse JSON', $response);
+
+            return response()->json($response);
         } catch (\Throwable $e) {
-            \Log::error('Anki submit error: ' . $e->getMessage(), [
-                'exception' => $e,
+            \Log::error('=== ANKI SUBMIT ERROR ===', [
+                'message' => $e->getMessage(),
+                'class' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
                 'module_id' => $module->id,
                 'request_data' => $request->all(),

@@ -165,11 +165,23 @@
         function submitAnswer(optionIndex, event) {
             event.preventDefault();
 
+            console.log('=== DEBUG: Soumission réponse ===');
+            console.log('optionIndex:', optionIndex);
+            console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').content);
+
             // Désactiver tous les boutons d'option pour éviter les soumissions multiples
             // pendant que la requête est en cours
             document.querySelectorAll('.anki-option').forEach(btn => {
                 btn.disabled = true;
             });
+
+            const payload = {
+                item_id: {{ $question['item_id'] }},
+                answer: optionIndex,
+                question: @json($question),
+            };
+
+            console.log('Payload envoyé:', JSON.stringify(payload, null, 2));
 
             // Envoyer la réponse au serveur via requête AJAX (POST JSON)
             // Le serveur va mettre à jour la progression et retourner le feedback
@@ -180,24 +192,37 @@
                     // Token CSRF requis pour les requêtes POST sécurisées
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 },
-                body: JSON.stringify({
-                    item_id: {{ $question['item_id'] }},
-                    answer: optionIndex,
-                    question: @json($question),
-                }),
+                body: JSON.stringify(payload),
             })
             .then(response => {
-                if (!response.ok) throw new Error('Erreur serveur');
+                console.log('=== DEBUG: Réponse reçue ===');
+                console.log('Status:', response.status);
+                console.log('OK:', response.ok);
+                console.log('Headers:', {
+                    'Content-Type': response.headers.get('Content-Type'),
+                    'Content-Length': response.headers.get('Content-Length'),
+                });
+
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error('Erreur serveur (status ' + response.status + '):', text);
+                        throw new Error('Erreur serveur: ' + response.status);
+                    });
+                }
                 return response.json();
             })
             .then(data => {
+                console.log('=== DEBUG: Données JSON reçues ===');
+                console.log('Data:', JSON.stringify(data, null, 2));
                 // Afficher le feedback avec le résultat du serveur
                 displayFeedback(data, optionIndex);
             })
             .catch(error => {
                 // En cas d'erreur, afficher un message et réactiver les boutons
-                console.error('Erreur:', error);
-                alert('Une erreur est survenue. Veuillez réessayer.');
+                console.error('=== DEBUG: Erreur dans le fetch ===');
+                console.error('Error:', error);
+                console.error('Stack:', error.stack);
+                alert('Une erreur est survenue. Veuillez réessayer.\n\nConsole (F12) pour détails.');
                 document.querySelectorAll('.anki-option').forEach(btn => {
                     btn.disabled = false;
                 });
