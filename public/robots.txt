@@ -1,2 +1,10 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /modules
+Disallow: /progression
+Disallow: /api/
+
+# Sitemap
+Sitemap: /sitemap.xml

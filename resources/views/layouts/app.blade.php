@@ -5,7 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ isset($title) ? $title . ' - Mnémo' : 'Mnémo' }}</title>
+    <title>{{ isset($pageTitle) ? $pageTitle . ' - Mnémo' : 'Mnémo - Apprenez par la répétition espacée' }}</title>
+
+    {{-- SEO - méta descriptions et mots-clés --}}
+    <meta name="description" content="{{ isset($metaDescription) ? $metaDescription : 'Mnémo est une application de mémorisation par répétition espacée. Créez vos modules, apprenez avec le mode Anki ou testez vos connaissances.' }}">
+    <meta name="keywords" content="mémorisation, répétition espacée, anki, flashcard, apprentissage, quiz, mnémo">
+    <meta name="author" content="YoannFM">
+    <meta name="robots" content="index, follow">
+
+    {{-- Open Graph (partage sur réseaux sociaux) --}}
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ isset($pageTitle) ? $pageTitle . ' - Mnémo' : 'Mnémo - Apprenez par la répétition espacée' }}">
+    <meta property="og:description" content="Application de mémorisation par répétition espacée. Créez des modules, entraînez-vous en mode Anki et suivez votre progression.">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:site_name" content="Mnémo">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="{{ isset($pageTitle) ? $pageTitle . ' - Mnémo' : 'Mnémo' }}">
+    <meta name="twitter:description" content="Application de mémorisation par répétition espacée.">
 
     {{-- Google Fonts : Inter pour le corps, Poppins pour les titres --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -317,6 +335,56 @@
         }
 
         /* ============================================================
+           Tableaux Bootstrap - forcer le dark theme
+           Bootstrap utilise des variables --bs-table-* par défaut
+           qui donnent un fond blanc. On les réécrit ici.
+           ============================================================ */
+        .table {
+            --bs-table-bg: transparent;
+            --bs-table-color: var(--text-primary);
+            --bs-table-border-color: var(--card-border);
+            --bs-table-striped-bg: rgba(99,102,241,.05);
+            --bs-table-striped-color: var(--text-primary);
+            --bs-table-hover-bg: rgba(99,102,241,.08);
+            --bs-table-hover-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+
+        .table > :not(caption) > * > * {
+            background-color: transparent;
+            color: var(--text-primary);
+            border-bottom-color: var(--card-border);
+        }
+
+        .table thead th {
+            background: var(--card-border);
+            color: var(--text-muted);
+            border-color: var(--card-border);
+        }
+
+        /* ============================================================
+           Footer
+           ============================================================ */
+        #main-footer {
+            border-top: 1px solid var(--card-border);
+            padding: 1.25rem 1.5rem;
+            text-align: center;
+            font-size: .78rem;
+            color: var(--text-muted);
+            background: var(--sidebar-bg);
+        }
+
+        #main-footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        #main-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* ============================================================
            Responsive - sidebar en drawer sur mobile
            ============================================================ */
         @media (max-width: 991.98px) {
@@ -460,6 +528,12 @@
     <div class="page-content">
         {{ $slot }}
     </div>
+
+    {{-- Footer global - affiché sur toutes les pages --}}
+    <footer id="main-footer">
+        <div>© Copyright - Tout droit réservé</div>
+        <div>Fait avec ♥️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
+    </footer>
 
 </div>
 
