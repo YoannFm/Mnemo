@@ -54,7 +54,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
 
     // ─── Gestion 2FA (profil) ───
     Route::get('/profile/2fa', [ProfileTwoFactorController::class, 'show'])->name('profile.2fa.show');
-    Route::post('/profile/2fa/enable', [ProfileTwoFactorController::class, 'enable'])->name('profile.2fa.enable');
+    Route::get('/profile/2fa/enable', [ProfileTwoFactorController::class, 'enable'])->name('profile.2fa.enable');
     Route::post('/profile/2fa/confirm', [ProfileTwoFactorController::class, 'confirm'])->name('profile.2fa.confirm');
     Route::delete('/profile/2fa', [ProfileTwoFactorController::class, 'disable'])->name('profile.2fa.disable');
 
