@@ -35,6 +35,22 @@ class User extends Authenticatable
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (is_null($user->role_id)) {
+                try {
+                    $defaultRole = Role::where('is_admin_role', false)->orderBy('power')->first();
+                    if ($defaultRole) {
+                        $user->role_id = $defaultRole->id;
+                    }
+                } catch (\Throwable) {
+                    // table may not exist during installation
+                }
+            }
+        });
+    }
+
     public function isAdmin(): bool
     {
         return (bool) $this->is_admin;
