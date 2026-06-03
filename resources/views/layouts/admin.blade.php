@@ -52,23 +52,27 @@
 
                     <li class="sidebar-header">Paramètres</li>
 
+                    <li class="sidebar-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                        <a class="sidebar-link {{ request()->routeIs('admin.settings.*') ? '' : 'collapsed' }}"
+                           href="#" data-bs-toggle="collapse" data-bs-target="#collapseSettings"
+                           aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}">
+                            <i class="bi bi-gear"></i>
+                            <span>Paramètres</span>
+                        </a>
+                        <ul id="collapseSettings"
+                            class="sidebar-dropdown list-unstyled collapse {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}">
+                            <li class="sidebar-item {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
+                                <a class="sidebar-link" href="{{ route('admin.settings.index') }}">Général</a>
+                            </li>
+                            <li class="sidebar-item {{ request()->routeIs('admin.settings.mail') ? 'active' : '' }}">
+                                <a class="sidebar-link" href="{{ route('admin.settings.mail') }}">E-mail</a>
+                            </li>
+                        </ul>
+                    </li>
+
                     <li class="sidebar-item {{ request()->routeIs('admin.navbar.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.navbar.index') }}">
                             <i class="bi bi-list-ul"></i> <span>Navigation</span>
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
-                        <a class="sidebar-link" href="{{ route('admin.settings.index') }}">
-                            <i class="bi bi-gear"></i> <span>Paramètres</span>
-                        </a>
-                    </li>
-
-                    <li class="sidebar-header">Site</li>
-
-                    <li class="sidebar-item">
-                        <a class="sidebar-link" href="{{ route('dashboard') }}">
-                            <i class="bi bi-arrow-left"></i> <span>Retour au site</span>
                         </a>
                     </li>
 
@@ -86,15 +90,27 @@
                 </a>
 
                 <div class="navbar-collapse collapse">
+                    <div class="d-none d-sm-inline-block">
+                        <a href="https://discord.gg/mnemo" class="btn btn-outline-primary mx-1" target="_blank" rel="noopener noreferrer">
+                            <i class="bi bi-question-circle"></i> Support
+                        </a>
+                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary mx-1">
+                            <i class="bi bi-house"></i> Retour au site
+                        </a>
+                    </div>
+
                     <ul class="navbar-nav navbar-align">
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#"
+                            <a class="nav-link dropdown-toggle" href="#"
                                data-bs-toggle="dropdown" aria-expanded="false">
-                                <span class="text-dark">{{ Auth::user()->name ?? '' }}</span>
+                                <span class="me-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name ?? '' }}</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end">
                                 <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                    <i class="bi bi-person me-1"></i> Mon profil
+                                    <i class="bi bi-person-circle me-1"></i> Mon profil
+                                </a>
+                                <a class="dropdown-item" href="{{ route('dashboard') }}">
+                                    <i class="bi bi-house me-1"></i> Retour au site
                                 </a>
                                 <div class="dropdown-divider"></div>
                                 <form method="POST" action="{{ route('logout') }}">
