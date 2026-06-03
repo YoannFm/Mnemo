@@ -10,6 +10,11 @@ use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\Auth\TwoFactorController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\ModuleController as AdminModuleController;
+use App\Http\Controllers\Admin\NavbarController;
+use App\Http\Controllers\Admin\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -117,5 +122,27 @@ Route::get('/sitemap.xml', function () {
     $content .= '</urlset>';
     return response($content, 200)->header('Content-Type', 'application/xml');
 })->name('sitemap');
+
+/*
+|--------------------------------------------------------------------------
+| Routes Admin
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin'])->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::post('/users/{user}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('users.toggle-admin');
+    Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::get('/modules', [AdminModuleController::class, 'index'])->name('modules.index');
+    Route::delete('/modules/{module}', [AdminModuleController::class, 'destroy'])->name('modules.destroy');
+    Route::get('/navbar', [NavbarController::class, 'index'])->name('navbar.index');
+    Route::post('/navbar', [NavbarController::class, 'store'])->name('navbar.store');
+    Route::put('/navbar/{navItem}', [NavbarController::class, 'update'])->name('navbar.update');
+    Route::delete('/navbar/{navItem}', [NavbarController::class, 'destroy'])->name('navbar.destroy');
+    Route::post('/navbar/order', [NavbarController::class, 'updateOrder'])->name('navbar.order');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+});
 
 require __DIR__.'/auth.php';
