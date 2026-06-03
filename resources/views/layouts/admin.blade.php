@@ -176,7 +176,7 @@
                 <div class="navbar-collapse collapse">
                     <div class="d-none d-sm-inline-block">
                         <a href="https://discord.gg/HtjPAfqUXu" class="btn btn-outline-primary mx-1" target="_blank" rel="noopener noreferrer">
-                            <i class="bi bi-discord"></i> Discord
+                            <i class="bi bi-question-circle"></i> Support
                         </a>
                         <a href="https://wiki.novadev.ovh" class="btn btn-outline-info mx-1" target="_blank" rel="noopener noreferrer">
                             <i class="bi bi-book"></i> Documentation

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class Role extends Model
 {
     protected $fillable = [
-        'name', 'color', 'power', 'is_admin_role',
+        'name', 'color', 'icon', 'power', 'is_admin_role',
         'can_create_module', 'can_train_own', 'can_test_own',
         'can_access_library', 'can_train_public', 'can_test_public',
     ];
