@@ -1,41 +1,75 @@
 <x-admin-layout>
-    <x-slot name="pageTitle">Modifier - {{ $user->name }}</x-slot>
+    <x-slot name="pageTitle">Edition de l'utilisateur {{ $user->name }}</x-slot>
+
+    {{-- Alerte bannissement --}}
+    @if($user->is_banned)
+        @php $latestBan = $user->bans()->latest()->first(); @endphp
+        <div class="alert alert-warning shadow" role="alert">
+            <h5><i class="bi bi-exclamation-triangle"></i> Cet utilisateur est banni</h5>
+            <ul class="mb-2">
+                @if($latestBan)
+                    <li>Banni par : {{ $latestBan->author->name ?? '?' }}</li>
+                    <li>Raison : {{ $latestBan->reason ?? '-' }}</li>
+                    <li>Date : {{ $latestBan->created_at->format('d/m/Y à H:i') }}</li>
+                @endif
+            </ul>
+            @if($latestBan)
+                <form method="POST" action="{{ route('admin.users.bans.destroy', [$user, $latestBan]) }}" class="d-inline">
+                    @method('DELETE')
+                    @csrf
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-slash-circle"></i> Debannir
+                    </button>
+                </form>
+            @endif
+        </div>
+    @endif
 
     <div class="row">
 
         {{-- Colonne gauche : Modifier le profil --}}
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card shadow mb-4">
                 <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-person-gear me-1"></i> Modifier le profil</h5>
+                    <h5 class="card-title mb-0">Modifier le profil</h5>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('admin.users.update', $user) }}" method="POST">
                         @method('PUT')
                         @csrf
 
-                        <div class="mb-3">
-                            <label class="form-label" for="nameInput">Nom</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror"
-                                   id="nameInput" name="name"
-                                   value="{{ old('name', $user->name) }}" required>
-                            @error('name')
-                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                            @enderror
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div class="mb-3">
+                                    <label class="form-label" for="nameInput">Nom</label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                           id="nameInput" name="name"
+                                           value="{{ old('name', $user->name) }}" required>
+                                    @error('name')
+                                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="emailInput">Email</label>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                           id="emailInput" name="email"
+                                           value="{{ old('email', $user->email) }}" required>
+                                    @error('email')
+                                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 text-center d-flex align-items-center justify-content-center">
+                                <div style="width:80px;height:80px;border-radius:50%;background:#266fd9;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;font-weight:700;">
+                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                </div>
+                            </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label" for="emailInput">Email</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror"
-                                   id="emailInput" name="email"
-                                   value="{{ old('email', $user->email) }}" required>
-                            @error('email')
-                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label" for="passwordInput">Nouveau mot de passe <span class="text-muted">(facultatif)</span></label>
+                            <label class="form-label" for="passwordInput">Mot de passe</label>
                             <input type="password" class="form-control @error('password') is-invalid @enderror"
                                    id="passwordInput" name="password" placeholder="Laisser vide pour ne pas changer">
                             @error('password')
@@ -52,12 +86,11 @@
                         <div class="mb-3">
                             <label class="form-label" for="roleSelect">Role</label>
                             <select class="form-select @error('role_id') is-invalid @enderror" id="roleSelect" name="role_id">
-                                <option value="">-- Aucun role --</option>
+                                <option value="">- Aucun role -</option>
                                 @foreach($roles as $role)
                                     <option value="{{ $role->id }}"
                                         {{ old('role_id', $user->role_id) == $role->id ? 'selected' : '' }}>
-                                        {{ $role->name }}
-                                        @if($role->is_admin_role) (Admin) @endif
+                                        {{ $role->name }}@if($role->is_admin_role) (Admin)@endif
                                     </option>
                                 @endforeach
                             </select>
@@ -66,22 +99,26 @@
                             @enderror
                         </div>
 
-                        <div class="d-flex gap-2 flex-wrap">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Sauvegarder
-                            </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Sauvegarder
+                        </button>
 
-                            @if ($user->id !== Auth::id())
-                                <button type="button" class="btn btn-danger"
-                                    onclick="if(confirm('Supprimer cet utilisateur ?')) { document.getElementById('delete-user-{{ $user->id }}').submit(); }">
-                                    <i class="bi bi-trash"></i> Supprimer
-                                </button>
-                            @endif
-                        </div>
+                        @if ($user->id !== Auth::id() && !$user->is_banned)
+                            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#banModal">
+                                <i class="bi bi-slash-circle"></i> Bannir
+                            </button>
+                        @endif
+
+                        @if ($user->id !== Auth::id())
+                            <button type="button" class="btn btn-danger"
+                                onclick="if(confirm('Supprimer definitivement cet utilisateur ?')) document.getElementById('delete-form-{{ $user->id }}').submit()">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </button>
+                        @endif
                     </form>
 
                     @if ($user->id !== Auth::id())
-                        <form id="delete-user-{{ $user->id }}" method="POST"
+                        <form id="delete-form-{{ $user->id }}" method="POST"
                               action="{{ route('admin.users.destroy', $user) }}" class="d-none">
                             @csrf @method('DELETE')
                         </form>
@@ -90,158 +127,144 @@
             </div>
         </div>
 
-        {{-- Colonne centre : Avatar --}}
-        <div class="col-md-4">
-            <div class="card shadow mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-person-circle me-1"></i> Avatar</h5>
-                </div>
-                <div class="card-body d-flex align-items-center justify-content-center" style="min-height:180px;">
-                    <div style="width:120px;height:120px;border-radius:50%;background:#266fd9;display:flex;align-items:center;justify-content:center;font-size:3rem;color:#fff;font-weight:700;margin:auto;">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                    </div>
-                </div>
-            </div>
-        </div>
-
         {{-- Colonne droite : Informations --}}
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card shadow mb-4">
                 <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-info-circle me-1"></i> Informations</h5>
+                    <h5 class="card-title mb-0">Informations de l'utilisateur</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label text-muted small mb-1">Inscription</label>
-                        <div class="fw-semibold">{{ $user->created_at->format('d/m/Y à H:i') }}</div>
+                        <label class="form-label" for="registerInput">Inscrit le</label>
+                        <input type="text" class="form-control" id="registerInput"
+                               value="{{ $user->created_at->format('d/m/Y à H:i') }}" disabled>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label text-muted small mb-1">Derniere connexion</label>
-                        <div class="fw-semibold">
-                            {{ $user->last_login_at ? $user->last_login_at->format('d/m/Y à H:i') : '-' }}
-                        </div>
+                        <label class="form-label" for="lastLoginInput">Derniere connexion</label>
+                        <input type="text" class="form-control" id="lastLoginInput"
+                               value="{{ $user->last_login_at ? $user->last_login_at->format('d/m/Y à H:i') : 'Jamais' }}" disabled>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label text-muted small mb-1">Adresse IP</label>
-                        <div class="fw-semibold">{{ $user->last_login_ip ?? '-' }}</div>
+                        <label class="form-label" for="2faInput">Authentification a deux facteurs</label>
+                        @if($user->two_factor_secret)
+                            <input type="text" class="form-control text-success" id="2faInput" value="Active" disabled>
+                        @else
+                            <input type="text" class="form-control text-danger" id="2faInput" value="Non" disabled>
+                        @endif
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted small mb-1">2FA</label>
-                        <div>
-                            @if ($user->two_factor_secret)
-                                <span class="badge bg-success"><i class="bi bi-shield-check me-1"></i> Active</span>
+                    <form action="{{ route('admin.users.force-password-change', $user) }}" method="POST">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label" for="forcePasswordInput">Changement de mot de passe</label>
+                            @if($user->force_password_change)
+                                <input type="text" class="form-control" id="forcePasswordInput"
+                                       value="Changement force en attente" disabled>
                             @else
-                                <span class="badge bg-danger"><i class="bi bi-shield-x me-1"></i> Desactive</span>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="forcePasswordInput"
+                                           value="{{ $user->last_login_at ? $user->last_login_at->format('d/m/Y à H:i') : 'Inconnu' }}" disabled>
+                                    <button class="btn btn-outline-danger" type="submit"
+                                        onclick="return confirm('Forcer le changement de mot de passe ?')">
+                                        Forcer le changement
+                                    </button>
+                                </div>
                             @endif
                         </div>
+                    </form>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="ipInput">Adresse IP</label>
+                        <input type="text" class="form-control" id="ipInput"
+                               value="{{ $user->last_login_ip ?? 'Inconnue' }}" disabled>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label text-muted small mb-1">Modules crees</label>
-                        <div class="fw-semibold">{{ $user->modules()->count() }}</div>
+                        <label class="form-label">Modules crees</label>
+                        <input type="text" class="form-control" value="{{ $user->modules()->count() }}" disabled>
                     </div>
-
-                    <form action="{{ route('admin.users.force-password-change', $user) }}" method="POST" class="mt-3">
-                        @csrf
-                        <button type="submit" class="btn btn-warning btn-sm w-100"
-                            onclick="return confirm('Forcer le changement de mot de passe pour cet utilisateur ?')">
-                            <i class="bi bi-key"></i> Forcer changement mot de passe
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- Section Bannissement --}}
-        <div class="col-md-12">
-            <div class="card shadow mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-slash-circle me-1"></i> Bannissement</h5>
+    {{-- Logs --}}
+    @if(!$userLogs->isEmpty())
+        <div class="card shadow mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Logs</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Action</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($userLogs as $log)
+                                @php $fmt = method_exists($log, 'getActionFormat') ? $log->getActionFormat() : ['color'=>'secondary','icon'=>'circle']; @endphp
+                                <tr>
+                                    <th scope="row">{{ $log->id }}</th>
+                                    <td>
+                                        <i class="text-{{ $fmt['color'] }} bi bi-{{ $fmt['icon'] }}"></i>
+                                        {{ method_exists($log, 'getActionMessage') ? $log->getActionMessage() : ($log->action ?? '-') }}
+                                    </td>
+                                    <td>{{ $log->created_at ? $log->created_at->format('d/m/Y à H:i') : '-' }}</td>
+                                    <td>
+                                        <a href="{{ route('admin.logs.show', $log) }}" class="mx-1" title="Voir">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
-                <div class="card-body">
-                    @if($user->is_banned)
-                        <div class="alert alert-danger">
-                            <i class="bi bi-slash-circle"></i> Cet utilisateur est actuellement banni.
-                        </div>
-                        @php $latestBan = $user->bans()->latest()->first(); @endphp
-                        @if($latestBan)
-                            <p><strong>Raison :</strong> {{ $latestBan->reason ?? '-' }}</p>
-                            <p><strong>Banni par :</strong> {{ $latestBan->author->name ?? '?' }} le {{ $latestBan->created_at->format('d/m/Y') }}</p>
-                            <form action="{{ route('admin.users.bans.destroy', [$user, $latestBan]) }}" method="POST" class="d-inline-block">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-person-check"></i> Debannir
-                                </button>
-                            </form>
-                        @endif
-                    @else
-                        <form action="{{ route('admin.users.bans.store', $user) }}" method="POST">
+                {{ $userLogs->links() }}
+            </div>
+        </div>
+    @endif
+
+    {{-- Modal bannissement --}}
+    @if(!$user->is_banned && $user->id !== Auth::id())
+        <div class="modal fade" id="banModal" tabindex="-1" role="dialog" aria-labelledby="banLabel" aria-modal="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title" id="banLabel">Bannir {{ $user->name }}</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Cette action empechera l'utilisateur de se connecter. Vous pourrez le debannir plus tard.</p>
+
+                        <form method="POST" action="{{ route('admin.users.bans.store', $user) }}">
                             @csrf
+
                             <div class="mb-3">
-                                <label class="form-label" for="reasonInput">Raison du bannissement</label>
-                                <input type="text" class="form-control" id="reasonInput" name="reason" placeholder="Comportement abusif...">
+                                <label class="form-label" for="reasonInput">Raison</label>
+                                <input type="text" class="form-control @error('reason') is-invalid @enderror"
+                                       id="reasonInput" name="reason" required placeholder="Comportement abusif...">
+                                @error('reason')
+                                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                                @enderror
                             </div>
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Bannir cet utilisateur ?')">
-                                <i class="bi bi-slash-circle"></i> Bannir l'utilisateur
+
+                            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Annuler</button>
+                            <button class="btn btn-danger" type="submit">
+                                <i class="bi bi-slash-circle"></i> Bannir
                             </button>
                         </form>
-                    @endif
+                    </div>
                 </div>
             </div>
         </div>
+    @endif
 
-        {{-- Section Logs --}}
-        <div class="col-md-12">
-            <div class="card shadow mb-4">
-                <div class="card-header">
-                    <h5 class="card-title mb-0"><i class="bi bi-clock-history me-1"></i> Activite de l'utilisateur</h5>
-                </div>
-                <div class="card-body p-0">
-                    @if($userLogs->isEmpty())
-                        <p class="text-muted p-3 mb-0">Aucune activite enregistree.</p>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Action</th>
-                                        <th>Description</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($userLogs as $log)
-                                        @php $fmt = $log->getActionFormat(); @endphp
-                                        <tr>
-                                            <td class="text-muted small">{{ $log->id }}</td>
-                                            <td>
-                                                <span class="badge bg-{{ $fmt['color'] }}">
-                                                    <i class="bi bi-{{ $fmt['icon'] }} me-1"></i>
-                                                    {{ $log->getActionMessage() }}
-                                                </span>
-                                            </td>
-                                            <td class="text-muted small">
-                                                {{ Str::limit($log->data ? json_encode($log->data) : '-', 80) }}
-                                            </td>
-                                            <td class="text-muted small text-nowrap">
-                                                {{ $log->created_at ? $log->created_at->format('d/m/Y H:i') : '-' }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="p-3">
-                            {{ $userLogs->links() }}
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-    </div>
 </x-admin-layout>
