@@ -2,17 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        // Guard: make sure the columns exist before seeding
-        if (!Schema::hasColumn('roles', 'color')) {
-            return;
-        }
-
         if (DB::table('roles')->count() === 0) {
             DB::table('roles')->insert([
                 [
