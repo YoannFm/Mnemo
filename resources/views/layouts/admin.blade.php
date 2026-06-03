@@ -28,11 +28,9 @@
 
                 <ul class="sidebar-nav">
 
-                    <li class="sidebar-header">Général</li>
-
                     <li class="sidebar-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.dashboard') }}">
-                            <i class="bi bi-speedometer2"></i> <span>Tableau de bord</span>
+                            <i class="bi bi-speedometer"></i> <span>Tableau de bord</span>
                         </a>
                     </li>
 
