@@ -15,37 +15,33 @@
                         <div class="d-flex gap-3">
                             <div class="form-check">
                                 <input class="form-check-input notify-target-radio" type="radio" name="target"
-                                       id="targetAll" value="all"
+                                       id="modalTargetAll" value="all"
                                        {{ ($presetTarget ?? 'all') === 'all' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="targetAll">Tous</label>
+                                <label class="form-check-label" for="modalTargetAll">Tous</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input notify-target-radio" type="radio" name="target"
-                                       id="targetUsers" value="users"
+                                       id="modalTargetUsers" value="users"
                                        {{ ($presetTarget ?? '') === 'users' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="targetUsers">Utilisateurs</label>
+                                <label class="form-check-label" for="modalTargetUsers">Utilisateurs</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input notify-target-radio" type="radio" name="target"
-                                       id="targetRoles" value="roles"
+                                       id="modalTargetRoles" value="roles"
                                        {{ ($presetTarget ?? '') === 'roles' ? 'checked' : '' }}>
-                                <label class="form-check-label" for="targetRoles">Roles</label>
+                                <label class="form-check-label" for="modalTargetRoles">Roles</label>
                             </div>
                         </div>
                     </div>
 
                     {{-- Utilisateurs specifiques --}}
                     <div class="mb-3 notify-section-users" style="{{ ($presetTarget ?? 'all') === 'users' ? '' : 'display:none' }}">
-                        <label class="form-label" for="notifyUserIds">Utilisateurs</label>
-                        <select class="form-select" id="notifyUserIds" name="user_ids[]" multiple size="5">
-                            @foreach($notifyUsers ?? [] as $u)
-                                <option value="{{ $u->id }}"
-                                    {{ in_array($u->id, $presetUserIds ?? []) ? 'selected' : '' }}>
-                                    {{ $u->name }} ({{ $u->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="form-text">Maintenez Ctrl pour selectionner plusieurs utilisateurs.</div>
+                        <label class="form-label">Utilisateurs</label>
+                        @include('admin._user_autocomplete', [
+                            'inputId'      => 'modalUserSearch',
+                            'presetUsers'  => collect($notifyUsers ?? [])->whereIn('id', $presetUserIds ?? []),
+                            'allUsers'     => $notifyUsers ?? [],
+                        ])
                     </div>
 
                     {{-- Roles --}}
@@ -56,8 +52,8 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox"
                                            name="role_ids[]" value="{{ $r->id }}"
-                                           id="notifyRole{{ $r->id }}">
-                                    <label class="form-check-label" for="notifyRole{{ $r->id }}">
+                                           id="modalNotifyRole{{ $r->id }}">
+                                    <label class="form-check-label" for="modalNotifyRole{{ $r->id }}">
                                         @if($r->icon) <i class="{{ $r->icon }}"></i> @endif
                                         {{ $r->name }}
                                     </label>

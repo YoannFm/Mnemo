@@ -17,8 +17,9 @@ class NotificationController extends Controller
 
     public function create()
     {
-        $users = User::orderBy('name')->get();
-        return view('admin.notifications.create', compact('users'));
+        $users = User::orderBy('name')->get(['id', 'name', 'email']);
+        $roles = \App\Models\Role::orderBy('power', 'desc')->get();
+        return view('admin.notifications.create', compact('users', 'roles'));
     }
 
     public function store(Request $request)
