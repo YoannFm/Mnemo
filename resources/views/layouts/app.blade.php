@@ -175,6 +175,10 @@
             flex-direction: column;
         }
 
+        #main-content {
+            background: #18191d;
+        }
+
         .page-content {
             padding: 2rem 1.5rem;
             flex: 1;
