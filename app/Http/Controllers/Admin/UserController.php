@@ -29,6 +29,35 @@ class UserController extends Controller
         return view('admin.users.index', compact('users'));
     }
 
+    public function create()
+    {
+        $roles = Role::orderBy('power', 'desc')->get();
+        return view('admin.users.create', compact('roles'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users,email',
+            'password' => ['required', 'confirmed', Password::min(8)],
+            'role_id'  => 'nullable|exists:roles,id',
+        ]);
+
+        $role = $data['role_id'] ? Role::find($data['role_id']) : null;
+
+        $user = User::create([
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role_id'  => $data['role_id'] ?? null,
+            'is_admin' => $role && $role->is_admin_role,
+        ]);
+
+        return redirect()->route('admin.users.edit', $user)
+            ->with('success', 'Utilisateur ' . $user->name . ' cree.');
+    }
+
     public function edit(User $user)
     {
         $roles = Role::orderBy('power', 'desc')->get();
