@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -23,6 +25,34 @@ class UserController extends Controller
         $users = $query->latest()->paginate(20)->withQueryString();
 
         return view('admin.users.index', compact('users'));
+    }
+
+    public function edit(User $user)
+    {
+        return view('admin.users.edit', compact('user'));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
+            'password' => ['nullable', 'confirmed', Password::min(8)],
+            'is_admin' => 'boolean',
+        ]);
+
+        $user->name     = $data['name'];
+        $user->email    = $data['email'];
+        $user->is_admin = $request->boolean('is_admin');
+
+        if (!empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
+
+        $user->save();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Utilisateur ' . $user->name . ' mis à jour.');
     }
 
     public function toggleAdmin(User $user)

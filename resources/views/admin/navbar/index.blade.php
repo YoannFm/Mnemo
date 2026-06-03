@@ -1,13 +1,15 @@
 <x-admin-layout>
     <x-slot name="pageTitle">Navigation</x-slot>
 
-    <div class="row g-4">
+    <div class="row">
 
-        {{-- Add form --}}
-        <div class="col-12 col-lg-4">
+        {{-- Formulaire d'ajout --}}
+        <div class="col-12 col-xl-4">
             <div class="card">
-                <div class="card-header"><i class="bi bi-plus-lg me-2"></i>Ajouter un lien</div>
-                <div class="card-body p-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-plus-lg me-1"></i> Ajouter un lien</h5>
+                </div>
+                <div class="card-body">
                     <form method="POST" action="{{ route('admin.navbar.store') }}">
                         @csrf
                         <div class="mb-3">
@@ -22,29 +24,24 @@
                                    placeholder="/bibliotheque">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Icône Bootstrap</label>
+                            <label class="form-label">Icône Bootstrap Icons</label>
                             <input type="text" name="icon" class="form-control"
                                    value="{{ old('icon') }}" maxlength="100"
                                    placeholder="bi-globe2">
+                            <div class="form-text">Ex : bi-house, bi-collection, bi-book</div>
                         </div>
-                        <div class="mb-3 d-flex gap-3">
+                        <div class="mb-3 d-flex gap-4">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox"
                                        name="is_active" id="is_active" value="1"
                                        {{ old('is_active', '1') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_active"
-                                       style="font-size:.8rem;text-transform:none;color:var(--text-muted);">
-                                    Actif
-                                </label>
+                                <label class="form-check-label" for="is_active">Actif</label>
                             </div>
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox"
                                        name="open_new_tab" id="open_new_tab" value="1"
                                        {{ old('open_new_tab') ? 'checked' : '' }}>
-                                <label class="form-check-label" for="open_new_tab"
-                                       style="font-size:.8rem;text-transform:none;color:var(--text-muted);">
-                                    Nouvel onglet
-                                </label>
+                                <label class="form-check-label" for="open_new_tab">Nouvel onglet</label>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">
@@ -55,15 +52,17 @@
             </div>
         </div>
 
-        {{-- List --}}
-        <div class="col-12 col-lg-8">
+        {{-- Liste des éléments --}}
+        <div class="col-12 col-xl-8">
             <div class="card">
-                <div class="card-header"><i class="bi bi-list-ul me-2"></i>Éléments de navigation</div>
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-list-ul me-1"></i> Éléments de navigation</h5>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead>
                             <tr>
-                                <th>Pos.</th>
+                                <th style="width:80px;">Ordre</th>
                                 <th>Libellé</th>
                                 <th>URL</th>
                                 <th>Icône</th>
@@ -71,9 +70,9 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="navbar-list">
+                        <tbody>
                             @forelse ($navItems as $item)
-                                <tr id="nav-row-{{ $item->id }}">
+                                <tr>
                                     <td>
                                         <div class="d-flex flex-column gap-1">
                                             @if (! $loop->first)
@@ -83,7 +82,7 @@
                                                     <input type="hidden" name="url" value="{{ $item->url }}">
                                                     <input type="hidden" name="icon" value="{{ $item->icon }}">
                                                     <input type="hidden" name="position" value="{{ $item->position - 1 }}">
-                                                    <button type="submit" class="btn btn-sm" style="padding:.1rem .3rem;background:none;border:1px solid var(--card-border);color:var(--text-muted);" title="Monter">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Monter">
                                                         <i class="bi bi-arrow-up" style="font-size:.7rem;"></i>
                                                     </button>
                                                 </form>
@@ -95,18 +94,18 @@
                                                     <input type="hidden" name="url" value="{{ $item->url }}">
                                                     <input type="hidden" name="icon" value="{{ $item->icon }}">
                                                     <input type="hidden" name="position" value="{{ $item->position + 1 }}">
-                                                    <button type="submit" class="btn btn-sm" style="padding:.1rem .3rem;background:none;border:1px solid var(--card-border);color:var(--text-muted);" title="Descendre">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary py-0 px-1" title="Descendre">
                                                         <i class="bi bi-arrow-down" style="font-size:.7rem;"></i>
                                                     </button>
                                                 </form>
                                             @endif
                                         </div>
                                     </td>
-                                    <td>{{ $item->label }}</td>
-                                    <td class="text-muted" style="font-size:.8rem;">{{ $item->url }}</td>
+                                    <td><strong>{{ $item->label }}</strong></td>
+                                    <td class="text-muted small">{{ $item->url }}</td>
                                     <td>
                                         @if ($item->icon)
-                                            <i class="bi {{ $item->icon }}" style="color:var(--accent);"></i>
+                                            <i class="bi {{ $item->icon }}"></i>
                                             <small class="text-muted ms-1">{{ $item->icon }}</small>
                                         @else
                                             <span class="text-muted">—</span>
@@ -114,18 +113,17 @@
                                     </td>
                                     <td>
                                         @if ($item->is_active)
-                                            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--success-color);">Actif</span>
+                                            <span class="badge bg-success">Actif</span>
                                         @else
-                                            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Inactif</span>
+                                            <span class="badge bg-secondary">Inactif</span>
                                         @endif
                                         @if ($item->open_new_tab)
-                                            <i class="bi bi-box-arrow-up-right ms-1" style="font-size:.7rem;color:var(--text-muted);" title="Nouvel onglet"></i>
+                                            <i class="bi bi-box-arrow-up-right ms-1 text-muted" title="Nouvel onglet"></i>
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="d-flex gap-2">
-                                            {{-- Edit modal trigger --}}
-                                            <button class="btn btn-sm btn-outline-primary"
+                                        <div class="d-flex gap-1">
+                                            <button class="btn btn-sm btn-primary"
                                                     data-bs-toggle="modal"
                                                     data-bs-target="#edit-modal-{{ $item->id }}"
                                                     title="Modifier">
@@ -142,15 +140,13 @@
                                     </td>
                                 </tr>
 
-                                {{-- Edit modal --}}
+                                {{-- Modal édition --}}
                                 <div class="modal fade" id="edit-modal-{{ $item->id }}" tabindex="-1">
                                     <div class="modal-dialog">
-                                        <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--card-border);">
-                                            <div class="modal-header" style="border-color:var(--card-border);">
-                                                <h6 class="modal-title" style="font-weight:700;text-transform:uppercase;letter-spacing:.5px;">
-                                                    Modifier "{{ $item->label }}"
-                                                </h6>
-                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Modifier "{{ $item->label }}"</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
                                             <form method="POST" action="{{ route('admin.navbar.update', $item) }}">
                                                 @csrf @method('PUT')
@@ -166,30 +162,28 @@
                                                                value="{{ $item->url }}" required maxlength="255">
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="form-label">Icône Bootstrap</label>
+                                                        <label class="form-label">Icône Bootstrap Icons</label>
                                                         <input type="text" name="icon" class="form-control"
                                                                value="{{ $item->icon }}" maxlength="100">
                                                     </div>
-                                                    <div class="d-flex gap-3">
+                                                    <div class="d-flex gap-4">
                                                         <div class="form-check">
                                                             <input class="form-check-input" type="checkbox"
                                                                    name="is_active" value="1"
                                                                    {{ $item->is_active ? 'checked' : '' }}>
-                                                            <label class="form-check-label"
-                                                                   style="font-size:.8rem;text-transform:none;color:var(--text-muted);">Actif</label>
+                                                            <label class="form-check-label">Actif</label>
                                                         </div>
                                                         <div class="form-check">
                                                             <input class="form-check-input" type="checkbox"
                                                                    name="open_new_tab" value="1"
                                                                    {{ $item->open_new_tab ? 'checked' : '' }}>
-                                                            <label class="form-check-label"
-                                                                   style="font-size:.8rem;text-transform:none;color:var(--text-muted);">Nouvel onglet</label>
+                                                            <label class="form-check-label">Nouvel onglet</label>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="modal-footer" style="border-color:var(--card-border);">
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" data-bs-dismiss="modal">Annuler</button>
-                                                    <button type="submit" class="btn btn-sm btn-primary">Enregistrer</button>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
                                                 </div>
                                             </form>
                                         </div>
