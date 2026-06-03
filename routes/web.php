@@ -136,17 +136,47 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::post('/users/{user}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('users.toggle-admin');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    // Bans (nested under user)
+    Route::post('/users/{user}/bans', [\App\Http\Controllers\Admin\BanController::class, 'store'])->name('users.bans.store');
+    Route::delete('/users/{user}/bans/{ban}', [\App\Http\Controllers\Admin\BanController::class, 'destroy'])->name('users.bans.destroy');
+    Route::get('/bans', [\App\Http\Controllers\Admin\BanController::class, 'index'])->name('bans.index');
+    // Roles
+    Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+    // Modules
     Route::get('/modules', [AdminModuleController::class, 'index'])->name('modules.index');
     Route::delete('/modules/{module}', [AdminModuleController::class, 'destroy'])->name('modules.destroy');
+    // Navbar
     Route::get('/navbar', [NavbarController::class, 'index'])->name('navbar.index');
     Route::post('/navbar', [NavbarController::class, 'store'])->name('navbar.store');
     Route::put('/navbar/{navItem}', [NavbarController::class, 'update'])->name('navbar.update');
     Route::delete('/navbar/{navItem}', [NavbarController::class, 'destroy'])->name('navbar.destroy');
     Route::post('/navbar/order', [NavbarController::class, 'updateOrder'])->name('navbar.order');
+    // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::get('/settings/mail', [SettingsController::class, 'mail'])->name('settings.mail');
     Route::post('/settings/mail', [SettingsController::class, 'updateMail'])->name('settings.mail.update');
+    // Pages
+    Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
+    // Posts
+    Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
+    // Images
+    Route::get('/images', [\App\Http\Controllers\Admin\ImageController::class, 'index'])->name('images.index');
+    Route::get('/images/create', [\App\Http\Controllers\Admin\ImageController::class, 'create'])->name('images.create');
+    Route::post('/images', [\App\Http\Controllers\Admin\ImageController::class, 'store'])->name('images.store');
+    Route::delete('/images/{image}', [\App\Http\Controllers\Admin\ImageController::class, 'destroy'])->name('images.destroy');
+    // Redirects
+    Route::resource('redirects', \App\Http\Controllers\Admin\RedirectController::class);
+    // Logs
+    Route::get('/logs', [\App\Http\Controllers\Admin\LogController::class, 'index'])->name('logs.index');
+    Route::get('/logs/{log}', [\App\Http\Controllers\Admin\LogController::class, 'show'])->name('logs.show');
+    Route::post('/logs/clear', [\App\Http\Controllers\Admin\LogController::class, 'clear'])->name('logs.clear');
+    // Plugins placeholder
+    Route::get('/plugins', fn() => view('admin.plugins.index'))->name('plugins.index');
+    // Themes placeholder
+    Route::get('/themes', fn() => view('admin.themes.index'))->name('themes.index');
+    // Update placeholder
+    Route::get('/update', fn() => view('admin.update.index'))->name('update.index');
 });
 
 require __DIR__.'/auth.php';
