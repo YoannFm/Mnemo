@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\CheckInstallation::class,
+            \App\Http\Middleware\HandleRedirects::class,
         ]);
         $middleware->alias([
             'two-factor' => \App\Http\Middleware\TwoFactorAuth::class,

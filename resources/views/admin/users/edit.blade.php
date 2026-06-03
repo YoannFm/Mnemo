@@ -106,5 +106,43 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-12">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Bannissement</h5>
+                </div>
+                <div class="card-body">
+                    @if($user->is_banned)
+                        <div class="alert alert-danger">
+                            <i class="bi bi-slash-circle"></i> Cet utilisateur est actuellement banni.
+                        </div>
+                        @php $latestBan = $user->bans()->latest()->first(); @endphp
+                        @if($latestBan)
+                            <p><strong>Raison :</strong> {{ $latestBan->reason ?? '—' }}</p>
+                            <p><strong>Banni par :</strong> {{ $latestBan->author->name ?? '?' }} le {{ $latestBan->created_at->format('d/m/Y') }}</p>
+                            <form action="{{ route('admin.users.bans.destroy', [$user, $latestBan]) }}" method="POST" class="d-inline-block">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-person-check"></i> Débannir
+                                </button>
+                            </form>
+                        @endif
+                    @else
+                        <form action="{{ route('admin.users.bans.store', $user) }}" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label" for="reasonInput">Raison du bannissement</label>
+                                <input type="text" class="form-control" id="reasonInput" name="reason" placeholder="Comportement abusif...">
+                            </div>
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Bannir cet utilisateur ?')">
+                                <i class="bi bi-slash-circle"></i> Bannir l'utilisateur
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </div>
+        </div>
+
     </div>
 </x-admin-layout>
