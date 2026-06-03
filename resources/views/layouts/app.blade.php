@@ -25,9 +25,9 @@
     <meta name="twitter:title" content="{{ isset($pageTitle) ? $pageTitle . ' - Mnémo' : 'Mnémo' }}">
     <meta name="twitter:description" content="Application de mémorisation par répétition espacée.">
 
-    {{-- Google Fonts : Inter pour le corps, Poppins pour les titres --}}
+    {{-- Google Fonts : Rubik --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     {{-- Bootstrap 5.3 CDN --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -37,37 +37,48 @@
 
     <style>
         /* ============================================================
-           Variables CSS - palette inspirée ModernPro/Azurium
-           Fond sombre avec accents bleu-violet (#6366f1 = Indigo)
+           Variables CSS - palette ModernPro
+           Accent dore #EFB702 sur fond sombre #2E2E34
            ============================================================ */
         :root {
-            --sidebar-bg: #0f1117;
+            --sidebar-bg: #212227;
             --sidebar-width: 260px;
-            --sidebar-border: #1e2130;
-            --accent: #6366f1;
-            --accent-hover: #4f46e5;
-            --accent-light: rgba(99,102,241,.12);
-            --text-primary: #f1f5f9;
-            --text-muted: #8b9bb4;
-            --card-bg: #181c2a;
-            --card-border: #252a3d;
-            --body-bg: #13162b;
+            --sidebar-border: #2E2E34;
+            --accent: #EFB702;
+            --accent-hover: #d6a502;
+            --accent-light: rgba(239,183,2,.12);
+            --text-primary: #DDDDDD;
+            --text-muted: #9ca3af;
+            --card-bg: #212227;
+            --card-border: #2E2E34;
+            --body-bg: #2E2E34;
             --success-color: #22c55e;
-            --danger-color: #ef4444;
+            --danger-color: #ff5956;
         }
 
         /* ============================================================
            Base
            ============================================================ */
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Rubik', sans-serif;
             background-color: var(--body-bg);
             color: var(--text-primary);
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
-        h1, h2, h3, h4, h5, h6, .fw-bold {
-            font-family: 'Poppins', sans-serif;
+        ::selection {
+            background: var(--accent);
+            color: #212227;
+        }
+
+        ::-webkit-scrollbar { width: 7px; height: 7px; }
+        ::-webkit-scrollbar-track { background: var(--sidebar-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Rubik', sans-serif;
+            font-weight: 700;
         }
 
         /* ============================================================
@@ -230,8 +241,8 @@
            ============================================================ */
         .card {
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
+            border: 2px solid var(--accent);
+            border-radius: 5px;
             color: var(--text-primary);
         }
 
@@ -244,15 +255,23 @@
         /* ============================================================
            Boutons
            ============================================================ */
+        .btn {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            border-radius: 0;
+        }
+
         .btn-primary {
             background: var(--accent);
             border-color: var(--accent);
-            font-weight: 500;
+            color: #212227;
         }
 
         .btn-primary:hover {
             background: var(--accent-hover);
             border-color: var(--accent-hover);
+            color: #212227;
         }
 
         .btn-outline-primary {
@@ -263,30 +282,41 @@
         .btn-outline-primary:hover {
             background: var(--accent);
             border-color: var(--accent);
+            color: #212227;
         }
 
-        /* Boutons tactiles (plus grands sur mobile) */
+        .btn-danger {
+            background: #ff5956;
+            border-color: #ff5956;
+            color: #DDDDDD;
+        }
+
+        .btn-danger:hover {
+            background: #ff403d;
+            border-color: #ff403d;
+            color: #DDDDDD;
+        }
+
         @media (max-width: 768px) {
-            .btn {
-                min-height: 44px;
-            }
+            .btn { min-height: 44px; }
         }
 
         /* ============================================================
            Formulaires
            ============================================================ */
         .form-control, .form-select {
-            background: #0f1117;
-            border: 1px solid var(--card-border);
-            color: var(--text-primary);
-            border-radius: 8px;
+            background: var(--body-bg) !important;
+            border: 2px solid var(--accent) !important;
+            color: var(--text-primary) !important;
+            border-radius: 0;
+            outline: 0 !important;
         }
 
         .form-control:focus, .form-select:focus {
-            background: #0f1117;
-            border-color: var(--accent);
-            color: var(--text-primary);
-            box-shadow: 0 0 0 3px var(--accent-light);
+            background: var(--body-bg) !important;
+            border-color: var(--accent) !important;
+            color: var(--text-primary) !important;
+            box-shadow: 0 0 0 3px var(--accent-light) !important;
         }
 
         .form-control::placeholder {
@@ -294,10 +324,12 @@
         }
 
         .form-label {
-            font-weight: 500;
+            font-weight: 600;
             font-size: .875rem;
             color: var(--text-muted);
             margin-bottom: .4rem;
+            text-transform: uppercase;
+            letter-spacing: .5px;
         }
 
         /* ============================================================
@@ -343,11 +375,11 @@
             --bs-table-bg: transparent;
             --bs-table-color: var(--text-primary);
             --bs-table-border-color: var(--card-border);
-            --bs-table-striped-bg: rgba(99,102,241,.05);
-            --bs-table-striped-color: var(--text-primary);
-            --bs-table-hover-bg: rgba(99,102,241,.08);
-            --bs-table-hover-color: var(--text-primary);
+            --bs-table-striped-bg: rgba(239,183,2,.05);
+            --bs-table-hover-bg: rgba(239,183,2,.08);
             color: var(--text-primary);
+            background: var(--accent);
+            border-radius: 0;
         }
 
         .table > :not(caption) > * > * {
@@ -357,9 +389,26 @@
         }
 
         .table thead th {
-            background: var(--card-border);
-            color: var(--text-muted);
-            border-color: var(--card-border);
+            background: var(--accent) !important;
+            color: #212227 !important;
+            border-color: var(--accent) !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 14px 16px;
+        }
+
+        .table tbody {
+            background: #212227;
+        }
+
+        .table tbody td {
+            background: #212227;
+            color: var(--text-primary);
+            padding: 10px 16px;
+        }
+
+        .breadcrumb {
+            background-color: #212227;
         }
 
         /* ============================================================
