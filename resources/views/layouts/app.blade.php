@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" id="html-root">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -22,6 +22,12 @@
     <meta name="twitter:title" content="{{ isset($pageTitle) ? $pageTitle . ' - Mnémo' : 'Mnémo' }}">
     <meta name="twitter:description" content="Application de mémorisation par répétition espacée.">
 
+    <script>
+        (function() {
+            var t = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-bs-theme', t);
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -443,6 +449,22 @@
             {{-- Utilisateur (droite) --}}
             @auth
             <div class="ms-lg-auto d-flex align-items-center py-2 py-lg-0">
+                <button id="theme-toggle"
+                        style="background:none;border:none;color:var(--text-muted);font-size:1rem;cursor:pointer;padding:0 .5rem;"
+                        title="Changer le theme"
+                        aria-label="Basculer theme clair/sombre">
+                    <i class="bi bi-sun-fill"></i>
+                </button>
+                <li class="nav-item list-unstyled me-1">
+                    <a class="nav-link position-relative" href="{{ route('notifications.index') }}" title="Notifications">
+                        <i class="bi bi-bell-fill" style="color:var(--text-muted);"></i>
+                        @if(($unreadNotifications ?? 0) > 0)
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.6rem;">
+                                {{ $unreadNotifications }}
+                            </span>
+                        @endif
+                    </a>
+                </li>
                 <div class="nav-sep d-none d-lg-block"></div>
                 <div class="user-avatar mx-2">
                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
@@ -519,6 +541,30 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+(function() {
+    var theme = localStorage.getItem('theme') || 'dark';
+    document.getElementById('html-root').setAttribute('data-bs-theme', theme);
+    var btn = document.getElementById('theme-toggle');
+    if (btn) {
+        btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+    }
+})();
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('theme-toggle');
+    if (!btn) return;
+    var theme = localStorage.getItem('theme') || 'dark';
+    btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+    btn.addEventListener('click', function() {
+        var current = document.getElementById('html-root').getAttribute('data-bs-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.getElementById('html-root').setAttribute('data-bs-theme', next);
+        localStorage.setItem('theme', next);
+        this.innerHTML = next === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+    });
+});
+</script>
 
 </body>
 </html>
