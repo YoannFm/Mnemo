@@ -69,23 +69,40 @@
 </div>
 
 @push('footer-scripts')
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdn.tiny.cloud/1/{{ config('services.tinymce.api_key', 'no-api-key') }}/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-tinymce.init({
-    selector: '.html-editor',
-    license_key: 'gpl',
-    promotion: false,
-    height: 400,
-    min_height: 200,
-    entity_encoding: 'raw',
-    plugins: 'searchreplace autolink code image link anchor lists table',
-    toolbar: 'blocks bold italic underline strikethrough forecolor | link image | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat code | undo redo',
-    relative_urls: false,
-    valid_children: '+body[style]',
-    extended_valid_elements: 'i[class],iframe[src|frameborder|scrolling|class|width|height|name|allow|title]',
-    skin: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'oxide-dark' : 'oxide',
-    content_css: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'dark' : 'default',
-    paste_data_images: false,
-});
+function initTinyMCE() {
+    var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    if (tinymce.get('contentArea')) {
+        tinymce.remove('#contentArea');
+    }
+    tinymce.init({
+        selector: '#contentArea',
+        license_key: 'gpl',
+        promotion: false,
+        height: 400,
+        min_height: 200,
+        entity_encoding: 'raw',
+        plugins: 'searchreplace autolink code image link anchor lists table',
+        toolbar: 'blocks bold italic underline strikethrough forecolor | link image | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat code | undo redo',
+        relative_urls: false,
+        valid_children: '+body[style]',
+        extended_valid_elements: 'i[class],iframe[src|frameborder|scrolling|class|width|height|name|allow|title]',
+        skin: dark ? 'oxide-dark' : 'oxide',
+        content_css: dark ? 'dark' : 'default',
+        paste_data_images: false,
+    });
+}
+
+initTinyMCE();
+
+// Re-initialise quand le theme change
+new MutationObserver(function (mutations) {
+    mutations.forEach(function (m) {
+        if (m.attributeName === 'data-bs-theme') {
+            initTinyMCE();
+        }
+    });
+}).observe(document.documentElement, { attributes: true });
 </script>
 @endpush
