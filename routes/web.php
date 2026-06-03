@@ -154,8 +154,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/settings/home', [SettingsController::class, 'home'])->name('settings.home');
+    Route::post('/settings/home', [SettingsController::class, 'updateHome'])->name('settings.home.update');
+    Route::get('/settings/auth', [SettingsController::class, 'auth'])->name('settings.auth');
+    Route::post('/settings/auth', [SettingsController::class, 'updateAuth'])->name('settings.auth.update');
     Route::get('/settings/mail', [SettingsController::class, 'mail'])->name('settings.mail');
     Route::post('/settings/mail', [SettingsController::class, 'updateMail'])->name('settings.mail.update');
+    Route::post('/settings/mail/send', [SettingsController::class, 'sendTestMail'])->name('settings.mail.send');
+    Route::get('/settings/maintenance', [SettingsController::class, 'maintenance'])->name('settings.maintenance');
+    Route::post('/settings/maintenance', [SettingsController::class, 'updateMaintenance'])->name('settings.maintenance.update');
     // Pages
     Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
     // Posts
@@ -171,10 +178,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/logs', [\App\Http\Controllers\Admin\LogController::class, 'index'])->name('logs.index');
     Route::get('/logs/{log}', [\App\Http\Controllers\Admin\LogController::class, 'show'])->name('logs.show');
     Route::post('/logs/clear', [\App\Http\Controllers\Admin\LogController::class, 'clear'])->name('logs.clear');
+    Route::delete('/logs/purge', [\App\Http\Controllers\Admin\LogController::class, 'purge'])->name('logs.purge');
     // Plugins placeholder
     Route::get('/plugins', fn() => view('admin.plugins.index'))->name('plugins.index');
-    // Themes placeholder
-    Route::get('/themes', fn() => view('admin.themes.index'))->name('themes.index');
+    // Themes
+    Route::get('/themes', [\App\Http\Controllers\Admin\ThemeController::class, 'index'])->name('themes.index');
+    Route::post('/themes', [\App\Http\Controllers\Admin\ThemeController::class, 'update'])->name('themes.update');
     // Update placeholder
     Route::get('/update', fn() => view('admin.update.index'))->name('update.index');
 });

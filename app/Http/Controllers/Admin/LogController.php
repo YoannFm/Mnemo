@@ -23,4 +23,11 @@ class LogController extends Controller
         ActivityLog::truncate();
         return redirect()->route('admin.logs.index')->with('success', 'Logs effacés.');
     }
+
+    public function purge()
+    {
+        $count = ActivityLog::where('created_at', '<', now()->subDays(15))->count();
+        ActivityLog::where('created_at', '<', now()->subDays(15))->delete();
+        return redirect()->route('admin.logs.index')->with('success', "{$count} log(s) de plus de 15 jours supprimé(s).");
+    }
 }

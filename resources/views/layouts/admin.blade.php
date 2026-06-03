@@ -49,8 +49,17 @@
                             <li class="sidebar-item {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
                                 <a class="sidebar-link" href="{{ route('admin.settings.index') }}">Général</a>
                             </li>
+                            <li class="sidebar-item {{ request()->routeIs('admin.settings.home') ? 'active' : '' }}">
+                                <a class="sidebar-link" href="{{ route('admin.settings.home') }}">Accueil</a>
+                            </li>
+                            <li class="sidebar-item {{ request()->routeIs('admin.settings.auth') ? 'active' : '' }}">
+                                <a class="sidebar-link" href="{{ route('admin.settings.auth') }}">Authentification</a>
+                            </li>
                             <li class="sidebar-item {{ request()->routeIs('admin.settings.mail') ? 'active' : '' }}">
                                 <a class="sidebar-link" href="{{ route('admin.settings.mail') }}">E-mail</a>
+                            </li>
+                            <li class="sidebar-item {{ request()->routeIs('admin.settings.maintenance') ? 'active' : '' }}">
+                                <a class="sidebar-link" href="{{ route('admin.settings.maintenance') }}">Maintenance</a>
                             </li>
                         </ul>
                     </li>

@@ -29,15 +29,15 @@
 
     <style>
         :root {
-            --accent: #EFB702;
+            --accent: {{ setting('theme_accent', '#EFB702') }};
             --accent-hover: #d6a502;
             --accent-light: rgba(239,183,2,.12);
-            --text-primary: #DDDDDD;
+            --text-primary: {{ setting('theme_text_color', '#e2e8f0') }};
             --text-muted: #9ca3af;
-            --card-bg: #212227;
-            --card-border: #2E2E34;
-            --body-bg: #111113;
-            --header-bg: #1a1b1f;
+            --card-bg: {{ setting('theme_card_bg', '#212227') }};
+            --card-border: {{ setting('theme_content_bg', '#2E2E34') }};
+            --body-bg: {{ setting('theme_body_bg', '#111113') }};
+            --header-bg: {{ setting('theme_header_bg', '#1a1b1f') }};
             --success-color: #22c55e;
             --danger-color: #ff5956;
         }
@@ -176,7 +176,7 @@
         }
 
         #main-content {
-            background: #2E2E34;
+            background: var(--card-border);
         }
 
         .page-content {
