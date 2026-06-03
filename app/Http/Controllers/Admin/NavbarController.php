@@ -10,63 +10,100 @@ class NavbarController extends Controller
 {
     public function index()
     {
-        $navItems = NavItem::orderBy('position')->get();
+        $navItems = NavItem::whereNull('parent_id')->orderBy('position')->with('children')->get();
 
         return view('admin.navbar.index', compact('navItems'));
+    }
+
+    public function create()
+    {
+        $pages   = \App\Models\Page::orderBy('title')->get();
+        $posts   = \App\Models\Post::orderBy('title')->get();
+        $roles   = \App\Models\Role::orderBy('name')->get();
+        $navItem = new NavItem();
+        $types   = ['link' => 'Lien', 'page' => 'Page', 'post' => 'Article', 'dropdown' => 'Menu deroulant'];
+
+        return view('admin.navbar.create', compact('pages', 'posts', 'roles', 'navItem', 'types'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'label'        => 'required|string|max:100',
-            'url'          => 'required|string|max:255',
-            'icon'         => 'nullable|string|max:100',
-            'is_active'    => 'boolean',
-            'open_new_tab' => 'boolean',
+            'label'     => 'required|string|max:100',
+            'icon'      => 'nullable|string|max:100',
+            'type'      => 'required|in:link,page,post,dropdown',
+            'value'     => 'nullable|string|max:500',
+            'new_tab'   => 'boolean',
+            'is_active' => 'boolean',
         ]);
 
-        $data['position'] = NavItem::max('position') + 1;
+        $data['new_tab']   = $request->boolean('new_tab');
         $data['is_active'] = $request->boolean('is_active', true);
-        $data['open_new_tab'] = $request->boolean('open_new_tab', false);
+        $data['position']  = NavItem::whereNull('parent_id')->max('position') + 1;
 
         NavItem::create($data);
 
-        return back()->with('success', 'Élément de navigation ajouté.');
+        return redirect()->route('admin.navbar.index')->with('success', 'Element ajoute.');
+    }
+
+    public function edit(NavItem $navItem)
+    {
+        $pages = \App\Models\Page::orderBy('title')->get();
+        $posts = \App\Models\Post::orderBy('title')->get();
+        $roles = \App\Models\Role::orderBy('name')->get();
+        $types = ['link' => 'Lien', 'page' => 'Page', 'post' => 'Article', 'dropdown' => 'Menu deroulant'];
+
+        return view('admin.navbar.edit', compact('navItem', 'pages', 'posts', 'roles', 'types'));
     }
 
     public function update(Request $request, NavItem $navItem)
     {
         $data = $request->validate([
-            'label'        => 'required|string|max:100',
-            'url'          => 'required|string|max:255',
-            'icon'         => 'nullable|string|max:100',
-            'is_active'    => 'boolean',
-            'open_new_tab' => 'boolean',
+            'label'     => 'required|string|max:100',
+            'icon'      => 'nullable|string|max:100',
+            'type'      => 'required|in:link,page,post,dropdown',
+            'value'     => 'nullable|string|max:500',
+            'new_tab'   => 'boolean',
+            'is_active' => 'boolean',
         ]);
 
+        $data['new_tab']   = $request->boolean('new_tab');
         $data['is_active'] = $request->boolean('is_active', true);
-        $data['open_new_tab'] = $request->boolean('open_new_tab', false);
 
         $navItem->update($data);
 
-        return back()->with('success', 'Élément de navigation modifié.');
+        return redirect()->route('admin.navbar.index')->with('success', 'Element modifie.');
     }
 
     public function destroy(NavItem $navItem)
     {
+        $navItem->children()->delete();
         $navItem->delete();
 
-        return back()->with('success', 'Élément de navigation supprimé.');
+        return redirect()->route('admin.navbar.index')->with('success', 'Element supprime.');
     }
 
     public function updateOrder(Request $request)
     {
-        $request->validate(['order' => 'required|array']);
-
-        foreach ($request->input('order') as $position => $id) {
-            NavItem::where('id', $id)->update(['position' => $position]);
-        }
+        $order    = $request->input('order', []);
+        $position = 0;
+        $this->processOrder($order, null, $position);
 
         return response()->json(['success' => true]);
+    }
+
+    private function processOrder(array $items, ?int $parentId, int &$position): void
+    {
+        foreach ($items as $item) {
+            NavItem::where('id', $item['id'])->update([
+                'parent_id' => $parentId,
+                'position'  => $position++,
+            ]);
+
+            if (!empty($item['children'])) {
+                $childPos = 0;
+                $this->processOrder($item['children'], (int) $item['id'], $childPos);
+            }
+        }
     }
 }

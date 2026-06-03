@@ -148,7 +148,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::delete('/modules/{module}', [AdminModuleController::class, 'destroy'])->name('modules.destroy');
     // Navbar
     Route::get('/navbar', [NavbarController::class, 'index'])->name('navbar.index');
+    Route::get('/navbar/create', [NavbarController::class, 'create'])->name('navbar.create');
     Route::post('/navbar', [NavbarController::class, 'store'])->name('navbar.store');
+    Route::get('/navbar/{navItem}/edit', [NavbarController::class, 'edit'])->name('navbar.edit');
     Route::put('/navbar/{navItem}', [NavbarController::class, 'update'])->name('navbar.update');
     Route::delete('/navbar/{navItem}', [NavbarController::class, 'destroy'])->name('navbar.destroy');
     Route::post('/navbar/order', [NavbarController::class, 'updateOrder'])->name('navbar.order');
