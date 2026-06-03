@@ -65,18 +65,24 @@
         /* ── Header ── */
         #main-header {
             background: var(--header-bg);
-            border-bottom: 2px solid var(--accent);
+            border-bottom: 1px solid rgba(239,183,2,.25);
             position: sticky;
             top: 0;
             z-index: 100;
+            height: 56px;
+        }
+
+        #main-header .navbar {
+            height: 56px;
         }
 
         #main-header .navbar-brand {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 800;
             color: var(--accent);
-            letter-spacing: -.5px;
+            letter-spacing: 1px;
             text-decoration: none;
+            text-transform: uppercase;
         }
 
         #main-header .navbar-brand span {
@@ -86,20 +92,23 @@
         .nav-link-custom {
             display: flex;
             align-items: center;
-            gap: .4rem;
+            gap: .35rem;
             color: var(--text-muted);
             text-decoration: none;
-            font-size: .875rem;
-            font-weight: 500;
-            padding: .5rem .85rem;
-            border-bottom: 3px solid transparent;
-            transition: all .2s;
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 0 1rem;
+            height: 56px;
+            border-bottom: 2px solid transparent;
+            transition: color .2s, border-color .2s;
             white-space: nowrap;
         }
 
         .nav-link-custom:hover {
             color: var(--text-primary);
-            background: var(--accent-light);
+            border-bottom-color: rgba(239,183,2,.4);
         }
 
         .nav-link-custom.active {
@@ -107,19 +116,19 @@
             border-bottom-color: var(--accent);
         }
 
-        .nav-link-custom i { font-size: .95rem; }
+        .nav-link-custom i { font-size: .85rem; }
 
         /* Avatar utilisateur */
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: .8rem;
+            font-size: .75rem;
             color: #212227;
             flex-shrink: 0;
         }
@@ -127,15 +136,19 @@
         /* Dropdown utilisateur */
         .dropdown-menu-dark-custom {
             background: var(--card-bg);
-            border: 2px solid var(--accent);
-            border-radius: 5px;
+            border: 1px solid rgba(239,183,2,.3);
+            border-radius: 4px;
             padding: .25rem 0;
             min-width: 180px;
+            margin-top: 8px !important;
         }
 
         .dropdown-menu-dark-custom .dropdown-item {
             color: var(--text-muted);
-            font-size: .875rem;
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
             padding: .5rem 1rem;
             display: flex;
             align-items: center;
@@ -337,14 +350,22 @@
 
         /* ── Navbar toggler custom ── */
         .navbar-toggler {
-            border: 2px solid var(--accent);
+            border: 1px solid rgba(239,183,2,.4);
             color: var(--accent);
             border-radius: 0;
-            padding: .35rem .6rem;
+            padding: .3rem .55rem;
         }
 
         .navbar-toggler-icon {
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23EFB702' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* ── Séparateur vertical entre nav et user ── */
+        .nav-sep {
+            width: 1px;
+            height: 24px;
+            background: rgba(239,183,2,.2);
+            margin: 0 .5rem;
         }
     </style>
 </head>
@@ -352,7 +373,7 @@
 
 {{-- ─── Header ─────────────────────────────────────────────── --}}
 <header id="main-header">
-    <nav class="navbar navbar-expand-lg px-3 py-0">
+    <nav class="navbar navbar-expand-lg px-3 py-0 h-100">
 
         {{-- Logo --}}
         <a href="{{ route('dashboard') }}" class="navbar-brand me-4">
@@ -372,7 +393,7 @@
             <div class="d-flex flex-column flex-lg-row align-items-lg-stretch py-2 py-lg-0">
                 <a href="{{ route('dashboard') }}"
                    class="nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i> Tableau de bord
+                    <i class="bi bi-speedometer2"></i> Accueil
                 </a>
                 <a href="{{ route('modules.index') }}"
                    class="nav-link-custom {{ request()->routeIs('modules.*') || request()->routeIs('test.*') || request()->routeIs('anki.*') ? 'active' : '' }}">
@@ -384,23 +405,23 @@
                 </a>
                 <a href="{{ route('progress.index') }}"
                    class="nav-link-custom {{ request()->routeIs('progress.*') ? 'active' : '' }}">
-                    <i class="bi bi-bar-chart-line"></i> Ma progression
+                    <i class="bi bi-bar-chart-line"></i> Progression
                 </a>
             </div>
 
             {{-- Utilisateur (droite) --}}
             @auth
-            <div class="ms-lg-auto d-flex align-items-center gap-2 py-2 py-lg-0 ps-lg-3"
-                 style="border-left: 1px solid var(--card-border);">
-                <div class="user-avatar">
+            <div class="ms-lg-auto d-flex align-items-center py-2 py-lg-0">
+                <div class="nav-sep d-none d-lg-block"></div>
+                <div class="user-avatar mx-2">
                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                 </div>
                 <div class="dropdown">
-                    <button class="btn btn-sm p-0 d-flex align-items-center gap-1"
-                            style="background:none;border:none;color:var(--text-primary);font-weight:600;font-size:.875rem;text-transform:none;letter-spacing:0;"
+                    <button class="d-flex align-items-center gap-1"
+                            style="background:none;border:none;color:var(--text-primary);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;"
                             data-bs-toggle="dropdown" aria-expanded="false">
                         {{ Auth::user()->name }}
-                        <i class="bi bi-chevron-down" style="font-size:.7rem;color:var(--text-muted);"></i>
+                        <i class="bi bi-chevron-down" style="font-size:.65rem;color:var(--text-muted);"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
                         <li>
