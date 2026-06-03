@@ -135,6 +135,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    Route::post('/users/{user}/force-password-change', [AdminUserController::class, 'forcePasswordChange'])->name('users.force-password-change');
     // Bans (nested under user)
     Route::post('/users/{user}/bans', [\App\Http\Controllers\Admin\BanController::class, 'store'])->name('users.bans.store');
     Route::delete('/users/{user}/bans/{ban}', [\App\Http\Controllers\Admin\BanController::class, 'destroy'])->name('users.bans.destroy');
