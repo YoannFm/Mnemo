@@ -65,7 +65,7 @@
         /* ── Header ── */
         #main-header {
             background: var(--header-bg);
-            border-bottom: 1px solid rgba(239,183,2,.25);
+            border-bottom: 1px solid var(--card-border);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -74,6 +74,9 @@
 
         #main-header .navbar {
             height: 56px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         #main-header .navbar-brand {
@@ -101,6 +104,7 @@
             text-transform: uppercase;
             padding: 0 1rem;
             height: 56px;
+            border-top: 2px solid transparent;
             border-bottom: 2px solid transparent;
             transition: color .2s, border-color .2s;
             white-space: nowrap;
@@ -108,12 +112,12 @@
 
         .nav-link-custom:hover {
             color: var(--text-primary);
-            border-bottom-color: rgba(239,183,2,.4);
+            border-top-color: rgba(239,183,2,.4);
         }
 
         .nav-link-custom.active {
             color: var(--accent);
-            border-bottom-color: var(--accent);
+            border-top-color: var(--accent);
         }
 
         .nav-link-custom i { font-size: .85rem; }
