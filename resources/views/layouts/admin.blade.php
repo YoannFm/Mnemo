@@ -28,7 +28,6 @@
 
                 <ul class="sidebar-nav">
 
-                    {{-- Dashboard --}}
                     <li class="sidebar-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.dashboard') }}">
                             <i class="bi bi-speedometer"></i> <span>Tableau de bord</span>
@@ -41,14 +40,12 @@
                     <li class="sidebar-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                         <a class="sidebar-link {{ request()->routeIs('admin.settings.*') ? '' : 'collapsed' }}"
                            href="#" data-bs-toggle="collapse" data-bs-target="#collapseSettings"
-                           aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}"
-                           aria-controls="collapseSettings">
+                           aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}">
                             <i class="bi bi-gear"></i>
                             <span>Paramètres</span>
                         </a>
                         <ul id="collapseSettings"
-                            class="sidebar-dropdown list-unstyled collapse {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}"
-                            data-parent="#accordionSidebar">
+                            class="sidebar-dropdown list-unstyled collapse {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}">
                             <li class="sidebar-item {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
                                 <a class="sidebar-link" href="{{ route('admin.settings.index') }}">Général</a>
                             </li>
@@ -60,8 +57,7 @@
 
                     <li class="sidebar-item {{ request()->routeIs('admin.navbar.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.navbar.index') }}">
-                            <i class="bi bi-list"></i>
-                            <span>Navigation</span>
+                            <i class="bi bi-list-ul"></i> <span>Navigation</span>
                         </a>
                     </li>
 
@@ -70,18 +66,82 @@
 
                     <li class="sidebar-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.users.index') }}">
-                            <i class="bi bi-people"></i>
-                            <span>Utilisateurs</span>
+                            <i class="bi bi-people"></i> <span>Utilisateurs</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.roles.index') }}">
+                            <i class="bi bi-shield-check"></i> <span>Rôles</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.bans.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.bans.index') }}">
+                            <i class="bi bi-slash-circle"></i> <span>Bannissements</span>
                         </a>
                     </li>
 
                     {{-- Contenu --}}
                     <li class="sidebar-header">Contenu</li>
 
+                    <li class="sidebar-item {{ request()->routeIs('admin.pages.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.pages.index') }}">
+                            <i class="bi bi-file-earmark-text"></i> <span>Pages</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.posts.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.posts.index') }}">
+                            <i class="bi bi-newspaper"></i> <span>Articles</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.images.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.images.index') }}">
+                            <i class="bi bi-images"></i> <span>Images</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.redirects.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.redirects.index') }}">
+                            <i class="bi bi-arrow-left-right"></i> <span>Redirections</span>
+                        </a>
+                    </li>
+
                     <li class="sidebar-item {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.modules.index') }}">
-                            <i class="bi bi-collection"></i>
-                            <span>Modules publics</span>
+                            <i class="bi bi-collection"></i> <span>Modules publics</span>
+                        </a>
+                    </li>
+
+                    {{-- Extensions --}}
+                    <li class="sidebar-header">Extensions</li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.plugins.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.plugins.index') }}">
+                            <i class="bi bi-puzzle"></i> <span>Plugins</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.themes.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.themes.index') }}">
+                            <i class="bi bi-palette"></i> <span>Thèmes</span>
+                        </a>
+                    </li>
+
+                    {{-- Autres --}}
+                    <li class="sidebar-header">Autres</li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.update.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.update.index') }}">
+                            <i class="bi bi-cloud-download"></i> <span>Mises à jour</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.logs.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.logs.index') }}">
+                            <i class="bi bi-journal-text"></i> <span>Logs</span>
                         </a>
                     </li>
 
