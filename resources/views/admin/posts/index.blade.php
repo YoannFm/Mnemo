@@ -18,7 +18,7 @@
                                 <td>{{ $post->title }}</td>
                                 <td>{{ $post->slug }}</td>
                                 <td>{{ $post->author->name }}</td>
-                                <td>{{ $post->published_at ? $post->published_at->format('d/m/Y') : '—' }}</td>
+                                <td>{{ $post->published_at ? $post->published_at->format('d/m/Y') : '-' }}</td>
                                 <td>
                                     <a href="{{ route('admin.posts.edit', $post) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil-square"></i></a>
                                     <form action="{{ route('admin.posts.destroy', $post) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Supprimer cet article ?')">

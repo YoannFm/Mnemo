@@ -18,7 +18,49 @@
     <div class="mb-3 col-md-4 d-flex align-items-end">
         <div class="form-check form-switch">
             <input type="checkbox" class="form-check-input" id="adminSwitch" name="is_admin_role" value="1" @checked(old('is_admin_role', $role->is_admin_role ?? false))>
-            <label class="form-check-label" for="adminSwitch">Rôle admin</label>
+            <label class="form-check-label" for="adminSwitch">Role admin</label>
         </div>
     </div>
 </div>
+
+<hr>
+<h6 class="mb-3">Permissions</h6>
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" id="canCreateModule" name="can_create_module" value="1" @checked(old('can_create_module', $role->can_create_module ?? false))>
+            <label class="form-check-label" for="canCreateModule">Creer des modules</label>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" id="canTrainOwn" name="can_train_own" value="1" @checked(old('can_train_own', $role->can_train_own ?? true))>
+            <label class="form-check-label" for="canTrainOwn">S'entrainer sur ses modules</label>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" id="canTestOwn" name="can_test_own" value="1" @checked(old('can_test_own', $role->can_test_own ?? true))>
+            <label class="form-check-label" for="canTestOwn">Tester ses modules</label>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" id="canAccessLibrary" name="can_access_library" value="1" @checked(old('can_access_library', $role->can_access_library ?? true))>
+            <label class="form-check-label" for="canAccessLibrary">Acces a la bibliotheque</label>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" id="canTrainPublic" name="can_train_public" value="1" @checked(old('can_train_public', $role->can_train_public ?? true))>
+            <label class="form-check-label" for="canTrainPublic">S'entrainer sur modules publics</label>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" id="canTestPublic" name="can_test_public" value="1" @checked(old('can_test_public', $role->can_test_public ?? true))>
+            <label class="form-check-label" for="canTestPublic">Tester les modules publics</label>
+        </div>
+    </div>
+</div>
+<div class="mt-3"></div>

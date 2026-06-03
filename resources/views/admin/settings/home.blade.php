@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <x-slot name="pageTitle">Paramètres — Accueil</x-slot>
+    <x-slot name="pageTitle">Paramètres - Accueil</x-slot>
 
     <div class="card shadow mb-4">
         <div class="card-header">
