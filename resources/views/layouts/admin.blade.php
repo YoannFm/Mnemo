@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" id="admin-html-root">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +7,12 @@
 
     <title>{{ isset($pageTitle) ? $pageTitle . ' - Admin' : 'Administration - Mnemo' }}</title>
 
+    <script>
+        (function() {
+            var t = localStorage.getItem('admin-theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', t);
+        })();
+    </script>
     <script src="{{ asset('assets/vendor/admin.js') }}" defer></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -88,6 +94,12 @@
                     <li class="sidebar-item {{ request()->routeIs('admin.bans.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.bans.index') }}">
                             <i class="bi bi-slash-circle"></i> <span>Bannissements</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.notifications.index') }}">
+                            <i class="bi bi-bell"></i> <span>Notifications</span>
                         </a>
                     </li>
 
@@ -184,6 +196,9 @@
                         <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary mx-1">
                             <i class="bi bi-arrow-left"></i>
                         </a>
+                        <button id="admin-theme-toggle" class="btn btn-outline-secondary mx-1" title="Changer le theme" aria-label="Basculer theme clair/sombre">
+                            <i class="bi bi-moon-fill"></i>
+                        </button>
                     </div>
 
                     <ul class="navbar-nav navbar-align">
@@ -245,5 +260,27 @@
             </footer>
         </div>
     </div>
+<script>
+(function() {
+    var theme = localStorage.getItem('admin-theme') || 'light';
+    var btn = document.getElementById('admin-theme-toggle');
+    if (btn) {
+        btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+    }
+})();
+document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('admin-theme-toggle');
+    if (!btn) return;
+    var theme = localStorage.getItem('admin-theme') || 'light';
+    btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+    btn.addEventListener('click', function() {
+        var current = document.getElementById('admin-html-root').getAttribute('data-bs-theme');
+        var next = current === 'dark' ? 'light' : 'dark';
+        document.getElementById('admin-html-root').setAttribute('data-bs-theme', next);
+        localStorage.setItem('admin-theme', next);
+        this.innerHTML = next === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+    });
+});
+</script>
 </body>
 </html>

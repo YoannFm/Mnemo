@@ -100,4 +100,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Ban::class)->latestOfMany();
     }
+
+    public function userNotifications()
+    {
+        return $this->hasMany(UserNotification::class)->latest();
+    }
 }

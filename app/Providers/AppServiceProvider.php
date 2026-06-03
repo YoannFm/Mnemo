@@ -25,6 +25,19 @@ class AppServiceProvider extends ServiceProvider
             } catch (\Throwable) {}
         });
 
+        view()->composer('layouts.app', function ($view) {
+            if (auth()->check()) {
+                try {
+                    $unreadCount = \App\Models\UserNotification::where('user_id', auth()->id())
+                        ->whereNull('read_at')
+                        ->count();
+                    $view->with('unreadNotifications', $unreadCount);
+                } catch (\Throwable) {
+                    $view->with('unreadNotifications', 0);
+                }
+            }
+        });
+
         // Supprimer install.php si l'app est installee (securite apres git pull)
         if (env('APP_INSTALLED') === 'true') {
             $installFile = public_path('install.php');

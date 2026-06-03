@@ -110,6 +110,11 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
 
     // ─── Progression et historique ───
     Route::get('/progression', [ProgressController::class, 'index'])->name('progress.index');
+
+    // ─── Notifications utilisateur ───
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 });
 
 // ─── Sitemap XML dynamique ───
@@ -197,6 +202,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::delete('/private-modules/{module}', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'destroy'])->name('private-modules.destroy');
     // Update placeholder
     Route::get('/update', fn() => view('admin.update.index'))->name('update.index');
+    // Notifications admin
+    Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/create', [\App\Http\Controllers\Admin\NotificationController::class, 'create'])->name('notifications.create');
+    Route::post('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'store'])->name('notifications.store');
+    Route::delete('/notifications/{notification}', [\App\Http\Controllers\Admin\NotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 
 require __DIR__.'/auth.php';
