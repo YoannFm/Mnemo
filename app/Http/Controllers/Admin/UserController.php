@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -31,7 +32,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::orderBy('power', 'desc')->get();
-        return view('admin.users.edit', compact('user', 'roles'));
+        $userLogs = ActivityLog::where('user_id', $user->id)->latest()->paginate(15)->appends(request()->query());
+        return view('admin.users.edit', compact('user', 'roles', 'userLogs'));
     }
 
     public function update(Request $request, User $user)
@@ -71,5 +73,13 @@ class UserController extends Controller
         $user->delete();
 
         return back()->with('success', 'Utilisateur supprime.');
+    }
+
+    public function forcePasswordChange(User $user)
+    {
+        $user->force_password_change = true;
+        $user->save();
+
+        return back()->with('success', 'L\'utilisateur devra changer son mot de passe a la prochaine connexion.');
     }
 }
