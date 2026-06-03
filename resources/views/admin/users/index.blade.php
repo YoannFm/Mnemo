@@ -79,7 +79,10 @@
 
             {{ $users->withQueryString()->links() }}
 
-            <div class="mt-3">
+            <div class="mt-3 d-flex gap-2">
+                <a class="btn btn-primary" href="{{ route('admin.users.create') }}">
+                    <i class="bi bi-plus-lg"></i> Ajouter
+                </a>
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#notifyAllModal">
                     <i class="bi bi-megaphone"></i> Envoyer une notification
                 </button>
