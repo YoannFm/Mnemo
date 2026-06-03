@@ -36,8 +36,8 @@
             --text-muted: #9ca3af;
             --card-bg: #212227;
             --card-border: #2E2E34;
-            --body-bg: #2E2E34;
-            --header-bg: #212227;
+            --body-bg: #111113;
+            --header-bg: #1a1b1f;
             --success-color: #22c55e;
             --danger-color: #ff5956;
         }
@@ -176,7 +176,7 @@
         }
 
         #main-content {
-            background: #18191d;
+            background: #2E2E34;
         }
 
         .page-content {
