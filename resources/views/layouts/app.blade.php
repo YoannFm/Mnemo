@@ -178,6 +178,9 @@
         .page-content {
             padding: 2rem 1.5rem;
             flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
         }
 
         /* ── Cards ── */
