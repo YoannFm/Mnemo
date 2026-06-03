@@ -402,22 +402,42 @@
 
             {{-- Navigation principale --}}
             <div class="d-flex flex-column flex-lg-row align-items-lg-stretch py-2 py-lg-0">
-                <a href="{{ route('dashboard') }}"
-                   class="nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i> Accueil
-                </a>
-                <a href="{{ route('modules.index') }}"
-                   class="nav-link-custom {{ request()->routeIs('modules.*') || request()->routeIs('test.*') || request()->routeIs('anki.*') ? 'active' : '' }}">
-                    <i class="bi bi-collection"></i> Mes modules
-                </a>
-                <a href="{{ route('library.index') }}"
-                   class="nav-link-custom {{ request()->routeIs('library.*') ? 'active' : '' }}">
-                    <i class="bi bi-globe2"></i> Bibliothèque
-                </a>
-                <a href="{{ route('progress.index') }}"
-                   class="nav-link-custom {{ request()->routeIs('progress.*') ? 'active' : '' }}">
-                    <i class="bi bi-bar-chart-line"></i> Progression
-                </a>
+                @php
+                    $navItems = [];
+                    try {
+                        $navItems = \App\Models\NavItem::where('is_active', true)->orderBy('position')->get();
+                    } catch (\Throwable $e) {
+                        $navItems = [];
+                    }
+                @endphp
+
+                @if (count($navItems) > 0)
+                    @foreach ($navItems as $navItem)
+                        <a href="{{ $navItem->url }}"
+                           class="nav-link-custom {{ request()->is(ltrim($navItem->url, '/')) ? 'active' : '' }}"
+                           @if ($navItem->open_new_tab) target="_blank" rel="noopener noreferrer" @endif>
+                            @if ($navItem->icon)<i class="bi {{ $navItem->icon }}"></i> @endif
+                            {{ $navItem->label }}
+                        </a>
+                    @endforeach
+                @else
+                    <a href="{{ route('dashboard') }}"
+                       class="nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i> Accueil
+                    </a>
+                    <a href="{{ route('modules.index') }}"
+                       class="nav-link-custom {{ request()->routeIs('modules.*') || request()->routeIs('test.*') || request()->routeIs('anki.*') ? 'active' : '' }}">
+                        <i class="bi bi-collection"></i> Mes modules
+                    </a>
+                    <a href="{{ route('library.index') }}"
+                       class="nav-link-custom {{ request()->routeIs('library.*') ? 'active' : '' }}">
+                        <i class="bi bi-globe2"></i> Bibliothèque
+                    </a>
+                    <a href="{{ route('progress.index') }}"
+                       class="nav-link-custom {{ request()->routeIs('progress.*') ? 'active' : '' }}">
+                        <i class="bi bi-bar-chart-line"></i> Progression
+                    </a>
+                @endif
             </div>
 
             {{-- Utilisateur (droite) --}}
@@ -440,6 +460,14 @@
                                 <i class="bi bi-person"></i> Mon profil
                             </a>
                         </li>
+                        @if (Auth::user()->isAdmin())
+                        <li>
+                            <a class="dropdown-item" href="{{ route('admin.dashboard') }}"
+                               style="color:var(--accent);">
+                                <i class="bi bi-shield-check"></i> Administration
+                            </a>
+                        </li>
+                        @endif
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
