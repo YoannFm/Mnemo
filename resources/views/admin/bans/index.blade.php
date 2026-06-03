@@ -28,7 +28,7 @@
                                 <td>
                                     <a href="{{ route('admin.users.edit', $ban->author) }}">{{ $ban->author->name }}</a>
                                 </td>
-                                <td>{{ $ban->reason ?? '—' }}</td>
+                                <td>{{ $ban->reason ?? '-' }}</td>
                                 <td>{{ $ban->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <form action="{{ route('admin.users.bans.destroy', [$ban->user, $ban]) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Débannir cet utilisateur ?')">

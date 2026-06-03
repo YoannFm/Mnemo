@@ -134,7 +134,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
-    Route::post('/users/{user}/toggle-admin', [AdminUserController::class, 'toggleAdmin'])->name('users.toggle-admin');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     // Bans (nested under user)
     Route::post('/users/{user}/bans', [\App\Http\Controllers\Admin\BanController::class, 'store'])->name('users.bans.store');
@@ -183,7 +182,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/plugins', fn() => view('admin.plugins.index'))->name('plugins.index');
     // Themes
     Route::get('/themes', [\App\Http\Controllers\Admin\ThemeController::class, 'index'])->name('themes.index');
-    Route::post('/themes', [\App\Http\Controllers\Admin\ThemeController::class, 'update'])->name('themes.update');
+    Route::get('/themes/create', [\App\Http\Controllers\Admin\ThemeController::class, 'create'])->name('themes.create');
+    Route::post('/themes', [\App\Http\Controllers\Admin\ThemeController::class, 'store'])->name('themes.store');
+    Route::get('/themes/{theme}/edit', [\App\Http\Controllers\Admin\ThemeController::class, 'edit'])->name('themes.edit');
+    Route::put('/themes/{theme}', [\App\Http\Controllers\Admin\ThemeController::class, 'update'])->name('themes.update');
+    Route::delete('/themes/{theme}', [\App\Http\Controllers\Admin\ThemeController::class, 'destroy'])->name('themes.destroy');
+    Route::post('/themes/{theme}/activate', [\App\Http\Controllers\Admin\ThemeController::class, 'activate'])->name('themes.activate');
+    // Private modules
+    Route::get('/private-modules', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'index'])->name('private-modules.index');
+    Route::delete('/private-modules/{module}', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'destroy'])->name('private-modules.destroy');
     // Update placeholder
     Route::get('/update', fn() => view('admin.update.index'))->name('update.index');
 });

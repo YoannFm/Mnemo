@@ -22,15 +22,28 @@ class RoleController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'         => 'required|string|max:50',
-            'color'        => 'required|string|max:7',
-            'power'        => 'required|integer|min:0',
-            'is_admin_role'=> 'sometimes|boolean',
+            'name'               => 'required|string|max:50',
+            'color'              => 'required|string|max:7',
+            'power'              => 'required|integer|min:0',
+            'is_admin_role'      => 'sometimes|boolean',
+            'can_create_module'  => 'sometimes|boolean',
+            'can_train_own'      => 'sometimes|boolean',
+            'can_test_own'       => 'sometimes|boolean',
+            'can_access_library' => 'sometimes|boolean',
+            'can_train_public'   => 'sometimes|boolean',
+            'can_test_public'    => 'sometimes|boolean',
         ]);
-        $data['is_admin_role'] = $request->boolean('is_admin_role');
+        $data['is_admin_role']      = $request->boolean('is_admin_role');
+        $data['can_create_module']  = $request->boolean('can_create_module');
+        $data['can_train_own']      = $request->boolean('can_train_own');
+        $data['can_test_own']       = $request->boolean('can_test_own');
+        $data['can_access_library'] = $request->boolean('can_access_library');
+        $data['can_train_public']   = $request->boolean('can_train_public');
+        $data['can_test_public']    = $request->boolean('can_test_public');
+
         $role = Role::create($data);
         LogHelper::log('created_role', 'role', $role->id, ['name' => $role->name]);
-        return redirect()->route('admin.roles.index')->with('success', 'Rôle créé.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role cree.');
     }
 
     public function edit(Role $role)
@@ -41,21 +54,34 @@ class RoleController extends Controller
     public function update(Request $request, Role $role)
     {
         $data = $request->validate([
-            'name'         => 'required|string|max:50',
-            'color'        => 'required|string|max:7',
-            'power'        => 'required|integer|min:0',
-            'is_admin_role'=> 'sometimes|boolean',
+            'name'               => 'required|string|max:50',
+            'color'              => 'required|string|max:7',
+            'power'              => 'required|integer|min:0',
+            'is_admin_role'      => 'sometimes|boolean',
+            'can_create_module'  => 'sometimes|boolean',
+            'can_train_own'      => 'sometimes|boolean',
+            'can_test_own'       => 'sometimes|boolean',
+            'can_access_library' => 'sometimes|boolean',
+            'can_train_public'   => 'sometimes|boolean',
+            'can_test_public'    => 'sometimes|boolean',
         ]);
-        $data['is_admin_role'] = $request->boolean('is_admin_role');
+        $data['is_admin_role']      = $request->boolean('is_admin_role');
+        $data['can_create_module']  = $request->boolean('can_create_module');
+        $data['can_train_own']      = $request->boolean('can_train_own');
+        $data['can_test_own']       = $request->boolean('can_test_own');
+        $data['can_access_library'] = $request->boolean('can_access_library');
+        $data['can_train_public']   = $request->boolean('can_train_public');
+        $data['can_test_public']    = $request->boolean('can_test_public');
+
         $role->update($data);
         LogHelper::log('updated_role', 'role', $role->id, ['name' => $role->name]);
-        return redirect()->route('admin.roles.index')->with('success', 'Rôle mis à jour.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role mis a jour.');
     }
 
     public function destroy(Role $role)
     {
         LogHelper::log('deleted_role', 'role', $role->id, ['name' => $role->name]);
         $role->delete();
-        return redirect()->route('admin.roles.index')->with('success', 'Rôle supprimé.');
+        return redirect()->route('admin.roles.index')->with('success', 'Role supprime.');
     }
 }

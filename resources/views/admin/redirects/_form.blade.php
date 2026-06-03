@@ -14,8 +14,8 @@
     <div class="mb-3 col-md-3">
         <label class="form-label" for="typeSelect">Code HTTP</label>
         <select class="form-select @error('type') is-invalid @enderror" id="typeSelect" name="type" required>
-            <option value="301" @selected(old('type', $redirect->type ?? 301) == 301)>301 — Permanent</option>
-            <option value="302" @selected(old('type', $redirect->type ?? 301) == 302)>302 — Temporaire</option>
+            <option value="301" @selected(old('type', $redirect->type ?? 301) == 301)>301 - Permanent</option>
+            <option value="302" @selected(old('type', $redirect->type ?? 301) == 302)>302 - Temporaire</option>
         </select>
         @error('type')<span class="invalid-feedback"><strong>{{ $message }}</strong></span>@enderror
     </div>

@@ -207,8 +207,21 @@ class TestController extends Controller
      */
     private function authorize(Module $module): void
     {
-        if (!$module->is_public && $module->owner_id !== Auth::id()) {
-            abort(403, 'Ce module est privé.');
+        $user = Auth::user();
+        $role = $user ? $user->role : null;
+
+        if (!$module->is_public && $module->owner_id !== $user?->id) {
+            abort(403, 'Ce module est prive.');
+        }
+
+        if ($module->owner_id === $user?->id) {
+            if ($role && !$role->can_test_own && !$user->is_admin) {
+                abort(403, 'Vous n\'avez pas la permission de tester vos modules.');
+            }
+        } else {
+            if ($role && !$role->can_test_public && !$user->is_admin) {
+                abort(403, 'Vous n\'avez pas la permission de tester les modules publics.');
+            }
         }
     }
 }

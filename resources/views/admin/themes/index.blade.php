@@ -1,102 +1,67 @@
 <x-admin-layout>
-    <x-slot name="pageTitle">Thèmes — Couleurs</x-slot>
+    <x-slot name="pageTitle">Themes</x-slot>
 
-    <div class="card shadow mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0"><i class="bi bi-palette me-2"></i>Couleurs du thème</h5>
-        </div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('admin.themes.update') }}">
-                @csrf
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">Gestion des themes</h4>
+        <a href="{{ route('admin.themes.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nouveau theme
+        </a>
+    </div>
 
-                <div class="row g-3">
-
-                    <div class="col-md-4">
-                        <label class="form-label" for="theme_body_bg">Fond de page (--body-bg)</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="color" id="theme_body_bg" name="theme_body_bg"
-                                   class="form-control form-control-color @error('theme_body_bg') is-invalid @enderror"
-                                   value="{{ old('theme_body_bg', $colors['theme_body_bg']) }}"
-                                   style="width:50px; height:38px; padding:2px;">
-                            <span style="display:inline-block;width:32px;height:32px;background:{{ $colors['theme_body_bg'] }};border:1px solid #ccc;border-radius:4px;"></span>
-                            <small class="text-muted">{{ $colors['theme_body_bg'] }}</small>
-                        </div>
-                        @error('theme_body_bg')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
+    <div class="row g-3">
+        @forelse($themes as $theme)
+            <div class="col-md-4">
+                <div class="card shadow h-100 {{ $theme->is_active ? 'border-success border-2' : '' }}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong>{{ $theme->name }}</strong>
+                        @if($theme->is_active)
+                            <span class="badge bg-success">Actif</span>
+                        @endif
                     </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label" for="theme_content_bg">Fond du contenu (--content-bg)</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="color" id="theme_content_bg" name="theme_content_bg"
-                                   class="form-control form-control-color @error('theme_content_bg') is-invalid @enderror"
-                                   value="{{ old('theme_content_bg', $colors['theme_content_bg']) }}"
-                                   style="width:50px; height:38px; padding:2px;">
-                            <span style="display:inline-block;width:32px;height:32px;background:{{ $colors['theme_content_bg'] }};border:1px solid #ccc;border-radius:4px;"></span>
-                            <small class="text-muted">{{ $colors['theme_content_bg'] }}</small>
+                    <div class="card-body">
+                        <div class="d-flex gap-2 mb-3 flex-wrap">
+                            @foreach([
+                                'Fond' => $theme->body_bg,
+                                'Contenu' => $theme->content_bg,
+                                'Carte' => $theme->card_bg,
+                                'Accent' => $theme->accent_color,
+                                'Header' => $theme->header_bg,
+                                'Texte' => $theme->text_color,
+                            ] as $label => $color)
+                                <div title="{{ $label }}: {{ $color }}"
+                                     style="width:28px;height:28px;background:{{ $color }};border:1px solid #999;border-radius:4px;"
+                                     data-bs-toggle="tooltip"></div>
+                            @endforeach
                         </div>
-                        @error('theme_content_bg')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label" for="theme_card_bg">Fond des cartes (--card-bg)</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="color" id="theme_card_bg" name="theme_card_bg"
-                                   class="form-control form-control-color @error('theme_card_bg') is-invalid @enderror"
-                                   value="{{ old('theme_card_bg', $colors['theme_card_bg']) }}"
-                                   style="width:50px; height:38px; padding:2px;">
-                            <span style="display:inline-block;width:32px;height:32px;background:{{ $colors['theme_card_bg'] }};border:1px solid #ccc;border-radius:4px;"></span>
-                            <small class="text-muted">{{ $colors['theme_card_bg'] }}</small>
+                        <div class="d-flex gap-1 flex-wrap">
+                            @if(!$theme->is_active)
+                                <form action="{{ route('admin.themes.activate', $theme) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="bi bi-check-circle"></i> Activer
+                                    </button>
+                                </form>
+                            @endif
+                            <a href="{{ route('admin.themes.edit', $theme) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-pencil"></i> Modifier
+                            </a>
+                            @if(!$theme->is_active)
+                                <form action="{{ route('admin.themes.destroy', $theme) }}" method="POST"
+                                      onsubmit="return confirm('Supprimer ce theme ?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            @endif
                         </div>
-                        @error('theme_card_bg')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                     </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label" for="theme_accent">Couleur accentuée (--accent)</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="color" id="theme_accent" name="theme_accent"
-                                   class="form-control form-control-color @error('theme_accent') is-invalid @enderror"
-                                   value="{{ old('theme_accent', $colors['theme_accent']) }}"
-                                   style="width:50px; height:38px; padding:2px;">
-                            <span style="display:inline-block;width:32px;height:32px;background:{{ $colors['theme_accent'] }};border:1px solid #ccc;border-radius:4px;"></span>
-                            <small class="text-muted">{{ $colors['theme_accent'] }}</small>
-                        </div>
-                        @error('theme_accent')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label" for="theme_header_bg">Fond du header (--header-bg)</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="color" id="theme_header_bg" name="theme_header_bg"
-                                   class="form-control form-control-color @error('theme_header_bg') is-invalid @enderror"
-                                   value="{{ old('theme_header_bg', $colors['theme_header_bg']) }}"
-                                   style="width:50px; height:38px; padding:2px;">
-                            <span style="display:inline-block;width:32px;height:32px;background:{{ $colors['theme_header_bg'] }};border:1px solid #ccc;border-radius:4px;"></span>
-                            <small class="text-muted">{{ $colors['theme_header_bg'] }}</small>
-                        </div>
-                        @error('theme_header_bg')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label" for="theme_text_color">Couleur du texte (--text-color)</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="color" id="theme_text_color" name="theme_text_color"
-                                   class="form-control form-control-color @error('theme_text_color') is-invalid @enderror"
-                                   value="{{ old('theme_text_color', $colors['theme_text_color']) }}"
-                                   style="width:50px; height:38px; padding:2px;">
-                            <span style="display:inline-block;width:32px;height:32px;background:{{ $colors['theme_text_color'] }};border:1px solid #ccc;border-radius:4px;"></span>
-                            <small class="text-muted">{{ $colors['theme_text_color'] }}</small>
-                        </div>
-                        @error('theme_text_color')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
-                    </div>
-
                 </div>
-
-                <hr class="my-4">
-
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save me-1"></i> Enregistrer
-                </button>
-            </form>
-        </div>
+            </div>
+        @empty
+            <div class="col-12">
+                <p class="text-muted">Aucun theme disponible.</p>
+            </div>
+        @endforelse
     </div>
 </x-admin-layout>

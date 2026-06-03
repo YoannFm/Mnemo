@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <x-slot name="pageTitle">Paramètres — Authentification</x-slot>
+    <x-slot name="pageTitle">Paramètres - Authentification</x-slot>
 
     {{-- Card Authentification --}}
     <div class="card shadow mb-4">

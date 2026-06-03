@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ isset($pageTitle) ? $pageTitle . ' — Admin' : 'Administration — Mnémo' }}</title>
+    <title>{{ isset($pageTitle) ? $pageTitle . ' - Admin' : 'Administration - Mnemo' }}</title>
 
     <script src="{{ asset('assets/vendor/admin.js') }}" defer></script>
 
@@ -124,6 +124,12 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-item {{ request()->routeIs('admin.private-modules.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.private-modules.index') }}">
+                            <i class="bi bi-lock"></i> <span>Modules prives</span>
+                        </a>
+                    </li>
+
                     {{-- Extensions --}}
                     <li class="sidebar-header">Extensions</li>
 
@@ -169,11 +175,14 @@
 
                 <div class="navbar-collapse collapse">
                     <div class="d-none d-sm-inline-block">
-                        <a href="https://discord.gg/mnemo" class="btn btn-outline-primary mx-1" target="_blank" rel="noopener noreferrer">
-                            <i class="bi bi-question-circle"></i> Support
+                        <a href="https://discord.gg/HtjPAfqUXu" class="btn btn-outline-primary mx-1" target="_blank" rel="noopener noreferrer">
+                            <i class="bi bi-discord"></i> Discord
+                        </a>
+                        <a href="https://wiki.novadev.ovh" class="btn btn-outline-info mx-1" target="_blank" rel="noopener noreferrer">
+                            <i class="bi bi-book"></i> Documentation
                         </a>
                         <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary mx-1">
-                            <i class="bi bi-house"></i> Retour au site
+                            <i class="bi bi-arrow-left"></i>
                         </a>
                     </div>
 
@@ -230,7 +239,7 @@
             <footer class="footer">
                 <div class="container-fluid">
                     <p class="mb-0 py-2 text-center text-muted">
-                        Mnémo &mdash; Administration
+                        Mnemo - Administration
                     </p>
                 </div>
             </footer>

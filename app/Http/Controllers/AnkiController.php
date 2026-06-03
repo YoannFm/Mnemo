@@ -333,8 +333,21 @@ class AnkiController extends Controller
      */
     private function authorize(Module $module): void
     {
-        if (!$module->is_public && $module->owner_id !== Auth::id()) {
-            abort(403, 'Ce module est privé.');
+        $user = Auth::user();
+        $role = $user ? $user->role : null;
+
+        if (!$module->is_public && $module->owner_id !== $user?->id) {
+            abort(403, 'Ce module est prive.');
+        }
+
+        if ($module->owner_id === $user?->id) {
+            if ($role && !$role->can_train_own && !$user->is_admin) {
+                abort(403, 'Vous n\'avez pas la permission de vous entrainer sur vos modules.');
+            }
+        } else {
+            if ($role && !$role->can_train_public && !$user->is_admin) {
+                abort(403, 'Vous n\'avez pas la permission de vous entrainer sur les modules publics.');
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class ActivityLog extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['user_id', 'action', 'target_type', 'target_id', 'data'];
+    protected $fillable = ['user_id', 'action', 'target_type', 'target_id', 'data', 'level', 'old_value', 'new_value'];
 
     protected function casts(): array
     {

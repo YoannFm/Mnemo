@@ -186,7 +186,7 @@ class SettingsController extends Controller
             $user = Auth::user();
             Mail::raw('Ceci est un e-mail de test envoyé depuis le panel d\'administration de Mnémo.', function ($message) use ($user) {
                 $message->to($user->email)
-                        ->subject('Test e-mail — Mnémo');
+                        ->subject('Test e-mail - Mnémo');
             });
 
             return response()->json(['message' => 'E-mail de test envoyé à ' . $user->email]);

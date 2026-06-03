@@ -11,7 +11,7 @@
                     @error('name')<span class="invalid-feedback"><strong>{{ $message }}</strong></span>@enderror
                 </div>
                 <div class="mb-3">
-                    <label class="form-label" for="imageInput">Fichier image (jpg, png, gif, webp — max 2 Mo)</label>
+                    <label class="form-label" for="imageInput">Fichier image (jpg, png, gif, webp - max 2 Mo)</label>
                     <input type="file" class="form-control @error('image') is-invalid @enderror" id="imageInput" name="image" accept=".jpg,.jpeg,.png,.gif,.webp" required>
                     @error('image')<span class="invalid-feedback"><strong>{{ $message }}</strong></span>@enderror
                 </div>

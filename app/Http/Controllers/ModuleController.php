@@ -33,6 +33,10 @@ class ModuleController extends Controller
      */
     public function create()
     {
+        $user = Auth::user();
+        if ($user->role && !$user->role->can_create_module && !$user->is_admin) {
+            abort(403, 'Vous n\'avez pas la permission de creer des modules.');
+        }
         return view('modules.create');
     }
 
@@ -49,8 +53,13 @@ class ModuleController extends Controller
             'is_public'   => 'nullable|boolean',
         ]);
 
+        $user = Auth::user();
+        if ($user->role && !$user->role->can_create_module && !$user->is_admin) {
+            abort(403, 'Vous n\'avez pas la permission de creer des modules.');
+        }
+
         // Création du module lié à l'utilisateur connecté
-        Auth::user()->modules()->create([
+        $user->modules()->create([
             'title'       => $validated['title'],
             'description' => $validated['description'] ?? null,
             'is_public'   => $request->boolean('is_public'),
