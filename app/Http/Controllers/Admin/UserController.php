@@ -30,8 +30,9 @@ class UserController extends Controller
 
         $roles = Role::orderBy('power', 'desc')->get();
         $users = $query->with('role')->orderBy('id')->paginate(20)->withQueryString();
+        $allUsers = User::orderBy('name')->get(['id', 'name', 'email']);
 
-        return view('admin.users.index', compact('users', 'roles'));
+        return view('admin.users.index', compact('users', 'roles', 'allUsers'));
     }
 
     public function create()
@@ -66,8 +67,9 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::orderBy('power', 'desc')->get();
+        $allUsers = User::orderBy('name')->get(['id', 'name', 'email']);
         $userLogs = ActivityLog::where('user_id', $user->id)->latest()->paginate(15)->appends(request()->query());
-        return view('admin.users.edit', compact('user', 'roles', 'userLogs'));
+        return view('admin.users.edit', compact('user', 'roles', 'allUsers', 'userLogs'));
     }
 
     public function update(Request $request, User $user)

@@ -24,33 +24,36 @@ class NotificationController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'content' => 'required|string|max:200',
-            'level'   => 'required|in:info,success,warning,danger',
-            'target'  => 'required|in:all,user',
-            'user_id' => 'required_if:target,user|nullable|exists:users,id',
+            'content'   => 'required|string|max:200',
+            'level'     => 'required|in:info,success,warning,danger',
+            'target'    => 'required|in:all,users,roles',
+            'user_ids'  => 'required_if:target,users|array',
+            'user_ids.*'=> 'exists:users,id',
+            'role_ids'  => 'required_if:target,roles|array',
+            'role_ids.*'=> 'exists:roles,id',
         ]);
 
+        $recipients = collect();
+
         if ($data['target'] === 'all') {
-            User::chunk(100, function ($users) use ($data) {
-                foreach ($users as $user) {
-                    UserNotification::create([
-                        'user_id' => $user->id,
-                        'title'   => $data['content'],
-                        'type'    => $data['level'],
-                    ]);
-                }
-            });
-            return redirect()->route('admin.notifications.index')
-                ->with('success', 'Notification envoyee a tous les utilisateurs.');
-        } else {
+            $recipients = User::all();
+        } elseif ($data['target'] === 'users') {
+            $recipients = User::whereIn('id', $data['user_ids'])->get();
+        } elseif ($data['target'] === 'roles') {
+            $recipients = User::whereIn('role_id', $data['role_ids'])->get();
+        }
+
+        foreach ($recipients as $user) {
             UserNotification::create([
-                'user_id' => $data['user_id'],
+                'user_id' => $user->id,
                 'title'   => $data['content'],
                 'type'    => $data['level'],
             ]);
-            return redirect()->route('admin.notifications.index')
-                ->with('success', 'Notification envoyee.');
         }
+
+        $count = $recipients->count();
+        return redirect()->route('admin.notifications.index')
+            ->with('success', "Notification envoyee a {$count} utilisateur(s).");
     }
 
     public function destroy(UserNotification $notification)
