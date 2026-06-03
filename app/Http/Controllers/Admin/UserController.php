@@ -24,9 +24,14 @@ class UserController extends Controller
             });
         }
 
+        if ($roleId = $request->input('role_id')) {
+            $query->where('role_id', $roleId);
+        }
+
+        $roles = Role::orderBy('power', 'desc')->get();
         $users = $query->with('role')->orderBy('id')->paginate(20)->withQueryString();
 
-        return view('admin.users.index', compact('users'));
+        return view('admin.users.index', compact('users', 'roles'));
     }
 
     public function create()

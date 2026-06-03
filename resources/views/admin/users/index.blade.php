@@ -2,7 +2,7 @@
     <x-slot name="pageTitle">Utilisateurs</x-slot>
 
     <form class="row gx-3 align-items-center mb-3" action="{{ route('admin.users.index') }}" method="GET" role="search">
-        <div class="col-md-4 col-12">
+        <div class="col-md-4 col-12 mb-2 mb-md-0">
             <label class="visually-hidden" for="searchInput">Rechercher</label>
             <div class="input-group">
                 <input type="search" class="form-control" id="searchInput" name="search"
@@ -11,6 +11,16 @@
                     <i class="bi bi-search"></i>
                 </button>
             </div>
+        </div>
+        <div class="col-md-3 col-12">
+            <select name="role_id" class="form-select" onchange="this.form.submit()">
+                <option value="">Tous les roles</option>
+                @foreach($roles as $role)
+                    <option value="{{ $role->id }}" {{ request('role_id') == $role->id ? 'selected' : '' }}>
+                        {{ $role->name }}
+                    </option>
+                @endforeach
+            </select>
         </div>
     </form>
 
