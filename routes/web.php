@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProfileTwoFactorController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TestController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\AnkiController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\InstallController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -42,7 +44,19 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->group(function () {
+// ─── 2FA Challenge (après login) ───
+Route::middleware('guest')->group(function () {
+    Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.show');
+    Route::post('/two-factor-challenge', [TwoFactorController::class, 'store'])->name('two-factor.store');
+});
+
+Route::middleware(['auth', 'two-factor'])->group(function () {
+
+    // ─── Gestion 2FA (profil) ───
+    Route::get('/profile/2fa', [ProfileTwoFactorController::class, 'show'])->name('profile.2fa.show');
+    Route::post('/profile/2fa/enable', [ProfileTwoFactorController::class, 'enable'])->name('profile.2fa.enable');
+    Route::post('/profile/2fa/confirm', [ProfileTwoFactorController::class, 'confirm'])->name('profile.2fa.confirm');
+    Route::delete('/profile/2fa', [ProfileTwoFactorController::class, 'disable'])->name('profile.2fa.disable');
 
     // Dashboard - tableau de bord de l'utilisateur
     Route::get('/dashboard', function () {
