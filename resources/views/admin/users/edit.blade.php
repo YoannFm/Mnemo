@@ -1,110 +1,108 @@
 <x-admin-layout>
-    <x-slot name="pageTitle">Modifier l'utilisateur</x-slot>
+    <x-slot name="pageTitle">Modifier — {{ $user->name }}</x-slot>
 
     <div class="row">
-        <div class="col-md-8 col-lg-6">
-            <div class="card">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
                 <div class="card-header">
-                    <h5 class="card-title mb-0">Modifier — {{ $user->name }}</h5>
+                    <h5 class="card-title mb-0">Modifier le profil</h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('admin.users.update', $user) }}">
-                        @csrf
+                    <form action="{{ route('admin.users.update', $user) }}" method="POST">
                         @method('PUT')
-
-                        @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
+                        @csrf
 
                         <div class="mb-3">
-                            <label class="form-label">Nom *</label>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                   value="{{ old('name', $user->name) }}" required maxlength="255">
+                            <label class="form-label" for="nameInput">Nom</label>
+                            <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                   id="nameInput" name="name"
+                                   value="{{ old('name', $user->name) }}" required>
                             @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Email *</label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
-                                   value="{{ old('email', $user->email) }}" required maxlength="255">
+                            <label class="form-label" for="emailInput">Email</label>
+                            <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                   id="emailInput" name="email"
+                                   value="{{ old('email', $user->email) }}">
                             @error('email')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Nouveau mot de passe</label>
-                            <input type="password" name="password"
-                                   class="form-control @error('password') is-invalid @enderror"
-                                   placeholder="Laisser vide pour ne pas changer">
+                            <label class="form-label" for="passwordInput">Mot de passe</label>
+                            <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                   id="passwordInput" name="password" placeholder="**********">
                             @error('password')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Confirmer le mot de passe</label>
-                            <input type="password" name="password_confirmation" class="form-control">
+                            <label class="form-label" for="passwordConfirm">Confirmer le mot de passe</label>
+                            <input type="password" class="form-control" id="passwordConfirm"
+                                   name="password_confirmation" placeholder="**********">
                         </div>
 
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" name="is_admin"
-                                       id="is_admin" value="1"
+                                       id="isAdmin" value="1"
                                        {{ old('is_admin', $user->is_admin) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="is_admin">Administrateur</label>
+                                <label class="form-check-label" for="isAdmin">Administrateur</label>
                             </div>
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-lg me-1"></i> Enregistrer
-                            </button>
-                            <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
-                                Annuler
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Enregistrer
+                        </button>
+
+                        @if ($user->id !== Auth::id())
+                            <a href="{{ route('admin.users.destroy', $user) }}" class="btn btn-danger"
+                               onclick="event.preventDefault(); if(confirm('Supprimer cet utilisateur ?')) { document.getElementById('delete-user-{{ $user->id }}').submit(); }">
+                                <i class="bi bi-trash"></i> Supprimer
                             </a>
-                        </div>
+                            <form id="delete-user-{{ $user->id }}" method="POST"
+                                  action="{{ route('admin.users.destroy', $user) }}" class="d-none">
+                                @csrf @method('DELETE')
+                            </form>
+                        @endif
                     </form>
                 </div>
             </div>
+        </div>
 
-            <div class="card mt-3">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Informations</h5>
                 </div>
                 <div class="card-body">
-                    <table class="table table-sm mb-0">
-                        <tr>
-                            <td class="text-muted">ID</td>
-                            <td>{{ $user->id }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Inscription</td>
-                            <td>{{ $user->created_at->format('d/m/Y à H:i') }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Modules</td>
-                            <td>{{ $user->modules()->count() }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">2FA</td>
-                            <td>
-                                @if ($user->two_factor_secret)
-                                    <span class="badge bg-success">Activé</span>
-                                @else
-                                    <span class="badge bg-secondary">Désactivé</span>
-                                @endif
-                            </td>
-                        </tr>
-                    </table>
+                    <div class="mb-3">
+                        <label class="form-label">Inscription</label>
+                        <input type="text" class="form-control"
+                               value="{{ $user->created_at->format('d/m/Y à H:i') }}" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Modules créés</label>
+                        <input type="text" class="form-control"
+                               value="{{ $user->modules()->count() }}" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">2FA (double authentification)</label>
+                        @if ($user->two_factor_secret)
+                            <input type="text" class="form-control text-success"
+                                   value="Activé" disabled>
+                        @else
+                            <input type="text" class="form-control text-danger"
+                                   value="Désactivé" disabled>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
