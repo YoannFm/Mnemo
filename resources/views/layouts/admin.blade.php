@@ -28,39 +28,27 @@
 
                 <ul class="sidebar-nav">
 
-                    <li class="sidebar-header">Général</li>
-
+                    {{-- Dashboard --}}
                     <li class="sidebar-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.dashboard') }}">
-                            <i class="bi bi-speedometer2"></i> <span>Tableau de bord</span>
+                            <i class="bi bi-speedometer"></i> <span>Tableau de bord</span>
                         </a>
                     </li>
 
-                    <li class="sidebar-header">Contenu</li>
-
-                    <li class="sidebar-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                        <a class="sidebar-link" href="{{ route('admin.users.index') }}">
-                            <i class="bi bi-people"></i> <span>Utilisateurs</span>
-                        </a>
-                    </li>
-
-                    <li class="sidebar-item {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}">
-                        <a class="sidebar-link" href="{{ route('admin.modules.index') }}">
-                            <i class="bi bi-collection"></i> <span>Modules publics</span>
-                        </a>
-                    </li>
-
+                    {{-- Paramètres --}}
                     <li class="sidebar-header">Paramètres</li>
 
                     <li class="sidebar-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
                         <a class="sidebar-link {{ request()->routeIs('admin.settings.*') ? '' : 'collapsed' }}"
                            href="#" data-bs-toggle="collapse" data-bs-target="#collapseSettings"
-                           aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}">
+                           aria-expanded="{{ request()->routeIs('admin.settings.*') ? 'true' : 'false' }}"
+                           aria-controls="collapseSettings">
                             <i class="bi bi-gear"></i>
                             <span>Paramètres</span>
                         </a>
                         <ul id="collapseSettings"
-                            class="sidebar-dropdown list-unstyled collapse {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}">
+                            class="sidebar-dropdown list-unstyled collapse {{ request()->routeIs('admin.settings.*') ? 'show' : '' }}"
+                            data-parent="#accordionSidebar">
                             <li class="sidebar-item {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
                                 <a class="sidebar-link" href="{{ route('admin.settings.index') }}">Général</a>
                             </li>
@@ -72,7 +60,28 @@
 
                     <li class="sidebar-item {{ request()->routeIs('admin.navbar.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.navbar.index') }}">
-                            <i class="bi bi-list-ul"></i> <span>Navigation</span>
+                            <i class="bi bi-list"></i>
+                            <span>Navigation</span>
+                        </a>
+                    </li>
+
+                    {{-- Utilisateurs --}}
+                    <li class="sidebar-header">Utilisateurs</li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.users.index') }}">
+                            <i class="bi bi-people"></i>
+                            <span>Utilisateurs</span>
+                        </a>
+                    </li>
+
+                    {{-- Contenu --}}
+                    <li class="sidebar-header">Contenu</li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.modules.index') }}">
+                            <i class="bi bi-collection"></i>
+                            <span>Modules publics</span>
                         </a>
                     </li>
 
