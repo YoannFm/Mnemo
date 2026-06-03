@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Page;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -17,48 +18,61 @@ class PageController extends Controller
 
     public function create()
     {
-        return view('admin.pages.create');
+        $roles = Role::orderBy('power', 'desc')->get();
+        return view('admin.pages.create', compact('roles'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title'        => 'required|string|max:200',
-            'slug'         => 'required|string|max:200|unique:pages,slug',
-            'content'      => 'required|string',
-            'is_published' => 'sometimes|boolean',
+            'title'       => 'required|string|max:200',
+            'description' => 'nullable|string|max:500',
+            'slug'        => 'required|string|max:200|unique:pages,slug',
+            'content'     => 'required|string',
         ]);
-        $data['slug'] = Str::slug($data['slug']);
-        $data['is_published'] = $request->boolean('is_published');
+
+        $data['slug']          = Str::slug($data['slug']);
+        $data['is_enabled']    = $request->boolean('is_enabled');
+        $data['is_restricted'] = $request->boolean('restricted');
+
         $page = Page::create($data);
+        $page->roles()->sync($request->input('roles', []));
+
         LogHelper::log('created_page', 'page', $page->id, ['title' => $page->title]);
-        return redirect()->route('admin.pages.index')->with('success', 'Page créée.');
+        return redirect()->route('admin.pages.index')->with('success', 'Page creee.');
     }
 
     public function edit(Page $page)
     {
-        return view('admin.pages.edit', compact('page'));
+        $roles = Role::orderBy('power', 'desc')->get();
+        $page->load('roles');
+        return view('admin.pages.edit', compact('page', 'roles'));
     }
 
     public function update(Request $request, Page $page)
     {
         $data = $request->validate([
-            'title'        => 'required|string|max:200',
-            'slug'         => 'required|string|max:200|unique:pages,slug,' . $page->id,
-            'content'      => 'required|string',
-            'is_published' => 'sometimes|boolean',
+            'title'       => 'required|string|max:200',
+            'description' => 'nullable|string|max:500',
+            'slug'        => 'required|string|max:200|unique:pages,slug,' . $page->id,
+            'content'     => 'required|string',
         ]);
-        $data['slug'] = Str::slug($data['slug']);
-        $data['is_published'] = $request->boolean('is_published');
+
+        $data['slug']          = Str::slug($data['slug']);
+        $data['is_enabled']    = $request->boolean('is_enabled');
+        $data['is_restricted'] = $request->boolean('restricted');
+
         $page->update($data);
+        $page->roles()->sync($request->input('roles', []));
+
         LogHelper::log('updated_page', 'page', $page->id, ['title' => $page->title]);
-        return redirect()->route('admin.pages.index')->with('success', 'Page mise à jour.');
+        return redirect()->route('admin.pages.index')->with('success', 'Page mise a jour.');
     }
 
     public function destroy(Page $page)
     {
         LogHelper::log('deleted_page', 'page', $page->id, ['title' => $page->title]);
         $page->delete();
-        return redirect()->route('admin.pages.index')->with('success', 'Page supprimée.');
+        return redirect()->route('admin.pages.index')->with('success', 'Page supprimee.');
     }
 }
