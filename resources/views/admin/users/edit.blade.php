@@ -272,8 +272,11 @@
     @endif
 
     @include('admin.users._notify', [
-        'route'  => route('admin.notifications.store'),
-        'userId' => $user->id,
+        'route'          => route('admin.notifications.store'),
+        'notifyUsers'    => $allUsers,
+        'notifyRoles'    => $roles,
+        'presetTarget'   => 'users',
+        'presetUserIds'  => [$user->id],
     ])
 
 </x-admin-layout>

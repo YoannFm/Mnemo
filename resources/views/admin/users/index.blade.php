@@ -101,8 +101,9 @@
     </div>
 
     @include('admin.users._notify', [
-        'route' => route('admin.notifications.store'),
-        'all'   => true,
+        'route'        => route('admin.notifications.store'),
+        'notifyUsers'  => $allUsers,
+        'notifyRoles'  => $roles,
     ])
 
 </x-admin-layout>
