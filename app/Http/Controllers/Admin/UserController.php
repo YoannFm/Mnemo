@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,7 +30,8 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
-        return view('admin.users.edit', compact('user'));
+        $roles = Role::orderBy('power', 'desc')->get();
+        return view('admin.users.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, User $user)
@@ -38,28 +40,26 @@ class UserController extends Controller
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|max:255|unique:users,email,' . $user->id,
             'password' => ['nullable', 'confirmed', Password::min(8)],
-            'is_admin' => 'boolean',
+            'role_id'  => 'nullable|exists:roles,id',
         ]);
 
-        $user->name     = $data['name'];
-        $user->email    = $data['email'];
-        $user->is_admin = $request->boolean('is_admin');
+        $user->name  = $data['name'];
+        $user->email = $data['email'];
 
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
         }
 
+        if (!empty($data['role_id'])) {
+            $user->role_id = $data['role_id'];
+            $role = Role::find($data['role_id']);
+            $user->is_admin = $role && $role->is_admin_role;
+        }
+
         $user->save();
 
         return redirect()->route('admin.users.index')
-            ->with('success', 'Utilisateur ' . $user->name . ' mis à jour.');
-    }
-
-    public function toggleAdmin(User $user)
-    {
-        $user->update(['is_admin' => ! $user->is_admin]);
-
-        return back()->with('success', 'Statut admin modifié pour ' . $user->name . '.');
+            ->with('success', 'Utilisateur ' . $user->name . ' mis a jour.');
     }
 
     public function destroy(User $user)
@@ -70,6 +70,6 @@ class UserController extends Controller
 
         $user->delete();
 
-        return back()->with('success', 'Utilisateur supprimé.');
+        return back()->with('success', 'Utilisateur supprime.');
     }
 }

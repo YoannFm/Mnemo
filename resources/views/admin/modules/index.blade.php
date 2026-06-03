@@ -20,7 +20,7 @@
                             <tr>
                                 <th scope="row">{{ $module->id }}</th>
                                 <td>{{ $module->title }}</td>
-                                <td>{{ $module->owner?->name ?? '—' }}</td>
+                                <td>{{ $module->owner?->name ?? '-' }}</td>
                                 <td>{{ $module->items_count }}</td>
                                 <td>{{ $module->created_at->format('d/m/Y') }}</td>
                                 <td>

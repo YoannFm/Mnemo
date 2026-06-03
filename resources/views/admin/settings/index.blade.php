@@ -58,7 +58,7 @@
                         </a>
                         <select id="site_logo" name="site_logo"
                                 class="form-select @error('site_logo') is-invalid @enderror">
-                            <option value="">— Aucun —</option>
+                            <option value="">- Aucun -</option>
                             @foreach($images as $image)
                                 <option value="{{ $image->file }}"
                                     {{ old('site_logo', $settings['site_logo']) === $image->file ? 'selected' : '' }}>

@@ -1,5 +1,5 @@
 <x-admin-layout>
-    <x-slot name="pageTitle">Modifier — {{ $user->name }}</x-slot>
+    <x-slot name="pageTitle">Modifier - {{ $user->name }}</x-slot>
 
     <div class="row">
         <div class="col-md-6">
@@ -48,12 +48,20 @@
                         </div>
 
                         <div class="mb-3">
-                            <div class="form-check form-switch">
-                                <input class="form-check-input" type="checkbox" name="is_admin"
-                                       id="isAdmin" value="1"
-                                       {{ old('is_admin', $user->is_admin) ? 'checked' : '' }}>
-                                <label class="form-check-label" for="isAdmin">Administrateur</label>
-                            </div>
+                            <label class="form-label" for="roleSelect">Role</label>
+                            <select class="form-select @error('role_id') is-invalid @enderror" id="roleSelect" name="role_id">
+                                <option value="">-- Aucun role --</option>
+                                @foreach($roles as $role)
+                                    <option value="{{ $role->id }}"
+                                        {{ old('role_id', $user->role_id) == $role->id ? 'selected' : '' }}>
+                                        {{ $role->name }}
+                                        @if($role->is_admin_role) (Admin) @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('role_id')
+                                <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                            @enderror
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -119,7 +127,7 @@
                         </div>
                         @php $latestBan = $user->bans()->latest()->first(); @endphp
                         @if($latestBan)
-                            <p><strong>Raison :</strong> {{ $latestBan->reason ?? '—' }}</p>
+                            <p><strong>Raison :</strong> {{ $latestBan->reason ?? '-' }}</p>
                             <p><strong>Banni par :</strong> {{ $latestBan->author->name ?? '?' }} le {{ $latestBan->created_at->format('d/m/Y') }}</p>
                             <form action="{{ route('admin.users.bans.destroy', [$user, $latestBan]) }}" method="POST" class="d-inline-block">
                                 @csrf @method('DELETE')

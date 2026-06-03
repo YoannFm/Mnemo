@@ -18,6 +18,12 @@ class LibraryController extends Controller
      */
     public function index(Request $request)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        $role = $user ? $user->role : null;
+        if ($role && !$role->can_access_library && !$user->is_admin) {
+            abort(403, 'Vous n\'avez pas acces a la bibliotheque publique.');
+        }
+
         $search = $request->input('q');
 
         $modules = Module::where('is_public', true)
