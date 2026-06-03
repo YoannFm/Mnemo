@@ -3,40 +3,131 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Image;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class SettingsController extends Controller
 {
+    // ─────────────────────────────────────────────
+    // Paramètres généraux
+    // ─────────────────────────────────────────────
+
     public function index()
     {
-        $settings = [
+        $images    = Image::orderBy('name')->get();
+        $timezones = timezone_identifiers_list();
+        $settings  = [
             'site_name'        => Setting::get('site_name', 'Mnémo'),
+            'site_url'         => Setting::get('site_url', config('app.url')),
             'site_description' => Setting::get('site_description', ''),
+            'site_keywords'    => Setting::get('site_keywords', ''),
+            'site_logo'        => Setting::get('site_logo', ''),
+            'timezone'         => Setting::get('timezone', 'Europe/Paris'),
+            'locale'           => Setting::get('locale', 'fr'),
+            'copyright'        => Setting::get('copyright', ''),
+            'site_key'         => Setting::get('site_key', ''),
+            'posts_webhook'    => Setting::get('posts_webhook', ''),
         ];
 
-        return view('admin.settings.index', compact('settings'));
+        return view('admin.settings.index', compact('settings', 'images', 'timezones'));
     }
 
     public function update(Request $request)
     {
         $request->validate([
             'site_name'        => 'required|string|max:100',
+            'site_url'         => 'nullable|url|max:255',
             'site_description' => 'nullable|string|max:500',
+            'site_keywords'    => 'nullable|string|max:500',
+            'site_logo'        => 'nullable|string|max:255',
+            'timezone'         => 'nullable|string|max:100',
+            'locale'           => 'nullable|in:fr,en',
+            'copyright'        => 'nullable|string|max:255',
+            'site_key'         => 'nullable|string|max:255',
+            'posts_webhook'    => 'nullable|url|max:500',
         ]);
 
-        Setting::set('site_name', $request->input('site_name'));
-        Setting::set('site_description', $request->input('site_description', ''));
+        $fields = [
+            'site_name', 'site_url', 'site_description', 'site_keywords',
+            'site_logo', 'timezone', 'locale', 'copyright', 'site_key', 'posts_webhook',
+        ];
+
+        foreach ($fields as $field) {
+            Setting::set($field, $request->input($field, ''));
+        }
 
         return back()->with('success', 'Paramètres sauvegardés.');
     }
+
+    // ─────────────────────────────────────────────
+    // Accueil
+    // ─────────────────────────────────────────────
+
+    public function home()
+    {
+        $home_message = Setting::get('home_message', '');
+        return view('admin.settings.home', compact('home_message'));
+    }
+
+    public function updateHome(Request $request)
+    {
+        $request->validate([
+            'home_message' => 'nullable|string',
+        ]);
+
+        Setting::set('home_message', $request->input('home_message', ''));
+
+        return back()->with('success', 'Message d\'accueil sauvegardé.');
+    }
+
+    // ─────────────────────────────────────────────
+    // Authentification
+    // ─────────────────────────────────────────────
+
+    public function auth()
+    {
+        $settings = [
+            'registration_conditions'     => Setting::get('registration_conditions', ''),
+            'registration_enabled'        => Setting::get('registration_enabled', '1'),
+            'allow_name_change'           => Setting::get('allow_name_change', '1'),
+            'allow_account_deletion'      => Setting::get('allow_account_deletion', '1'),
+            'email_verification_required' => Setting::get('email_verification_required', '0'),
+            'admin_2fa_required'          => Setting::get('admin_2fa_required', '0'),
+        ];
+
+        return view('admin.settings.auth', compact('settings'));
+    }
+
+    public function updateAuth(Request $request)
+    {
+        $booleans = [
+            'registration_enabled', 'allow_name_change', 'allow_account_deletion',
+            'email_verification_required', 'admin_2fa_required',
+        ];
+
+        Setting::set('registration_conditions', $request->input('registration_conditions', ''));
+
+        foreach ($booleans as $field) {
+            Setting::set($field, $request->boolean($field) ? '1' : '0');
+        }
+
+        return back()->with('success', 'Paramètres d\'authentification sauvegardés.');
+    }
+
+    // ─────────────────────────────────────────────
+    // Mail
+    // ─────────────────────────────────────────────
 
     public function mail()
     {
         $smtpConfig = [
             'host'     => config('mail.mailers.smtp.host', ''),
             'port'     => config('mail.mailers.smtp.port', 587),
+            'scheme'   => config('mail.mailers.smtp.scheme', null),
             'username' => config('mail.mailers.smtp.username', ''),
             'from'     => config('mail.from.address', ''),
         ];
@@ -53,6 +144,7 @@ class SettingsController extends Controller
             'from_address'  => 'required|email|max:255',
             'smtp_host'     => 'nullable|string|max:255',
             'smtp_port'     => 'nullable|integer|min:1|max:65535',
+            'smtp_scheme'   => 'nullable|string|in:,smtp,smtps',
             'smtp_username' => 'nullable|string|max:255',
             'smtp_password' => 'nullable|string|max:255',
         ]);
@@ -73,6 +165,7 @@ class SettingsController extends Controller
         $replace('MAIL_HOST',         $data['smtp_host'] ?? '');
         $replace('MAIL_PORT',         (string) ($data['smtp_port'] ?? 587));
         $replace('MAIL_USERNAME',     $data['smtp_username'] ?? '');
+        $replace('MAIL_SCHEME',       $data['smtp_scheme'] ?? '');
 
         if (!empty($data['smtp_password'])) {
             $replace('MAIL_PASSWORD', $data['smtp_password']);
@@ -80,8 +173,53 @@ class SettingsController extends Controller
 
         file_put_contents(base_path('.env'), $env);
 
+        Setting::set('mail.users_email_verification', $request->boolean('users_email_verification') ? '1' : '0');
+
         Artisan::call('config:clear');
 
         return back()->with('success', 'Configuration e-mail sauvegardée.');
+    }
+
+    public function sendTestMail()
+    {
+        try {
+            $user = Auth::user();
+            Mail::raw('Ceci est un e-mail de test envoyé depuis le panel d\'administration de Mnémo.', function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('Test e-mail — Mnémo');
+            });
+
+            return response()->json(['message' => 'E-mail de test envoyé à ' . $user->email]);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Erreur : ' . $e->getMessage()], 500);
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // Maintenance
+    // ─────────────────────────────────────────────
+
+    public function maintenance()
+    {
+        $settings = [
+            'maintenance_message' => Setting::get('maintenance_message', 'Le site est en maintenance. Merci de revenir plus tard.'),
+            'maintenance_enabled' => Setting::get('maintenance_enabled', '0'),
+            'maintenance_all'     => Setting::get('maintenance_all', '0'),
+        ];
+
+        return view('admin.settings.maintenance', compact('settings'));
+    }
+
+    public function updateMaintenance(Request $request)
+    {
+        $request->validate([
+            'maintenance_message' => 'nullable|string',
+        ]);
+
+        Setting::set('maintenance_message', $request->input('maintenance_message', ''));
+        Setting::set('maintenance_enabled', $request->boolean('maintenance_enabled') ? '1' : '0');
+        Setting::set('maintenance_all',     $request->boolean('maintenance_all') ? '1' : '0');
+
+        return back()->with('success', 'Paramètres de maintenance sauvegardés.');
     }
 }
