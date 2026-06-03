@@ -5,538 +5,356 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ isset($pageTitle) ? $pageTitle . ' - Mnémo Admin' : 'Mnémo Admin' }}</title>
+    <title>{{ isset($pageTitle) ? $pageTitle . ' — Admin' : 'Administration — Mnémo' }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --accent: #EFB702;
-            --accent-hover: #d6a502;
-            --accent-light: rgba(239,183,2,.12);
-            --text-primary: #DDDDDD;
-            --text-muted: #9ca3af;
-            --card-bg: #212227;
-            --card-border: #2E2E34;
-            --body-bg: #111113;
-            --sidebar-bg: #1a1b1f;
-            --success-color: #22c55e;
-            --danger-color: #ff5956;
+            --sidebar-width: 260px;
+            --sidebar-bg: #1e2130;
+            --sidebar-border: #2a2e45;
+            --topbar-bg: #ffffff;
+            --body-bg: #f5f7fb;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-sidebar: #9ba1b4;
+            --card-bg: #ffffff;
+            --card-border: #e9ecef;
         }
 
         * { box-sizing: border-box; }
 
         body {
-            font-family: 'Rubik', sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--body-bg);
-            color: var(--text-primary);
+            color: #495057;
             min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
+            margin: 0;
         }
 
-        ::selection { background: var(--accent); color: #212227; }
-        ::-webkit-scrollbar { width: 7px; }
-        ::-webkit-scrollbar-track { background: var(--card-bg); }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+        a { text-decoration: none; }
+
+        .wrapper { display: flex; min-height: 100vh; }
 
         /* ── Sidebar ── */
-        #admin-sidebar {
+        #sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar-bg);
+            min-height: 100vh;
             position: fixed;
             top: 0; left: 0;
-            width: 260px;
-            height: 100vh;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--card-border);
+            z-index: 200;
             display: flex;
             flex-direction: column;
-            z-index: 200;
             transition: transform .3s ease;
         }
 
-        #admin-sidebar .sidebar-logo {
-            padding: 1.5rem 1.25rem 1rem;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        #admin-sidebar .sidebar-logo a {
-            font-size: 1.3rem;
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--sidebar-border);
+            color: #fff;
+            font-size: 1rem;
             font-weight: 800;
-            color: var(--accent);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            text-decoration: none;
         }
 
-        #admin-sidebar .sidebar-logo a span { color: var(--text-primary); }
+        .sidebar-brand .brand-icon {
+            width: 32px; height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .85rem; color: #fff; font-weight: 800; flex-shrink: 0;
+        }
 
-        #admin-sidebar .sidebar-logo small {
+        .sidebar-brand .back-link {
+            font-size: .7rem;
+            color: var(--text-sidebar);
+            margin-top: .1rem;
             display: block;
+        }
+
+        .sidebar-nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
+
+        .sidebar-header {
             font-size: .65rem;
-            color: var(--text-muted);
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-
-        #admin-sidebar nav { flex: 1; padding: 1rem 0; overflow-y: auto; }
-
-        #admin-sidebar .nav-label {
-            font-size: .6rem;
             font-weight: 700;
-            letter-spacing: 2px;
             text-transform: uppercase;
-            color: var(--text-muted);
-            padding: .75rem 1.25rem .35rem;
+            letter-spacing: 1.5px;
+            color: var(--text-sidebar);
+            padding: 1rem 1.5rem .35rem;
+            opacity: .6;
+            list-style: none;
         }
 
-        #admin-sidebar .nav-link {
+        .sidebar-item { list-style: none; }
+
+        .sidebar-link {
             display: flex;
             align-items: center;
-            gap: .65rem;
-            padding: .65rem 1.25rem;
-            color: var(--text-muted);
-            font-size: .8rem;
-            font-weight: 600;
-            letter-spacing: .5px;
-            text-transform: uppercase;
-            text-decoration: none;
+            gap: .75rem;
+            padding: .6rem 1.5rem;
+            color: var(--text-sidebar);
+            font-size: .85rem;
+            font-weight: 500;
+            transition: all .2s;
             border-left: 3px solid transparent;
-            transition: color .2s, background .2s, border-color .2s;
         }
 
-        #admin-sidebar .nav-link:hover {
-            color: var(--text-primary);
-            background: rgba(239,183,2,.06);
-        }
+        .sidebar-link:hover { color: #fff; background: rgba(255,255,255,.05); }
 
-        #admin-sidebar .nav-link.active {
-            color: var(--accent);
+        .sidebar-link.active {
+            color: #fff;
+            background: rgba(59,130,246,.15);
             border-left-color: var(--accent);
-            background: rgba(239,183,2,.1);
         }
 
-        #admin-sidebar .nav-link i { font-size: 1rem; width: 1.1rem; text-align: center; }
+        .sidebar-link i { font-size: 1rem; width: 20px; text-align: center; }
 
-        #admin-sidebar .sidebar-footer {
-            padding: 1rem 1.25rem;
-            border-top: 1px solid var(--card-border);
-        }
-
-        #admin-sidebar .sidebar-footer a {
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-            color: var(--text-muted);
-            font-size: .75rem;
-            font-weight: 600;
-            letter-spacing: .5px;
-            text-transform: uppercase;
-            text-decoration: none;
-            transition: color .2s;
-        }
-
-        #admin-sidebar .sidebar-footer a:hover { color: var(--accent); }
-
-        /* ── Main area ── */
-        #admin-main {
-            margin-left: 260px;
-            min-height: 100vh;
+        /* ── Main ── */
+        .main {
+            margin-left: var(--sidebar-width);
+            flex: 1;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
         }
 
         /* ── Topbar ── */
-        #admin-topbar {
-            background: var(--sidebar-bg);
+        .topbar {
+            background: var(--topbar-bg);
             border-bottom: 1px solid var(--card-border);
-            height: 56px;
-            display: flex;
-            align-items: center;
             padding: 0 1.5rem;
-            gap: 1rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             position: sticky;
-            top: 0;
-            z-index: 100;
+            top: 0; z-index: 100;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
         }
 
-        #admin-topbar .topbar-title {
-            font-weight: 700;
-            font-size: .9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-primary);
-            flex: 1;
+        #sidebar-toggle {
+            background: none; border: none;
+            font-size: 1.3rem; color: #495057;
+            cursor: pointer; display: none; padding: .25rem;
         }
 
-        #admin-topbar .topbar-user {
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-            font-size: .75rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: .5px;
+        .topbar-title { font-weight: 700; font-size: .95rem; color: #212529; }
+
+        .topbar-user {
+            display: flex; align-items: center; gap: .5rem;
+            font-size: .85rem; font-weight: 600; color: #495057;
         }
 
-        #admin-topbar .user-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: .75rem;
-            color: #212227;
+        .topbar-avatar {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: var(--accent); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .8rem;
         }
 
-        /* ── Page content ── */
-        #admin-content {
-            flex: 1;
-            padding: 2rem 1.5rem;
+        .topbar-btn {
+            background: none;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            padding: .35rem .75rem;
+            font-size: .8rem; font-weight: 600;
+            color: #495057; cursor: pointer;
+            display: flex; align-items: center; gap: .4rem;
+            transition: all .2s;
         }
+
+        .topbar-btn:hover { background: var(--body-bg); }
+
+        /* ── Content ── */
+        .content { padding: 2rem 1.5rem; flex: 1; }
 
         /* ── Cards ── */
         .card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 4px;
-            color: var(--text-primary);
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06);
         }
 
         .card-header {
             background: transparent;
             border-bottom: 1px solid var(--card-border);
-            padding: .875rem 1.25rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            font-size: .85rem;
+            padding: 1rem 1.25rem;
+            font-weight: 700; font-size: .9rem;
         }
 
         /* ── Stat cards ── */
         .stat-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-top: 3px solid var(--accent);
-            border-radius: 4px;
+            border-radius: 10px;
             padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,.06);
         }
 
-        .stat-card .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--accent);
-            line-height: 1;
-        }
-
-        .stat-card .stat-label {
-            font-size: .7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-top: .25rem;
-        }
-
-        .stat-card i {
-            font-size: 1.75rem;
-            color: rgba(239,183,2,.3);
-        }
-
-        /* ── Buttons ── */
-        .btn {
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            border-radius: 0;
-            font-size: .8rem;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: #212227;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-            border-color: var(--accent-hover);
-            color: #212227;
-        }
-
-        .btn-outline-primary {
-            color: var(--accent);
-            border-color: var(--accent);
-        }
-
-        .btn-outline-primary:hover {
-            background: var(--accent);
-            color: #212227;
-        }
-
-        .btn-danger {
-            background: #ff5956;
-            border-color: #ff5956;
-            color: #fff;
-        }
-
-        .btn-danger:hover {
-            background: #e63e3b;
-            border-color: #e63e3b;
-        }
-
-        .btn-sm { font-size: .7rem; padding: .3rem .6rem; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: #212529; line-height: 1; }
+        .stat-label { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: #6c757d; margin-top: .35rem; }
+        .stat-icon { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
 
         /* ── Tables ── */
-        .table {
-            --bs-table-bg: transparent;
-            --bs-table-color: var(--text-primary);
-            --bs-table-border-color: var(--card-border);
-            color: var(--text-primary);
-        }
-
-        .table > :not(caption) > * > * {
-            background-color: transparent;
-            color: var(--text-primary);
-            border-bottom-color: var(--card-border);
-        }
-
         .table thead th {
-            background: var(--accent) !important;
-            color: #212227 !important;
-            border-color: var(--accent) !important;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            font-size: .75rem;
+            font-size: .75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .8px;
+            color: #6c757d; background: #f8f9fa;
+            border-bottom: 2px solid var(--card-border);
         }
 
-        .table tbody { background: var(--card-bg); }
-
-        .table tbody td {
+        /* ── Footer ── */
+        .admin-footer {
+            padding: 1rem 1.5rem; text-align: center;
+            font-size: .78rem; color: #6c757d;
+            border-top: 1px solid var(--card-border);
             background: var(--card-bg);
-            padding: 10px 16px;
-            vertical-align: middle;
         }
 
-        /* ── Forms ── */
-        .form-control, .form-select {
-            background: var(--body-bg) !important;
-            border: 2px solid var(--card-border) !important;
-            color: var(--text-primary) !important;
-            border-radius: 0;
+        /* ── Overlay mobile ── */
+        #sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.5); z-index: 199;
         }
 
-        .form-control:focus, .form-select:focus {
-            border-color: var(--accent) !important;
-            box-shadow: 0 0 0 3px var(--accent-light) !important;
-        }
-
-        .form-control::placeholder { color: var(--text-muted); }
-
-        .form-label {
-            font-weight: 600;
-            font-size: .8rem;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-            color: var(--text-muted);
-        }
-
-        /* ── Alerts ── */
-        .alert-success {
-            background: rgba(34,197,94,.1);
-            border-color: rgba(34,197,94,.3);
-            color: var(--success-color);
-        }
-
-        .alert-danger {
-            background: rgba(239,68,68,.1);
-            border-color: rgba(239,68,68,.3);
-            color: var(--danger-color);
-        }
-
-        /* ── Badges ── */
-        .badge-admin {
-            background: rgba(239,183,2,.15);
-            color: var(--accent);
-            font-size: .65rem;
-            padding: .2em .55em;
-            border-radius: 3px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-        }
-
-        /* ── Hamburger ── */
-        #sidebar-toggle {
-            display: none;
-            background: none;
-            border: 1px solid rgba(239,183,2,.4);
-            color: var(--accent);
-            padding: .3rem .55rem;
-            cursor: pointer;
-            border-radius: 0;
-        }
-
-        /* ── Responsive ── */
-        @media (max-width: 991px) {
-            #admin-sidebar {
-                transform: translateX(-100%);
-            }
-
-            #admin-sidebar.open {
-                transform: translateX(0);
-            }
-
-            #admin-main {
-                margin-left: 0;
-            }
-
-            #sidebar-toggle {
-                display: flex;
-                align-items: center;
-            }
-
-            #sidebar-overlay {
-                display: none;
-                position: fixed;
-                inset: 0;
-                background: rgba(0,0,0,.5);
-                z-index: 199;
-            }
-
-            #sidebar-overlay.open {
-                display: block;
-            }
+        @media (max-width: 991.98px) {
+            #sidebar { transform: translateX(-100%); }
+            #sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; }
+            #sidebar-toggle { display: block; }
+            #sidebar-overlay.open { display: block; }
         }
     </style>
 </head>
 <body>
 
-{{-- Sidebar overlay (mobile) --}}
-<div id="sidebar-overlay"></div>
+<div class="wrapper">
 
-{{-- ─── Sidebar ──────────────────────────────────────── --}}
-<aside id="admin-sidebar">
-    <div class="sidebar-logo">
-        <a href="{{ route('admin.dashboard') }}">Mn<span>émo</span></a>
-        <small>Administration</small>
-    </div>
+    {{-- ── Sidebar ── --}}
+    <nav id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="bi bi-speedometer2"></i></div>
+            <div>
+                <div>Mnémo Admin</div>
+                <a href="{{ route('dashboard') }}" class="back-link">
+                    <i class="bi bi-arrow-left me-1"></i>Retour au site
+                </a>
+            </div>
+        </div>
 
-    <nav>
-        <div class="nav-label">Menu</div>
+        <ul class="sidebar-nav list-unstyled">
 
-        <a href="{{ route('admin.dashboard') }}"
-           class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-            <i class="bi bi-speedometer2"></i> Tableau de bord
-        </a>
+            <li class="sidebar-header">Général</li>
 
-        <a href="{{ route('admin.users.index') }}"
-           class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-            <i class="bi bi-people"></i> Utilisateurs
-        </a>
+            <li class="sidebar-item">
+                <a href="{{ route('admin.dashboard') }}"
+                   class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2"></i> Tableau de bord
+                </a>
+            </li>
 
-        <a href="{{ route('admin.modules.index') }}"
-           class="nav-link {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}">
-            <i class="bi bi-collection"></i> Modules publics
-        </a>
+            <li class="sidebar-header">Contenu</li>
 
-        <a href="{{ route('admin.navbar.index') }}"
-           class="nav-link {{ request()->routeIs('admin.navbar.*') ? 'active' : '' }}">
-            <i class="bi bi-list-ul"></i> Navigation
-        </a>
+            <li class="sidebar-item">
+                <a href="{{ route('admin.users.index') }}"
+                   class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                    <i class="bi bi-people"></i> Utilisateurs
+                </a>
+            </li>
 
-        <a href="{{ route('admin.settings.index') }}"
-           class="nav-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
-            <i class="bi bi-gear"></i> Paramètres
-        </a>
+            <li class="sidebar-item">
+                <a href="{{ route('admin.modules.index') }}"
+                   class="sidebar-link {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}">
+                    <i class="bi bi-collection"></i> Modules publics
+                </a>
+            </li>
+
+            <li class="sidebar-header">Paramètres</li>
+
+            <li class="sidebar-item">
+                <a href="{{ route('admin.navbar.index') }}"
+                   class="sidebar-link {{ request()->routeIs('admin.navbar.*') ? 'active' : '' }}">
+                    <i class="bi bi-list-ul"></i> Navigation
+                </a>
+            </li>
+
+            <li class="sidebar-item">
+                <a href="{{ route('admin.settings.index') }}"
+                   class="sidebar-link {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                    <i class="bi bi-gear"></i> Paramètres
+                </a>
+            </li>
+
+        </ul>
     </nav>
 
-    <div class="sidebar-footer">
-        <a href="{{ route('dashboard') }}">
-            <i class="bi bi-arrow-left-circle"></i> Retour au site
-        </a>
-    </div>
-</aside>
+    <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
-{{-- ─── Main ─────────────────────────────────────────── --}}
-<div id="admin-main">
+    {{-- ── Main ── --}}
+    <div class="main">
 
-    {{-- Topbar --}}
-    <div id="admin-topbar">
-        <button id="sidebar-toggle" type="button" aria-label="Menu">
-            <i class="bi bi-list" style="font-size:1.2rem;"></i>
-        </button>
-
-        <div class="topbar-title">
-            {{ $pageTitle ?? 'Administration' }}
-        </div>
-
-        <div class="topbar-user">
-            <div class="user-avatar">
-                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-            </div>
-            <span class="d-none d-sm-inline">{{ Auth::user()->name }}</span>
-
-            <form method="POST" action="{{ route('logout') }}" class="ms-2">
-                @csrf
-                <button type="submit" style="background:none;border:none;color:#ff5956;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;padding:0;" title="Déconnexion">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span class="d-none d-sm-inline">Déco.</span>
+        <div class="topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button id="sidebar-toggle" onclick="toggleSidebar()">
+                    <i class="bi bi-list"></i>
                 </button>
-            </form>
+                <span class="topbar-title">{{ $pageTitle ?? 'Administration' }}</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                @auth
+                <div class="topbar-user">
+                    <div class="topbar-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+                    {{ Auth::user()->name }}
+                </div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="topbar-btn">
+                        <i class="bi bi-box-arrow-right"></i> Déconnexion
+                    </button>
+                </form>
+                @endauth
+            </div>
         </div>
+
+        <div class="px-4 pt-3">
+            @if (session('success'))
+                <div class="alert alert-success d-flex align-items-center gap-2 py-2">
+                    <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="alert alert-danger d-flex align-items-center gap-2 py-2">
+                    <i class="bi bi-exclamation-triangle-fill"></i> {{ session('error') }}
+                </div>
+            @endif
+        </div>
+
+        <div class="content">
+            {{ $slot }}
+        </div>
+
+        <div class="admin-footer">Mnémo Administration</div>
     </div>
-
-    {{-- Flash messages --}}
-    <div class="px-4 pt-3">
-        @if (session('success'))
-            <div class="alert alert-success d-flex align-items-center gap-2 py-2">
-                <i class="bi bi-check-circle-fill"></i>
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-danger d-flex align-items-center gap-2 py-2">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                {{ session('error') }}
-            </div>
-        @endif
-    </div>
-
-    {{-- Content --}}
-    <div id="admin-content">
-        {{ $slot }}
-    </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const toggle = document.getElementById('sidebar-toggle');
-    const sidebar = document.getElementById('admin-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-
-    function openSidebar() {
-        sidebar.classList.add('open');
-        overlay.classList.add('open');
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('sidebar-overlay').classList.toggle('open');
     }
-
     function closeSidebar() {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('open');
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.remove('open');
     }
-
-    if (toggle) toggle.addEventListener('click', openSidebar);
-    if (overlay) overlay.addEventListener('click', closeSidebar);
 </script>
-
 </body>
 </html>
