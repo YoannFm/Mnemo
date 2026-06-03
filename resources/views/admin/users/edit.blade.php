@@ -103,6 +103,10 @@
                             <i class="bi bi-save"></i> Sauvegarder
                         </button>
 
+                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#notificationModal">
+                            <i class="bi bi-megaphone"></i> Envoyer une notification
+                        </button>
+
                         @if ($user->id !== Auth::id() && !$user->is_banned)
                             <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#banModal">
                                 <i class="bi bi-slash-circle"></i> Bannir
@@ -266,5 +270,45 @@
             </div>
         </div>
     @endif
+
+    {{-- Modal notification --}}
+    <div class="modal fade" id="notificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Envoyer une notification a {{ $user->name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{{ route('admin.notifications.store') }}">
+                    @csrf
+                    <input type="hidden" name="target" value="user">
+                    <input type="hidden" name="user_id" value="{{ $user->id }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Titre *</label>
+                            <input type="text" name="title" class="form-control" required maxlength="200">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Message</label>
+                            <textarea name="message" class="form-control" rows="3" maxlength="1000"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type</label>
+                            <select name="type" class="form-select">
+                                <option value="info">Information</option>
+                                <option value="success">Succes</option>
+                                <option value="warning">Avertissement</option>
+                                <option value="danger">Danger</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Envoyer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 </x-admin-layout>
