@@ -282,5 +282,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+@stack('footer-scripts')
 </body>
 </html>
