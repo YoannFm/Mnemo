@@ -65,6 +65,30 @@
             </div>
         </div>
 
+        {{-- ── Double authentification (2FA) ── --}}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-lock-fill" style="color:var(--accent);"></i>
+                    <span class="fw-semibold">Double authentification (2FA)</span>
+                </div>
+                <div class="card-body p-4">
+                    <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:1.25rem;">
+                        @if(auth()->user()->hasTwoFactorAuth())
+                            <i class="bi bi-check-circle-fill me-1" style="color:#22c55e;"></i>
+                            La double authentification est <strong style="color:#22c55e;">activée</strong>.
+                        @else
+                            <i class="bi bi-shield-x me-1"></i>
+                            La double authentification n'est pas activée.
+                        @endif
+                    </p>
+                    <a href="{{ route('profile.2fa.show') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-shield-lock me-1"></i>Gérer le 2FA
+                    </a>
+                </div>
+            </div>
+        </div>
+
         {{-- ── Changer le mot de passe ── --}}
         <div class="col-12">
             <div class="card">
