@@ -1,83 +1,132 @@
 <x-admin-layout>
     <x-slot name="pageTitle">Tableau de bord</x-slot>
 
-    {{-- Stat cards --}}
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-lg-3">
-            <div class="stat-card d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="stat-value">{{ $stats['users'] }}</div>
-                    <div class="stat-label">Utilisateurs</div>
+    <div class="row">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title mb-0">Utilisateurs</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-primary h3">
+                                <i class="bi bi-people"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">{{ $stats['users'] }}</h1>
                 </div>
-                <i class="bi bi-people"></i>
             </div>
         </div>
-        <div class="col-6 col-lg-3">
-            <div class="stat-card d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="stat-value">{{ $stats['modules'] }}</div>
-                    <div class="stat-label">Modules</div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title mb-0">Modules publics</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-primary h3">
+                                <i class="bi bi-collection"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">{{ $stats['modules'] }}</h1>
                 </div>
-                <i class="bi bi-collection"></i>
             </div>
         </div>
-        <div class="col-6 col-lg-3">
-            <div class="stat-card d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="stat-value">{{ $stats['items'] }}</div>
-                    <div class="stat-label">Items</div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title mb-0">Items</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-primary h3">
+                                <i class="bi bi-card-list"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">{{ $stats['items'] }}</h1>
                 </div>
-                <i class="bi bi-card-list"></i>
             </div>
         </div>
-        <div class="col-6 col-lg-3">
-            <div class="stat-card d-flex justify-content-between align-items-center">
-                <div>
-                    <div class="stat-value">{{ $stats['tests'] }}</div>
-                    <div class="stat-label">Tests réalisés</div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col mt-0">
+                            <h5 class="card-title mb-0">Tests réalisés</h5>
+                        </div>
+                        <div class="col-auto">
+                            <div class="stat text-primary h3">
+                                <i class="bi bi-clipboard-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <h1 class="mt-1 mb-3">{{ $stats['tests'] }}</h1>
                 </div>
-                <i class="bi bi-clipboard-check"></i>
             </div>
         </div>
     </div>
 
-    {{-- Latest users --}}
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <span><i class="bi bi-people me-2"></i>Derniers inscrits</span>
-            <a href="{{ route('admin.users.index') }}" class="btn btn-sm btn-outline-primary">Voir tous</a>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nom</th>
-                        <th>Email</th>
-                        <th>Admin</th>
-                        <th>Inscription</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($latestUsers as $user)
-                        <tr>
-                            <td>{{ $user->id }}</td>
-                            <td>{{ $user->name }}</td>
-                            <td class="text-muted">{{ $user->email }}</td>
-                            <td>
-                                @if ($user->is_admin)
-                                    <span class="badge-admin">Admin</span>
-                                @endif
-                            </td>
-                            <td class="text-muted" style="font-size:.8rem;">{{ $user->created_at->format('d/m/Y') }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-3">Aucun utilisateur.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Derniers inscrits</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Nom</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Rôle</th>
+                                    <th scope="col">Inscription</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($latestUsers as $user)
+                                    <tr>
+                                        <th scope="row">{{ $user->id }}</th>
+                                        <td>{{ $user->name }}</td>
+                                        <td>{{ $user->email }}</td>
+                                        <td>
+                                            @if ($user->is_admin)
+                                                <span class="badge bg-primary">Admin</span>
+                                            @else
+                                                <span class="badge bg-secondary">Utilisateur</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $user->created_at->format('d/m/Y') }}</td>
+                                        <td>
+                                            <a href="{{ route('admin.users.edit', $user) }}" class="mx-1" title="Modifier" data-bs-toggle="tooltip">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-3">Aucun utilisateur.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <a class="btn btn-primary" href="{{ route('admin.users.index') }}">
+                        <i class="bi bi-people"></i> Voir tous les utilisateurs
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </x-admin-layout>
