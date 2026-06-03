@@ -145,6 +145,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::post('/navbar/order', [NavbarController::class, 'updateOrder'])->name('navbar.order');
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/settings/mail', [SettingsController::class, 'mail'])->name('settings.mail');
+    Route::post('/settings/mail', [SettingsController::class, 'updateMail'])->name('settings.mail.update');
 });
 
 require __DIR__.'/auth.php';
