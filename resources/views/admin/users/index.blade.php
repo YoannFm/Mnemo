@@ -93,52 +93,16 @@
                 <a class="btn btn-primary" href="{{ route('admin.users.create') }}">
                     <i class="bi bi-plus-lg"></i> Ajouter
                 </a>
-                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#notifyAllModal">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#notificationModal">
                     <i class="bi bi-megaphone"></i> Envoyer une notification
                 </button>
             </div>
         </div>
     </div>
 
-    {{-- Modal notification a tous les utilisateurs --}}
-    <div class="modal fade" id="notifyAllModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Envoyer une notification a tous les utilisateurs</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="POST" action="{{ route('admin.notifications.store') }}">
-                    @csrf
-                    <input type="hidden" name="target" value="all">
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Titre *</label>
-                            <input type="text" name="title" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Message</label>
-                            <textarea name="message" class="form-control" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Type</label>
-                            <select name="type" class="form-select">
-                                <option value="info">Information</option>
-                                <option value="success">Succes</option>
-                                <option value="warning">Avertissement</option>
-                                <option value="danger">Danger</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-send"></i> Envoyer a tous
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    @include('admin.users._notify', [
+        'route' => route('admin.notifications.store'),
+        'all'   => true,
+    ])
 
 </x-admin-layout>
