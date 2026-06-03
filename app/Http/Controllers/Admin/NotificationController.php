@@ -24,9 +24,8 @@ class NotificationController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title'   => 'required|string|max:200',
-            'message' => 'nullable|string|max:1000',
-            'type'    => 'required|in:info,success,warning,danger',
+            'content' => 'required|string|max:200',
+            'level'   => 'required|in:info,success,warning,danger',
             'target'  => 'required|in:all,user',
             'user_id' => 'required_if:target,user|nullable|exists:users,id',
         ]);
@@ -36,9 +35,8 @@ class NotificationController extends Controller
                 foreach ($users as $user) {
                     UserNotification::create([
                         'user_id' => $user->id,
-                        'title'   => $data['title'],
-                        'message' => $data['message'] ?? null,
-                        'type'    => $data['type'],
+                        'title'   => $data['content'],
+                        'type'    => $data['level'],
                     ]);
                 }
             });
@@ -47,9 +45,8 @@ class NotificationController extends Controller
         } else {
             UserNotification::create([
                 'user_id' => $data['user_id'],
-                'title'   => $data['title'],
-                'message' => $data['message'] ?? null,
-                'type'    => $data['type'],
+                'title'   => $data['content'],
+                'type'    => $data['level'],
             ]);
             return redirect()->route('admin.notifications.index')
                 ->with('success', 'Notification envoyee.');
