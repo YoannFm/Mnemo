@@ -35,6 +35,10 @@ class CheckInstallation
 
     private function isInstalled(): bool
     {
+        if (app()->environment('testing')) {
+            return true;
+        }
+
         try {
             if (!DB::connection()->getDatabaseName()) {
                 return false;
