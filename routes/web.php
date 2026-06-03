@@ -142,6 +142,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/bans', [\App\Http\Controllers\Admin\BanController::class, 'index'])->name('bans.index');
     // Roles
     Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+    Route::post('/roles/order', [\App\Http\Controllers\Admin\RoleController::class, 'updateOrder'])->name('roles.order');
     // Modules
     Route::get('/modules', [AdminModuleController::class, 'index'])->name('modules.index');
     Route::delete('/modules/{module}', [AdminModuleController::class, 'destroy'])->name('modules.destroy');

@@ -16,7 +16,8 @@ class RoleController extends Controller
 
     public function create()
     {
-        return view('admin.roles.create');
+        $role = new Role();
+        return view('admin.roles.create', compact('role'));
     }
 
     public function store(Request $request)
@@ -24,6 +25,7 @@ class RoleController extends Controller
         $data = $request->validate([
             'name'               => 'required|string|max:50',
             'color'              => 'required|string|max:7',
+            'icon'               => 'nullable|string|max:50',
             'power'              => 'required|integer|min:0',
             'is_admin_role'      => 'sometimes|boolean',
             'can_create_module'  => 'sometimes|boolean',
@@ -56,6 +58,7 @@ class RoleController extends Controller
         $data = $request->validate([
             'name'               => 'required|string|max:50',
             'color'              => 'required|string|max:7',
+            'icon'               => 'nullable|string|max:50',
             'power'              => 'required|integer|min:0',
             'is_admin_role'      => 'sometimes|boolean',
             'can_create_module'  => 'sometimes|boolean',
@@ -83,5 +86,14 @@ class RoleController extends Controller
         LogHelper::log('deleted_role', 'role', $role->id, ['name' => $role->name]);
         $role->delete();
         return redirect()->route('admin.roles.index')->with('success', 'Role supprime.');
+    }
+
+    public function updateOrder(Request $request)
+    {
+        $order = $request->input('order', []);
+        foreach ($order as $index => $id) {
+            Role::where('id', $id)->update(['power' => count($order) - $index]);
+        }
+        return response()->json(['success' => true]);
     }
 }
