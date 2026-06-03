@@ -117,6 +117,16 @@ class InstallController extends Controller
             DB::table('installation')->truncate();
             DB::table('installation')->insert(['completed' => true]);
 
+            // Marquer l'installation comme terminée dans .env
+            $envPath = base_path('.env');
+            $env = file_get_contents($envPath);
+            if (preg_match('/^APP_INSTALLED=/m', $env)) {
+                $env = preg_replace('/^APP_INSTALLED=.*/m', 'APP_INSTALLED=true', $env);
+            } else {
+                $env .= "\nAPP_INSTALLED=true\n";
+            }
+            file_put_contents($envPath, $env);
+
             session(['installation_completed' => true]);
 
             return redirect('/login')->with('success', 'Installation réussie ! Bienvenue sur Mnemo.');
