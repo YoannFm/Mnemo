@@ -32,12 +32,9 @@
         @if ($post->allow_reactions)
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="d-flex gap-2 flex-wrap" id="reactions-bar">
+                    <div class="d-flex gap-2 flex-wrap align-items-center" id="reactions-bar">
                         @foreach(['👍','❤️','😂','😮','😢','🔥'] as $emoji)
-                            @php
-                                $count = $reactions[$emoji] ?? 0;
-                                $active = in_array($emoji, $userReactions);
-                            @endphp
+                            @php $count = $reactions[$emoji] ?? 0; $active = in_array($emoji, $userReactions); @endphp
                             <button type="button"
                                     class="btn btn-sm reaction-btn {{ $active ? 'btn-primary' : 'btn-outline-secondary' }}"
                                     data-emoji="{{ $emoji }}"
@@ -46,6 +43,24 @@
                                 {{ $emoji }} <span class="reaction-count">{{ $count > 0 ? $count : '' }}</span>
                             </button>
                         @endforeach
+
+                        {{-- Bouton + plus d'emojis --}}
+                        @auth
+                        <div class="position-relative">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="emoji-more-btn" title="Plus de réactions">
+                                +
+                            </button>
+                            <div id="emoji-picker" class="position-absolute d-none"
+                                 style="bottom:110%;left:0;background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:.5rem;z-index:100;display:flex;flex-wrap:wrap;gap:.25rem;width:220px;">
+                                @foreach(['😍','🎉','👏','🤔','😡','💯','🙏','😱','🤩','💪','🥳','😴','🤣','👀','💀','🫡','😎','🤯','❤️‍🔥','⚡'] as $e)
+                                    <button type="button" class="btn btn-sm btn-outline-secondary reaction-btn p-1"
+                                            data-emoji="{{ $e }}"
+                                            data-url="{{ route('posts.react', $post) }}"
+                                            style="font-size:1.1rem;line-height:1;">{{ $e }}</button>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endauth
                     </div>
                     @guest
                         <small class="text-muted mt-2 d-block">Connectez-vous pour réagir.</small>
@@ -54,28 +69,58 @@
             </div>
 
             <script>
-            document.querySelectorAll('.reaction-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var emoji = this.dataset.emoji;
-                    var url = this.dataset.url;
-                    var btnEl = this;
-                    fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                        },
-                        body: JSON.stringify({emoji: emoji})
-                    })
-                    .then(function(r){ return r.json(); })
-                    .then(function(data) {
+            var reactUrl = "{{ route('posts.react', $post) }}";
+            var csrf = document.querySelector('meta[name="csrf-token"]').content;
+
+            function sendReaction(emoji, btnEl) {
+                fetch(reactUrl, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                    body: JSON.stringify({emoji: emoji})
+                })
+                .then(function(r){ return r.json(); })
+                .then(function(data) {
+                    // Cherche le bouton existant dans la barre principale
+                    var existing = document.querySelector('#reactions-bar .reaction-btn[data-emoji="' + emoji + '"]');
+                    if (existing && existing !== btnEl) {
+                        existing.classList.toggle('btn-primary', data.active);
+                        existing.classList.toggle('btn-outline-secondary', !data.active);
+                        existing.querySelector('.reaction-count').textContent = data.count > 0 ? data.count : '';
+                    } else if (!existing) {
+                        // Ajoute un nouveau bouton dans la barre si emoji inexistant
+                        var bar = document.getElementById('reactions-bar');
+                        var newBtn = document.createElement('button');
+                        newBtn.type = 'button';
+                        newBtn.className = 'btn btn-sm reaction-btn ' + (data.active ? 'btn-primary' : 'btn-outline-secondary');
+                        newBtn.dataset.emoji = emoji;
+                        newBtn.dataset.url = reactUrl;
+                        newBtn.innerHTML = emoji + ' <span class="reaction-count">' + (data.count > 0 ? data.count : '') + '</span>';
+                        newBtn.addEventListener('click', function(){ sendReaction(this.dataset.emoji, this); });
+                        bar.insertBefore(newBtn, document.getElementById('emoji-more-btn').parentElement);
+                    } else {
                         btnEl.classList.toggle('btn-primary', data.active);
                         btnEl.classList.toggle('btn-outline-secondary', !data.active);
-                        btnEl.querySelector('.reaction-count').textContent = data.count > 0 ? data.count : '';
-                    });
+                        var countEl = btnEl.querySelector('.reaction-count');
+                        if (countEl) countEl.textContent = data.count > 0 ? data.count : '';
+                    }
+                    document.getElementById('emoji-picker').classList.add('d-none');
                 });
+            }
+
+            document.querySelectorAll('.reaction-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() { sendReaction(this.dataset.emoji, this); });
             });
+
+            var moreBtn = document.getElementById('emoji-more-btn');
+            var picker = document.getElementById('emoji-picker');
+            if (moreBtn) {
+                moreBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    picker.classList.toggle('d-none');
+                });
+                document.addEventListener('click', function() { picker.classList.add('d-none'); });
+                picker.addEventListener('click', function(e) { e.stopPropagation(); });
+            }
             </script>
         @endif
 
@@ -88,11 +133,47 @@
                 <div class="card-body">
                     @forelse($comments as $comment)
                         <div class="mb-3 pb-3 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color:var(--card-border)!important;">
-                            <div class="d-flex justify-content-between mb-1">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
                                 <strong style="font-size:.875rem;">{{ $comment->user->name }}</strong>
-                                <small style="color:var(--text-muted);">{{ $comment->created_at->format('d/m/Y H:i') }}</small>
+                                <div class="d-flex align-items-center gap-2">
+                                    <small style="color:var(--text-muted);">
+                                        {{ $comment->created_at->format('d/m/Y H:i') }}
+                                        @if($comment->edited_at)
+                                            · <em style="font-size:.75rem;">modifié</em>
+                                        @endif
+                                    </small>
+                                    @auth
+                                        @if(Auth::id() === $comment->user_id && !$comment->is_deleted)
+                                            <button type="button" class="btn btn-link p-0 edit-comment-btn"
+                                                    data-id="{{ $comment->id }}"
+                                                    data-content="{{ $comment->content }}"
+                                                    data-url="{{ route('posts.comment.update', $comment) }}"
+                                                    title="Modifier" style="font-size:.8rem;color:var(--text-muted);">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <form method="POST" action="{{ route('posts.comment.delete', $comment) }}" class="d-inline"
+                                                  onsubmit="return confirm('Supprimer ce commentaire ?')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn btn-link p-0" title="Supprimer"
+                                                        style="font-size:.8rem;color:var(--text-muted);">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        @elseif(Auth::id() !== $comment->user_id && !$comment->is_deleted)
+                                            <button type="button" class="btn btn-link p-0 report-btn"
+                                                    data-url="{{ route('posts.comment.report', $comment) }}"
+                                                    title="Signaler" style="font-size:.8rem;color:var(--text-muted);">
+                                                <i class="bi bi-flag"></i>
+                                            </button>
+                                        @endif
+                                    @endauth
+                                </div>
                             </div>
-                            <p style="font-size:.875rem;margin:0;">{{ $comment->content }}</p>
+                            @if($comment->is_deleted)
+                                <p style="font-size:.875rem;margin:0;color:var(--text-muted);font-style:italic;">[Commentaire supprimé]</p>
+                            @else
+                                <p style="font-size:.875rem;margin:0;" id="comment-text-{{ $comment->id }}">{{ $comment->content }}</p>
+                            @endif
                         </div>
                     @empty
                         <p style="color:var(--text-muted);font-size:.875rem;margin:0;">Aucun commentaire pour l'instant.</p>
@@ -123,6 +204,57 @@
                     </div>
                 @endauth
             </div>
+
+            <script>
+            document.querySelectorAll('.report-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var url = this.dataset.url;
+                    var el = this;
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept':'application/json'}
+                    })
+                    .then(function(r){ return r.json(); })
+                    .then(function() {
+                        el.innerHTML = '<i class="bi bi-flag-fill text-danger"></i>';
+                        el.disabled = true;
+                        el.title = 'Signalement envoyé';
+                    });
+                });
+            });
+            </script>
         @endif
     </div>
+
+    {{-- Modale modification commentaire --}}
+    <div class="modal fade" id="editCommentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background:var(--card-bg);color:var(--text-primary);">
+                <form method="POST" id="editCommentForm">
+                    @csrf @method('PATCH')
+                    <div class="modal-header" style="border-color:var(--card-border);">
+                        <h6 class="modal-title">Modifier le commentaire</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <textarea name="content" id="editCommentContent" class="form-control" rows="4" required maxlength="1000"></textarea>
+                    </div>
+                    <div class="modal-footer" style="border-color:var(--card-border);">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary btn-sm">Enregistrer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.querySelectorAll('.edit-comment-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.getElementById('editCommentContent').value = this.dataset.content;
+            document.getElementById('editCommentForm').action = this.dataset.url;
+            new bootstrap.Modal(document.getElementById('editCommentModal')).show();
+        });
+    });
+    </script>
 </x-app-layout>
