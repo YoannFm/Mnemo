@@ -142,6 +142,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
     Route::get('/users/import', [AdminUserController::class, 'importForm'])->name('users.import');
+    Route::get('/users/export-all', [AdminUserController::class, 'exportAll'])->name('users.export-all');
     Route::post('/users/import', [AdminUserController::class, 'importStore'])->name('users.import.store');
     Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
     Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
