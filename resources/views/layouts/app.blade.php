@@ -576,29 +576,41 @@
             </div>
 
             @auth
-            <div class="ms-auto d-flex align-items-center">
+            <div class="ms-auto d-flex align-items-center gap-1">
                 <button id="theme-toggle"
                         style="background:none;border:none;color:var(--text-muted);font-size:1rem;cursor:pointer;padding:0 .5rem;"
                         title="Changer le theme" aria-label="Basculer theme">
                     <i class="bi bi-sun-fill"></i>
                 </button>
-                <a class="nav-link position-relative me-1" href="{{ route('notifications.index') }}" title="Notifications">
-                    <i class="bi bi-bell-fill" style="color:var(--text-muted);"></i>
-                    @if(($unreadNotifications ?? 0) > 0)
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.6rem;">
-                            {{ $unreadNotifications }}
-                        </span>
-                    @endif
-                </a>
-                <div class="nav-sep"></div>
-                <div class="user-avatar mx-2">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+
                 <div class="dropdown">
-                    <button class="d-flex align-items-center gap-1"
-                            style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0 .25rem;"
+                    <button class="d-flex align-items-center gap-2 px-2"
+                            style="background:none;border:none;cursor:pointer;"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-chevron-down" style="font-size:.75rem;"></i>
+                        <div class="position-relative">
+                            <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+                            @if(($unreadNotifications ?? 0) > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.55rem;">
+                                    {{ $unreadNotifications }}
+                                </span>
+                            @endif
+                        </div>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
+                        <li>
+                            <span class="dropdown-item" style="color:var(--text-muted);font-size:.75rem;cursor:default;pointer-events:none;">
+                                {{ Auth::user()->name }}
+                            </span>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('notifications.index') }}">
+                                <i class="bi bi-bell"></i> Notifications
+                                @if(($unreadNotifications ?? 0) > 0)
+                                    <span class="badge bg-danger ms-1">{{ $unreadNotifications }}</span>
+                                @endif
+                            </a>
+                        </li>
                         <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person"></i> Mon profil</a></li>
                         @if(Auth::user()->isAdmin())
                         <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}" style="color:var(--accent);"><i class="bi bi-shield-check"></i> Administration</a></li>
