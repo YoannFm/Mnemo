@@ -205,6 +205,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/{report}/sanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markSanctioned'])->name('reports.sanctioned');
     Route::post('/reports/{report}/unsanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markUnsanctioned'])->name('reports.unsanctioned');
+    Route::post('/reports/{report}/delete-comment', [\App\Http\Controllers\Admin\ReportController::class, 'deleteComment'])->name('reports.delete-comment');
+    Route::post('/reports/{report}/mute-user', [\App\Http\Controllers\Admin\ReportController::class, 'muteUser'])->name('reports.mute-user');
     // Historique des commentaires
     Route::get('/comment-history', [\App\Http\Controllers\Admin\CommentHistoryController::class, 'index'])->name('comment-history.index');
     // Sanctions

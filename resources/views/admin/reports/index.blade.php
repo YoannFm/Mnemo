@@ -100,6 +100,57 @@
                                                 <i class="bi bi-person-x"></i>
                                             </a>
                                         @endif
+                                        @if($report->postComment && !$report->postComment->is_deleted)
+                                            <form method="POST" action="{{ route('admin.reports.delete-comment', $report) }}" class="d-inline"
+                                                  onsubmit="return confirm('Supprimer ce commentaire définitivement ?')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Supprimer le commentaire">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if($report->postComment && $report->postComment->user)
+                                            <button type="button" class="btn btn-sm btn-warning" title="Muter l'utilisateur"
+                                                    data-bs-toggle="modal" data-bs-target="#muteModal{{ $report->id }}">
+                                                <i class="bi bi-mic-mute"></i>
+                                            </button>
+                                            <!-- Modal mute pour le signalement {{ $report->id }} -->
+                                            <div class="modal fade" id="muteModal{{ $report->id }}" tabindex="-1" aria-labelledby="muteModalLabel{{ $report->id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <form method="POST" action="{{ route('admin.reports.mute-user', $report) }}">
+                                                            @csrf
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="muteModalLabel{{ $report->id }}">
+                                                                    Muter {{ $report->postComment->user->name }}
+                                                                </h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-bold">Durée</label>
+                                                                    <select name="duration" class="form-select" required>
+                                                                        <option value="1day">1 jour</option>
+                                                                        <option value="7days">7 jours</option>
+                                                                        <option value="30days">30 jours</option>
+                                                                        <option value="permanent">Définitif</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-bold">Raison</label>
+                                                                    <textarea name="reason" class="form-control" rows="3" maxlength="500" required
+                                                                              placeholder="Motif du mute..."></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                                <button type="submit" class="btn btn-warning">Confirmer le mute</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
