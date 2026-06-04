@@ -73,10 +73,12 @@
             Créer mon compte
         </button>
 
-        {{-- Lien vers la connexion --}}
-        <div class="text-center" style="font-size:.82rem;">
-            Déjà inscrit ?
-            <a href="{{ route('login') }}">Se connecter</a>
+        {{-- Liens secondaires --}}
+        <div class="d-flex justify-content-between" style="font-size:.82rem;">
+            <a href="{{ route('login') }}">Déjà inscrit ?</a>
+            @if (Route::has('password.request'))
+                <a href="{{ route('password.request') }}" style="color:var(--text-muted);">Mot de passe oublié ?</a>
+            @endif
         </div>
 
     </form>
