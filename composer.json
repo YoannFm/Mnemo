@@ -11,7 +11,8 @@
         "intervention/image": "^4.1",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
-        "pragmarx/google2fa-laravel": "^3.0"
+        "pragmarx/google2fa-laravel": "^3.0",
+        "league/commonmark": "^2.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
