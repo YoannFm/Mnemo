@@ -34,7 +34,7 @@
     <div class="row">
 
         {{-- Colonne gauche : Modifier le profil --}}
-        <div class="col-md-6">
+        <div class="col-12 col-lg-6">
             <div class="card shadow mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Modifier le profil</h5>
@@ -45,7 +45,7 @@
                         @csrf
 
                         <div class="row">
-                            <div class="col-md-9">
+                            <div class="col-12 col-sm-9">
                                 <div class="mb-3">
                                     <label class="form-label" for="nameInput">Nom</label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror"
@@ -67,7 +67,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-3 text-center d-flex align-items-center justify-content-center">
+                            <div class="col-12 col-sm-3 text-center d-flex align-items-center justify-content-center">
                                 <div style="width:80px;height:80px;border-radius:50%;background:#266fd9;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;font-weight:700;">
                                     {{ strtoupper(substr($user->name, 0, 1)) }}
                                 </div>
@@ -138,7 +138,7 @@
         </div>
 
         {{-- Colonne droite : Informations --}}
-        <div class="col-md-6">
+        <div class="col-12 col-lg-6">
             <div class="card shadow mb-4">
                 <div class="card-header">
                     <h5 class="card-title mb-0">Informations de l'utilisateur</h5>

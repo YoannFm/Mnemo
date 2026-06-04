@@ -261,6 +261,47 @@
 
         @media (max-width: 768px) { .btn { min-height: 44px; } }
 
+        /* ── Mobile navbar ── */
+        @media (max-width: 991.98px) {
+            #main-header {
+                height: auto;
+                min-height: 56px;
+            }
+            #main-header .navbar { height: auto; }
+            .nav-link-custom {
+                height: auto;
+                padding: .75rem 1.25rem;
+                border-top: none;
+                border-bottom: 1px solid rgba(239,183,2,.1);
+                border-left: 3px solid transparent;
+                font-size: .8rem;
+            }
+            .nav-link-custom.active {
+                border-top: none;
+                border-left-color: var(--accent);
+            }
+            .nav-link-custom:hover { border-top-color: transparent; }
+            #navbarMain {
+                background: var(--header-bg);
+                border-top: 1px solid var(--card-border);
+                padding: .25rem 0 .5rem;
+                width: 100%;
+            }
+            #navbarMain .ms-lg-auto {
+                padding: .5rem 1rem;
+                border-top: 1px solid var(--card-border);
+                width: 100%;
+            }
+            .page-content { padding: 1rem .75rem; }
+            .nav-sep { display: none; }
+            .table-responsive { font-size: .875rem; }
+        }
+        @media (max-width: 575.98px) {
+            .page-content { padding: .75rem .5rem; }
+            h1 { font-size: 1.4rem; }
+            h2 { font-size: 1.2rem; }
+        }
+
         /* ── Formulaires ── */
         .form-control, .form-select {
             background: var(--body-bg) !important;

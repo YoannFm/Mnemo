@@ -79,7 +79,7 @@
     @else
         <div class="row g-3">
             @foreach ($recentModules as $module)
-                <div class="col-12 col-md-6 col-xl-4">
+                <div class="col-12 col-md-6 col-lg-4">
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column p-3" style="gap:.75rem;">
                             <div class="d-flex align-items-start justify-content-between gap-2">
@@ -122,7 +122,7 @@
         </div>
         <div class="row g-3">
             @foreach ($latestPosts as $post)
-                <div class="col-12 col-md-6 col-xl-4">
+                <div class="col-12 col-md-6 col-lg-4">
                     <div class="card h-100">
                         @if ($post->image)
                             <img src="{{ $post->imageUrl() }}" class="card-img-top"
