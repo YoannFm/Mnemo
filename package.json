@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "bootstrap-icons": "^1.11.3",
+        "emoji-picker-element": "^1.29.1",
         "tinymce": "^6.8.6"
     }
 }

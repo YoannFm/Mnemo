@@ -219,6 +219,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/news/comments/{comment}/report', [\App\Http\Controllers\PostController::class, 'reportComment'])->name('posts.comment.report');
     Route::patch('/news/comments/{comment}', [\App\Http\Controllers\PostController::class, 'updateComment'])->name('posts.comment.update');
     Route::delete('/news/comments/{comment}', [\App\Http\Controllers\PostController::class, 'deleteComment'])->name('posts.comment.delete');
+    Route::post('/news/{post:slug}/reply', [\App\Http\Controllers\PostController::class, 'reply'])->name('posts.reply');
 });
 
 require __DIR__.'/auth.php';
