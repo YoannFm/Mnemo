@@ -27,5 +27,11 @@
                 <i class="bi bi-envelope me-2"></i>Envoyer le lien de réinitialisation
             </button>
         </div>
+
+        <div class="text-center mt-3" style="font-size:.82rem;">
+            <a href="{{ route('login') }}">Se connecter</a>
+            &nbsp;·&nbsp;
+            <a href="{{ route('register') }}">Créer un compte</a>
+        </div>
     </form>
 </x-guest-layout>
