@@ -81,7 +81,6 @@ function initTinyMCE() {
         selector: '#contentArea',
         base_url: 'https://cdn.jsdelivr.net/npm/tinymce@6',
         suffix: '.min',
-        license_key: 'gpl',
         promotion: false,
         height: 400,
         min_height: 200,
