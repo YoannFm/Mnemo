@@ -78,6 +78,8 @@ function initTinyMCE() {
     }
     tinymce.init({
         selector: '#contentArea',
+        base_url: '{{ asset('vendor/tinymce') }}',
+        suffix: '.min',
         promotion: false,
         height: 400,
         min_height: 200,

@@ -19,6 +19,6 @@
         "vite": "^8.0.0"
     },
     "dependencies": {
-        "tinymce": "^8.6.0"
+        "tinymce": "^6.8.6"
     }
 }
