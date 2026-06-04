@@ -1,8 +1,11 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminSanction;
 use App\Models\PostCommentReport;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
@@ -14,15 +17,25 @@ class ReportController extends Controller
         return view('admin.reports.index', compact('reports'));
     }
 
-    public function dismiss(PostCommentReport $report)
+    public function markSanctioned(PostCommentReport $report)
     {
-        $report->update(['status' => 'dismissed']);
-        return back()->with('success', 'Signalement ignoré.');
+        $report->update(['status' => 'sanctioned']);
+
+        if ($report->postComment && $report->postComment->user) {
+            AdminSanction::create([
+                'user_id'  => $report->postComment->user->id,
+                'admin_id' => Auth::id(),
+                'reason'   => 'Signalement sanctionné (motif : ' . ($report->reason ?? 'non précisé') . ')',
+                'type'     => 'warning',
+            ]);
+        }
+
+        return back()->with('success', 'Signalement marqué comme sanctionné.');
     }
 
-    public function review(PostCommentReport $report)
+    public function markUnsanctioned(PostCommentReport $report)
     {
-        $report->update(['status' => 'reviewed']);
-        return back()->with('success', 'Signalement marqué comme traité.');
+        $report->update(['status' => 'unsanctioned']);
+        return back()->with('success', 'Signalement marqué comme non sanctionné.');
     }
 }
