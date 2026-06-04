@@ -18,7 +18,7 @@ class Post extends Model
     }
 
     public function reactions() { return $this->hasMany(PostReaction::class); }
-    public function comments() { return $this->hasMany(PostComment::class)->with('user')->latest(); }
+    public function comments() { return $this->hasMany(PostComment::class)->with('user')->oldest(); }
 
     public function imageUrl(): string
     {
