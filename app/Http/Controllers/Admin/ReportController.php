@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AdminSanction;
 use App\Models\Mute;
 use App\Models\PostCommentReport;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -99,6 +100,14 @@ class ReportController extends Controller
             'admin_id' => Auth::id(),
             'reason'   => $request->input('reason'),
             'type'     => 'mute',
+        ]);
+
+        $reason = trim($request->input('reason', ''));
+        UserNotification::create([
+            'user_id' => $comment->user->id,
+            'title'   => 'Vous avez été rendu muet',
+            'message' => 'Vous avez été rendu muet pour la raison suivante : ' . ($reason !== '' ? $reason : 'Aucune raison spécifiée'),
+            'type'    => 'warning',
         ]);
 
         return redirect()->route('admin.reports.index')->with('success', 'Utilisateur muté avec succès.');
