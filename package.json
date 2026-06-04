@@ -5,6 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
+        "copy-vendors": "mkdir -p public/vendor && rm -rf public/vendor/tinymce && cp -r node_modules/tinymce public/vendor/tinymce && rm -rf public/vendor/bootstrap-icons && cp -r node_modules/bootstrap-icons/font public/vendor/bootstrap-icons",
         "copy-tinymce": "rm -rf public/vendor/tinymce && mkdir -p public/vendor && cp -r node_modules/tinymce public/vendor/tinymce"
     },
     "devDependencies": {
@@ -19,6 +20,7 @@
         "vite": "^8.0.0"
     },
     "dependencies": {
+        "bootstrap-icons": "^1.11.3",
         "tinymce": "^6.8.6"
     }
 }

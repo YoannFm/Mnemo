@@ -15,7 +15,7 @@
     </script>
     <script src="{{ asset('assets/vendor/admin.js') }}" defer></script>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/vendor/admin.css') }}" rel="stylesheet">
     @stack('header-styles')
 </head>
