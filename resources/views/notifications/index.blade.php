@@ -54,7 +54,7 @@
                                 <div class="fw-bold">{{ $notification->title }}</div>
                                 @if($notification->message)
                                     <div class="mt-1" style="color:var(--text-muted);font-size:.9rem;">
-                                        {{ $notification->message }}
+                                        {!! $notification->message !!}
                                     </div>
                                 @endif
                             </div>
