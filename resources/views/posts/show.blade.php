@@ -135,7 +135,7 @@
         @if ($post->allow_comments)
             <div class="card mb-4">
                 <div class="card-header">
-                    <h6 class="mb-0" id="comments-count-header">Commentaires ({{ $comments->count() }})</h6>
+                    <h6 class="mb-0" id="comments-count-header">Commentaires ({{ $comments->filter(fn($c) => !$c->is_deleted)->count() }})</h6>
                 </div>
                 <div class="card-body" id="comments-list">
                     @forelse($comments->filter(fn($c) => !$c->is_deleted) as $comment)
