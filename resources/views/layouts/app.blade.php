@@ -302,10 +302,9 @@
         #mobile-menu .mobile-nav-link i { font-size: 1.1rem; width: 24px; text-align: center; }
 
         #mobile-menu .mobile-user-section {
-            margin-top: 1.5rem;
+            margin-top: 0;
             display: flex;
             flex-direction: column;
-            gap: .5rem;
         }
         #mobile-menu .mobile-user-section a,
         #mobile-menu .mobile-user-section button {
@@ -509,19 +508,19 @@
     </nav>
 
     @auth
-    <div class="mobile-user-section" style="margin-top:auto;padding-top:1rem;">
-        <a href="{{ route('notifications.index') }}" class="mobile-nav-link">
-            <i class="bi bi-bell"></i> Notifications
-            @if(($unreadNotifications ?? 0) > 0)
-                <span class="badge bg-danger ms-1">{{ $unreadNotifications }}</span>
-            @endif
-        </a>
+    <div class="mobile-user-section">
         <button id="mobile-user-toggle" style="background:none;border:none;width:100%;text-align:left;padding:1rem 0;cursor:pointer;display:flex;align-items:center;gap:.75rem;border-bottom:1px solid rgba(239,183,2,.1);">
             <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
             <span style="font-weight:700;color:var(--text-primary);font-size:1rem;text-transform:uppercase;letter-spacing:.5px;">{{ Auth::user()->name }}</span>
             <i class="bi bi-chevron-down" id="mobile-user-chevron" style="color:var(--text-muted);margin-left:auto;transition:transform .2s;"></i>
         </button>
-        <div id="mobile-user-items" style="display:none;padding-left:.5rem;">
+        <div id="mobile-user-items" style="display:none;">
+            <a href="{{ route('notifications.index') }}" class="mobile-nav-link">
+                <i class="bi bi-bell"></i> Notifications
+                @if(($unreadNotifications ?? 0) > 0)
+                    <span class="badge bg-danger ms-1">{{ $unreadNotifications }}</span>
+                @endif
+            </a>
             <a href="{{ route('profile.edit') }}" class="mobile-nav-link"><i class="bi bi-person"></i> Mon profil</a>
             @if(Auth::user()->isAdmin())
                 <a href="{{ route('admin.dashboard') }}" class="mobile-nav-link" style="color:var(--accent);"><i class="bi bi-shield-check"></i> Administration</a>
