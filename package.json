@@ -5,7 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "copy-tinymce": "cp -r node_modules/tinymce public/vendor/tinymce"
+        "copy-tinymce": "mkdir -p public/vendor && cp -r node_modules/tinymce public/vendor/tinymce"
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",
