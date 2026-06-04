@@ -1,36 +1,74 @@
-# Mnémo
+# Mnemo
 
-Application web de mémorisation par répétition espacée, développée en stage au Lycée Rascol (Albi).
+Application web de mémorisation par répétition espacée, développée au Lycée Rascol (Albi).
 
 ## Présentation
 
-Mnémo permet de créer des modules thématiques contenant des items (photo + nom FR + nom EN + fonction), puis de s'entraîner via deux modes :
-- **Mode Anki** : questions infinies avec feedback immédiat et suivi de progression personnalisé (algorithme SM-2)
-- **Mode Test** : série de N questions avec score final et récapitulatif des erreurs
+Mnemo permet de créer des modules thématiques contenant des items (question + réponse), puis de s'entraîner via deux modes :
+
+- **Mode Anki** - questions infinies avec feedback immédiat et suivi de progression (algorithme SM-2)
+- **Mode Test** - série de N questions avec score final et récapitulatif des erreurs
+
+Une bibliothèque publique permet de partager et dupliquer des modules entre utilisateurs.
+
+## Fonctionnalités
+
+### Apprentissage
+- Création de modules avec items (question/réponse, image optionnelle)
+- Import en masse d'items via CSV
+- Mode Anki avec algorithme SM-2 (répétition espacée)
+- Mode Test avec résultats détaillés
+- Bibliothèque publique - partage et duplication de modules
+- Suivi de progression et historique des scores
+
+### Communauté
+- Réactions emoji sur les articles
+- Commentaires avec réponses imbriquées
+- Signalement de commentaires et modules
+- Modification et suppression de ses propres commentaires (historique conservé)
+
+### Panel d'administration
+- Gestion des utilisateurs (CRUD, rôles, bannissements, import/export CSV)
+- Gestion des modules et articles (posts) avec éditeur TinyMCE
+- Système de thèmes (mode sombre/clair personnalisable)
+- Signalements avec workflow : en attente - sanctionné - non sanctionné
+- Historique des commentaires modifiés/supprimés
+- Sanctions et mutes temporaires ou définitifs
+- Notifications personnalisées aux utilisateurs
+- Logs d'activité avec purge automatique des entrées de plus de 30 jours
+- Redirections, pages statiques, navbar configurable
+
+### Sécurité
+- Authentification Laravel Breeze
+- Double authentification (2FA) TOTP optionnelle
+- Système de mute (bloque commentaires et réactions)
+- Fuseau horaire configurable depuis les paramètres
 
 ## Stack technique
 
-- **Back-end** : PHP 8.3, Laravel 12
-- **Base de données** : SQLite (développement) / MySQL (production)
-- **Front-end** : Bootstrap 5.3, Bootstrap Icons, JavaScript natif
-- **Authentification** : Laravel Breeze
-- **Stockage photos** : Fichiers locaux via Laravel Storage
+- **Back-end** - PHP 8.3, Laravel 11
+- **Base de données** - SQLite (développement) / MySQL (production)
+- **Front-end** - Bootstrap 5.3, Bootstrap Icons, Alpine.js, JavaScript natif
+- **Éditeur** - TinyMCE 6 (hébergé localement)
+- **Build** - Vite 8
+- **Stockage** - Laravel Storage (`storage/app/public`)
 
 ## Prérequis
 
 - PHP >= 8.2 avec extensions : `pdo`, `pdo_sqlite`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`
 - Composer
+- Node.js >= 18
 - Git
 
-## Installation rapide
+## Installation
 
-### Option 1 — Via l'installateur web
+### Option 1 - Via l'installateur web
 
 1. Déposer les fichiers sur le serveur
-2. Ouvrir `http://votre-domaine/install.php` dans un navigateur
+2. Ouvrir `http://votre-domaine/install` dans un navigateur
 3. Suivre les étapes de l'assistant
 
-### Option 2 — Installation manuelle
+### Option 2 - Installation manuelle
 
 ```bash
 # 1. Cloner le dépôt
@@ -48,56 +86,50 @@ php artisan key:generate
 # SQLite (défaut) : DB_CONNECTION=sqlite
 # MySQL : renseigner DB_HOST, DB_DATABASE, DB_USERNAME, DB_PASSWORD
 
-# 5. Créer la base et le lien storage
-php artisan migrate --seed
+# 5. Migrer la base et créer le lien storage
+php artisan migrate
 php artisan storage:link
 
-# 6. Lancer le serveur de développement
+# 6. Installer les assets front-end
+npm install
+npm run copy-vendors
+npm run build
+
+# 7. Lancer le serveur de développement
 php artisan serve
 ```
 
 L'application est disponible sur `http://localhost:8000`.
 
-**Compte de démo** : `demo@mnemo.fr` / `demo1234`
+## Mise à jour (serveur)
+
+```bash
+git pull origin main
+php artisan migrate
+php artisan view:clear && php artisan config:clear
+```
 
 ## Structure du projet
 
 ```
 app/
-├── Http/Controllers/    # Contrôleurs (Module, Item, Test, Anki, Library, Progress...)
-├── Models/              # Modèles Eloquent (User, Module, Item, Progress, Score)
-└── Services/
-    └── QuizGenerator.php   # Moteur de génération des QCM (Q1-Q8)
+- Http/Controllers/         # Contrôleurs publics et admin
+- Http/Middleware/           # Auth, 2FA, maintenance, fuseau horaire...
+- Models/                   # Modèles Eloquent
 database/
-├── migrations/          # Schéma de base de données
-└── seeders/             # Données de démonstration
+- migrations/               # Schéma de base de données
 resources/views/
-├── layouts/             # Layout principal (dark theme)
-├── modules/             # CRUD modules
-├── items/               # CRUD items (+ import CSV)
-├── quiz/
-│   ├── anki/            # Mode Anki
-│   └── test/            # Mode Test
-├── library/             # Bibliothèque publique
-└── progress/            # Progression et historique
+- layouts/                  # Layouts (app, admin, guest)
+- admin/                    # Vues du panel admin
+- modules/                  # CRUD modules
+- posts/                    # Articles publics
+- library/                  # Bibliothèque publique
 public/
-└── install.php          # Installateur autonome
+- vendor/tinymce/           # TinyMCE 6 (local)
+- vendor/bootstrap-icons/   # Bootstrap Icons (local)
 ```
-
-## Types de questions (Q1-Q8)
-
-| Type | Énoncé      | Réponse attendue |
-|------|-------------|-----------------|
-| Q1   | Photo       | Nom français    |
-| Q2   | Photo       | Fonction        |
-| Q3   | Fonction    | Photo           |
-| Q4   | Nom français| Nom anglais     |
-| Q5   | Nom anglais | Photo           |
-| Q6   | Fonction    | Nom français    |
-| Q7   | Nom anglais | Nom français    |
-| Q8   | Photo       | Nom anglais     |
 
 ## Auteur
 
-Développé par **YoannFM** — [github.com/YoannFM-rascol](https://github.com/YoannFM-rascol/)  
-Lycée Rascol, Albi — Projet de stage développement web
+Développé par **YoannFM** - [github.com/YoannFM-rascol](https://github.com/YoannFM-rascol/)  
+Lycée Rascol, Albi
