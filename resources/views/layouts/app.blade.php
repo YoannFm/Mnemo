@@ -455,15 +455,23 @@
 
         /* ── Navbar toggler custom ── */
         .navbar-toggler {
-            border: 1px solid rgba(239,183,2,.4);
-            color: var(--accent);
+            border: 1px solid var(--accent);
             border-radius: 0;
-            padding: .3rem .55rem;
+            padding: .4rem .6rem;
+            background: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
         }
-
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23EFB702' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        .navbar-toggler .hb-line {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 0;
         }
+        .navbar-toggler-icon { display: none; }
 
         /* ── Séparateur vertical entre nav et user ── */
         .nav-sep {
@@ -549,7 +557,9 @@
 
         {{-- Bouton hamburger mobile --}}
         <button id="mobile-menu-open" class="navbar-toggler d-lg-none ms-auto me-2" type="button" aria-label="Ouvrir le menu">
-            <span class="navbar-toggler-icon"></span>
+            <span class="hb-line"></span>
+            <span class="hb-line"></span>
+            <span class="hb-line"></span>
         </button>
 
         {{-- Nav desktop uniquement --}}
