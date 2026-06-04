@@ -133,7 +133,7 @@
                     <h6 class="mb-0" id="comments-count-header">Commentaires ({{ $comments->count() }})</h6>
                 </div>
                 <div class="card-body" id="comments-list">
-                    @forelse($comments as $comment)
+                    @forelse($comments->filter(fn($c) => !$c->is_deleted) as $comment)
                         <div class="mb-3 pb-3 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color:var(--card-border)!important;" id="comment-{{ $comment->id }}">
                             {{-- Comment header --}}
                             <div class="d-flex justify-content-between align-items-start mb-1">
@@ -181,8 +181,9 @@
                             @endif
 
                             {{-- Replies --}}
-                            <div class="mt-2 ps-3 replies-container-{{ $comment->id }}" style="{{ $comment->replies->isNotEmpty() ? '' : 'display:none;' }} border-left:2px solid var(--card-border);">
-                                @foreach($comment->replies as $reply)
+                            @php $visibleReplies = $comment->replies->filter(fn($r) => !$r->is_deleted); @endphp
+                            <div class="mt-2 ps-3 replies-container-{{ $comment->id }}" style="{{ $visibleReplies->isNotEmpty() ? '' : 'display:none;' }} border-left:2px solid var(--card-border);">
+                                @foreach($visibleReplies as $reply)
                                     <div class="mb-2 pt-2 {{ !$loop->last ? 'border-bottom pb-2' : '' }}" style="border-color:var(--card-border)!important;" id="comment-{{ $reply->id }}">
                                         <div class="d-flex justify-content-between align-items-start mb-1">
                                             <strong style="font-size:.8rem;">{{ $reply->user->name }}</strong>
@@ -406,18 +407,10 @@
                 .then(function(r){ return r.json(); })
                 .then(function(data) {
                     if (data.status === 'ok') {
-                        var textEl = document.getElementById('comment-text-' + commentId);
-                        if (textEl) {
-                            textEl.textContent = '[Commentaire supprimé]';
-                            textEl.style.fontStyle = 'italic';
-                            textEl.style.color = 'var(--text-muted)';
-                        }
-                        // Hide edit/delete buttons for this comment
                         var commentEl = document.getElementById('comment-' + commentId);
                         if (commentEl) {
-                            commentEl.querySelectorAll('.edit-comment-btn, .delete-comment-form').forEach(function(el) {
-                                el.style.display = 'none';
-                            });
+                            commentEl.remove();
+                            updateCommentCount(-1);
                         }
                     }
                 });
