@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Theme;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ThemeController extends Controller
@@ -77,6 +78,23 @@ class ThemeController extends Controller
     {
         Theme::where('is_active', true)->update(['is_active' => false]);
         $theme->update(['is_active' => true]);
+
+        $map = [
+            'theme_body_bg'    => $theme->body_bg,
+            'theme_content_bg' => $theme->content_bg,
+            'theme_card_bg'    => $theme->card_bg,
+            'theme_accent'     => $theme->accent_color,
+            'theme_header_bg'  => $theme->header_bg,
+            'theme_text_color' => $theme->text_color,
+        ];
+
+        foreach ($map as $key => $value) {
+            DB::table('settings')->updateOrInsert(
+                ['key' => $key],
+                ['value' => $value, 'updated_at' => now()]
+            );
+        }
+
         return back()->with('success', 'Theme "' . $theme->name . '" active.');
     }
 }
