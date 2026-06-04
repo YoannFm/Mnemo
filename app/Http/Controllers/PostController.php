@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Mute;
 use App\Models\Post;
 use App\Models\PostComment;
 use App\Models\PostCommentReport;
@@ -34,7 +35,7 @@ class PostController extends Controller
         }
 
         $comments = $post->allow_comments
-            ? $post->comments()->whereNull('parent_id')->with(['user', 'replies.user'])->get()
+            ? $post->comments()->whereNull('parent_id')->with(['user', 'replies.user'])->orderBy('created_at', 'asc')->get()
             : collect();
 
         return view('posts.show', compact('post', 'reactions', 'userReactions', 'comments'));
@@ -43,6 +44,13 @@ class PostController extends Controller
     public function react(Request $request, Post $post)
     {
         if (!$post->allow_reactions || !Auth::check()) abort(403);
+
+        $isMuted = Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->exists();
+        if ($isMuted) {
+            return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas interagir.'], 403);
+        }
 
         $emoji = $request->validate(['emoji' => 'required|string|max:10'])['emoji'];
 
@@ -69,6 +77,21 @@ class PostController extends Controller
     {
         if (!$post->allow_comments || !Auth::check()) abort(403);
 
+        $mute = Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->latest()
+            ->first();
+
+        if ($mute) {
+            $reason = $mute->reason ? 'Vous êtes muet pour la raison suivante : ' . $mute->reason : 'Vous êtes muet. Aucune raison spécifiée.';
+            $expiry = $mute->expires_at ? 'Ce mute expirera dans ' . now()->diffForHumans($mute->expires_at, ['parts' => 2, 'join' => ' et ']) . '.' : 'Ce mute n\'expirera pas.';
+            $message = $reason . ' ' . $expiry;
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'muted', 'message' => $message], 403);
+            }
+            abort(403, $message);
+        }
+
         $data = $request->validate(['content' => 'required|string|max:1000']);
 
         $comment = PostComment::create([
@@ -79,42 +102,94 @@ class PostController extends Controller
 
         $comment->load('user');
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status'  => 'ok',
+                'comment' => [
+                    'id'         => $comment->id,
+                    'user_name'  => $comment->user->name,
+                    'content'    => $comment->content,
+                    'created_at' => $comment->created_at->format('d/m/Y H:i'),
+                ],
+            ]);
+        }
+
         return redirect()->to(route('posts.show', $post) . '#comments')->with('success', 'Commentaire ajouté.');
     }
 
     public function reply(Request $request, Post $post)
     {
         if (!$post->allow_comments || !Auth::check()) abort(403);
+
+        $mute = Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->latest()
+            ->first();
+
+        if ($mute) {
+            $reason = $mute->reason ? 'Vous êtes muet pour la raison suivante : ' . $mute->reason : 'Vous êtes muet. Aucune raison spécifiée.';
+            $expiry = $mute->expires_at ? 'Ce mute expirera dans ' . now()->diffForHumans($mute->expires_at, ['parts' => 2, 'join' => ' et ']) . '.' : 'Ce mute n\'expirera pas.';
+            $message = $reason . ' ' . $expiry;
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'muted', 'message' => $message], 403);
+            }
+            abort(403, $message);
+        }
+
         $data = $request->validate([
             'content'   => 'required|string|max:1000',
             'parent_id' => 'required|exists:post_comments,id',
         ]);
-        PostComment::create([
+        $reply = PostComment::create([
             'post_id'   => $post->id,
             'user_id'   => Auth::id(),
             'content'   => $data['content'],
             'parent_id' => $data['parent_id'],
         ]);
+        $reply->load('user');
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status'  => 'ok',
+                'comment' => [
+                    'id'         => $reply->id,
+                    'user_name'  => $reply->user->name,
+                    'content'    => $reply->content,
+                    'created_at' => $reply->created_at->format('d/m/Y H:i'),
+                ],
+            ]);
+        }
+
         return redirect()->to(route('posts.show', $post) . '#comments')->with('success', 'Réponse ajoutée.');
     }
 
-    public function reportComment(PostComment $comment)
+    public function reportComment(Request $request, PostComment $comment)
     {
         if (!Auth::check()) abort(403);
+
+        $data = $request->validate([
+            'reason' => 'required|in:spam,harassment,inappropriate,misinformation,other',
+            'note'   => 'nullable|string|max:500',
+        ]);
 
         $already = PostCommentReport::where([
             'post_comment_id' => $comment->id,
             'user_id'         => Auth::id(),
         ])->exists();
 
-        if (!$already) {
-            PostCommentReport::create([
-                'post_comment_id' => $comment->id,
-                'user_id'         => Auth::id(),
-            ]);
+        if ($already) {
+            return response()->json(['status' => 'already_reported']);
         }
 
-        return response()->json(['reported' => true]);
+        PostCommentReport::create([
+            'post_comment_id' => $comment->id,
+            'user_id'         => Auth::id(),
+            'reason'          => $data['reason'],
+            'note'            => $data['note'] ?? null,
+            'status'          => 'pending',
+        ]);
+
+        return response()->json(['status' => 'ok']);
     }
 
     public function updateComment(Request $request, PostComment $comment)
@@ -132,10 +207,14 @@ class PostController extends Controller
 
         $comment->update(['content' => $data['content'], 'edited_at' => now()]);
 
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'ok', 'content' => $comment->content]);
+        }
+
         return redirect()->to(route('posts.show', $comment->post) . '#comments')->with('success', 'Commentaire modifié.');
     }
 
-    public function deleteComment(PostComment $comment)
+    public function deleteComment(Request $request, PostComment $comment)
     {
         if (!Auth::check() || Auth::id() !== $comment->user_id) abort(403);
 
@@ -147,6 +226,10 @@ class PostController extends Controller
         ]);
 
         $comment->update(['is_deleted' => true, 'content' => '']);
+
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'ok']);
+        }
 
         return redirect()->to(route('posts.show', $comment->post) . '#comments')->with('success', 'Commentaire supprimé.');
     }

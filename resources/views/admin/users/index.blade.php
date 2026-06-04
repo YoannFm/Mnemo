@@ -76,6 +76,10 @@
                                        title="Modifier" data-bs-toggle="tooltip">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
+                                    <a href="{{ route('admin.users.export', $user) }}" class="mx-1"
+                                       title="Telecharger les donnees" data-bs-toggle="tooltip">
+                                        <i class="bi bi-download"></i>
+                                    </a>
                                 </td>
                             </tr>
                         @empty
@@ -92,6 +96,9 @@
             <div class="mt-3 d-flex gap-2">
                 <a class="btn btn-primary" href="{{ route('admin.users.create') }}">
                     <i class="bi bi-plus-lg"></i> Ajouter
+                </a>
+                <a class="btn btn-outline-secondary" href="{{ route('admin.users.import') }}">
+                    <i class="bi bi-upload"></i> Importer
                 </a>
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#notificationModal">
                     <i class="bi bi-megaphone"></i> Envoyer une notification

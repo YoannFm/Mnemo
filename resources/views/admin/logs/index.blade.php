@@ -4,13 +4,9 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">Journal d'activite admin</h5>
             <div class="d-flex gap-2">
-                <form action="{{ route('admin.logs.purge') }}" method="POST" onsubmit="return confirm('Supprimer les logs de plus de 15 jours ?')">
+                <form action="{{ route('admin.logs.purge') }}" method="POST" onsubmit="return confirm('Supprimer les logs de plus de 30 jours ?')">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-warning btn-sm"><i class="bi bi-trash"></i> Purger &gt; 15 jours</button>
-                </form>
-                <form action="{{ route('admin.logs.clear') }}" method="POST" onsubmit="return confirm('Effacer tous les logs ?')">
-                    @csrf
-                    <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Effacer tout</button>
+                    <button type="submit" class="btn btn-warning btn-sm"><i class="bi bi-trash"></i> Purger &gt; 30 jours</button>
                 </form>
             </div>
         </div>

@@ -105,6 +105,9 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     // Dupliquer un module public dans son espace personnel
     Route::post('/modules/{module}/duplicate', [ModuleController::class, 'duplicate'])->name('modules.duplicate');
 
+    // Signaler un module public
+    Route::post('/modules/{module}/report', [ModuleController::class, 'report'])->name('modules.report');
+
     // ─── Bibliothèque publique ───
     Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');
 
@@ -138,11 +141,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+    Route::get('/users/import', [AdminUserController::class, 'importForm'])->name('users.import');
+    Route::post('/users/import', [AdminUserController::class, 'importStore'])->name('users.import.store');
     Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
     Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/{user}/force-password-change', [AdminUserController::class, 'forcePasswordChange'])->name('users.force-password-change');
+    Route::get('/users/{user}/export', [AdminUserController::class, 'exportData'])->name('users.export');
     // Bans (nested under user)
     Route::post('/users/{user}/bans', [\App\Http\Controllers\Admin\BanController::class, 'store'])->name('users.bans.store');
     Route::delete('/users/{user}/bans/{ban}', [\App\Http\Controllers\Admin\BanController::class, 'destroy'])->name('users.bans.destroy');
@@ -201,6 +207,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::delete('/private-modules/{module}', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'destroy'])->name('private-modules.destroy');
     // Update placeholder
     Route::get('/update', fn() => view('admin.update.index'))->name('update.index');
+    // Reports (commentaires)
+    Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+    Route::post('/reports/{report}/sanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markSanctioned'])->name('reports.sanctioned');
+    Route::post('/reports/{report}/unsanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markUnsanctioned'])->name('reports.unsanctioned');
+    Route::post('/reports/{report}/delete-comment', [\App\Http\Controllers\Admin\ReportController::class, 'deleteComment'])->name('reports.delete-comment');
+    Route::post('/reports/{report}/mute-user', [\App\Http\Controllers\Admin\ReportController::class, 'muteUser'])->name('reports.mute-user');
+    Route::post('/reports/modules/{report}/treated', [\App\Http\Controllers\Admin\ReportController::class, 'markModuleTreated'])->name('reports.modules.treated');
+    Route::post('/reports/modules/{report}/rejected', [\App\Http\Controllers\Admin\ReportController::class, 'markModuleRejected'])->name('reports.modules.rejected');
+    // Historique des commentaires
+    Route::get('/comment-history', [\App\Http\Controllers\Admin\CommentHistoryController::class, 'index'])->name('comment-history.index');
+    // Sanctions
+    Route::get('/sanctions', [\App\Http\Controllers\Admin\SanctionController::class, 'index'])->name('sanctions.index');
+    Route::post('/sanctions/{sanction}/unmute', [\App\Http\Controllers\Admin\SanctionController::class, 'unmute'])->name('sanctions.unmute');
     // Notifications admin
     Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/create', [\App\Http\Controllers\Admin\NotificationController::class, 'create'])->name('notifications.create');

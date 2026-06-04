@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Module;
+use App\Models\ModuleReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -161,6 +162,44 @@ class ModuleController extends Controller
 
         return redirect()->route('modules.show', $copy)
             ->with('success', 'Module dupliqué dans votre espace ! Vous pouvez maintenant l\'enrichir.');
+    }
+
+    /**
+     * Signale un module public.
+     * Un utilisateur ne peut signaler qu'une fois le même module.
+     */
+    public function report(Request $request, Module $module)
+    {
+        if (!$module->is_public) {
+            return response()->json(['status' => 'error', 'message' => 'Ce module n\'est pas public.'], 403);
+        }
+
+        if ($module->owner_id === Auth::id()) {
+            return response()->json(['status' => 'error', 'message' => 'Vous ne pouvez pas signaler votre propre module.'], 403);
+        }
+
+        $validated = $request->validate([
+            'reason' => 'required|string|in:spam,inappropriate,copyright,other',
+            'note'   => 'nullable|string|max:500',
+        ]);
+
+        $already = ModuleReport::where('module_id', $module->id)
+            ->where('user_id', Auth::id())
+            ->exists();
+
+        if ($already) {
+            return response()->json(['status' => 'already_reported']);
+        }
+
+        ModuleReport::create([
+            'module_id' => $module->id,
+            'user_id'   => Auth::id(),
+            'reason'    => $validated['reason'],
+            'note'      => $validated['note'] ?? null,
+            'status'    => 'pending',
+        ]);
+
+        return response()->json(['status' => 'ok']);
     }
 
     // ─────────────────────────────────────────────

@@ -1,6 +1,12 @@
 <x-admin-layout>
     <x-slot name="pageTitle">Edition de l'utilisateur {{ $user->name }}</x-slot>
 
+    <div class="mb-3">
+        <a href="{{ route('admin.users.export', $user) }}" class="btn btn-outline-primary">
+            <i class="bi bi-download"></i> Telecharger les donnees
+        </a>
+    </div>
+
     {{-- Alerte bannissement --}}
     @if($user->is_banned)
         @php $latestBan = $user->bans()->latest()->first(); @endphp
