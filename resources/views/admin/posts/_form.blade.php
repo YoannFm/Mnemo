@@ -57,6 +57,18 @@
     <label class="form-check-label" for="pinnedSwitch">Epingler</label>
 </div>
 
+<div class="mb-3 form-check form-switch">
+    <input type="checkbox" class="form-check-input" id="reactionsSwitch" name="allow_reactions" value="1"
+           @checked(old('allow_reactions', $post->allow_reactions ?? false))>
+    <label class="form-check-label" for="reactionsSwitch">Autoriser les réactions emoji</label>
+</div>
+
+<div class="mb-3 form-check form-switch">
+    <input type="checkbox" class="form-check-input" id="commentsSwitch" name="allow_comments" value="1"
+           @checked(old('allow_comments', $post->allow_comments ?? false))>
+    <label class="form-check-label" for="commentsSwitch">Autoriser les commentaires</label>
+</div>
+
 <script src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
 <script>
 (function () {
