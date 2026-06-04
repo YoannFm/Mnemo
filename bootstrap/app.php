@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\HandleRedirects::class);
         $middleware->web(append: [
+            \App\Http\Middleware\SetTimezone::class,
             \App\Http\Middleware\CheckInstallation::class,
             \App\Http\Middleware\CheckMaintenance::class,
             \App\Http\Middleware\CheckForcePasswordChange::class,
