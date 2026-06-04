@@ -109,4 +109,45 @@
         </div>
     @endif
 
+    @php
+        $latestPosts = \App\Models\Post::where('published_at', '<=', now())
+            ->latest('published_at')->limit(4)->get();
+    @endphp
+
+    @if ($latestPosts->isNotEmpty())
+        <div class="mt-5 mb-2 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Articles</h5>
+        </div>
+        <div class="row g-3">
+            @foreach ($latestPosts as $post)
+                <div class="col-12 col-md-6">
+                    <div class="card h-100">
+                        @if ($post->image)
+                            <img src="{{ $post->imageUrl() }}" class="card-img-top"
+                                 style="height:160px;object-fit:cover;" alt="{{ $post->title }}">
+                        @endif
+                        <div class="card-body p-3 d-flex flex-column" style="gap:.5rem;">
+                            <h6 class="mb-0 fw-semibold">{{ $post->title }}</h6>
+                            @if ($post->description)
+                                <p style="font-size:.8rem;color:var(--text-muted);margin:0;">
+                                    {{ $post->description }}
+                                </p>
+                            @endif
+                            <div style="font-size:.75rem;color:var(--text-muted);">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                {{ $post->published_at->format('d/m/Y') }}
+                                &nbsp;·&nbsp;
+                                <i class="bi bi-person me-1"></i>
+                                {{ $post->author->name }}
+                            </div>
+                            <a href="{{ route('posts.show', $post) }}" class="btn btn-sm btn-outline-primary mt-auto">
+                                Lire
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
 </x-app-layout>
