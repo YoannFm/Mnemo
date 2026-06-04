@@ -206,6 +206,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     // Emojis
     Route::get('/emojis', [\App\Http\Controllers\Admin\EmojiController::class, 'index'])->name('emojis.index');
     Route::post('/emojis', [\App\Http\Controllers\Admin\EmojiController::class, 'store'])->name('emojis.store');
+    Route::post('/emojis/import-pack', [\App\Http\Controllers\Admin\EmojiController::class, 'importPack'])->name('emojis.import-pack');
     Route::delete('/emojis/{emoji}', [\App\Http\Controllers\Admin\EmojiController::class, 'destroy'])->name('emojis.destroy');
     // Plugins placeholder
     Route::get('/plugins', fn() => view('admin.plugins.index'))->name('plugins.index');
