@@ -119,6 +119,12 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.reports.index') }}">
+                            <i class="bi bi-flag"></i> <span>Signalements</span>
+                        </a>
+                    </li>
+
                     <li class="sidebar-item {{ request()->routeIs('admin.images.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.images.index') }}">
                             <i class="bi bi-images"></i> <span>Images</span>
