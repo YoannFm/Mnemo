@@ -35,6 +35,21 @@ class ImageController extends Controller
         return redirect()->route('admin.images.index')->with('success', 'Image ajoutée.');
     }
 
+    public function edit(Image $image)
+    {
+        return view('admin.images.edit', compact('image'));
+    }
+
+    public function update(Request $request, Image $image)
+    {
+        $request->validate([
+            'name' => 'required|string|max:200',
+        ]);
+        $image->update(['name' => $request->name]);
+        LogHelper::log('updated_image', 'image', $image->id, ['name' => $image->name]);
+        return redirect()->route('admin.images.index')->with('success', 'Image mise à jour.');
+    }
+
     public function destroy(Image $image)
     {
         $path = public_path('uploads/images/' . $image->file);

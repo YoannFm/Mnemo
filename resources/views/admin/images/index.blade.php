@@ -19,9 +19,10 @@
                                 <td>{{ $image->name }}</td>
                                 <td><a href="{{ $image->url() }}" target="_blank" rel="noopener noreferrer">{{ $image->file }}</a></td>
                                 <td>
+                                    <a href="{{ route('admin.images.edit', $image) }}" class="mx-1" title="Modifier"><i class="bi bi-pencil-square"></i></a>
                                     <form action="{{ route('admin.images.destroy', $image) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Supprimer cette image ?')">
                                         @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                        <button type="submit" class="btn btn-link p-0 mx-1 text-danger" title="Supprimer"><i class="bi bi-trash"></i></button>
                                     </form>
                                 </td>
                             </tr>

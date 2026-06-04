@@ -12,8 +12,10 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="imageInput">Fichier image (jpg, png, gif, webp - max 2 Mo)</label>
-                    <input type="file" class="form-control @error('image') is-invalid @enderror" id="imageInput" name="image" accept=".jpg,.jpeg,.png,.gif,.webp" required>
+                    <input type="file" class="form-control @error('image') is-invalid @enderror" id="imageInput" name="image" accept=".jpg,.jpeg,.png,.gif,.webp" required
+                           onchange="var r=new FileReader();r.onload=function(e){var p=document.getElementById('filePreview');p.src=e.target.result;p.classList.remove('d-none');};r.readAsDataURL(this.files[0]);">
                     @error('image')<span class="invalid-feedback"><strong>{{ $message }}</strong></span>@enderror
+                    <img src="#" class="mt-2 img-fluid rounded d-none" style="max-height:200px" alt="Apercu" id="filePreview">
                 </div>
                 <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Enregistrer</button>
                 <a href="{{ route('admin.images.index') }}" class="btn btn-secondary">Annuler</a>
