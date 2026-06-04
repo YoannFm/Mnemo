@@ -300,7 +300,8 @@
         #mobile-menu .mobile-nav-link.active {
             color: var(--accent);
             border-left: 3px solid var(--accent);
-            padding-left: .75rem;
+            margin-left: -1.5rem;
+            padding-left: calc(1.5rem - 3px);
         }
         #mobile-menu .mobile-nav-link i { font-size: 1.1rem; width: 24px; text-align: center; }
 
