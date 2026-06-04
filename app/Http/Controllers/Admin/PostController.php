@@ -30,12 +30,16 @@ class PostController extends Controller
             'image'        => 'nullable|image|max:2048',
             'slug'         => 'required|string|max:200|unique:posts,slug',
             'content'      => 'required|string',
-            'published_at' => 'nullable|date',
-            'is_pinned'    => 'boolean',
+            'published_at'    => 'nullable|date',
+            'is_pinned'       => 'boolean',
+            'allow_reactions' => 'boolean',
+            'allow_comments'  => 'boolean',
         ]);
         $data['slug'] = Str::slug($data['slug']);
         $data['user_id'] = Auth::id();
         $data['is_pinned'] = $request->has('is_pinned');
+        $data['allow_reactions'] = $request->boolean('allow_reactions');
+        $data['allow_comments'] = $request->boolean('allow_comments');
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('posts', 'public');
         }
@@ -57,11 +61,15 @@ class PostController extends Controller
             'image'        => 'nullable|image|max:2048',
             'slug'         => 'required|string|max:200|unique:posts,slug,' . $post->id,
             'content'      => 'required|string',
-            'published_at' => 'nullable|date',
-            'is_pinned'    => 'boolean',
+            'published_at'    => 'nullable|date',
+            'is_pinned'       => 'boolean',
+            'allow_reactions' => 'boolean',
+            'allow_comments'  => 'boolean',
         ]);
         $data['slug'] = Str::slug($data['slug']);
         $data['is_pinned'] = $request->has('is_pinned');
+        $data['allow_reactions'] = $request->boolean('allow_reactions');
+        $data['allow_comments'] = $request->boolean('allow_comments');
         if ($request->hasFile('image')) {
             if ($post->image) {
                 Storage::disk('public')->delete($post->image);

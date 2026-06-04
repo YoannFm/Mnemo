@@ -213,5 +213,9 @@ Route::get('/p/{slug}', [\App\Http\Controllers\PageController::class, 'show'])->
 
 // Articles publics
 Route::get('/news/{post:slug}', [\App\Http\Controllers\PostController::class, 'show'])->name('posts.show');
+Route::middleware('auth')->group(function () {
+    Route::post('/news/{post:slug}/react', [\App\Http\Controllers\PostController::class, 'react'])->name('posts.react');
+    Route::post('/news/{post:slug}/comment', [\App\Http\Controllers\PostController::class, 'comment'])->name('posts.comment');
+});
 
 require __DIR__.'/auth.php';
