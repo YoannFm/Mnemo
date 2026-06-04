@@ -513,7 +513,7 @@
             <span style="font-weight:700;color:var(--text-primary);font-size:1rem;text-transform:uppercase;letter-spacing:.5px;">{{ Auth::user()->name }}</span>
             <i class="bi bi-chevron-down" id="mobile-user-chevron" style="color:var(--text-muted);margin-left:auto;transition:transform .2s;"></i>
         </button>
-        <div id="mobile-user-items" style="display:none;">
+        <div id="mobile-user-items" style="display:none;background:rgba(239,183,2,.06);border-radius:8px;padding:.25rem .75rem;margin-top:.25rem;">
             <a href="{{ route('notifications.index') }}" class="mobile-nav-link">
                 <i class="bi bi-bell"></i> Notifications
                 @if(($unreadNotifications ?? 0) > 0)
