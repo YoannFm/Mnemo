@@ -37,4 +37,33 @@
                value="{{ old('text_color', $theme->text_color ?? '#e2e8f0') }}">
     </div>
 </div>
+<hr class="my-4">
+<h6 class="mb-3">Mode clair</h6>
+<div class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label" for="lightBodyBg">Fond principal</label>
+        <input type="color" class="form-control form-control-color" id="lightBodyBg" name="light_body_bg"
+               value="{{ old('light_body_bg', $theme->light_body_bg ?? '#f0f2f5') }}">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label" for="lightContentBg">Fond contenu</label>
+        <input type="color" class="form-control form-control-color" id="lightContentBg" name="light_content_bg"
+               value="{{ old('light_content_bg', $theme->light_content_bg ?? '#e9ecef') }}">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label" for="lightCardBg">Fond carte</label>
+        <input type="color" class="form-control form-control-color" id="lightCardBg" name="light_card_bg"
+               value="{{ old('light_card_bg', $theme->light_card_bg ?? '#ffffff') }}">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label" for="lightHeaderBg">Fond header</label>
+        <input type="color" class="form-control form-control-color" id="lightHeaderBg" name="light_header_bg"
+               value="{{ old('light_header_bg', $theme->light_header_bg ?? '#ffffff') }}">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label" for="lightTextColor">Couleur texte</label>
+        <input type="color" class="form-control form-control-color" id="lightTextColor" name="light_text_color"
+               value="{{ old('light_text_color', $theme->light_text_color ?? '#212529') }}">
+    </div>
+</div>
 <div class="mt-3"></div>

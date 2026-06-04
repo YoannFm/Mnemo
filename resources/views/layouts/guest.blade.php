@@ -29,6 +29,13 @@
             --text-muted: #9ca3af;
         }
 
+        [data-bs-theme="light"] {
+            --body-bg: {{ setting('theme_light_body_bg', '#f0f2f5') }};
+            --card-bg: {{ setting('theme_light_card_bg', '#ffffff') }};
+            --card-border: {{ setting('theme_light_content_bg', '#e9ecef') }};
+            --text-primary: {{ setting('theme_light_text_color', '#212529') }};
+        }
+
         body {
             font-family: 'Rubik', sans-serif;
             background: var(--body-bg);
