@@ -594,10 +594,9 @@
                 <div class="user-avatar mx-2">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
                 <div class="dropdown">
                     <button class="d-flex align-items-center gap-1"
-                            style="background:none;border:none;color:var(--text-primary);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;"
+                            style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0 .25rem;"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ Auth::user()->name }}
-                        <i class="bi bi-chevron-down" style="font-size:.65rem;color:var(--text-muted);"></i>
+                        <i class="bi bi-chevron-down" style="font-size:.75rem;"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
                         <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person"></i> Mon profil</a></li>

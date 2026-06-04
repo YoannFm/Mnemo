@@ -338,18 +338,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Overlay mobile sidebar
-    var toggle = document.querySelector('.js-sidebar-toggle');
+    // Overlay mobile sidebar - on observe les changements de classe sans re-toggler
     var sidebar = document.querySelector('.js-sidebar');
     var overlay = document.getElementById('sidebar-overlay');
-    if (toggle && sidebar && overlay) {
-        toggle.addEventListener('click', function() {
-            var isMobile = window.innerWidth < 992;
-            sidebar.classList.toggle('collapsed');
-            if (isMobile) {
-                var isOpen = !sidebar.classList.contains('collapsed');
+    if (sidebar && overlay) {
+        var observer = new MutationObserver(function() {
+            if (window.innerWidth < 992) {
+                var isOpen = sidebar.classList.contains('collapsed');
                 overlay.style.display = isOpen ? 'block' : 'none';
             }
+        });
+        observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+
+        overlay.addEventListener('click', function() {
+            sidebar.classList.remove('collapsed');
+            overlay.style.display = 'none';
         });
     }
 });
