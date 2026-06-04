@@ -34,7 +34,7 @@ class PostController extends Controller
         }
 
         $comments = $post->allow_comments
-            ? $post->comments()->get()
+            ? $post->comments()->whereNull('parent_id')->with(['user', 'replies.user'])->get()
             : collect();
 
         return view('posts.show', compact('post', 'reactions', 'userReactions', 'comments'));
@@ -79,7 +79,23 @@ class PostController extends Controller
 
         $comment->load('user');
 
-        return redirect()->back()->with('success', 'Commentaire ajouté.');
+        return redirect()->to(route('posts.show', $post) . '#comments')->with('success', 'Commentaire ajouté.');
+    }
+
+    public function reply(Request $request, Post $post)
+    {
+        if (!$post->allow_comments || !Auth::check()) abort(403);
+        $data = $request->validate([
+            'content'   => 'required|string|max:1000',
+            'parent_id' => 'required|exists:post_comments,id',
+        ]);
+        PostComment::create([
+            'post_id'   => $post->id,
+            'user_id'   => Auth::id(),
+            'content'   => $data['content'],
+            'parent_id' => $data['parent_id'],
+        ]);
+        return redirect()->to(route('posts.show', $post) . '#comments')->with('success', 'Réponse ajoutée.');
     }
 
     public function reportComment(PostComment $comment)
@@ -116,7 +132,7 @@ class PostController extends Controller
 
         $comment->update(['content' => $data['content'], 'edited_at' => now()]);
 
-        return redirect()->back()->with('success', 'Commentaire modifié.');
+        return redirect()->to(route('posts.show', $comment->post) . '#comments')->with('success', 'Commentaire modifié.');
     }
 
     public function deleteComment(PostComment $comment)
@@ -132,6 +148,6 @@ class PostController extends Controller
 
         $comment->update(['is_deleted' => true, 'content' => '']);
 
-        return redirect()->back()->with('success', 'Commentaire supprimé.');
+        return redirect()->to(route('posts.show', $comment->post) . '#comments')->with('success', 'Commentaire supprimé.');
     }
 }

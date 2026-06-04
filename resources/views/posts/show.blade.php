@@ -44,20 +44,16 @@
                             </button>
                         @endforeach
 
-                        {{-- Bouton + plus d'emojis --}}
+                        {{-- Bouton emoji-picker-element --}}
+                        <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
                         @auth
-                        <div class="position-relative">
+                        <div class="position-relative" id="emoji-picker-wrapper">
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="emoji-more-btn" title="Plus de réactions">
-                                +
+                                <i class="bi bi-emoji-smile"></i>
                             </button>
-                            <div id="emoji-picker" class="position-absolute d-none"
-                                 style="bottom:110%;left:0;background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:.5rem;z-index:100;display:flex;flex-wrap:wrap;gap:.25rem;width:220px;">
-                                @foreach(['😍','🎉','👏','🤔','😡','💯','🙏','😱','🤩','💪','🥳','😴','🤣','👀','💀','🫡','😎','🤯','❤️‍🔥','⚡'] as $e)
-                                    <button type="button" class="btn btn-sm btn-outline-secondary reaction-btn p-1"
-                                            data-emoji="{{ $e }}"
-                                            data-url="{{ route('posts.react', $post) }}"
-                                            style="font-size:1.1rem;line-height:1;">{{ $e }}</button>
-                                @endforeach
+                            <div id="emoji-picker-container" class="position-absolute d-none"
+                                 style="bottom:110%;left:0;z-index:200;">
+                                <emoji-picker id="the-picker"></emoji-picker>
                             </div>
                         </div>
                         @endauth
@@ -103,7 +99,7 @@
                         var countEl = btnEl.querySelector('.reaction-count');
                         if (countEl) countEl.textContent = data.count > 0 ? data.count : '';
                     }
-                    document.getElementById('emoji-picker').classList.add('d-none');
+                    if (document.getElementById('emoji-picker-container')) document.getElementById('emoji-picker-container').classList.add('d-none');
                 });
             }
 
@@ -112,14 +108,19 @@
             });
 
             var moreBtn = document.getElementById('emoji-more-btn');
-            var picker = document.getElementById('emoji-picker');
-            if (moreBtn) {
+            var pickerContainer = document.getElementById('emoji-picker-container');
+            var picker = document.getElementById('the-picker');
+            if (moreBtn && picker) {
                 moreBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    picker.classList.toggle('d-none');
+                    pickerContainer.classList.toggle('d-none');
                 });
-                document.addEventListener('click', function() { picker.classList.add('d-none'); });
-                picker.addEventListener('click', function(e) { e.stopPropagation(); });
+                picker.addEventListener('emoji-click', function(e) {
+                    sendReaction(e.detail.unicode, null);
+                    pickerContainer.classList.add('d-none');
+                });
+                document.addEventListener('click', function() { pickerContainer.classList.add('d-none'); });
+                pickerContainer.addEventListener('click', function(e) { e.stopPropagation(); });
             }
             </script>
         @endif
@@ -133,6 +134,7 @@
                 <div class="card-body">
                     @forelse($comments as $comment)
                         <div class="mb-3 pb-3 {{ !$loop->last ? 'border-bottom' : '' }}" style="border-color:var(--card-border)!important;">
+                            {{-- Comment header --}}
                             <div class="d-flex justify-content-between align-items-start mb-1">
                                 <strong style="font-size:.875rem;">{{ $comment->user->name }}</strong>
                                 <div class="d-flex align-items-center gap-2">
@@ -169,11 +171,85 @@
                                     @endauth
                                 </div>
                             </div>
+                            {{-- Comment content --}}
                             @if($comment->is_deleted)
                                 <p style="font-size:.875rem;margin:0;color:var(--text-muted);font-style:italic;">[Commentaire supprimé]</p>
                             @else
                                 <p style="font-size:.875rem;margin:0;" id="comment-text-{{ $comment->id }}">{{ $comment->content }}</p>
                             @endif
+
+                            {{-- Replies --}}
+                            @if($comment->replies->isNotEmpty())
+                                <div class="mt-2 ps-3" style="border-left:2px solid var(--card-border);">
+                                    @foreach($comment->replies as $reply)
+                                        <div class="mb-2 pt-2 {{ !$loop->last ? 'border-bottom pb-2' : '' }}" style="border-color:var(--card-border)!important;">
+                                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                                <strong style="font-size:.8rem;">{{ $reply->user->name }}</strong>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <small style="color:var(--text-muted);font-size:.75rem;">
+                                                        {{ $reply->created_at->format('d/m/Y H:i') }}
+                                                        @if($reply->edited_at) · <em>modifié</em> @endif
+                                                    </small>
+                                                    @auth
+                                                        @if(Auth::id() === $reply->user_id && !$reply->is_deleted)
+                                                            <button type="button" class="btn btn-link p-0 edit-comment-btn"
+                                                                    data-id="{{ $reply->id }}"
+                                                                    data-content="{{ $reply->content }}"
+                                                                    data-url="{{ route('posts.comment.update', $reply) }}"
+                                                                    title="Modifier" style="font-size:.75rem;color:var(--text-muted);">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <form method="POST" action="{{ route('posts.comment.delete', $reply) }}" class="d-inline"
+                                                                  onsubmit="return confirm('Supprimer ?')">
+                                                                @csrf @method('DELETE')
+                                                                <button type="submit" class="btn btn-link p-0"
+                                                                        style="font-size:.75rem;color:var(--text-muted);">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @elseif(Auth::id() !== $reply->user_id && !$reply->is_deleted)
+                                                            <button type="button" class="btn btn-link p-0 report-btn"
+                                                                    data-url="{{ route('posts.comment.report', $reply) }}"
+                                                                    style="font-size:.75rem;color:var(--text-muted);">
+                                                                <i class="bi bi-flag"></i>
+                                                            </button>
+                                                        @endif
+                                                    @endauth
+                                                </div>
+                                            </div>
+                                            @if($reply->is_deleted)
+                                                <p style="font-size:.8rem;margin:0;color:var(--text-muted);font-style:italic;">[Réponse supprimée]</p>
+                                            @else
+                                                <p style="font-size:.8rem;margin:0;">{{ $reply->content }}</p>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            {{-- Reply button + form --}}
+                            @auth
+                                @if(!$comment->is_deleted)
+                                    <button type="button" class="btn btn-link p-0 mt-1 toggle-reply-btn"
+                                            data-target="reply-form-{{ $comment->id }}"
+                                            style="font-size:.8rem;color:var(--text-muted);">
+                                        <i class="bi bi-reply me-1"></i>Répondre
+                                    </button>
+                                    <div id="reply-form-{{ $comment->id }}" class="d-none mt-2">
+                                        <form method="POST" action="{{ route('posts.reply', $post) }}">
+                                            @csrf
+                                            <input type="hidden" name="parent_id" value="{{ $comment->id }}">
+                                            <div class="d-flex gap-2">
+                                                <input type="text" name="content" class="form-control form-control-sm"
+                                                       placeholder="Votre réponse..." required maxlength="1000">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <i class="bi bi-send"></i>
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                @endif
+                            @endauth
                         </div>
                     @empty
                         <p style="color:var(--text-muted);font-size:.875rem;margin:0;">Aucun commentaire pour l'instant.</p>
@@ -220,6 +296,13 @@
                         el.disabled = true;
                         el.title = 'Signalement envoyé';
                     });
+                });
+            });
+
+            document.querySelectorAll('.toggle-reply-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var target = document.getElementById(this.dataset.target);
+                    if (target) target.classList.toggle('d-none');
                 });
             });
             </script>
