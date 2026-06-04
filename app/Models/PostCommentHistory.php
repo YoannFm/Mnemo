@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PostCommentHistory extends Model
 {
+    protected $table = 'post_comment_history';
     public $timestamps = false;
 
     protected $fillable = ['post_comment_id', 'content'];
