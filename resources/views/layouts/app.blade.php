@@ -263,7 +263,6 @@
 
         /* ── Mobile menu plein écran ── */
         #mobile-menu {
-            display: none;
             position: fixed;
             inset: 0;
             background: var(--header-bg);
@@ -271,8 +270,15 @@
             flex-direction: column;
             padding: 1.5rem;
             overflow-y: auto;
+            display: flex;
+            transform: translateX(-100%);
+            transition: transform .3s cubic-bezier(.4,0,.2,1);
+            visibility: hidden;
         }
-        #mobile-menu.open { display: flex; }
+        #mobile-menu.open {
+            transform: translateX(0);
+            visibility: visible;
+        }
 
         #mobile-menu-close {
             background: none;
@@ -470,7 +476,12 @@
             height: 2px;
             background: var(--accent);
             border-radius: 0;
+            transition: transform .3s, opacity .3s;
+            transform-origin: center;
         }
+        .navbar-toggler.is-open .hb-line:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .navbar-toggler.is-open .hb-line:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .navbar-toggler.is-open .hb-line:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
         .navbar-toggler-icon { display: none; }
 
         /* ── Séparateur vertical entre nav et user ── */
@@ -721,10 +732,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (menu && openBtn && closeBtn) {
         openBtn.addEventListener('click', function() {
             menu.classList.add('open');
+            openBtn.classList.add('is-open');
             document.body.style.overflow = 'hidden';
         });
         closeBtn.addEventListener('click', function() {
             menu.classList.remove('open');
+            openBtn.classList.remove('is-open');
             document.body.style.overflow = '';
         });
     }
