@@ -10,6 +10,8 @@ class Theme extends Model
         'name', 'slug', 'is_active',
         'body_bg', 'content_bg', 'card_bg',
         'accent_color', 'header_bg', 'text_color',
+        'light_body_bg', 'light_content_bg', 'light_card_bg',
+        'light_header_bg', 'light_text_color',
     ];
 
     protected function casts(): array

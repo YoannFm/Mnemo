@@ -24,13 +24,18 @@ class ThemeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'        => 'required|string|max:100',
-            'body_bg'     => 'required|string|max:20',
-            'content_bg'  => 'required|string|max:20',
-            'card_bg'     => 'required|string|max:20',
-            'accent_color'=> 'required|string|max:20',
-            'header_bg'   => 'required|string|max:20',
-            'text_color'  => 'required|string|max:20',
+            'name'             => 'required|string|max:100',
+            'body_bg'          => 'required|string|max:20',
+            'content_bg'       => 'required|string|max:20',
+            'card_bg'          => 'required|string|max:20',
+            'accent_color'     => 'required|string|max:20',
+            'header_bg'        => 'required|string|max:20',
+            'text_color'       => 'required|string|max:20',
+            'light_body_bg'    => 'required|string|max:20',
+            'light_content_bg' => 'required|string|max:20',
+            'light_card_bg'    => 'required|string|max:20',
+            'light_header_bg'  => 'required|string|max:20',
+            'light_text_color' => 'required|string|max:20',
         ]);
 
         $data['slug'] = Str::slug($data['name']);
@@ -49,13 +54,18 @@ class ThemeController extends Controller
     public function update(Request $request, Theme $theme)
     {
         $data = $request->validate([
-            'name'        => 'required|string|max:100',
-            'body_bg'     => 'required|string|max:20',
-            'content_bg'  => 'required|string|max:20',
-            'card_bg'     => 'required|string|max:20',
-            'accent_color'=> 'required|string|max:20',
-            'header_bg'   => 'required|string|max:20',
-            'text_color'  => 'required|string|max:20',
+            'name'             => 'required|string|max:100',
+            'body_bg'          => 'required|string|max:20',
+            'content_bg'       => 'required|string|max:20',
+            'card_bg'          => 'required|string|max:20',
+            'accent_color'     => 'required|string|max:20',
+            'header_bg'        => 'required|string|max:20',
+            'text_color'       => 'required|string|max:20',
+            'light_body_bg'    => 'required|string|max:20',
+            'light_content_bg' => 'required|string|max:20',
+            'light_card_bg'    => 'required|string|max:20',
+            'light_header_bg'  => 'required|string|max:20',
+            'light_text_color' => 'required|string|max:20',
         ]);
 
         $data['slug'] = Str::slug($data['name']);
@@ -85,7 +95,12 @@ class ThemeController extends Controller
             'theme_card_bg'    => $theme->card_bg,
             'theme_accent'     => $theme->accent_color,
             'theme_header_bg'  => $theme->header_bg,
-            'theme_text_color' => $theme->text_color,
+            'theme_text_color'       => $theme->text_color,
+            'theme_light_body_bg'    => $theme->light_body_bg,
+            'theme_light_content_bg' => $theme->light_content_bg,
+            'theme_light_card_bg'    => $theme->light_card_bg,
+            'theme_light_header_bg'  => $theme->light_header_bg,
+            'theme_light_text_color' => $theme->light_text_color,
         ];
 
         foreach ($map as $key => $value) {
