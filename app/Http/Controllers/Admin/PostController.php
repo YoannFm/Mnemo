@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
@@ -25,12 +26,19 @@ class PostController extends Controller
     {
         $data = $request->validate([
             'title'        => 'required|string|max:200',
+            'description'  => 'nullable|string|max:255',
+            'image'        => 'nullable|image|max:2048',
             'slug'         => 'required|string|max:200|unique:posts,slug',
             'content'      => 'required|string',
             'published_at' => 'nullable|date',
+            'is_pinned'    => 'boolean',
         ]);
         $data['slug'] = Str::slug($data['slug']);
         $data['user_id'] = Auth::id();
+        $data['is_pinned'] = $request->has('is_pinned');
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('posts', 'public');
+        }
         $post = Post::create($data);
         LogHelper::log('created_post', 'post', $post->id, ['title' => $post->title]);
         return redirect()->route('admin.posts.index')->with('success', 'Article créé.');
@@ -45,11 +53,21 @@ class PostController extends Controller
     {
         $data = $request->validate([
             'title'        => 'required|string|max:200',
+            'description'  => 'nullable|string|max:255',
+            'image'        => 'nullable|image|max:2048',
             'slug'         => 'required|string|max:200|unique:posts,slug,' . $post->id,
             'content'      => 'required|string',
             'published_at' => 'nullable|date',
+            'is_pinned'    => 'boolean',
         ]);
         $data['slug'] = Str::slug($data['slug']);
+        $data['is_pinned'] = $request->has('is_pinned');
+        if ($request->hasFile('image')) {
+            if ($post->image) {
+                Storage::disk('public')->delete($post->image);
+            }
+            $data['image'] = $request->file('image')->store('posts', 'public');
+        }
         $post->update($data);
         LogHelper::log('updated_post', 'post', $post->id, ['title' => $post->title]);
         return redirect()->route('admin.posts.index')->with('success', 'Article mis à jour.');
@@ -57,6 +75,9 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
+        if ($post->image) {
+            Storage::disk('public')->delete($post->image);
+        }
         LogHelper::log('deleted_post', 'post', $post->id, ['title' => $post->title]);
         $post->delete();
         return redirect()->route('admin.posts.index')->with('success', 'Article supprimé.');

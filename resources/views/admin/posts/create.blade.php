@@ -3,7 +3,7 @@
     <div class="card shadow mb-4">
         <div class="card-header"><h5 class="card-title mb-0">Créer un article</h5></div>
         <div class="card-body">
-            <form action="{{ route('admin.posts.store') }}" method="POST">
+            <form action="{{ route('admin.posts.store') }}" method="POST" enctype="multipart/form-data">
                 @include('admin.posts._form')
                 <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Enregistrer</button>
                 <a href="{{ route('admin.posts.index') }}" class="btn btn-secondary">Annuler</a>
