@@ -64,9 +64,11 @@ class ReportController extends Controller
 
     public function muteUser(Request $request, PostCommentReport $report)
     {
-        $data = $request->validate([
-            'duration' => 'required|in:1day,7days,30days,permanent',
-            'reason'   => 'required|string|max:500',
+        $request->validate([
+            'reason'            => 'required|string|max:500',
+            'duration_value'    => 'nullable|integer|min:1',
+            'duration_unit'     => 'nullable|in:minutes,hours,days,weeks,months',
+            'duration_permanent'=> 'nullable',
         ]);
 
         $comment = $report->postComment;
@@ -75,24 +77,27 @@ class ReportController extends Controller
             return redirect()->route('admin.reports.index')->with('error', 'Utilisateur introuvable.');
         }
 
-        $expiresAt = match ($data['duration']) {
-            '1day'   => now()->addDay(),
-            '7days'  => now()->addDays(7),
-            '30days' => now()->addDays(30),
-            'permanent' => null,
-        };
+        $permanent = $request->boolean('duration_permanent');
+
+        if ($permanent) {
+            $expiresAt = null;
+        } else {
+            $value = (int) $request->input('duration_value', 1);
+            $unit  = $request->input('duration_unit', 'days');
+            $expiresAt = now()->add($unit, $value);
+        }
 
         Mute::create([
             'user_id'    => $comment->user->id,
             'admin_id'   => Auth::id(),
-            'reason'     => $data['reason'],
+            'reason'     => $request->input('reason'),
             'expires_at' => $expiresAt,
         ]);
 
         AdminSanction::create([
             'user_id'  => $comment->user->id,
             'admin_id' => Auth::id(),
-            'reason'   => $data['reason'],
+            'reason'   => $request->input('reason'),
             'type'     => 'mute',
         ]);
 

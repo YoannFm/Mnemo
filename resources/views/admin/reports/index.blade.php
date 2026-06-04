@@ -129,12 +129,21 @@
                                                             <div class="modal-body">
                                                                 <div class="mb-3">
                                                                     <label class="form-label fw-bold">Durée</label>
-                                                                    <select name="duration" class="form-select" required>
-                                                                        <option value="1day">1 jour</option>
-                                                                        <option value="7days">7 jours</option>
-                                                                        <option value="30days">30 jours</option>
-                                                                        <option value="permanent">Définitif</option>
-                                                                    </select>
+                                                                    <div class="input-group">
+                                                                        <input type="number" name="duration_value" class="form-control" min="1" placeholder="ex: 27" style="max-width:100px;">
+                                                                        <select name="duration_unit" class="form-select">
+                                                                            <option value="minutes">Minutes</option>
+                                                                            <option value="hours">Heures</option>
+                                                                            <option value="days" selected>Jours</option>
+                                                                            <option value="weeks">Semaines</option>
+                                                                            <option value="months">Mois</option>
+                                                                        </select>
+                                                                        <div class="input-group-text">
+                                                                            <input class="form-check-input mt-0 me-1" type="checkbox" name="duration_permanent" id="perm{{ $report->id }}" value="1"
+                                                                                   onchange="toggleDuration(this, '{{ $report->id }}')">
+                                                                            <label class="form-check-label" for="perm{{ $report->id }}">Définitif</label>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                                 <div class="mb-3">
                                                                     <label class="form-label fw-bold">Raison</label>
@@ -169,5 +178,9 @@ document.addEventListener('DOMContentLoaded', function () {
         new bootstrap.Tooltip(el);
     });
 });
+function toggleDuration(checkbox, id) {
+    var inputs = checkbox.closest('.input-group').querySelectorAll('input[type="number"], select');
+    inputs.forEach(function(el) { el.disabled = checkbox.checked; });
+}
 </script>
 </x-admin-layout>

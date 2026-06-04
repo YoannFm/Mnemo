@@ -45,6 +45,13 @@ class PostController extends Controller
     {
         if (!$post->allow_reactions || !Auth::check()) abort(403);
 
+        $isMuted = Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->exists();
+        if ($isMuted) {
+            return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas interagir.'], 403);
+        }
+
         $emoji = $request->validate(['emoji' => 'required|string|max:10'])['emoji'];
 
         $existing = PostReaction::where([
