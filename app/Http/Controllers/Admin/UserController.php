@@ -177,8 +177,70 @@ class UserController extends Controller
         ]);
     }
 
-    public function importForm()
+    public function exportAll()
     {
+        $users = User::with([
+            'role',
+            'modules.items',
+            'progresses',
+            'scores',
+            'bans',
+            'userNotifications',
+        ])->get();
+
+        $zip = new \ZipArchive();
+        $zipPath = storage_path('app/tmp_export_users_' . time() . '.zip');
+        $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        foreach ($users as $user) {
+            $data = [
+                'account' => [
+                    'id'         => $user->id,
+                    'name'       => $user->name,
+                    'email'      => $user->email,
+                    'created_at' => $user->created_at?->toIso8601String(),
+                    'role'       => $user->role ? ['id' => $user->role->id, 'name' => $user->role->name] : null,
+                    'is_admin'   => $user->is_admin,
+                    'is_banned'  => $user->is_banned,
+                    'two_factor_enabled' => !empty($user->two_factor_secret),
+                    'last_login_at' => $user->last_login_at?->toIso8601String(),
+                ],
+                'modules' => $user->modules->map(fn ($m) => [
+                    'id'          => $m->id,
+                    'title'       => $m->title,
+                    'description' => $m->description,
+                    'is_public'   => $m->is_public,
+                    'created_at'  => $m->created_at?->toIso8601String(),
+                    'items'       => $m->items->map(fn ($i) => [
+                        'id'         => $i->id,
+                        'question'   => $i->question ?? null,
+                        'answer'     => $i->answer ?? null,
+                        'created_at' => $i->created_at?->toIso8601String(),
+                    ])->values(),
+                ])->values(),
+                'progress'      => $user->progresses->map(fn ($p) => $p->toArray())->values(),
+                'scores'        => $user->scores->map(fn ($s) => $s->toArray())->values(),
+                'bans'          => $user->bans->map(fn ($b) => [
+                    'id'         => $b->id,
+                    'reason'     => $b->reason,
+                    'created_at' => $b->created_at?->toIso8601String(),
+                ])->values(),
+                'notifications' => $user->userNotifications->map(fn ($n) => $n->toArray())->values(),
+                'exported_at'   => now()->toIso8601String(),
+            ];
+
+            $zip->addFromString(
+                "user_{$user->id}_{$user->name}.json",
+                json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            );
+        }
+
+        $zip->close();
+
+        return response()->download($zipPath, 'users_export_' . now()->format('Y-m-d') . '.zip')->deleteFileAfterSend(true);
+    }
+
+
         return view('admin.users.import');
     }
 

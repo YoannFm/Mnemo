@@ -100,6 +100,9 @@
                 <a class="btn btn-outline-secondary" href="{{ route('admin.users.import') }}">
                     <i class="bi bi-upload"></i> Importer
                 </a>
+                <a class="btn btn-outline-success" href="{{ route('admin.users.export-all') }}">
+                    <i class="bi bi-file-earmark-zip"></i> Exporter tout
+                </a>
                 <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#notificationModal">
                     <i class="bi bi-megaphone"></i> Envoyer une notification
                 </button>
