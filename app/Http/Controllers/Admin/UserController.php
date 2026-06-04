@@ -131,6 +131,16 @@ class UserController extends Controller
             'userNotifications',
         ]);
 
+        $activityLogs = ActivityLog::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn ($l) => [
+                'date'        => $l->created_at?->toIso8601String(),
+                'action'      => $l->action,
+                'description' => $l->data,
+                'level'       => $l->level,
+            ])->values();
+
         $data = [
             'account' => [
                 'id'         => $user->id,
@@ -157,15 +167,16 @@ class UserController extends Controller
                     'created_at' => $i->created_at?->toIso8601String(),
                 ])->values(),
             ])->values(),
-            'progress'      => $user->progresses->map(fn ($p) => $p->toArray())->values(),
-            'scores'        => $user->scores->map(fn ($s) => $s->toArray())->values(),
-            'bans'          => $user->bans->map(fn ($b) => [
+            'progress'       => $user->progresses->map(fn ($p) => $p->toArray())->values(),
+            'scores'         => $user->scores->map(fn ($s) => $s->toArray())->values(),
+            'bans'           => $user->bans->map(fn ($b) => [
                 'id'         => $b->id,
                 'reason'     => $b->reason,
                 'created_at' => $b->created_at?->toIso8601String(),
             ])->values(),
-            'notifications' => $user->userNotifications->map(fn ($n) => $n->toArray())->values(),
-            'exported_at'   => now()->toIso8601String(),
+            'notifications'  => $user->userNotifications->map(fn ($n) => $n->toArray())->values(),
+            'activity_logs'  => $activityLogs,
+            'exported_at'    => now()->toIso8601String(),
         ];
 
         $filename = "user_{$user->id}_data.json";
@@ -192,7 +203,18 @@ class UserController extends Controller
         $zipPath = storage_path('app/tmp_export_users_' . time() . '.zip');
         $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
 
+        $allLogs = \App\Models\ActivityLog::orderBy('created_at', 'desc')
+            ->get()
+            ->groupBy('user_id');
+
         foreach ($users as $user) {
+            $userLogs = ($allLogs[$user->id] ?? collect())->map(fn ($l) => [
+                'date'        => $l->created_at?->toIso8601String(),
+                'action'      => $l->action,
+                'description' => $l->data,
+                'level'       => $l->level,
+            ])->values();
+
             $data = [
                 'account' => [
                     'id'         => $user->id,
@@ -225,8 +247,9 @@ class UserController extends Controller
                     'reason'     => $b->reason,
                     'created_at' => $b->created_at?->toIso8601String(),
                 ])->values(),
-                'notifications' => $user->userNotifications->map(fn ($n) => $n->toArray())->values(),
-                'exported_at'   => now()->toIso8601String(),
+                'notifications'  => $user->userNotifications->map(fn ($n) => $n->toArray())->values(),
+                'activity_logs'  => $userLogs,
+                'exported_at'    => now()->toIso8601String(),
             ];
 
             $zip->addFromString(
@@ -240,7 +263,8 @@ class UserController extends Controller
         return response()->download($zipPath, 'users_export_' . now()->format('Y-m-d') . '.zip')->deleteFileAfterSend(true);
     }
 
-
+    public function importForm()
+    {
         return view('admin.users.import');
     }
 
