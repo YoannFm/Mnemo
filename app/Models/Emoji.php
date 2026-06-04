@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Emoji extends Model
 {
+    protected $table = 'emojis';
     protected $fillable = ['name', 'slug', 'type', 'image_path'];
 
     public function imageUrl(): string
