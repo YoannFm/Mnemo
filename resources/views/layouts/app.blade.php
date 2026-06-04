@@ -510,24 +510,27 @@
 
     @auth
     <div class="mobile-user-section" style="margin-top:auto;padding-top:1.5rem;border-top:1px solid rgba(239,183,2,.2);">
-        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;">
+        <button id="mobile-user-toggle" style="background:none;border:none;width:100%;text-align:left;padding:0;cursor:pointer;display:flex;align-items:center;gap:.75rem;">
             <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
-            <span style="font-weight:700;color:var(--text-primary);">{{ Auth::user()->name }}</span>
-        </div>
-        <a href="{{ route('notifications.index') }}" style="color:var(--text-muted);">
-            <i class="bi bi-bell"></i> Notifications
-            @if(($unreadNotifications ?? 0) > 0)
-                <span class="badge bg-danger ms-1">{{ $unreadNotifications }}</span>
+            <span style="font-weight:700;color:var(--text-primary);font-size:1rem;text-transform:uppercase;letter-spacing:.5px;">{{ Auth::user()->name }}</span>
+            <i class="bi bi-chevron-down" id="mobile-user-chevron" style="color:var(--text-muted);margin-left:auto;transition:transform .2s;"></i>
+        </button>
+        <div id="mobile-user-items" style="display:none;margin-top:.75rem;padding-left:.5rem;">
+            <a href="{{ route('notifications.index') }}" style="color:var(--text-muted);">
+                <i class="bi bi-bell"></i> Notifications
+                @if(($unreadNotifications ?? 0) > 0)
+                    <span class="badge bg-danger ms-1">{{ $unreadNotifications }}</span>
+                @endif
+            </a>
+            <a href="{{ route('profile.edit') }}" style="color:var(--text-muted);"><i class="bi bi-person"></i> Mon profil</a>
+            @if(Auth::user()->isAdmin())
+                <a href="{{ route('admin.dashboard') }}" style="color:var(--accent);"><i class="bi bi-shield-check"></i> Administration</a>
             @endif
-        </a>
-        <a href="{{ route('profile.edit') }}" style="color:var(--text-muted);"><i class="bi bi-person"></i> Mon profil</a>
-        @if(Auth::user()->isAdmin())
-            <a href="{{ route('admin.dashboard') }}" style="color:var(--accent);"><i class="bi bi-shield-check"></i> Administration</a>
-        @endif
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" style="color:#ef4444;"><i class="bi bi-box-arrow-right"></i> Déconnexion</button>
-        </form>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" style="color:#ef4444;"><i class="bi bi-box-arrow-right"></i> Déconnexion</button>
+            </form>
+        </div>
     </div>
     @endauth
 </div>
@@ -710,6 +713,18 @@ document.addEventListener('DOMContentLoaded', function() {
         closeBtn.addEventListener('click', function() {
             menu.classList.remove('open');
             document.body.style.overflow = '';
+        });
+    }
+
+    // Section utilisateur mobile repliable
+    var userToggle = document.getElementById('mobile-user-toggle');
+    var userItems = document.getElementById('mobile-user-items');
+    var userChevron = document.getElementById('mobile-user-chevron');
+    if (userToggle && userItems) {
+        userToggle.addEventListener('click', function() {
+            var open = userItems.style.display === 'none';
+            userItems.style.display = open ? 'block' : 'none';
+            if (userChevron) userChevron.style.transform = open ? 'rotate(180deg)' : '';
         });
     }
 });
