@@ -178,10 +178,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     // Posts
     Route::resource('posts', \App\Http\Controllers\Admin\PostController::class);
     // Images
-    Route::get('/images', [\App\Http\Controllers\Admin\ImageController::class, 'index'])->name('images.index');
-    Route::get('/images/create', [\App\Http\Controllers\Admin\ImageController::class, 'create'])->name('images.create');
-    Route::post('/images', [\App\Http\Controllers\Admin\ImageController::class, 'store'])->name('images.store');
-    Route::delete('/images/{image}', [\App\Http\Controllers\Admin\ImageController::class, 'destroy'])->name('images.destroy');
+    Route::resource('images', \App\Http\Controllers\Admin\ImageController::class)->except(['show']);
     // Redirects
     Route::resource('redirects', \App\Http\Controllers\Admin\RedirectController::class);
     // Logs
