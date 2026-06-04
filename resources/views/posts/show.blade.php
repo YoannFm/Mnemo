@@ -44,16 +44,26 @@
                             </button>
                         @endforeach
 
-                        {{-- Bouton emoji-picker-element --}}
-                        <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
                         @auth
                         <div class="position-relative" id="emoji-picker-wrapper">
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="emoji-more-btn" title="Plus de réactions">
                                 <i class="bi bi-emoji-smile"></i>
                             </button>
                             <div id="emoji-picker-container" class="position-absolute d-none"
-                                 style="bottom:110%;left:0;z-index:200;">
-                                <emoji-picker id="the-picker"></emoji-picker>
+                                 style="bottom:110%;left:0;z-index:200;background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:8px;width:280px;box-shadow:0 4px 16px rgba(0,0,0,.2);">
+                                <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;">
+                                    @foreach(['😀','😁','😂','🤣','😃','😄','😅','😆','😇','😈','🤩','😍','🥰','😘','😋','😎',
+                                              '🤔','😐','😑','😶','🙄','😏','😣','😞','😟','😤','😢','😭','😱','😨','😰','😓',
+                                              '🤗','🤭','🤫','🤥','😬','🙃','🤪','😜','😝','😛','🤑','😲','🥳','🥺','😔','😪',
+                                              '👍','👎','👏','🙌','🤝','👊','✊','🤜','🤛','🤞','✌️','🤟','🤘','👌','🤌','👋',
+                                              '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💔','❣️','💕','💞','💓','💗','💖','💘',
+                                              '🔥','⭐','✨','💫','🎉','🎊','🎯','🏆','🥇','💯','🚀','💡','👀','💪','🙏','🫶'] as $e)
+                                        <button type="button" class="btn btn-sm emoji-grid-btn"
+                                                style="padding:4px;font-size:1.2rem;line-height:1;background:none;border:none;border-radius:4px;cursor:pointer;"
+                                                onmouseover="this.style.background='var(--content-bg)'" onmouseout="this.style.background='none'"
+                                                onclick="sendReaction('{{ $e }}', null); document.getElementById('emoji-picker-container').classList.add('d-none');">{{ $e }}</button>
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                         @endauth
@@ -110,15 +120,10 @@
 
             var moreBtn = document.getElementById('emoji-more-btn');
             var pickerContainer = document.getElementById('emoji-picker-container');
-            var picker = document.getElementById('the-picker');
-            if (moreBtn && picker) {
+            if (moreBtn && pickerContainer) {
                 moreBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     pickerContainer.classList.toggle('d-none');
-                });
-                picker.addEventListener('emoji-click', function(e) {
-                    sendReaction(e.detail.unicode, null);
-                    pickerContainer.classList.add('d-none');
                 });
                 document.addEventListener('click', function() { pickerContainer.classList.add('d-none'); });
                 pickerContainer.addEventListener('click', function(e) { e.stopPropagation(); });
