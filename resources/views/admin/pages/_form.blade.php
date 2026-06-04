@@ -69,7 +69,8 @@
 </div>
 
 @push('footer-scripts')
-<script src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
+{{-- TinyMCE 6 (LGPL) via CDN - aucune cle requise --}}
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
 <script>
 function initTinyMCE() {
     var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
@@ -78,9 +79,8 @@ function initTinyMCE() {
     }
     tinymce.init({
         selector: '#contentArea',
-        base_url: '{{ asset('vendor/tinymce') }}',
+        base_url: 'https://cdn.jsdelivr.net/npm/tinymce@6',
         suffix: '.min',
-        license_key: 'gpl',
         promotion: false,
         height: 400,
         min_height: 200,
