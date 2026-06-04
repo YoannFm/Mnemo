@@ -36,8 +36,8 @@
     <style>
         :root {
             --accent: {{ setting('theme_accent', '#EFB702') }};
-            --accent-hover: #d6a502;
-            --accent-light: rgba(239,183,2,.12);
+            --accent-hover: color-mix(in srgb, {{ setting('theme_accent', '#EFB702') }} 85%, black);
+            --accent-light: color-mix(in srgb, {{ setting('theme_accent', '#EFB702') }} 15%, transparent);
             --text-primary: {{ setting('theme_text_color', '#e2e8f0') }};
             --text-muted: #9ca3af;
             --card-bg: {{ setting('theme_card_bg', '#212227') }};
@@ -46,6 +46,15 @@
             --header-bg: {{ setting('theme_header_bg', '#1a1b1f') }};
             --success-color: #22c55e;
             --danger-color: #ff5956;
+        }
+
+        [data-bs-theme="light"] {
+            --body-bg: #f0f2f5;
+            --card-bg: #ffffff;
+            --card-border: #dee2e6;
+            --header-bg: #ffffff;
+            --text-primary: #212529;
+            --text-muted: #6c757d;
         }
 
         body {
