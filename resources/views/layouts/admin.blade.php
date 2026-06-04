@@ -22,23 +22,26 @@
             .sidebar {
                 position: fixed !important;
                 top: 0; left: 0; bottom: 0;
-                width: 100vw !important;
-                max-width: 100vw !important;
-                min-width: 100vw !important;
+                width: 78vw !important;
+                max-width: 320px !important;
+                min-width: unset !important;
                 z-index: 100;
-                margin-left: -100vw !important;
+                margin-left: -78vw !important;
                 transition: margin-left .3s ease;
+                overflow-y: auto;
             }
             .sidebar.collapsed {
                 margin-left: 0 !important;
             }
-            .main { margin-left: 0 !important; width: 100% !important; }
+            .main {
+                margin-left: 0 !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
             .navbar-bg { position: sticky; top: 0; z-index: 99; width: 100%; }
             .content { padding: 1rem .75rem !important; }
-            .table-responsive { font-size: .85rem; }
+            .table-responsive { font-size: .82rem; }
             .card { margin-bottom: 1rem; }
-        }
-        @media (max-width: 575.98px) {
             h1.h3 { font-size: 1.1rem; }
         }
     </style>
