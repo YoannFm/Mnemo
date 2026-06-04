@@ -351,7 +351,7 @@
                             if (noMsg) noMsg.remove();
                             var list = document.getElementById('comments-list');
                             var html = buildCommentHtml(data.comment);
-                            list.insertAdjacentHTML('beforeend', html);
+                            list.insertAdjacentHTML('afterbegin', html);
                             document.getElementById('new-comment-content').value = '';
                             updateCommentCount(1);
                         }
