@@ -297,7 +297,11 @@
             text-transform: uppercase;
             padding: 1rem 0;
         }
-        #mobile-menu .mobile-nav-link.active { color: var(--accent); }
+        #mobile-menu .mobile-nav-link.active {
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+            padding-left: .75rem;
+        }
         #mobile-menu .mobile-nav-link i { font-size: 1.1rem; width: 24px; text-align: center; }
 
         #mobile-menu .mobile-user-section {
