@@ -210,10 +210,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::post('/reports/{report}/unsanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markUnsanctioned'])->name('reports.unsanctioned');
     Route::post('/reports/{report}/delete-comment', [\App\Http\Controllers\Admin\ReportController::class, 'deleteComment'])->name('reports.delete-comment');
     Route::post('/reports/{report}/mute-user', [\App\Http\Controllers\Admin\ReportController::class, 'muteUser'])->name('reports.mute-user');
-    // Reports (modules)
-    Route::get('/module-reports', [\App\Http\Controllers\Admin\ModuleReportController::class, 'index'])->name('module-reports.index');
-    Route::post('/module-reports/{report}/treated', [\App\Http\Controllers\Admin\ModuleReportController::class, 'markTreated'])->name('module-reports.treated');
-    Route::post('/module-reports/{report}/rejected', [\App\Http\Controllers\Admin\ModuleReportController::class, 'markRejected'])->name('module-reports.rejected');
+    Route::post('/reports/modules/{report}/treated', [\App\Http\Controllers\Admin\ReportController::class, 'markModuleTreated'])->name('reports.modules.treated');
+    Route::post('/reports/modules/{report}/rejected', [\App\Http\Controllers\Admin\ReportController::class, 'markModuleRejected'])->name('reports.modules.rejected');
     // Historique des commentaires
     Route::get('/comment-history', [\App\Http\Controllers\Admin\CommentHistoryController::class, 'index'])->name('comment-history.index');
     // Sanctions
