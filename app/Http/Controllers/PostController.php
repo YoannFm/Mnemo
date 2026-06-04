@@ -52,7 +52,11 @@ class PostController extends Controller
             return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas interagir.'], 403);
         }
 
-        $emoji = $request->validate(['emoji' => 'required|string|max:10'])['emoji'];
+        $emoji = $request->validate(['emoji' => 'required|string|max:100'])['emoji'];
+
+        if (!\App\Models\Emoji::where('slug', $emoji)->exists()) {
+            return response()->json(['error' => 'Emoji invalide.'], 422);
+        }
 
         $existing = PostReaction::where([
             'post_id' => $post->id,

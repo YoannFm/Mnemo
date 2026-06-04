@@ -33,24 +33,33 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="d-flex gap-2 flex-wrap align-items-center" id="reactions-bar">
-                        @foreach(['👍','❤️','😂','😮','😢','🔥'] as $emoji)
-                            @php $count = $reactions[$emoji] ?? 0; $active = in_array($emoji, $userReactions); @endphp
+                        @foreach($reactions as $slug => $count)
+                            @php $active = in_array($slug, $userReactions); $emojiModel = \App\Models\Emoji::where('slug', $slug)->first(); @endphp
+                            @if($emojiModel)
                             <button type="button"
-                                    class="btn btn-sm reaction-btn {{ $active ? 'btn-primary' : 'btn-outline-secondary' }}"
-                                    data-emoji="{{ $emoji }}"
-                                    data-url="{{ route('posts.react', $post) }}"
+                                    class="btn btn-sm reaction-btn d-flex align-items-center gap-1 {{ $active ? 'btn-primary' : 'btn-outline-secondary' }}"
+                                    data-emoji="{{ $slug }}"
                                     {{ Auth::check() ? '' : 'disabled' }}>
-                                {{ $emoji }} <span class="reaction-count">{{ $count > 0 ? $count : '' }}</span>
+                                <img src="{{ $emojiModel->imageUrl() }}" alt="{{ $emojiModel->name }}" style="width:18px;height:18px;object-fit:contain;">
+                                <span class="reaction-count">{{ $count > 0 ? $count : '' }}</span>
                             </button>
+                            @endif
                         @endforeach
 
                         @auth
                         <div class="position-relative" id="emoji-picker-wrapper">
-                            <button type="button" class="btn btn-sm btn-outline-secondary" id="emoji-more-btn" title="Plus de réactions">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="emoji-more-btn" title="Réagir">
                                 <i class="bi bi-emoji-smile"></i>
                             </button>
                             <div id="emoji-picker-container" class="position-absolute d-none"
-                                 style="bottom:110%;left:0;z-index:200;">
+                                 style="bottom:110%;left:0;z-index:200;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:12px;width:320px;box-shadow:0 8px 24px rgba(0,0,0,.2);">
+                                <input type="search" id="emoji-search" class="form-control form-control-sm mb-2" placeholder="Rechercher...">
+                                <div class="d-flex gap-2 mb-2" id="emoji-type-tabs">
+                                    <button type="button" class="btn btn-sm btn-primary active" data-tab="simple">Simples</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-tab="animated">Animés</button>
+                                </div>
+                                <div id="emoji-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:240px;overflow-y:auto;"></div>
+                                <p id="emoji-empty" class="text-muted text-center small mt-2 d-none">Aucun emoji.</p>
                             </div>
                         </div>
                         @endauth
@@ -61,60 +70,105 @@
                 </div>
             </div>
 
-            <script type="module">
-            import { Picker } from '/vendor/emoji-picker-element/index.js';
-
+            <script>
             var reactUrl = "{{ route('posts.react', $post) }}";
+            var emojisUrl = "{{ route('emojis.json') }}";
             var csrf = document.querySelector('meta[name="csrf-token"]').content;
+            var allEmojis = [];
+            var currentTab = 'simple';
 
-            function sendReaction(emoji) {
+            function sendReaction(slug, imgUrl, imgAlt) {
                 fetch(reactUrl, {
                     method: 'POST',
                     headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
-                    body: JSON.stringify({emoji: emoji})
+                    body: JSON.stringify({emoji: slug})
                 })
                 .then(r => r.json())
                 .then(data => {
                     if (data.status === 'muted') { showMuteAlert(data.message); return; }
-                    var existing = document.querySelector('#reactions-bar .reaction-btn[data-emoji="' + emoji + '"]');
+                    var existing = document.querySelector('#reactions-bar .reaction-btn[data-emoji="' + slug + '"]');
                     if (existing) {
                         existing.classList.toggle('btn-primary', data.active);
                         existing.classList.toggle('btn-outline-secondary', !data.active);
                         existing.querySelector('.reaction-count').textContent = data.count > 0 ? data.count : '';
                         if (!data.active && data.count === 0) existing.remove();
-                    } else {
+                    } else if (data.active) {
                         var bar = document.getElementById('reactions-bar');
                         var newBtn = document.createElement('button');
                         newBtn.type = 'button';
-                        newBtn.className = 'btn btn-sm reaction-btn ' + (data.active ? 'btn-primary' : 'btn-outline-secondary');
-                        newBtn.dataset.emoji = emoji;
-                        newBtn.innerHTML = emoji + ' <span class="reaction-count">' + (data.count > 0 ? data.count : '') + '</span>';
-                        newBtn.addEventListener('click', function(){ sendReaction(this.dataset.emoji); });
-                        bar.insertBefore(newBtn, document.getElementById('emoji-more-btn').parentElement);
+                        newBtn.className = 'btn btn-sm reaction-btn d-flex align-items-center gap-1 btn-primary';
+                        newBtn.dataset.emoji = slug;
+                        newBtn.innerHTML = '<img src="' + imgUrl + '" alt="' + imgAlt + '" style="width:18px;height:18px;object-fit:contain;"> <span class="reaction-count">' + (data.count > 0 ? data.count : '') + '</span>';
+                        newBtn.addEventListener('click', function(){ sendReaction(this.dataset.emoji, imgUrl, imgAlt); });
+                        bar.insertBefore(newBtn, document.getElementById('emoji-picker-wrapper'));
                     }
                 });
             }
 
             document.querySelectorAll('.reaction-btn').forEach(btn => {
-                btn.addEventListener('click', function(){ sendReaction(this.dataset.emoji); });
+                btn.addEventListener('click', function(){
+                    var img = this.querySelector('img');
+                    sendReaction(this.dataset.emoji, img ? img.src : '', img ? img.alt : '');
+                });
             });
+
+            function renderEmojiGrid(emojis) {
+                var grid = document.getElementById('emoji-grid');
+                var empty = document.getElementById('emoji-empty');
+                grid.innerHTML = '';
+                if (!emojis.length) { empty.classList.remove('d-none'); return; }
+                empty.classList.add('d-none');
+                emojis.forEach(e => {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.title = e.name;
+                    btn.style = 'background:none;border:1px solid transparent;border-radius:6px;padding:4px;cursor:pointer;transition:.15s;';
+                    btn.innerHTML = '<img src="' + e.url + '" alt="' + e.name + '" style="width:32px;height:32px;object-fit:contain;">';
+                    btn.addEventListener('mouseenter', () => btn.style.borderColor = 'var(--card-border)');
+                    btn.addEventListener('mouseleave', () => btn.style.borderColor = 'transparent');
+                    btn.addEventListener('click', () => sendReaction(e.slug, e.url, e.name));
+                    grid.appendChild(btn);
+                });
+            }
+
+            function filterAndRender() {
+                var q = (document.getElementById('emoji-search').value || '').toLowerCase();
+                var filtered = allEmojis.filter(e => e.type === currentTab && (!q || e.name.toLowerCase().includes(q) || e.slug.toLowerCase().includes(q)));
+                renderEmojiGrid(filtered);
+            }
 
             var moreBtn = document.getElementById('emoji-more-btn');
             var pickerContainer = document.getElementById('emoji-picker-container');
+            var loaded = false;
 
             if (moreBtn && pickerContainer) {
-                var picker = new Picker({ locale: 'fr', skinToneEmoji: '👋' });
-                picker.addEventListener('emoji-click', e => {
-                    sendReaction(e.detail.unicode);
-                });
-                pickerContainer.appendChild(picker);
-
                 moreBtn.addEventListener('click', e => {
                     e.stopPropagation();
                     pickerContainer.classList.toggle('d-none');
+                    if (!loaded) {
+                        loaded = true;
+                        fetch(emojisUrl).then(r => r.json()).then(data => {
+                            allEmojis = data;
+                            filterAndRender();
+                        });
+                    }
                 });
                 document.addEventListener('click', () => pickerContainer.classList.add('d-none'));
                 pickerContainer.addEventListener('click', e => e.stopPropagation());
+
+                document.getElementById('emoji-search').addEventListener('input', filterAndRender);
+
+                document.querySelectorAll('#emoji-type-tabs button').forEach(tab => {
+                    tab.addEventListener('click', function() {
+                        currentTab = this.dataset.tab;
+                        document.querySelectorAll('#emoji-type-tabs button').forEach(b => {
+                            b.className = 'btn btn-sm btn-outline-secondary';
+                        });
+                        this.className = 'btn btn-sm btn-primary active';
+                        document.getElementById('emoji-search').value = '';
+                        filterAndRender();
+                    });
+                });
             }
             </script>
         @endif
