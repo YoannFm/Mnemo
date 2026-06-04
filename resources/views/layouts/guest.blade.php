@@ -19,13 +19,13 @@
 
     <style>
         :root {
-            --accent: #EFB702;
-            --accent-hover: #d6a502;
-            --accent-light: rgba(239,183,2,.12);
-            --body-bg: #2E2E34;
-            --card-bg: #212227;
-            --card-border: #2E2E34;
-            --text-primary: #DDDDDD;
+            --accent: {{ setting('theme_accent', '#EFB702') }};
+            --accent-hover: color-mix(in srgb, {{ setting('theme_accent', '#EFB702') }} 85%, black);
+            --accent-light: color-mix(in srgb, {{ setting('theme_accent', '#EFB702') }} 15%, transparent);
+            --body-bg: {{ setting('theme_content_bg', '#2E2E34') }};
+            --card-bg: {{ setting('theme_card_bg', '#212227') }};
+            --card-border: {{ setting('theme_content_bg', '#2E2E34') }};
+            --text-primary: {{ setting('theme_text_color', '#e2e8f0') }};
             --text-muted: #9ca3af;
         }
 
