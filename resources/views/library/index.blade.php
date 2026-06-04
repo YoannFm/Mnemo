@@ -102,6 +102,17 @@
                                         <i class="bi bi-arrow-repeat"></i>
                                     </a>
                                 @endif
+                                @auth
+                                    @if (Auth::id() !== $module->owner_id)
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                title="Signaler ce module"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#reportModal{{ $module->id }}">
+                                            <i class="bi bi-flag"></i>
+                                        </button>
+                                    @endif
+                                @endauth
                             </div>
 
                         </div>
@@ -115,5 +126,109 @@
             {{ $modules->links('pagination::bootstrap-5') }}
         </div>
     @endif
+
+    {{-- Modals de signalement (un par module) --}}
+    @auth
+        @foreach ($modules as $module)
+            @if (Auth::id() !== $module->owner_id)
+                <div class="modal fade" id="reportModal{{ $module->id }}" tabindex="-1"
+                     aria-labelledby="reportModalLabel{{ $module->id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="reportModalLabel{{ $module->id }}">
+                                    <i class="bi bi-flag me-2 text-danger"></i>Signaler « {{ $module->title }} »
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="reportReason{{ $module->id }}" class="form-label fw-semibold">Motif <span class="text-danger">*</span></label>
+                                    <select id="reportReason{{ $module->id }}" class="form-select">
+                                        <option value="">-- Choisir un motif --</option>
+                                        <option value="spam">Spam</option>
+                                        <option value="inappropriate">Contenu inapproprié</option>
+                                        <option value="copyright">Violation de droits d'auteur</option>
+                                        <option value="other">Autre</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="reportNote{{ $module->id }}" class="form-label fw-semibold">Note (optionnelle)</label>
+                                    <textarea id="reportNote{{ $module->id }}" class="form-control" rows="3" maxlength="500"
+                                              placeholder="Précisez votre signalement..."></textarea>
+                                </div>
+                                <div id="reportFeedback{{ $module->id }}" class="d-none"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="button" class="btn btn-danger"
+                                        id="reportSubmit{{ $module->id }}"
+                                        data-module-id="{{ $module->id }}"
+                                        data-report-url="{{ route('modules.report', $module) }}">
+                                    <i class="bi bi-flag me-1"></i> Envoyer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endforeach
+    @endauth
+
+    @auth
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('[id^="reportSubmit"]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const id  = this.dataset.moduleId;
+                    const url = this.dataset.reportUrl;
+                    const reason   = document.getElementById('reportReason' + id).value;
+                    const note     = document.getElementById('reportNote' + id).value;
+                    const feedback = document.getElementById('reportFeedback' + id);
+
+                    if (!reason) {
+                        feedback.className = 'alert alert-warning';
+                        feedback.textContent = 'Veuillez choisir un motif.';
+                        feedback.classList.remove('d-none');
+                        return;
+                    }
+
+                    this.disabled = true;
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+                        },
+                        body: JSON.stringify({ reason, note })
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === 'ok') {
+                            feedback.className = 'alert alert-success';
+                            feedback.textContent = 'Signalement envoyé. Merci !';
+                            this.classList.add('d-none');
+                        } else if (data.status === 'already_reported') {
+                            feedback.className = 'alert alert-info';
+                            feedback.textContent = 'Vous avez déjà signalé ce module.';
+                        } else {
+                            feedback.className = 'alert alert-danger';
+                            feedback.textContent = data.message ?? 'Une erreur est survenue.';
+                            this.disabled = false;
+                        }
+                        feedback.classList.remove('d-none');
+                    })
+                    .catch(() => {
+                        feedback.className = 'alert alert-danger';
+                        feedback.textContent = 'Erreur réseau. Veuillez réessayer.';
+                        feedback.classList.remove('d-none');
+                        this.disabled = false;
+                    });
+                });
+            });
+        });
+        </script>
+    @endauth
 
 </x-app-layout>
