@@ -105,6 +105,9 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     // Dupliquer un module public dans son espace personnel
     Route::post('/modules/{module}/duplicate', [ModuleController::class, 'duplicate'])->name('modules.duplicate');
 
+    // Signaler un module public
+    Route::post('/modules/{module}/report', [ModuleController::class, 'report'])->name('modules.report');
+
     // ─── Bibliothèque publique ───
     Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');
 
@@ -201,12 +204,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::delete('/private-modules/{module}', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'destroy'])->name('private-modules.destroy');
     // Update placeholder
     Route::get('/update', fn() => view('admin.update.index'))->name('update.index');
-    // Reports
+    // Reports (commentaires)
     Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/{report}/sanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markSanctioned'])->name('reports.sanctioned');
     Route::post('/reports/{report}/unsanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markUnsanctioned'])->name('reports.unsanctioned');
     Route::post('/reports/{report}/delete-comment', [\App\Http\Controllers\Admin\ReportController::class, 'deleteComment'])->name('reports.delete-comment');
     Route::post('/reports/{report}/mute-user', [\App\Http\Controllers\Admin\ReportController::class, 'muteUser'])->name('reports.mute-user');
+    // Reports (modules)
+    Route::get('/module-reports', [\App\Http\Controllers\Admin\ModuleReportController::class, 'index'])->name('module-reports.index');
+    Route::post('/module-reports/{report}/treated', [\App\Http\Controllers\Admin\ModuleReportController::class, 'markTreated'])->name('module-reports.treated');
+    Route::post('/module-reports/{report}/rejected', [\App\Http\Controllers\Admin\ModuleReportController::class, 'markRejected'])->name('module-reports.rejected');
     // Historique des commentaires
     Route::get('/comment-history', [\App\Http\Controllers\Admin\CommentHistoryController::class, 'index'])->name('comment-history.index');
     // Sanctions

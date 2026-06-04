@@ -62,8 +62,108 @@
                     </button>
                 </form>
             </div>
+        @elseif (Auth::check() && $module->is_public)
+            {{-- Bouton Signaler (visible uniquement pour les utilisateurs connectés non propriétaires) --}}
+            <div>
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#reportModuleModal">
+                    <i class="bi bi-flag me-1"></i> Signaler
+                </button>
+            </div>
         @endif
     </div>
+
+    {{-- Modal Signalement --}}
+    @auth
+        @if ($module->is_public && Auth::id() !== $module->owner_id)
+            <div class="modal fade" id="reportModuleModal" tabindex="-1" aria-labelledby="reportModuleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reportModuleModalLabel">
+                                <i class="bi bi-flag me-2 text-danger"></i>Signaler ce module
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="reportReason" class="form-label fw-semibold">Motif du signalement <span class="text-danger">*</span></label>
+                                <select id="reportReason" class="form-select">
+                                    <option value="">-- Choisir un motif --</option>
+                                    <option value="spam">Spam</option>
+                                    <option value="inappropriate">Contenu inapproprié</option>
+                                    <option value="copyright">Violation de droits d'auteur</option>
+                                    <option value="other">Autre</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="reportNote" class="form-label fw-semibold">Note (optionnelle)</label>
+                                <textarea id="reportNote" class="form-control" rows="3" maxlength="500"
+                                          placeholder="Précisez votre signalement..."></textarea>
+                                <div class="form-text">Maximum 500 caractères.</div>
+                            </div>
+                            <div id="reportFeedback" class="d-none"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="button" class="btn btn-danger" id="reportSubmitBtn">
+                                <i class="bi bi-flag me-1"></i> Envoyer le signalement
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+            document.getElementById('reportSubmitBtn')?.addEventListener('click', function () {
+                const reason = document.getElementById('reportReason').value;
+                const note   = document.getElementById('reportNote').value;
+                const feedback = document.getElementById('reportFeedback');
+
+                if (!reason) {
+                    feedback.className = 'alert alert-warning';
+                    feedback.textContent = 'Veuillez choisir un motif.';
+                    return;
+                }
+
+                this.disabled = true;
+
+                fetch('{{ route('modules.report', $module) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({ reason, note })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        feedback.className = 'alert alert-success';
+                        feedback.textContent = 'Signalement envoyé. Merci !';
+                        document.getElementById('reportSubmitBtn').classList.add('d-none');
+                    } else if (data.status === 'already_reported') {
+                        feedback.className = 'alert alert-info';
+                        feedback.textContent = 'Vous avez déjà signalé ce module.';
+                    } else {
+                        feedback.className = 'alert alert-danger';
+                        feedback.textContent = data.message ?? 'Une erreur est survenue.';
+                        document.getElementById('reportSubmitBtn').disabled = false;
+                    }
+                    feedback.classList.remove('d-none');
+                })
+                .catch(() => {
+                    feedback.className = 'alert alert-danger';
+                    feedback.textContent = 'Erreur réseau. Veuillez réessayer.';
+                    feedback.classList.remove('d-none');
+                    document.getElementById('reportSubmitBtn').disabled = false;
+                });
+            });
+            </script>
+        @endif
+    @endauth
 
     {{-- ── Boutons d'entraînement (Test / Anki) - nécessite au moins 4 items ── --}}
     @if ($items->total() >= 4)
