@@ -19,6 +19,47 @@
         </li>
     </ul>
 
+    {{-- Import pack --}}
+    <div class="card shadow mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong><i class="bi bi-file-earmark-zip me-1"></i> Importer un pack (.zip)</strong>
+            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#packHelp">
+                <i class="bi bi-question-circle"></i> Format
+            </button>
+        </div>
+        <div class="card-body">
+            <form action="{{ route('admin.emojis.import-pack') }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2 align-items-start flex-wrap">
+                @csrf
+                <div class="flex-grow-1">
+                    <input type="file" name="pack" class="form-control @error('pack') is-invalid @enderror" accept=".zip" required>
+                    @error('pack') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-upload"></i> Importer
+                </button>
+            </form>
+            <div class="collapse mt-3" id="packHelp">
+                <div class="bg-body-secondary rounded p-3">
+                    <p class="mb-2 small fw-semibold">Structure du ZIP :</p>
+                    <pre class="mb-2" style="font-size:.8rem;">pack.zip
+├── manifest.yml
+└── images/
+    ├── coeur.png
+    └── feu.gif</pre>
+                    <p class="mb-1 small fw-semibold">manifest.yml :</p>
+                    <pre style="font-size:.8rem;">namespace: mon_pack
+
+emojis:
+  - name: Coeur Rouge
+    file: images/coeur.png
+  - name: Feu
+    file: images/feu.gif</pre>
+                    <p class="small text-muted mb-0">Le type est auto-détecté : <code>.gif</code> / <code>.webp</code> = animé, reste = simple. Le slug sera <code>mon_pack-coeur-rouge</code>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         {{-- Formulaire d'ajout --}}
         <div class="col-md-4">
