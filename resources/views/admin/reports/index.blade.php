@@ -50,25 +50,25 @@
                                 <td>
                                     @if($report->status === 'pending')
                                         <span class="badge bg-danger">En attente</span>
-                                    @elseif($report->status === 'reviewed')
-                                        <span class="badge bg-success">Traité</span>
+                                    @elseif($report->status === 'sanctioned')
+                                        <span class="badge bg-success">Sanctionné</span>
                                     @else
-                                        <span class="badge bg-secondary">Ignoré</span>
+                                        <span class="badge bg-secondary">Non sanctionné</span>
                                     @endif
                                 </td>
                                 <td style="font-size:.8rem;">{{ $report->created_at->format('d/m/Y H:i') }}</td>
                                 <td>
                                     <div class="d-flex gap-1 flex-wrap">
                                         @if($report->status === 'pending')
-                                            <form method="POST" action="{{ route('admin.reports.review', $report) }}" class="d-inline">
+                                            <form method="POST" action="{{ route('admin.reports.sanctioned', $report) }}" class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Marquer traité">
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Marquer sanctionné">
                                                     <i class="bi bi-check-lg"></i>
                                                 </button>
                                             </form>
-                                            <form method="POST" action="{{ route('admin.reports.dismiss', $report) }}" class="d-inline">
+                                            <form method="POST" action="{{ route('admin.reports.unsanctioned', $report) }}" class="d-inline">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Ignorer">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Non sanctionné">
                                                     <i class="bi bi-x-lg"></i>
                                                 </button>
                                             </form>

@@ -98,6 +98,12 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-item {{ request()->routeIs('admin.sanctions.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.sanctions.index') }}">
+                            <i class="bi bi-exclamation-triangle"></i> <span>Sanctions</span>
+                        </a>
+                    </li>
+
                     <li class="sidebar-item {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.notifications.index') }}">
                             <i class="bi bi-bell"></i> <span>Notifications</span>
@@ -122,6 +128,12 @@
                     <li class="sidebar-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.reports.index') }}">
                             <i class="bi bi-flag"></i> <span>Signalements</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item {{ request()->routeIs('admin.comment-history.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.comment-history.index') }}">
+                            <i class="bi bi-clock-history"></i> <span>Historique commentaires</span>
                         </a>
                     </li>
 

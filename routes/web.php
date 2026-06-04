@@ -203,8 +203,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/update', fn() => view('admin.update.index'))->name('update.index');
     // Reports
     Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
-    Route::post('/reports/{report}/review', [\App\Http\Controllers\Admin\ReportController::class, 'review'])->name('reports.review');
-    Route::post('/reports/{report}/dismiss', [\App\Http\Controllers\Admin\ReportController::class, 'dismiss'])->name('reports.dismiss');
+    Route::post('/reports/{report}/sanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markSanctioned'])->name('reports.sanctioned');
+    Route::post('/reports/{report}/unsanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markUnsanctioned'])->name('reports.unsanctioned');
+    // Historique des commentaires
+    Route::get('/comment-history', [\App\Http\Controllers\Admin\CommentHistoryController::class, 'index'])->name('comment-history.index');
+    // Sanctions
+    Route::get('/sanctions', [\App\Http\Controllers\Admin\SanctionController::class, 'index'])->name('sanctions.index');
     // Notifications admin
     Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/create', [\App\Http\Controllers\Admin\NotificationController::class, 'create'])->name('notifications.create');
