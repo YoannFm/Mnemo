@@ -68,46 +68,41 @@
     <label class="form-check-label" for="enableSwitch">Active</label>
 </div>
 
-@push('header-styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css">
-@endpush
-
-@push('footer-scripts')
 <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/lang/summernote-fr-FR.min.js"></script>
 <script>
-function initSummernote() {
-    var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-    if ($('#contentArea').data('summernote')) {
-        $('#contentArea').summernote('destroy');
-    }
-    $('#contentArea').summernote({
-        height: 400,
-        lang: 'fr-FR',
-        toolbar: [
-            ['style', ['style']],
-            ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
-            ['color', ['color']],
-            ['para', ['ul', 'ol', 'paragraph']],
-            ['table', ['table']],
-            ['insert', ['link', 'picture', 'hr']],
-            ['view', ['fullscreen', 'codeview']],
-        ],
-    });
-    if (dark) {
-        document.querySelector('.note-editor')?.classList.add('note-dark');
-    }
-}
-
-$(document).ready(function () { initSummernote(); });
-
-new MutationObserver(function (mutations) {
-    mutations.forEach(function (m) {
-        if (m.attributeName === 'data-bs-theme') {
-            initSummernote();
+$(document).ready(function () {
+    function initSummernote() {
+        var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        if ($('#contentArea').data('summernote')) {
+            $('#contentArea').summernote('destroy');
         }
-    });
-}).observe(document.documentElement, { attributes: true });
+        $('#contentArea').summernote({
+            height: 400,
+            lang: 'fr-FR',
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture', 'hr']],
+                ['view', ['fullscreen', 'codeview']],
+            ],
+        });
+        if (dark) {
+            document.querySelector('.note-editor')?.classList.add('note-dark');
+        }
+    }
+
+    initSummernote();
+
+    new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+            if (m.attributeName === 'data-bs-theme') { initSummernote(); }
+        });
+    }).observe(document.documentElement, { attributes: true });
+});
 </script>
-@endpush
