@@ -144,6 +144,12 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-item {{ request()->routeIs('admin.emojis.*') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.emojis.index') }}">
+                            <i class="bi bi-emoji-smile"></i> <span>Emojis</span>
+                        </a>
+                    </li>
+
                     <li class="sidebar-item {{ request()->routeIs('admin.redirects.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.redirects.index') }}">
                             <i class="bi bi-arrow-left-right"></i> <span>Redirections</span>

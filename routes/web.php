@@ -131,6 +131,16 @@ Route::get('/sitemap.xml', function () {
     return response($content, 200)->header('Content-Type', 'application/xml');
 })->name('sitemap');
 
+Route::middleware('auth')->get('/emojis.json', function () {
+    return response()->json(\App\Models\Emoji::orderBy('name')->get(['id','name','slug','type','image_path'])->map(fn($e) => [
+        'id'    => $e->id,
+        'name'  => $e->name,
+        'slug'  => $e->slug,
+        'type'  => $e->type,
+        'url'   => $e->imageUrl(),
+    ]));
+})->name('emojis.json');
+
 /*
 |--------------------------------------------------------------------------
 | Routes Admin
@@ -193,6 +203,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/logs/{log}', [\App\Http\Controllers\Admin\LogController::class, 'show'])->name('logs.show');
     Route::post('/logs/clear', [\App\Http\Controllers\Admin\LogController::class, 'clear'])->name('logs.clear');
     Route::delete('/logs/purge', [\App\Http\Controllers\Admin\LogController::class, 'purge'])->name('logs.purge');
+    // Emojis
+    Route::get('/emojis', [\App\Http\Controllers\Admin\EmojiController::class, 'index'])->name('emojis.index');
+    Route::post('/emojis', [\App\Http\Controllers\Admin\EmojiController::class, 'store'])->name('emojis.store');
+    Route::delete('/emojis/{emoji}', [\App\Http\Controllers\Admin\EmojiController::class, 'destroy'])->name('emojis.destroy');
     // Plugins placeholder
     Route::get('/plugins', fn() => view('admin.plugins.index'))->name('plugins.index');
     // Themes
