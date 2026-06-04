@@ -509,7 +509,7 @@
     </nav>
 
     @auth
-    <div class="mobile-user-section" style="margin-top:auto;padding-top:1.5rem;border-top:1px solid rgba(239,183,2,.2);">
+    <div class="mobile-user-section" style="margin-top:auto;padding-top:1rem;">
         <button id="mobile-user-toggle" style="background:none;border:none;width:100%;text-align:left;padding:0;cursor:pointer;display:flex;align-items:center;gap:.75rem;">
             <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
             <span style="font-weight:700;color:var(--text-primary);font-size:1rem;text-transform:uppercase;letter-spacing:.5px;">{{ Auth::user()->name }}</span>
