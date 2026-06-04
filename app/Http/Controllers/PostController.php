@@ -3,9 +3,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\PostComment;
+use App\Models\PostCommentReport;
 use App\Models\PostReaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
@@ -78,5 +80,58 @@ class PostController extends Controller
         $comment->load('user');
 
         return redirect()->back()->with('success', 'Commentaire ajouté.');
+    }
+
+    public function reportComment(PostComment $comment)
+    {
+        if (!Auth::check()) abort(403);
+
+        $already = PostCommentReport::where([
+            'post_comment_id' => $comment->id,
+            'user_id'         => Auth::id(),
+        ])->exists();
+
+        if (!$already) {
+            PostCommentReport::create([
+                'post_comment_id' => $comment->id,
+                'user_id'         => Auth::id(),
+            ]);
+        }
+
+        return response()->json(['reported' => true]);
+    }
+
+    public function updateComment(Request $request, PostComment $comment)
+    {
+        if (!Auth::check() || Auth::id() !== $comment->user_id) abort(403);
+
+        $data = $request->validate(['content' => 'required|string|max:1000']);
+
+        // Sauvegarde l'ancienne version dans l'historique
+        DB::table('post_comment_history')->insert([
+            'post_comment_id' => $comment->id,
+            'content'         => $comment->content,
+            'created_at'      => now(),
+        ]);
+
+        $comment->update(['content' => $data['content'], 'edited_at' => now()]);
+
+        return redirect()->back()->with('success', 'Commentaire modifié.');
+    }
+
+    public function deleteComment(PostComment $comment)
+    {
+        if (!Auth::check() || Auth::id() !== $comment->user_id) abort(403);
+
+        // Sauvegarde dans l'historique avant suppression logique
+        DB::table('post_comment_history')->insert([
+            'post_comment_id' => $comment->id,
+            'content'         => $comment->content,
+            'created_at'      => now(),
+        ]);
+
+        $comment->update(['is_deleted' => true, 'content' => '']);
+
+        return redirect()->back()->with('success', 'Commentaire supprimé.');
     }
 }
