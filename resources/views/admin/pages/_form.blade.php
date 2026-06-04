@@ -68,7 +68,7 @@
     <label class="form-check-label" for="enableSwitch">Active</label>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
+<script src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
 <script>
 (function () {
     function initTinyMCE() {
@@ -76,6 +76,7 @@
         if (tinymce.get('contentArea')) tinymce.remove('#contentArea');
         tinymce.init({
             selector: '#contentArea',
+            base_url: '{{ asset('vendor/tinymce') }}',
             license_key: 'gpl',
             promotion: false,
             height: 400,
