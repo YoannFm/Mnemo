@@ -29,7 +29,11 @@ class ImageController extends Controller
         $file = $request->file('image');
         $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
             . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $file->move(public_path('uploads/images'), $filename);
+        $dest = public_path('uploads/images');
+        if (!is_dir($dest)) {
+            mkdir($dest, 0755, true);
+        }
+        $file->move($dest, $filename);
         $image = Image::create(['name' => $request->name, 'file' => $filename]);
         LogHelper::log('created_image', 'image', $image->id, ['name' => $image->name]);
         return redirect()->route('admin.images.index')->with('success', 'Image ajoutée.');
