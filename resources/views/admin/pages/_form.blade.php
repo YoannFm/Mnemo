@@ -68,21 +68,30 @@
     <label class="form-check-label" for="enableSwitch">Active</label>
 </div>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
-<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
 <script>
 (function () {
-    var easyMDE = new EasyMDE({
-        element: document.getElementById('contentArea'),
-        spellChecker: false,
-        autosave: { enabled: false },
-        toolbar: [
-            'bold','italic','strikethrough','heading','|',
-            'quote','unordered-list','ordered-list','|',
-            'link','image','table','horizontal-rule','|',
-            'preview','side-by-side','fullscreen','|',
-            'guide'
-        ],
-    });
+    function initTinyMCE() {
+        var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        if (tinymce.get('contentArea')) tinymce.remove('#contentArea');
+        tinymce.init({
+            selector: '#contentArea',
+            license_key: 'gpl',
+            promotion: false,
+            height: 400,
+            plugins: 'searchreplace autolink code link lists table',
+            toolbar: 'blocks bold italic underline strikethrough | link | alignleft aligncenter alignright | bullist numlist | removeformat code | undo redo',
+            skin: dark ? 'oxide-dark' : 'oxide',
+            content_css: dark ? 'dark' : 'default',
+        });
+    }
+
+    initTinyMCE();
+
+    new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+            if (m.attributeName === 'data-bs-theme') initTinyMCE();
+        });
+    }).observe(document.documentElement, { attributes: true });
 })();
 </script>
