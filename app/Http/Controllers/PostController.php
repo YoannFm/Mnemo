@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\Mute;
 use App\Models\Post;
 use App\Models\PostComment;
 use App\Models\PostCommentReport;
@@ -69,6 +70,17 @@ class PostController extends Controller
     {
         if (!$post->allow_comments || !Auth::check()) abort(403);
 
+        $isMuted = Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->exists();
+
+        if ($isMuted) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas poster de commentaires.'], 403);
+            }
+            abort(403, 'Vous êtes muté et ne pouvez pas poster de commentaires.');
+        }
+
         $data = $request->validate(['content' => 'required|string|max:1000']);
 
         $comment = PostComment::create([
@@ -97,6 +109,18 @@ class PostController extends Controller
     public function reply(Request $request, Post $post)
     {
         if (!$post->allow_comments || !Auth::check()) abort(403);
+
+        $isMuted = Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->exists();
+
+        if ($isMuted) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas poster de commentaires.'], 403);
+            }
+            abort(403, 'Vous êtes muté et ne pouvez pas poster de commentaires.');
+        }
+
         $data = $request->validate([
             'content'   => 'required|string|max:1000',
             'parent_id' => 'required|exists:post_comments,id',
