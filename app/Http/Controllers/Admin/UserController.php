@@ -135,8 +135,8 @@ class UserController extends Controller
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(fn ($l) => [
-                'date'        => $l->created_at?->toIso8601String(),
-                'action'      => $l->action,
+                'date'        => $l->created_at?->format('d/m/Y H:i'),
+                'action'      => $l->getActionMessage(),
                 'description' => $l->data,
                 'level'       => $l->level,
             ])->values();
@@ -209,8 +209,8 @@ class UserController extends Controller
 
         foreach ($users as $user) {
             $userLogs = ($allLogs[$user->id] ?? collect())->map(fn ($l) => [
-                'date'        => $l->created_at?->toIso8601String(),
-                'action'      => $l->action,
+                'date'        => $l->created_at?->format('d/m/Y H:i'),
+                'action'      => $l->getActionMessage(),
                 'description' => $l->data,
                 'level'       => $l->level,
             ])->values();
