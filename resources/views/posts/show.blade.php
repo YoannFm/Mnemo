@@ -76,6 +76,7 @@
                 })
                 .then(function(r){ return r.json(); })
                 .then(function(data) {
+                    if (data.status === 'muted') { showMuteAlert(data.message); return; }
                     // Cherche le bouton existant dans la barre principale
                     var existing = document.querySelector('#reactions-bar .reaction-btn[data-emoji="' + emoji + '"]');
                     if (existing && existing !== btnEl) {
@@ -313,6 +314,20 @@
             <script>
             var _csrf = document.querySelector('meta[name="csrf-token"]').content;
 
+            function showMuteAlert(message) {
+                var existing = document.getElementById('mute-alert-banner');
+                if (existing) existing.remove();
+                var el = document.createElement('div');
+                el.id = 'mute-alert-banner';
+                el.className = 'alert alert-warning alert-dismissible fade show';
+                el.setAttribute('role', 'alert');
+                el.innerHTML = '<i class="bi bi-mic-mute-fill me-2"></i>' + message +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                var commentsSection = document.getElementById('comments');
+                if (commentsSection) commentsSection.prepend(el);
+                el.scrollIntoView({behavior: 'smooth', block: 'center'});
+            }
+
             // ── New comment (AJAX) ──
             var newCommentForm = document.getElementById('new-comment-form');
             if (newCommentForm) {
@@ -327,18 +342,17 @@
                     })
                     .then(function(r){ return r.json(); })
                     .then(function(data) {
+                        if (data.status === 'muted') {
+                            showMuteAlert(data.message);
+                            return;
+                        }
                         if (data.status === 'ok') {
-                            // Remove "no comments" message if present
                             var noMsg = document.getElementById('no-comments-msg');
                             if (noMsg) noMsg.remove();
-
                             var list = document.getElementById('comments-list');
                             var html = buildCommentHtml(data.comment);
                             list.insertAdjacentHTML('beforeend', html);
-
                             document.getElementById('new-comment-content').value = '';
-
-                            // Update count
                             updateCommentCount(1);
                         }
                     });
@@ -360,6 +374,10 @@
                 })
                 .then(function(r){ return r.json(); })
                 .then(function(data) {
+                    if (data.status === 'muted') {
+                        showMuteAlert(data.message);
+                        return;
+                    }
                     if (data.status === 'ok') {
                         var container = document.querySelector('.replies-container-' + parentId);
                         if (container) {
@@ -368,7 +386,6 @@
                             container.insertAdjacentHTML('beforeend', html);
                         }
                         contentInput.value = '';
-                        // Hide reply form
                         var replyFormDiv = document.getElementById('reply-form-' + parentId);
                         if (replyFormDiv) replyFormDiv.classList.add('d-none');
                     }

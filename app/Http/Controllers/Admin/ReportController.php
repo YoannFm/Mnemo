@@ -58,7 +58,20 @@ class ReportController extends Controller
             'created_at'      => now(),
         ]);
 
+        $commentContent = $comment->content;
+        $postTitle = $comment->post?->title ?? 'un article';
+        $postUrl = $comment->post ? route('posts.show', $comment->post) : '#';
+
         $comment->update(['is_deleted' => true, 'content' => '']);
+
+        if ($comment->user_id) {
+            UserNotification::create([
+                'user_id' => $comment->user_id,
+                'title'   => 'Votre commentaire a été supprimé',
+                'message' => 'Votre commentaire "' . \Illuminate\Support\Str::limit($commentContent, 100) . '" posté sur l\'article <a href="' . $postUrl . '">' . e($postTitle) . '</a> a été supprimé par un administrateur.',
+                'type'    => 'warning',
+            ]);
+        }
 
         return redirect()->route('admin.reports.index')->with('success', 'Commentaire supprimé.');
     }

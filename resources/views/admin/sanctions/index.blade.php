@@ -49,13 +49,34 @@
                                                 ->exists();
                                         @endphp
                                         @if($isMuted)
-                                            <form method="POST" action="{{ route('admin.sanctions.unmute', $sanction) }}" class="d-inline"
-                                                  onsubmit="return confirm('Lever le mute de {{ $sanction->user->name }} ?')">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Lever le mute">
-                                                    <i class="bi bi-mic-fill"></i> Démuter
-                                                </button>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline-success"
+                                                    data-bs-toggle="modal" data-bs-target="#unmuteModal{{ $sanction->id }}">
+                                                <i class="bi bi-mic-fill"></i> Démuter
+                                            </button>
+                                            <div class="modal fade" id="unmuteModal{{ $sanction->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <form method="POST" action="{{ route('admin.sanctions.unmute', $sanction) }}">
+                                                            @csrf
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Démuter {{ $sanction->user->name }}</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-bold">Raison <span class="text-muted fw-normal">(optionnel)</span></label>
+                                                                    <textarea name="reason" class="form-control" rows="3" maxlength="500"
+                                                                              placeholder="Motif du démute..."></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                                <button type="submit" class="btn btn-success">Confirmer le démute</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         @else
                                             <span class="text-muted" style="font-size:.8rem;">Mute expiré</span>
                                         @endif

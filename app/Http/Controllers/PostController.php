@@ -77,15 +77,19 @@ class PostController extends Controller
     {
         if (!$post->allow_comments || !Auth::check()) abort(403);
 
-        $isMuted = Mute::where('user_id', Auth::id())
+        $mute = Mute::where('user_id', Auth::id())
             ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            ->exists();
+            ->latest()
+            ->first();
 
-        if ($isMuted) {
+        if ($mute) {
+            $reason = $mute->reason ? 'Vous êtes muet pour la raison suivante : ' . $mute->reason : 'Vous êtes muet. Aucune raison spécifiée.';
+            $expiry = $mute->expires_at ? 'Ce mute expirera dans ' . now()->diffForHumans($mute->expires_at, ['parts' => 2, 'join' => ' et ']) . '.' : 'Ce mute n\'expirera pas.';
+            $message = $reason . ' ' . $expiry;
             if ($request->expectsJson()) {
-                return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas poster de commentaires.'], 403);
+                return response()->json(['status' => 'muted', 'message' => $message], 403);
             }
-            abort(403, 'Vous êtes muté et ne pouvez pas poster de commentaires.');
+            abort(403, $message);
         }
 
         $data = $request->validate(['content' => 'required|string|max:1000']);
@@ -117,15 +121,19 @@ class PostController extends Controller
     {
         if (!$post->allow_comments || !Auth::check()) abort(403);
 
-        $isMuted = Mute::where('user_id', Auth::id())
+        $mute = Mute::where('user_id', Auth::id())
             ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            ->exists();
+            ->latest()
+            ->first();
 
-        if ($isMuted) {
+        if ($mute) {
+            $reason = $mute->reason ? 'Vous êtes muet pour la raison suivante : ' . $mute->reason : 'Vous êtes muet. Aucune raison spécifiée.';
+            $expiry = $mute->expires_at ? 'Ce mute expirera dans ' . now()->diffForHumans($mute->expires_at, ['parts' => 2, 'join' => ' et ']) . '.' : 'Ce mute n\'expirera pas.';
+            $message = $reason . ' ' . $expiry;
             if ($request->expectsJson()) {
-                return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas poster de commentaires.'], 403);
+                return response()->json(['status' => 'muted', 'message' => $message], 403);
             }
-            abort(403, 'Vous êtes muté et ne pouvez pas poster de commentaires.');
+            abort(403, $message);
         }
 
         $data = $request->validate([
