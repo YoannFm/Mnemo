@@ -50,20 +50,7 @@
                                 <i class="bi bi-emoji-smile"></i>
                             </button>
                             <div id="emoji-picker-container" class="position-absolute d-none"
-                                 style="bottom:110%;left:0;z-index:200;background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:8px;width:280px;box-shadow:0 4px 16px rgba(0,0,0,.2);">
-                                <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;">
-                                    @foreach(['😀','😁','😂','🤣','😃','😄','😅','😆','😇','😈','🤩','😍','🥰','😘','😋','😎',
-                                              '🤔','😐','😑','😶','🙄','😏','😣','😞','😟','😤','😢','😭','😱','😨','😰','😓',
-                                              '🤗','🤭','🤫','🤥','😬','🙃','🤪','😜','😝','😛','🤑','😲','🥳','🥺','😔','😪',
-                                              '👍','👎','👏','🙌','🤝','👊','✊','🤜','🤛','🤞','✌️','🤟','🤘','👌','🤌','👋',
-                                              '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💔','❣️','💕','💞','💓','💗','💖','💘',
-                                              '🔥','⭐','✨','💫','🎉','🎊','🎯','🏆','🥇','💯','🚀','💡','👀','💪','🙏','🫶'] as $e)
-                                        <button type="button" class="btn btn-sm emoji-grid-btn"
-                                                style="padding:4px;font-size:1.2rem;line-height:1;background:none;border:none;border-radius:4px;cursor:pointer;"
-                                                onmouseover="this.style.background='var(--content-bg)'" onmouseout="this.style.background='none'"
-                                                onclick="sendReaction('{{ $e }}', null); document.getElementById('emoji-picker-container').classList.add('d-none');">{{ $e }}</button>
-                                    @endforeach
-                                </div>
+                                 style="bottom:110%;left:0;z-index:200;">
                             </div>
                         </div>
                         @endauth
@@ -74,59 +61,60 @@
                 </div>
             </div>
 
-            <script>
+            <script type="module">
+            import { Picker } from '/vendor/emoji-picker-element/index.js';
+
             var reactUrl = "{{ route('posts.react', $post) }}";
             var csrf = document.querySelector('meta[name="csrf-token"]').content;
 
-            function sendReaction(emoji, btnEl) {
+            function sendReaction(emoji) {
                 fetch(reactUrl, {
                     method: 'POST',
                     headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
                     body: JSON.stringify({emoji: emoji})
                 })
-                .then(function(r){ return r.json(); })
-                .then(function(data) {
+                .then(r => r.json())
+                .then(data => {
                     if (data.status === 'muted') { showMuteAlert(data.message); return; }
-                    // Cherche le bouton existant dans la barre principale
                     var existing = document.querySelector('#reactions-bar .reaction-btn[data-emoji="' + emoji + '"]');
-                    if (existing && existing !== btnEl) {
+                    if (existing) {
                         existing.classList.toggle('btn-primary', data.active);
                         existing.classList.toggle('btn-outline-secondary', !data.active);
                         existing.querySelector('.reaction-count').textContent = data.count > 0 ? data.count : '';
-                    } else if (!existing) {
-                        // Ajoute un nouveau bouton dans la barre si emoji inexistant
+                        if (!data.active && data.count === 0) existing.remove();
+                    } else {
                         var bar = document.getElementById('reactions-bar');
                         var newBtn = document.createElement('button');
                         newBtn.type = 'button';
                         newBtn.className = 'btn btn-sm reaction-btn ' + (data.active ? 'btn-primary' : 'btn-outline-secondary');
                         newBtn.dataset.emoji = emoji;
-                        newBtn.dataset.url = reactUrl;
                         newBtn.innerHTML = emoji + ' <span class="reaction-count">' + (data.count > 0 ? data.count : '') + '</span>';
-                        newBtn.addEventListener('click', function(){ sendReaction(this.dataset.emoji, this); });
+                        newBtn.addEventListener('click', function(){ sendReaction(this.dataset.emoji); });
                         bar.insertBefore(newBtn, document.getElementById('emoji-more-btn').parentElement);
-                    } else {
-                        btnEl.classList.toggle('btn-primary', data.active);
-                        btnEl.classList.toggle('btn-outline-secondary', !data.active);
-                        var countEl = btnEl.querySelector('.reaction-count');
-                        if (countEl) countEl.textContent = data.count > 0 ? data.count : '';
                     }
-                    if (document.getElementById('emoji-picker-container')) document.getElementById('emoji-picker-container').classList.add('d-none');
                 });
             }
 
-            document.querySelectorAll('.reaction-btn').forEach(function(btn) {
-                btn.addEventListener('click', function() { sendReaction(this.dataset.emoji, this); });
+            document.querySelectorAll('.reaction-btn').forEach(btn => {
+                btn.addEventListener('click', function(){ sendReaction(this.dataset.emoji); });
             });
 
             var moreBtn = document.getElementById('emoji-more-btn');
             var pickerContainer = document.getElementById('emoji-picker-container');
+
             if (moreBtn && pickerContainer) {
-                moreBtn.addEventListener('click', function(e) {
+                var picker = new Picker({ locale: 'fr', skinToneEmoji: '👋' });
+                picker.addEventListener('emoji-click', e => {
+                    sendReaction(e.detail.unicode);
+                });
+                pickerContainer.appendChild(picker);
+
+                moreBtn.addEventListener('click', e => {
                     e.stopPropagation();
                     pickerContainer.classList.toggle('d-none');
                 });
-                document.addEventListener('click', function() { pickerContainer.classList.add('d-none'); });
-                pickerContainer.addEventListener('click', function(e) { e.stopPropagation(); });
+                document.addEventListener('click', () => pickerContainer.classList.add('d-none'));
+                pickerContainer.addEventListener('click', e => e.stopPropagation());
             }
             </script>
         @endif

@@ -5,7 +5,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "copy-vendors": "mkdir -p public/vendor && rm -rf public/vendor/tinymce && cp -r node_modules/tinymce public/vendor/tinymce && rm -rf public/vendor/bootstrap-icons && cp -r node_modules/bootstrap-icons/font public/vendor/bootstrap-icons",
+        "copy-vendors": "mkdir -p public/vendor && rm -rf public/vendor/tinymce && cp -r node_modules/tinymce public/vendor/tinymce && rm -rf public/vendor/bootstrap-icons && cp -r node_modules/bootstrap-icons/font public/vendor/bootstrap-icons && rm -rf public/vendor/emoji-picker-element && mkdir -p public/vendor/emoji-picker-element && cp node_modules/emoji-picker-element/index.js node_modules/emoji-picker-element/picker.js node_modules/emoji-picker-element/database.js public/vendor/emoji-picker-element/",
         "copy-tinymce": "rm -rf public/vendor/tinymce && mkdir -p public/vendor && cp -r node_modules/tinymce public/vendor/tinymce"
     },
     "devDependencies": {
