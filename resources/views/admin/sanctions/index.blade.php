@@ -12,6 +12,7 @@
                             <th>Utilisateur sanctionné</th>
                             <th>Type</th>
                             <th>Raison</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,9 +41,31 @@
                                     <span class="badge {{ $t['class'] }}">{{ $t['label'] }}</span>
                                 </td>
                                 <td style="font-size:.8rem;max-width:250px;">{{ $sanction->reason }}</td>
+                                <td>
+                                    @if($sanction->type === 'mute' && $sanction->user)
+                                        @php
+                                            $isMuted = \App\Models\Mute::where('user_id', $sanction->user_id)
+                                                ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+                                                ->exists();
+                                        @endphp
+                                        @if($isMuted)
+                                            <form method="POST" action="{{ route('admin.sanctions.unmute', $sanction) }}" class="d-inline"
+                                                  onsubmit="return confirm('Lever le mute de {{ $sanction->user->name }} ?')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Lever le mute">
+                                                    <i class="bi bi-mic-fill"></i> Démuter
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-muted" style="font-size:.8rem;">Mute expiré</span>
+                                        @endif
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="text-center text-muted">Aucune sanction.</td></tr>
+                            <tr><td colspan="6" class="text-center text-muted">Aucune sanction.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
