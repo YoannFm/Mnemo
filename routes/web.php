@@ -211,4 +211,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
 // Pages statiques publiques
 Route::get('/p/{slug}', [\App\Http\Controllers\PageController::class, 'show'])->name('pages.show');
 
+// Articles publics
+Route::get('/news/{post:slug}', [\App\Http\Controllers\PostController::class, 'show'])->name('posts.show');
+
 require __DIR__.'/auth.php';
