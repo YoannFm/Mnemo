@@ -272,12 +272,14 @@
             overflow-y: auto;
             display: flex;
             transform: translateX(-100%);
-            transition: transform .3s cubic-bezier(.4,0,.2,1);
+            transition: transform .35s cubic-bezier(.4,0,.2,1), visibility .35s;
             visibility: hidden;
+            pointer-events: none;
         }
         #mobile-menu.open {
             transform: translateX(0);
             visibility: visible;
+            pointer-events: all;
         }
 
         #mobile-menu-close {
@@ -461,7 +463,7 @@
 
         /* ── Navbar toggler custom ── */
         .navbar-toggler {
-            border: 1px solid var(--accent);
+            border: none;
             border-radius: 0;
             padding: .4rem .6rem;
             background: none;
@@ -469,6 +471,8 @@
             flex-direction: column;
             gap: 5px;
             cursor: pointer;
+            box-shadow: none !important;
+            outline: none !important;
         }
         .navbar-toggler .hb-line {
             display: block;
