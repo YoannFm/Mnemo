@@ -19,7 +19,7 @@ class SanctionController extends Controller
         return view('admin.sanctions.index', compact('sanctions'));
     }
 
-    public function unmute(AdminSanction $sanction)
+    public function unmute(\Illuminate\Http\Request $request, AdminSanction $sanction)
     {
         if (!$sanction->user) {
             return back()->with('error', 'Utilisateur introuvable.');
@@ -29,10 +29,18 @@ class SanctionController extends Controller
             ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->delete();
 
+        $reason = trim($request->input('reason', ''));
+        $message = 'Votre restriction de commentaires a été levée par un administrateur.';
+        if ($reason !== '') {
+            $message .= ' Raison : ' . $reason;
+        } else {
+            $message .= ' Aucune raison spécifiée.';
+        }
+
         UserNotification::create([
             'user_id' => $sanction->user_id,
             'title'   => 'Votre mute a été levé',
-            'message' => 'Votre restriction de commentaires a été levée par un administrateur.',
+            'message' => $message,
             'type'    => 'info',
         ]);
 
