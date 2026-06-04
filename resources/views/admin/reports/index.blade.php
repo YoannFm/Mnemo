@@ -11,6 +11,7 @@
                             <th>Signalé par</th>
                             <th>Commentaire de</th>
                             <th>Article</th>
+                            <th>Commentaire signalé</th>
                             <th>Motif</th>
                             <th>Note</th>
                             <th>Statut</th>
@@ -39,6 +40,20 @@
                                         <a href="{{ route('posts.show', $report->postComment->post) }}" target="_blank">
                                             {{ Str::limit($report->postComment->post->title, 30) }}
                                         </a>
+                                    @else -
+                                    @endif
+                                </td>
+                                <td style="max-width:250px;">
+                                    @if($report->postComment)
+                                        @if($report->postComment->is_deleted)
+                                            <em class="text-muted">[Commentaire supprimé]</em>
+                                        @else
+                                            <span class="d-inline-block text-truncate" style="max-width:220px;"
+                                                  data-bs-toggle="tooltip" data-bs-placement="top"
+                                                  title="{{ e($report->postComment->content) }}">
+                                                {{ $report->postComment->content }}
+                                            </span>
+                                        @endif
                                     @else -
                                     @endif
                                 </td>
@@ -89,7 +104,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="9" class="text-center text-muted">Aucun signalement.</td></tr>
+                            <tr><td colspan="10" class="text-center text-muted">Aucun signalement.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -97,4 +112,11 @@
             {{ $reports->links() }}
         </div>
     </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+        new bootstrap.Tooltip(el);
+    });
+});
+</script>
 </x-admin-layout>
