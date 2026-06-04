@@ -47,7 +47,7 @@
 
         <div class="row g-3">
             @foreach ($modules as $module)
-                <div class="col-12 col-md-6 col-xl-4">
+                <div class="col-12 col-md-6 col-lg-4">
                     <div class="card h-100">
                         <div class="card-body d-flex flex-column p-3" style="gap:.75rem;">
 

@@ -52,7 +52,7 @@
                                 <i class="bi bi-emoji-smile"></i>
                             </button>
                             <div id="emoji-picker-container" class="position-absolute d-none"
-                                 style="bottom:110%;left:0;z-index:200;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:12px;width:320px;box-shadow:0 8px 24px rgba(0,0,0,.2);">
+                                 style="bottom:110%;right:0;z-index:200;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:12px;width:min(320px, calc(100vw - 1.5rem));box-shadow:0 8px 24px rgba(0,0,0,.2);">
                                 <input type="search" id="emoji-search" class="form-control form-control-sm mb-2" placeholder="Rechercher...">
                                 <div class="d-flex gap-2 mb-2" id="emoji-type-tabs">
                                     <button type="button" class="btn btn-sm btn-primary active" data-tab="simple">Simples</button>

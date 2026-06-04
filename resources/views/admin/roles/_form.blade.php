@@ -1,14 +1,14 @@
 @csrf
 
 <div class="row gx-3">
-    <div class="mb-3 col-md-5">
+    <div class="mb-3 col-12 col-md-5">
         <label class="form-label" for="nameInput">Nom</label>
         <input type="text" class="form-control @error('name') is-invalid @enderror"
                id="nameInput" name="name" value="{{ old('name', $role->name ?? '') }}" required>
         @error('name')<span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>@enderror
     </div>
 
-    <div class="mb-3 col-md-5">
+    <div class="mb-3 col-12 col-md-5">
         <label class="form-label" for="iconInput">Icône</label>
         <input type="text" class="form-control @error('icon') is-invalid @enderror"
                id="iconInput" name="icon" value="{{ old('icon', $role->icon ?? '') }}"
@@ -20,7 +20,7 @@
         </small>
     </div>
 
-    <div class="mb-3 col-md-2">
+    <div class="mb-3 col-12 col-md-2">
         <label class="form-label" for="colorInput">Couleur</label>
         <input type="color" class="form-control form-control-color w-100 @error('color') is-invalid @enderror"
                id="colorInput" name="color" value="{{ old('color', $role->color ?? '#2196f3') }}" required>

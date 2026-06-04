@@ -17,10 +17,39 @@
 
     <link href="{{ asset('vendor/bootstrap-icons/bootstrap-icons.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/vendor/admin.css') }}" rel="stylesheet">
+    <style>
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: fixed !important;
+                top: 0; left: 0; bottom: 0;
+                width: 100vw !important;
+                max-width: 100vw !important;
+                min-width: 100vw !important;
+                z-index: 100;
+                margin-left: -100vw !important;
+                transition: margin-left .3s ease;
+            }
+            .sidebar.collapsed {
+                margin-left: 0 !important;
+            }
+            .main { margin-left: 0 !important; width: 100% !important; }
+            .navbar-bg { position: sticky; top: 0; z-index: 99; width: 100%; }
+            .content { padding: 1rem .75rem !important; }
+            .table-responsive { font-size: .85rem; }
+            .card { margin-bottom: 1rem; }
+        }
+        @media (max-width: 575.98px) {
+            h1.h3 { font-size: 1.1rem; }
+        }
+    </style>
     @stack('header-styles')
 </head>
 <body>
     <div class="wrapper">
+
+        {{-- Overlay mobile sidebar --}}
+        <div id="sidebar-overlay" onclick="document.querySelector('.js-sidebar').classList.remove('collapsed');this.classList.add('d-none');"
+             style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;"></div>
 
         {{-- ── Sidebar ── --}}
         <nav id="sidebar" class="sidebar js-sidebar">
@@ -212,17 +241,17 @@
                 </a>
 
                 <div class="navbar-collapse collapse">
-                    <div class="d-none d-sm-inline-block">
-                        <a href="https://discord.gg/HtjPAfqUXu" class="btn btn-outline-primary mx-1" target="_blank" rel="noopener noreferrer">
-                            <i class="bi bi-question-circle"></i> Support
+                    <div class="d-flex align-items-center gap-1">
+                        <a href="https://discord.gg/HtjPAfqUXu" class="btn btn-outline-primary btn-sm d-none d-sm-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <i class="bi bi-question-circle"></i> <span class="d-none d-md-inline">Support</span>
                         </a>
-                        <a href="https://wiki.novadev.ovh" class="btn btn-outline-info mx-1" target="_blank" rel="noopener noreferrer">
-                            <i class="bi bi-book"></i> Documentation
+                        <a href="https://wiki.novadev.ovh" class="btn btn-outline-info btn-sm d-none d-sm-inline-flex" target="_blank" rel="noopener noreferrer">
+                            <i class="bi bi-book"></i> <span class="d-none d-md-inline">Documentation</span>
                         </a>
-                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary mx-1">
+                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm mx-1" title="Retour au site">
                             <i class="bi bi-arrow-left"></i>
                         </a>
-                        <button id="admin-theme-toggle" class="btn btn-outline-secondary mx-1" title="Changer le theme" aria-label="Basculer theme clair/sombre">
+                        <button id="admin-theme-toggle" class="btn btn-outline-secondary btn-sm mx-1" title="Changer le theme" aria-label="Basculer theme clair/sombre">
                             <i class="bi bi-moon-fill"></i>
                         </button>
                     </div>
@@ -290,22 +319,36 @@
 (function() {
     var theme = localStorage.getItem('admin-theme') || 'light';
     var btn = document.getElementById('admin-theme-toggle');
-    if (btn) {
-        btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
-    }
+    if (btn) btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
 })();
 document.addEventListener('DOMContentLoaded', function() {
     var btn = document.getElementById('admin-theme-toggle');
-    if (!btn) return;
-    var theme = localStorage.getItem('admin-theme') || 'light';
-    btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
-    btn.addEventListener('click', function() {
-        var current = document.getElementById('admin-html-root').getAttribute('data-bs-theme');
-        var next = current === 'dark' ? 'light' : 'dark';
-        document.getElementById('admin-html-root').setAttribute('data-bs-theme', next);
-        localStorage.setItem('admin-theme', next);
-        this.innerHTML = next === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
-    });
+    if (btn) {
+        var theme = localStorage.getItem('admin-theme') || 'light';
+        btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+        btn.addEventListener('click', function() {
+            var current = document.getElementById('admin-html-root').getAttribute('data-bs-theme');
+            var next = current === 'dark' ? 'light' : 'dark';
+            document.getElementById('admin-html-root').setAttribute('data-bs-theme', next);
+            localStorage.setItem('admin-theme', next);
+            this.innerHTML = next === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+        });
+    }
+
+    // Overlay mobile sidebar
+    var toggle = document.querySelector('.js-sidebar-toggle');
+    var sidebar = document.querySelector('.js-sidebar');
+    var overlay = document.getElementById('sidebar-overlay');
+    if (toggle && sidebar && overlay) {
+        toggle.addEventListener('click', function() {
+            var isMobile = window.innerWidth < 992;
+            sidebar.classList.toggle('collapsed');
+            if (isMobile) {
+                var isOpen = !sidebar.classList.contains('collapsed');
+                overlay.style.display = isOpen ? 'block' : 'none';
+            }
+        });
+    }
 });
 </script>
 @stack('footer-scripts')
