@@ -296,7 +296,6 @@
             letter-spacing: .5px;
             text-transform: uppercase;
             padding: 1rem 0;
-            border-bottom: 1px solid rgba(239,183,2,.1);
         }
         #mobile-menu .mobile-nav-link.active { color: var(--accent); }
         #mobile-menu .mobile-nav-link i { font-size: 1.1rem; width: 24px; text-align: center; }
