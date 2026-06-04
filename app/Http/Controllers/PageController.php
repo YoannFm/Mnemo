@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Page;
 use Illuminate\Support\Facades\Auth;
+use League\CommonMark\CommonMarkConverter;
 
 class PageController extends Controller
 {
@@ -20,6 +21,9 @@ class PageController extends Controller
             }
         }
 
-        return view('pages.show', compact('page'));
+        $converter = new CommonMarkConverter(['html_input' => 'strip', 'allow_unsafe_links' => false]);
+        $markdownContent = $converter->convert($page->content);
+
+        return view('pages.show', compact('page', 'markdownContent'));
     }
 }
