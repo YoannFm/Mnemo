@@ -211,6 +211,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/comment-history', [\App\Http\Controllers\Admin\CommentHistoryController::class, 'index'])->name('comment-history.index');
     // Sanctions
     Route::get('/sanctions', [\App\Http\Controllers\Admin\SanctionController::class, 'index'])->name('sanctions.index');
+    Route::post('/sanctions/{sanction}/unmute', [\App\Http\Controllers\Admin\SanctionController::class, 'unmute'])->name('sanctions.unmute');
     // Notifications admin
     Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('/notifications/create', [\App\Http\Controllers\Admin\NotificationController::class, 'create'])->name('notifications.create');
