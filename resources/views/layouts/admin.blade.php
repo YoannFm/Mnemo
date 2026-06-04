@@ -131,11 +131,6 @@
                         </a>
                     </li>
 
-                    <li class="sidebar-item {{ request()->routeIs('admin.module-reports.*') ? 'active' : '' }}">
-                        <a class="sidebar-link" href="{{ route('admin.module-reports.index') }}">
-                            <i class="bi bi-flag-fill"></i> <span>Signalements modules</span>
-                        </a>
-                    </li>
 
                     <li class="sidebar-item {{ request()->routeIs('admin.comment-history.*') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.comment-history.index') }}">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminSanction;
+use App\Models\ModuleReport;
 use App\Models\Mute;
 use App\Models\PostCommentReport;
 use App\Models\UserNotification;
@@ -13,12 +14,33 @@ use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $reports = PostCommentReport::with(['user', 'postComment.user', 'postComment.post'])
+        $type = $request->input('type', 'comments');
+
+        $commentReports = PostCommentReport::with(['user', 'postComment.user', 'postComment.post'])
             ->orderBy('created_at', 'desc')
-            ->paginate(25);
-        return view('admin.reports.index', compact('reports'));
+            ->paginate(25, ['*'], 'comments_page')
+            ->withQueryString();
+
+        $moduleReports = ModuleReport::with(['user', 'module.owner'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(25, ['*'], 'modules_page')
+            ->withQueryString();
+
+        return view('admin.reports.index', compact('commentReports', 'moduleReports', 'type'));
+    }
+
+    public function markModuleTreated(ModuleReport $report)
+    {
+        $report->update(['status' => 'treated']);
+        return back()->with('success', 'Signalement module marqué comme traité.');
+    }
+
+    public function markModuleRejected(ModuleReport $report)
+    {
+        $report->update(['status' => 'rejected']);
+        return back()->with('success', 'Signalement module rejeté.');
     }
 
     public function markSanctioned(PostCommentReport $report)
