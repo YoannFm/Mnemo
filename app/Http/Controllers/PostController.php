@@ -35,7 +35,7 @@ class PostController extends Controller
         }
 
         $comments = $post->allow_comments
-            ? $post->comments()->whereNull('parent_id')->with(['user', 'replies.user'])->orderBy('created_at', 'desc')->get()
+            ? $post->comments()->whereNull('parent_id')->with(['user', 'replies.user'])->orderBy('created_at', 'asc')->get()
             : collect();
 
         return view('posts.show', compact('post', 'reactions', 'userReactions', 'comments'));
