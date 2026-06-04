@@ -5,6 +5,7 @@ use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Image;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ImageController extends Controller
@@ -29,11 +30,7 @@ class ImageController extends Controller
         $file = $request->file('image');
         $filename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME))
             . '_' . time() . '.' . $file->getClientOriginalExtension();
-        $dest = public_path('uploads/images');
-        if (!is_dir($dest)) {
-            mkdir($dest, 0755, true);
-        }
-        $file->move($dest, $filename);
+        $file->storeAs('images', $filename, 'public');
         $image = Image::create(['name' => $request->name, 'file' => $filename]);
         LogHelper::log('created_image', 'image', $image->id, ['name' => $image->name]);
         return redirect()->route('admin.images.index')->with('success', 'Image ajoutée.');
@@ -56,10 +53,7 @@ class ImageController extends Controller
 
     public function destroy(Image $image)
     {
-        $path = public_path('uploads/images/' . $image->file);
-        if (file_exists($path)) {
-            unlink($path);
-        }
+        Storage::disk('public')->delete('images/' . $image->file);
         LogHelper::log('deleted_image', 'image', $image->id, ['name' => $image->name]);
         $image->delete();
         return redirect()->route('admin.images.index')->with('success', 'Image supprimée.');

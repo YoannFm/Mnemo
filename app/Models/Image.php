@@ -9,6 +9,6 @@ class Image extends Model
 
     public function url(): string
     {
-        return asset('uploads/images/' . $this->file);
+        return asset('storage/images/' . $this->file);
     }
 }
