@@ -68,41 +68,44 @@
     <label class="form-check-label" for="enableSwitch">Active</label>
 </div>
 
+@push('header-styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.css">
+@endpush
+
 @push('footer-scripts')
-{{-- TinyMCE 6 (LGPL) via CDN - aucune cle requise --}}
-<script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-bs5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/lang/summernote-fr-FR.min.js"></script>
 <script>
-function initTinyMCE() {
+function initSummernote() {
     var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-    if (tinymce.get('contentArea')) {
-        tinymce.remove('#contentArea');
+    if ($('#contentArea').data('summernote')) {
+        $('#contentArea').summernote('destroy');
     }
-    tinymce.init({
-        selector: '#contentArea',
-        base_url: 'https://cdn.jsdelivr.net/npm/tinymce@6',
-        suffix: '.min',
-        promotion: false,
+    $('#contentArea').summernote({
         height: 400,
-        min_height: 200,
-        entity_encoding: 'raw',
-        plugins: 'searchreplace autolink code image link anchor lists table',
-        toolbar: 'blocks bold italic underline strikethrough forecolor | link image | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat code | undo redo',
-        relative_urls: false,
-        valid_children: '+body[style]',
-        extended_valid_elements: 'i[class],iframe[src|frameborder|scrolling|class|width|height|name|allow|title]',
-        skin: dark ? 'oxide-dark' : 'oxide',
-        content_css: dark ? 'dark' : 'default',
-        paste_data_images: false,
+        lang: 'fr-FR',
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture', 'hr']],
+            ['view', ['fullscreen', 'codeview']],
+        ],
     });
+    if (dark) {
+        document.querySelector('.note-editor')?.classList.add('note-dark');
+    }
 }
 
-initTinyMCE();
+$(document).ready(function () { initSummernote(); });
 
-// Re-initialise quand le theme change
 new MutationObserver(function (mutations) {
     mutations.forEach(function (m) {
         if (m.attributeName === 'data-bs-theme') {
-            initTinyMCE();
+            initSummernote();
         }
     });
 }).observe(document.documentElement, { attributes: true });
