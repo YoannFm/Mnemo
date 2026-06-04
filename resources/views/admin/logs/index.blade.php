@@ -8,10 +8,6 @@
                     @csrf @method('DELETE')
                     <button type="submit" class="btn btn-warning btn-sm"><i class="bi bi-trash"></i> Purger &gt; 30 jours</button>
                 </form>
-                <form action="{{ route('admin.logs.clear') }}" method="POST" onsubmit="return confirm('Effacer tous les logs ?')">
-                    @csrf
-                    <button type="submit" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Effacer tout</button>
-                </form>
             </div>
         </div>
         <div class="card-body">
