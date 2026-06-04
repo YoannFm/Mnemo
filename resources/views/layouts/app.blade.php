@@ -261,37 +261,72 @@
 
         @media (max-width: 768px) { .btn { min-height: 44px; } }
 
-        /* ── Mobile navbar ── */
+        /* ── Mobile menu plein écran ── */
+        #mobile-menu {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--header-bg);
+            z-index: 1000;
+            flex-direction: column;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        #mobile-menu.open { display: flex; }
+
+        #mobile-menu-close {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 1.75rem;
+            line-height: 1;
+            align-self: flex-end;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        #mobile-menu .mobile-nav-link {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(239,183,2,.1);
+        }
+        #mobile-menu .mobile-nav-link.active { color: var(--accent); }
+        #mobile-menu .mobile-nav-link i { font-size: 1.1rem; width: 24px; text-align: center; }
+
+        #mobile-menu .mobile-user-section {
+            margin-top: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
+        }
+        #mobile-menu .mobile-user-section a,
+        #mobile-menu .mobile-user-section button {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            color: var(--text-muted);
+            font-size: .9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            padding: .65rem 0;
+            text-decoration: none;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
         @media (max-width: 991.98px) {
-            #main-header {
-                height: auto;
-                min-height: 56px;
-            }
-            #main-header .navbar { height: auto; }
-            .nav-link-custom {
-                height: auto;
-                padding: .75rem 1.25rem;
-                border-top: none;
-                border-bottom: 1px solid rgba(239,183,2,.1);
-                border-left: 3px solid transparent;
-                font-size: .8rem;
-            }
-            .nav-link-custom.active {
-                border-top: none;
-                border-left-color: var(--accent);
-            }
-            .nav-link-custom:hover { border-top-color: transparent; }
-            #navbarMain {
-                background: var(--header-bg);
-                border-top: 1px solid var(--card-border);
-                padding: .25rem 0 .5rem;
-                width: 100%;
-            }
-            #navbarMain .ms-lg-auto {
-                padding: .5rem 1rem;
-                border-top: 1px solid var(--card-border);
-                width: 100%;
-            }
             .page-content { padding: 1rem .75rem; }
             .nav-sep { display: none; }
             .table-responsive { font-size: .875rem; }
@@ -438,6 +473,65 @@
 </head>
 <body>
 
+@php
+    $navItems = [];
+    try { $navItems = \App\Models\NavItem::where('is_active', true)->orderBy('position')->get(); } catch (\Throwable $e) {}
+@endphp
+
+{{-- ─── Menu mobile plein écran ─── --}}
+<div id="mobile-menu" role="dialog" aria-modal="true" aria-label="Menu navigation">
+    <button id="mobile-menu-close" aria-label="Fermer le menu">&#x2715;</button>
+
+    <nav style="margin-top:1.5rem;">
+        @if (count($navItems) > 0)
+            @foreach ($navItems as $navItem)
+                <a href="{{ $navItem->url }}"
+                   class="mobile-nav-link {{ request()->is(ltrim($navItem->url, '/')) ? 'active' : '' }}"
+                   @if($navItem->open_new_tab) target="_blank" rel="noopener noreferrer" @endif>
+                    @if($navItem->icon)<i class="bi {{ $navItem->icon }}"></i>@endif
+                    {{ $navItem->label }}
+                </a>
+            @endforeach
+        @else
+            <a href="{{ route('dashboard') }}" class="mobile-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <i class="bi bi-speedometer2"></i> Accueil
+            </a>
+            <a href="{{ route('modules.index') }}" class="mobile-nav-link {{ request()->routeIs('modules.*') || request()->routeIs('test.*') || request()->routeIs('anki.*') ? 'active' : '' }}">
+                <i class="bi bi-collection"></i> Mes modules
+            </a>
+            <a href="{{ route('library.index') }}" class="mobile-nav-link {{ request()->routeIs('library.*') ? 'active' : '' }}">
+                <i class="bi bi-globe2"></i> Bibliothèque
+            </a>
+            <a href="{{ route('progress.index') }}" class="mobile-nav-link {{ request()->routeIs('progress.*') ? 'active' : '' }}">
+                <i class="bi bi-bar-chart-line"></i> Progression
+            </a>
+        @endif
+    </nav>
+
+    @auth
+    <div class="mobile-user-section" style="margin-top:auto;padding-top:1.5rem;border-top:1px solid rgba(239,183,2,.2);">
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;">
+            <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+            <span style="font-weight:700;color:var(--text-primary);">{{ Auth::user()->name }}</span>
+        </div>
+        <a href="{{ route('notifications.index') }}" style="color:var(--text-muted);">
+            <i class="bi bi-bell"></i> Notifications
+            @if(($unreadNotifications ?? 0) > 0)
+                <span class="badge bg-danger ms-1">{{ $unreadNotifications }}</span>
+            @endif
+        </a>
+        <a href="{{ route('profile.edit') }}" style="color:var(--text-muted);"><i class="bi bi-person"></i> Mon profil</a>
+        @if(Auth::user()->isAdmin())
+            <a href="{{ route('admin.dashboard') }}" style="color:var(--accent);"><i class="bi bi-shield-check"></i> Administration</a>
+        @endif
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" style="color:#ef4444;"><i class="bi bi-box-arrow-right"></i> Déconnexion</button>
+        </form>
+    </div>
+    @endauth
+</div>
+
 {{-- ─── Header ─────────────────────────────────────────────── --}}
 <header id="main-header">
     <nav class="navbar navbar-expand-lg px-3 py-0 h-100">
@@ -447,78 +541,57 @@
             Mn<span>émo</span>
         </a>
 
-        {{-- Hamburger mobile --}}
-        <button class="navbar-toggler ms-auto me-2" type="button"
-                data-bs-toggle="collapse" data-bs-target="#navbarMain"
-                aria-controls="navbarMain" aria-expanded="false" aria-label="Menu">
+        {{-- Bouton hamburger mobile --}}
+        <button id="mobile-menu-open" class="navbar-toggler d-lg-none ms-auto me-2" type="button" aria-label="Ouvrir le menu">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarMain">
+        {{-- Nav desktop uniquement --}}
+        <div class="d-none d-lg-flex align-items-stretch flex-grow-1" id="navbarDesktop">
 
-            {{-- Navigation principale --}}
-            <div class="d-flex flex-column flex-lg-row align-items-lg-stretch py-2 py-lg-0">
-                @php
-                    $navItems = [];
-                    try {
-                        $navItems = \App\Models\NavItem::where('is_active', true)->orderBy('position')->get();
-                    } catch (\Throwable $e) {
-                        $navItems = [];
-                    }
-                @endphp
-
+            <div class="d-flex align-items-stretch">
                 @if (count($navItems) > 0)
                     @foreach ($navItems as $navItem)
                         <a href="{{ $navItem->url }}"
                            class="nav-link-custom {{ request()->is(ltrim($navItem->url, '/')) ? 'active' : '' }}"
-                           @if ($navItem->open_new_tab) target="_blank" rel="noopener noreferrer" @endif>
-                            @if ($navItem->icon)<i class="bi {{ $navItem->icon }}"></i> @endif
+                           @if($navItem->open_new_tab) target="_blank" rel="noopener noreferrer" @endif>
+                            @if($navItem->icon)<i class="bi {{ $navItem->icon }}"></i>@endif
                             {{ $navItem->label }}
                         </a>
                     @endforeach
                 @else
-                    <a href="{{ route('dashboard') }}"
-                       class="nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <a href="{{ route('dashboard') }}" class="nav-link-custom {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <i class="bi bi-speedometer2"></i> Accueil
                     </a>
-                    <a href="{{ route('modules.index') }}"
-                       class="nav-link-custom {{ request()->routeIs('modules.*') || request()->routeIs('test.*') || request()->routeIs('anki.*') ? 'active' : '' }}">
+                    <a href="{{ route('modules.index') }}" class="nav-link-custom {{ request()->routeIs('modules.*') || request()->routeIs('test.*') || request()->routeIs('anki.*') ? 'active' : '' }}">
                         <i class="bi bi-collection"></i> Mes modules
                     </a>
-                    <a href="{{ route('library.index') }}"
-                       class="nav-link-custom {{ request()->routeIs('library.*') ? 'active' : '' }}">
+                    <a href="{{ route('library.index') }}" class="nav-link-custom {{ request()->routeIs('library.*') ? 'active' : '' }}">
                         <i class="bi bi-globe2"></i> Bibliothèque
                     </a>
-                    <a href="{{ route('progress.index') }}"
-                       class="nav-link-custom {{ request()->routeIs('progress.*') ? 'active' : '' }}">
+                    <a href="{{ route('progress.index') }}" class="nav-link-custom {{ request()->routeIs('progress.*') ? 'active' : '' }}">
                         <i class="bi bi-bar-chart-line"></i> Progression
                     </a>
                 @endif
             </div>
 
-            {{-- Utilisateur (droite) --}}
             @auth
-            <div class="ms-lg-auto d-flex align-items-center py-2 py-lg-0">
+            <div class="ms-auto d-flex align-items-center">
                 <button id="theme-toggle"
                         style="background:none;border:none;color:var(--text-muted);font-size:1rem;cursor:pointer;padding:0 .5rem;"
-                        title="Changer le theme"
-                        aria-label="Basculer theme clair/sombre">
+                        title="Changer le theme" aria-label="Basculer theme">
                     <i class="bi bi-sun-fill"></i>
                 </button>
-                <li class="nav-item list-unstyled me-1">
-                    <a class="nav-link position-relative" href="{{ route('notifications.index') }}" title="Notifications">
-                        <i class="bi bi-bell-fill" style="color:var(--text-muted);"></i>
-                        @if(($unreadNotifications ?? 0) > 0)
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.6rem;">
-                                {{ $unreadNotifications }}
-                            </span>
-                        @endif
-                    </a>
-                </li>
-                <div class="nav-sep d-none d-lg-block"></div>
-                <div class="user-avatar mx-2">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                </div>
+                <a class="nav-link position-relative me-1" href="{{ route('notifications.index') }}" title="Notifications">
+                    <i class="bi bi-bell-fill" style="color:var(--text-muted);"></i>
+                    @if(($unreadNotifications ?? 0) > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.6rem;">
+                            {{ $unreadNotifications }}
+                        </span>
+                    @endif
+                </a>
+                <div class="nav-sep"></div>
+                <div class="user-avatar mx-2">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
                 <div class="dropdown">
                     <button class="d-flex align-items-center gap-1"
                             style="background:none;border:none;color:var(--text-primary);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.8px;cursor:pointer;"
@@ -527,25 +600,15 @@
                         <i class="bi bi-chevron-down" style="font-size:.65rem;color:var(--text-muted);"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
-                        <li>
-                            <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                <i class="bi bi-person"></i> Mon profil
-                            </a>
-                        </li>
-                        @if (Auth::user()->isAdmin())
-                        <li>
-                            <a class="dropdown-item" href="{{ route('admin.dashboard') }}"
-                               style="color:var(--accent);">
-                                <i class="bi bi-shield-check"></i> Administration
-                            </a>
-                        </li>
+                        <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person"></i> Mon profil</a></li>
+                        @if(Auth::user()->isAdmin())
+                        <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}" style="color:var(--accent);"><i class="bi bi-shield-check"></i> Administration</a></li>
                         @endif
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item"
-                                        style="background:none;border:none;width:100%;text-align:left;color:#ef4444;">
+                                <button type="submit" class="dropdown-item" style="background:none;border:none;width:100%;text-align:left;color:#ef4444;">
                                     <i class="bi bi-box-arrow-right"></i> Déconnexion
                                 </button>
                             </form>
@@ -554,8 +617,18 @@
                 </div>
             </div>
             @endauth
-
         </div>
+
+        {{-- Notifications visible sur mobile dans la barre --}}
+        @auth
+        <a class="nav-link position-relative d-lg-none" href="{{ route('notifications.index') }}" style="color:var(--text-muted);">
+            <i class="bi bi-bell-fill"></i>
+            @if(($unreadNotifications ?? 0) > 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.6rem;">{{ $unreadNotifications }}</span>
+            @endif
+        </a>
+        @endauth
+
     </nav>
 </header>
 
@@ -597,22 +670,37 @@
     var theme = localStorage.getItem('theme') || 'dark';
     document.getElementById('html-root').setAttribute('data-bs-theme', theme);
     var btn = document.getElementById('theme-toggle');
-    if (btn) {
-        btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
-    }
+    if (btn) btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
 })();
 document.addEventListener('DOMContentLoaded', function() {
+    // Theme toggle
     var btn = document.getElementById('theme-toggle');
-    if (!btn) return;
-    var theme = localStorage.getItem('theme') || 'dark';
-    btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
-    btn.addEventListener('click', function() {
-        var current = document.getElementById('html-root').getAttribute('data-bs-theme');
-        var next = current === 'dark' ? 'light' : 'dark';
-        document.getElementById('html-root').setAttribute('data-bs-theme', next);
-        localStorage.setItem('theme', next);
-        this.innerHTML = next === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
-    });
+    if (btn) {
+        var theme = localStorage.getItem('theme') || 'dark';
+        btn.innerHTML = theme === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+        btn.addEventListener('click', function() {
+            var current = document.getElementById('html-root').getAttribute('data-bs-theme');
+            var next = current === 'dark' ? 'light' : 'dark';
+            document.getElementById('html-root').setAttribute('data-bs-theme', next);
+            localStorage.setItem('theme', next);
+            this.innerHTML = next === 'dark' ? '<i class="bi bi-sun-fill"></i>' : '<i class="bi bi-moon-fill"></i>';
+        });
+    }
+
+    // Menu mobile plein écran
+    var menu = document.getElementById('mobile-menu');
+    var openBtn = document.getElementById('mobile-menu-open');
+    var closeBtn = document.getElementById('mobile-menu-close');
+    if (menu && openBtn && closeBtn) {
+        openBtn.addEventListener('click', function() {
+            menu.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        });
+        closeBtn.addEventListener('click', function() {
+            menu.classList.remove('open');
+            document.body.style.overflow = '';
+        });
+    }
 });
 </script>
 
