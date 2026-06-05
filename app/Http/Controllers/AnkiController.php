@@ -177,78 +177,35 @@ class AnkiController extends Controller
      */
     public function submit(Request $request, Module $module)
     {
-        \Log::info('=== DEBUG: Anki submit() appelé ===');
-        \Log::info('Module ID: ' . $module->id);
-        \Log::info('User ID: ' . Auth::id());
-        \Log::info('Request body: ' . $request->getContent());
-
         $this->authorize($module);
 
         if (!session()->has('anki_module_id') || session('anki_module_id') !== $module->id) {
-            \Log::warning('Session Anki invalide ou manquante');
             return response()->json(['error' => 'Aucune session Anki en cours.'], 403);
         }
 
         try {
-            \Log::info('DEBUG: Validation des données');
-
-            // Valider la réponse
-            // Laravel parse automatiquement le body JSON quand Content-Type: application/json
-            // 'question' arrive comme array, pas comme string JSON
             $data = $request->validate([
                 'item_id'  => 'required|integer',
                 'answer'   => 'required|integer|min:0|max:3',
                 'question' => 'required|array',
             ]);
 
-            \Log::info('DEBUG: Validation réussie');
-            \Log::info('item_id: ' . $data['item_id']);
-            \Log::info('answer: ' . $data['answer']);
-            \Log::info('question keys: ' . implode(', ', array_keys($data['question'])));
-
-            // La question est déjà un array (décodé par Laravel)
             $question = $data['question'];
 
             if (empty($question)) {
-                \Log::error('DEBUG: Question vide');
                 return response()->json(['error' => 'Erreur lors du traitement de la réponse.'], 422);
             }
 
-            \Log::info('DEBUG: Validation de la réponse');
-
-            // Valider la réponse
             $isCorrect = QuizGenerator::validateAnswer($question, $data['answer']);
 
-            \Log::info('DEBUG: isCorrect = ' . ($isCorrect ? 'true' : 'false'));
-            \Log::info('DEBUG: correct_index = ' . ($question['correct_index'] ?? 'MISSING'));
-
-            // Récupérer ou créer la progression (firstOrCreate évite un 404 si la session a été perdue)
-            \Log::info('DEBUG: Créer/récupérer Progress');
             $progress = Progress::firstOrCreate(
                 ['user_id' => Auth::id(), 'item_id' => $data['item_id']],
                 ['success_count' => 0, 'fail_count' => 0, 'streak' => 0, 'easiness_factor' => 2.5, 'interval_days' => 1]
             );
 
-            \Log::info('DEBUG: Progress créé/récupéré', [
-                'id' => $progress->id,
-                'success_count' => $progress->success_count,
-                'fail_count' => $progress->fail_count,
-                'streak' => $progress->streak,
-                'easiness_factor' => $progress->easiness_factor,
-                'interval_days' => $progress->interval_days,
-            ]);
-
             $progress->last_seen = now();
 
-            // SM-2 doit lire success_count AVANT l'incrément pour calculer le bon intervalle
             $quality = $isCorrect ? 5 : 1;
-
-            \Log::info('DEBUG: Avant applySM2', [
-                'quality' => $quality,
-                'easiness_factor' => $progress->easiness_factor,
-                'interval_days' => $progress->interval_days,
-            ]);
-
             $progress->applySM2($quality);
 
             if ($isCorrect) {
@@ -259,12 +216,6 @@ class AnkiController extends Controller
                 $progress->streak = 0;
             }
 
-            \Log::info('DEBUG: Après applySM2', [
-                'easiness_factor' => $progress->easiness_factor,
-                'interval_days' => $progress->interval_days,
-                'next_review' => $progress->next_review,
-            ]);
-
             $progress->save();
 
             // Mode apprentissage : retirer l'item du pool si réponse correcte
@@ -274,28 +225,18 @@ class AnkiController extends Controller
                 session(['anki_learn_remaining' => $remaining]);
             }
 
-            // Retourner le feedback
-            $response = [
+            return response()->json([
                 'is_correct'      => $isCorrect,
                 'correct_answer'  => $question['correct_answer'],
                 'user_answer'     => $question['options'][$data['answer']],
                 'streak'          => $progress->streak,
+                'success_count'   => $progress->success_count,
+                'fail_count'      => $progress->fail_count,
                 'is_mastered'     => $progress->isMastered(),
                 'learn_remaining' => session('anki_learn_remaining') ? count(session('anki_learn_remaining')) : null,
-            ];
-
-            return response()->json($response);
-        } catch (\Throwable $e) {
-            \Log::error('=== ANKI SUBMIT ERROR ===', [
-                'message' => $e->getMessage(),
-                'class' => get_class($e),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'user_id' => Auth::id(),
-                'module_id' => $module->id,
-                'request_data' => $request->all(),
             ]);
+        } catch (\Throwable $e) {
+            \Log::error('Anki submit error', ['message' => $e->getMessage(), 'user_id' => Auth::id()]);
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }

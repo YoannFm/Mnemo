@@ -52,21 +52,18 @@
             <div class="card mb-4" style="background:var(--accent-light);border:none;">
                 <div class="card-body p-3" style="font-size:.85rem;">
                     <div class="row g-3 text-center">
-                        {{-- Compteur des bonnes réponses cumulées pour cet item --}}
                         <div class="col">
-                            <div style="font-weight:600;color:var(--accent);">{{ $question['progress']['success_count'] }}</div>
+                            <div id="stat-success" style="font-weight:600;color:var(--accent);">{{ $question['progress']['success_count'] }}</div>
                             <div style="color:var(--text-muted);">Bonnes réponses</div>
                         </div>
 
-                        {{-- Compteur des mauvaises réponses cumulées pour cet item --}}
                         <div class="col">
-                            <div style="font-weight:600;color:#ef4444;">{{ $question['progress']['fail_count'] }}</div>
+                            <div id="stat-fail" style="font-weight:600;color:#ef4444;">{{ $question['progress']['fail_count'] }}</div>
                             <div style="color:var(--text-muted);">Mauvaises réponses</div>
                         </div>
 
-                        {{-- Série actuelle (bonnes réponses consécutives) - réinitialisée à 0 si erreur --}}
                         <div class="col">
-                            <div style="font-weight:600;color:#fbbf24;">{{ $question['progress']['streak'] }}</div>
+                            <div id="stat-streak" style="font-weight:600;color:#fbbf24;">{{ $question['progress']['streak'] }}</div>
                             <div style="color:var(--text-muted);">Série actuelle</div>
                         </div>
 
@@ -335,6 +332,11 @@
             // Injecter le HTML et afficher la zone feedback
             content.innerHTML = feedbackHtml;
             container.style.display = 'block';
+
+            // Mettre à jour les stats en temps réel
+            if (data.success_count !== undefined) document.getElementById('stat-success').textContent = data.success_count;
+            if (data.fail_count !== undefined)    document.getElementById('stat-fail').textContent    = data.fail_count;
+            if (data.streak !== undefined)        document.getElementById('stat-streak').textContent  = data.streak;
         }
 
         /**
