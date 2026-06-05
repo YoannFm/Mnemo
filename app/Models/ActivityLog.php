@@ -59,6 +59,12 @@ class ActivityLog extends Model
             str_starts_with($this->action, 'updated_theme')       => ['color' => '#7c3aed', 'icon' => 'bi-palette-fill'],
             str_starts_with($this->action, 'deleted_theme')       => ['color' => '#7c3aed', 'icon' => 'bi-palette-fill'],
             str_starts_with($this->action, 'activated_theme')     => ['color' => '#7c3aed', 'icon' => 'bi-palette-fill'],
+            // Module actions
+            str_starts_with($this->action, 'deleted_module')      => ['color' => '#64748b', 'icon' => 'bi-collection-fill'],
+            str_starts_with($this->action, 'transferred_module')  => ['color' => '#64748b', 'icon' => 'bi-collection-fill'],
+            // Report actions
+            str_starts_with($this->action, 'treated_report')      => ['color' => '#16a34a', 'icon' => 'bi-flag-fill'],
+            str_starts_with($this->action, 'rejected_report')     => ['color' => '#dc2626', 'icon' => 'bi-flag-fill'],
             // Notification actions
             $this->action === 'sent_notification'                  => ['color' => '#0284c7', 'icon' => 'bi-bell-fill'],
             $this->action === 'deleted_notification'               => ['color' => '#0284c7', 'icon' => 'bi-bell-fill'],
@@ -114,6 +120,11 @@ class ActivityLog extends Model
             'updated_theme'        => 'Thème modifié',
             'deleted_theme'        => 'Thème supprimé',
             'activated_theme'      => 'Thème activé',
+            'updated_image'        => 'Image modifiée',
+            'deleted_module'       => 'Module supprimé',
+            'transferred_module'   => 'Module transféré',
+            'treated_report'       => 'Signalement traité',
+            'rejected_report'      => 'Signalement rejeté',
         ];
         return $labels[$this->action] ?? $this->action;
     }
