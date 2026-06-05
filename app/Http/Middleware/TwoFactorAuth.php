@@ -13,6 +13,9 @@ class TwoFactorAuth
         $user = $request->user();
 
         if ($user && $user->hasTwoFactorAuth() && ! $request->session()->get('two_factor_verified')) {
+            if ($request->routeIs('two-factor.*')) {
+                return $next($request);
+            }
             return redirect()->route('two-factor.show');
         }
 
