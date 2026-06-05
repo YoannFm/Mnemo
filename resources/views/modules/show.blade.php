@@ -216,266 +216,6 @@
         </div>
     @endif
 
-    {{-- ── Notation du module ── --}}
-    @auth
-    <div class="card mb-4 p-3">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-            <div>
-                <span class="fw-semibold" style="font-size:.95rem;">Notation du module</span>
-                @if ($ratingCount > 0)
-                    <span style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;">
-                        {{ number_format($avgRating, 1) }}/5
-                        <span style="color:var(--text-muted);">({{ $ratingCount }} avis)</span>
-                    </span>
-                @else
-                    <span style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;">Aucun avis</span>
-                @endif
-            </div>
-            {{-- Etoiles moyennes (lecture seule) --}}
-            <div style="font-size:1.1rem;">
-                @for ($i = 1; $i <= 5; $i++)
-                    <i class="bi {{ $ratingCount > 0 && $i <= round($avgRating) ? 'bi-star-fill' : 'bi-star' }}"
-                       style="color:#fbbf24;"></i>
-                @endfor
-            </div>
-        </div>
-
-        {{-- Formulaire de notation --}}
-        @if ($isMuted)
-            <p style="font-size:.82rem;color:#ef4444;margin:0;">
-                <i class="bi bi-mic-mute me-1"></i>Vous êtes muté et ne pouvez pas poster ou modifier un avis.
-            </p>
-        @elseif (Auth::id() !== $module->owner_id)
-        <div id="rating-form-wrapper">
-            <div class="d-flex align-items-center gap-2 mb-2">
-                <span style="font-size:.85rem;color:var(--text-muted);">
-                    {{ $userRating ? 'Votre note :' : 'Notez ce module :' }}
-                </span>
-                <div class="d-flex gap-1" id="star-picker">
-                    @for ($i = 1; $i <= 5; $i++)
-                        <i class="bi {{ $userRating && $i <= $userRating->rating ? 'bi-star-fill' : 'bi-star' }} star-btn"
-                           data-value="{{ $i }}"
-                           style="font-size:1.4rem;cursor:pointer;color:#fbbf24;transition:transform .1s;">
-                        </i>
-                    @endfor
-                </div>
-            </div>
-            <textarea id="rating-comment" class="form-control mb-2" rows="2"
-                      maxlength="1000"
-                      placeholder="Commentaire facultatif..."
-                      style="font-size:.85rem;background:var(--card-bg);color:var(--text-primary);border-color:var(--card-border);">{{ $userRating?->comment }}</textarea>
-            <button id="rating-submit" class="btn btn-sm btn-primary">
-                {{ $userRating ? 'Modifier mon avis' : 'Envoyer mon avis' }}
-            </button>
-            <div id="rating-feedback" class="d-none mt-2" style="font-size:.82rem;"></div>
-        </div>
-        @elseif (Auth::id() === $module->owner_id)
-            <p style="font-size:.82rem;color:var(--text-muted);margin:0;">
-                <i class="bi bi-info-circle me-1"></i>Vous ne pouvez pas noter votre propre module.
-            </p>
-        @endif
-    </div>
-
-    <script>
-    (function () {
-        const stars = document.querySelectorAll('#star-picker .star-btn');
-        const submitBtn = document.getElementById('rating-submit');
-        const commentEl = document.getElementById('rating-comment');
-        const feedback  = document.getElementById('rating-feedback');
-        let selected = {{ $userRating ? $userRating->rating : 0 }};
-
-        function renderStars(hovered) {
-            const val = hovered || selected;
-            stars.forEach((s, i) => {
-                s.className = 'bi ' + (i < val ? 'bi-star-fill' : 'bi-star') + ' star-btn';
-                s.style.fontSize = '1.4rem';
-                s.style.cursor = 'pointer';
-                s.style.color = '#fbbf24';
-                s.style.transition = 'transform .1s';
-            });
-        }
-
-        stars.forEach((s, i) => {
-            s.addEventListener('mouseenter', () => renderStars(i + 1));
-            s.addEventListener('mouseleave', () => renderStars(0));
-            s.addEventListener('click', () => { selected = i + 1; renderStars(0); });
-        });
-
-        submitBtn?.addEventListener('click', function () {
-            if (!selected) {
-                feedback.className = 'alert alert-warning mt-2';
-                feedback.textContent = 'Veuillez choisir une note.';
-                feedback.classList.remove('d-none');
-                return;
-            }
-            this.disabled = true;
-            fetch('{{ route('modules.rate', $module) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ rating: selected, comment: commentEl?.value ?? '' })
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.status === 'ok') {
-                    feedback.className = 'alert alert-success mt-2';
-                    feedback.textContent = 'Votre avis a bien été enregistré.';
-                    submitBtn.textContent = 'Modifier mon avis';
-                } else if (data.status === 'muted') {
-                    feedback.className = 'alert alert-warning mt-2';
-                    feedback.textContent = data.message ?? 'Vous êtes muté.';
-                    submitBtn.disabled = true;
-                } else {
-                    feedback.className = 'alert alert-danger mt-2';
-                    feedback.textContent = data.message ?? 'Une erreur est survenue.';
-                    submitBtn.disabled = false;
-                }
-                feedback.classList.remove('d-none');
-            })
-            .catch(() => {
-                feedback.className = 'alert alert-danger mt-2';
-                feedback.textContent = 'Erreur réseau. Veuillez réessayer.';
-                feedback.classList.remove('d-none');
-                submitBtn.disabled = false;
-            });
-        });
-    })();
-    </script>
-    @endauth
-
-    {{-- ── Avis des utilisateurs ── --}}
-    @if ($allRatingsWithData->isNotEmpty())
-        <div class="mb-4">
-            <h6 class="mb-3" style="font-size:.9rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">
-                Avis ({{ $allRatingsWithData->count() }})
-            </h6>
-            <div class="d-flex flex-column gap-2">
-                @foreach ($allRatingsWithData as $r)
-                    @php
-                        $rReacts    = $ratingReactions[$r->id] ?? [];
-                        $rUserReact = $userRatingReacts[$r->id] ?? [];
-                    @endphp
-                    <div class="card p-3" id="rating-card-{{ $r->id }}" style="gap:.5rem;display:flex;flex-direction:column;">
-
-                        {{-- En-tête : nom + étoiles + signaler --}}
-                        <div class="d-flex align-items-center justify-content-between gap-2">
-                            <span class="fw-semibold" style="font-size:.85rem;">{{ $r->user?->name ?? 'Utilisateur supprimé' }}</span>
-                            <div class="d-flex align-items-center gap-2">
-                                <div>
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        <i class="bi {{ $i <= $r->rating ? 'bi-star-fill' : 'bi-star' }}" style="color:#fbbf24;font-size:.8rem;"></i>
-                                    @endfor
-                                </div>
-                                @auth
-                                    @if (Auth::id() !== $r->user_id)
-                                        <button type="button" class="btn btn-sm report-rating-btn"
-                                                style="color:var(--text-muted);border:none;background:transparent;padding:0;font-size:.8rem;"
-                                                data-rating-id="{{ $r->id }}" title="Signaler cet avis">
-                                            <i class="bi bi-flag"></i>
-                                        </button>
-                                    @endif
-                                @endauth
-                            </div>
-                        </div>
-
-                        {{-- Commentaire --}}
-                        <p style="font-size:.82rem;color:var(--text-muted);margin:0;">{{ $r->comment }}</p>
-
-                        {{-- Date --}}
-                        <div style="font-size:.75rem;color:var(--text-muted);">{{ $r->created_at->diffForHumans() }}</div>
-
-                        {{-- Barre de réactions --}}
-                        <div class="d-flex gap-1 flex-wrap align-items-center" id="reactions-bar-{{ $r->id }}">
-                            @foreach ($rReacts as $slug => $count)
-                                @php $emojiModel = \App\Models\Emoji::where('slug', $slug)->first(); @endphp
-                                @if ($emojiModel)
-                                    <button type="button"
-                                            class="btn btn-sm reaction-btn d-flex align-items-center gap-1 {{ in_array($slug, $rUserReact) ? 'btn-primary' : 'btn-outline-secondary' }}"
-                                            data-emoji="{{ $slug }}"
-                                            data-rating-id="{{ $r->id }}"
-                                            {{ Auth::check() ? '' : 'disabled' }}>
-                                        <img src="{{ $emojiModel->imageUrl() }}" alt="{{ $emojiModel->name }}" style="width:16px;height:16px;object-fit:contain;">
-                                        <span class="reaction-count">{{ $count > 0 ? $count : '' }}</span>
-                                    </button>
-                                @endif
-                            @endforeach
-
-                            @auth
-                                @if (!$isMuted)
-                                <div class="position-relative emoji-picker-wrapper" data-rating-id="{{ $r->id }}">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-more-btn" title="Réagir">
-                                        <i class="bi bi-emoji-smile" style="font-size:.8rem;"></i>
-                                    </button>
-                                    <div class="emoji-picker-container position-absolute d-none"
-                                         style="bottom:110%;right:0;z-index:200;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:12px;width:min(300px,calc(100vw - 1.5rem));box-shadow:0 8px 24px rgba(0,0,0,.2);">
-                                        <input type="search" class="form-control form-control-sm emoji-search mb-2" placeholder="Rechercher...">
-                                        <div class="emoji-recent-section d-none mb-2">
-                                            <p class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;">Récents</p>
-                                            <div class="emoji-recent-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;"></div>
-                                            <hr class="my-2" style="border-color:var(--card-border);">
-                                        </div>
-                                        <div class="emoji-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-height:180px;overflow-y:auto;"></div>
-                                        <p class="emoji-empty text-muted text-center small mt-2 d-none">Aucun emoji.</p>
-                                    </div>
-                                </div>
-                                @endif
-                            @endauth
-                        </div>
-
-                        {{-- Réponses --}}
-                        <div class="mt-1" id="replies-{{ $r->id }}">
-                            @foreach ($r->replies as $reply)
-                                <div class="d-flex gap-2 align-items-start mb-2" id="reply-{{ $reply->id }}" style="padding-left:.75rem;border-left:2px solid var(--card-border);">
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="fw-semibold" style="font-size:.8rem;">{{ $reply->user?->name ?? '-' }}</span>
-                                            <span style="font-size:.72rem;color:var(--text-muted);">{{ $reply->created_at->diffForHumans() }}</span>
-                                            @auth
-                                                @if (Auth::id() === $reply->user_id || Auth::user()->is_admin)
-                                                    <button type="button" class="delete-reply-btn btn btn-sm"
-                                                            style="color:#ef4444;border:none;background:transparent;padding:0;font-size:.75rem;"
-                                                            data-reply-id="{{ $reply->id }}"
-                                                            data-url="{{ route('modules.ratings.replies.destroy', $reply) }}"
-                                                            title="Supprimer">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                @endif
-                                            @endauth
-                                        </div>
-                                        <p style="font-size:.8rem;color:var(--text-primary);margin:.15rem 0 0;">{{ $reply->content }}</p>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        {{-- Formulaire de réponse --}}
-                        @auth
-                            @if (!$isMuted)
-                            <div class="d-flex gap-2 mt-1">
-                                <input type="text" class="form-control form-control-sm reply-input"
-                                       placeholder="Répondre..."
-                                       maxlength="1000"
-                                       data-rating-id="{{ $r->id }}"
-                                       style="font-size:.82rem;background:var(--card-bg);color:var(--text-primary);border-color:var(--card-border);">
-                                <button type="button" class="btn btn-sm btn-primary reply-submit"
-                                        data-rating-id="{{ $r->id }}"
-                                        data-url="{{ route('modules.ratings.replies.store', $r) }}">
-                                    <i class="bi bi-send"></i>
-                                </button>
-                            </div>
-                            @else
-                                <p style="font-size:.75rem;color:#ef4444;margin:0;"><i class="bi bi-mic-mute me-1"></i>Muté - impossible de répondre.</p>
-                            @endif
-                        @endauth
-
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
     {{-- ── Liste des items ── --}}
     @if ($items->isEmpty())
         {{-- État vide - aucun item dans le module --}}
@@ -844,5 +584,265 @@ function openZoom(src) {
     document.getElementById('zoom-modal').style.display = 'flex';
 }
 </script>
+
+    {{-- ── Notation du module ── --}}
+    @auth
+    <div class="card mb-4 p-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+                <span class="fw-semibold" style="font-size:.95rem;">Notation du module</span>
+                @if ($ratingCount > 0)
+                    <span style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;">
+                        {{ number_format($avgRating, 1) }}/5
+                        <span style="color:var(--text-muted);">({{ $ratingCount }} avis)</span>
+                    </span>
+                @else
+                    <span style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;">Aucun avis</span>
+                @endif
+            </div>
+            {{-- Etoiles moyennes (lecture seule) --}}
+            <div style="font-size:1.1rem;">
+                @for ($i = 1; $i <= 5; $i++)
+                    <i class="bi {{ $ratingCount > 0 && $i <= round($avgRating) ? 'bi-star-fill' : 'bi-star' }}"
+                       style="color:#fbbf24;"></i>
+                @endfor
+            </div>
+        </div>
+
+        {{-- Formulaire de notation --}}
+        @if ($isMuted)
+            <p style="font-size:.82rem;color:#ef4444;margin:0;">
+                <i class="bi bi-mic-mute me-1"></i>Vous êtes muté et ne pouvez pas poster ou modifier un avis.
+            </p>
+        @elseif (Auth::id() !== $module->owner_id)
+        <div id="rating-form-wrapper">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span style="font-size:.85rem;color:var(--text-muted);">
+                    {{ $userRating ? 'Votre note :' : 'Notez ce module :' }}
+                </span>
+                <div class="d-flex gap-1" id="star-picker">
+                    @for ($i = 1; $i <= 5; $i++)
+                        <i class="bi {{ $userRating && $i <= $userRating->rating ? 'bi-star-fill' : 'bi-star' }} star-btn"
+                           data-value="{{ $i }}"
+                           style="font-size:1.4rem;cursor:pointer;color:#fbbf24;transition:transform .1s;">
+                        </i>
+                    @endfor
+                </div>
+            </div>
+            <textarea id="rating-comment" class="form-control mb-2" rows="2"
+                      maxlength="1000"
+                      placeholder="Commentaire facultatif..."
+                      style="font-size:.85rem;background:var(--card-bg);color:var(--text-primary);border-color:var(--card-border);">{{ $userRating?->comment }}</textarea>
+            <button id="rating-submit" class="btn btn-sm btn-primary">
+                {{ $userRating ? 'Modifier mon avis' : 'Envoyer mon avis' }}
+            </button>
+            <div id="rating-feedback" class="d-none mt-2" style="font-size:.82rem;"></div>
+        </div>
+        @elseif (Auth::id() === $module->owner_id)
+            <p style="font-size:.82rem;color:var(--text-muted);margin:0;">
+                <i class="bi bi-info-circle me-1"></i>Vous ne pouvez pas noter votre propre module.
+            </p>
+        @endif
+    </div>
+
+    <script>
+    (function () {
+        const stars = document.querySelectorAll('#star-picker .star-btn');
+        const submitBtn = document.getElementById('rating-submit');
+        const commentEl = document.getElementById('rating-comment');
+        const feedback  = document.getElementById('rating-feedback');
+        let selected = {{ $userRating ? $userRating->rating : 0 }};
+
+        function renderStars(hovered) {
+            const val = hovered || selected;
+            stars.forEach((s, i) => {
+                s.className = 'bi ' + (i < val ? 'bi-star-fill' : 'bi-star') + ' star-btn';
+                s.style.fontSize = '1.4rem';
+                s.style.cursor = 'pointer';
+                s.style.color = '#fbbf24';
+                s.style.transition = 'transform .1s';
+            });
+        }
+
+        stars.forEach((s, i) => {
+            s.addEventListener('mouseenter', () => renderStars(i + 1));
+            s.addEventListener('mouseleave', () => renderStars(0));
+            s.addEventListener('click', () => { selected = i + 1; renderStars(0); });
+        });
+
+        submitBtn?.addEventListener('click', function () {
+            if (!selected) {
+                feedback.className = 'alert alert-warning mt-2';
+                feedback.textContent = 'Veuillez choisir une note.';
+                feedback.classList.remove('d-none');
+                return;
+            }
+            this.disabled = true;
+            fetch('{{ route('modules.rate', $module) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ rating: selected, comment: commentEl?.value ?? '' })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    feedback.className = 'alert alert-success mt-2';
+                    feedback.textContent = 'Votre avis a bien été enregistré.';
+                    submitBtn.textContent = 'Modifier mon avis';
+                } else if (data.status === 'muted') {
+                    feedback.className = 'alert alert-warning mt-2';
+                    feedback.textContent = data.message ?? 'Vous êtes muté.';
+                    submitBtn.disabled = true;
+                } else {
+                    feedback.className = 'alert alert-danger mt-2';
+                    feedback.textContent = data.message ?? 'Une erreur est survenue.';
+                    submitBtn.disabled = false;
+                }
+                feedback.classList.remove('d-none');
+            })
+            .catch(() => {
+                feedback.className = 'alert alert-danger mt-2';
+                feedback.textContent = 'Erreur réseau. Veuillez réessayer.';
+                feedback.classList.remove('d-none');
+                submitBtn.disabled = false;
+            });
+        });
+    })();
+    </script>
+    @endauth
+
+    {{-- ── Avis des utilisateurs ── --}}
+    @if ($allRatingsWithData->isNotEmpty())
+        <div class="mb-4">
+            <h6 class="mb-3" style="font-size:.9rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">
+                Avis ({{ $allRatingsWithData->count() }})
+            </h6>
+            <div class="d-flex flex-column gap-2">
+                @foreach ($allRatingsWithData as $r)
+                    @php
+                        $rReacts    = $ratingReactions[$r->id] ?? [];
+                        $rUserReact = $userRatingReacts[$r->id] ?? [];
+                    @endphp
+                    <div class="card p-3" id="rating-card-{{ $r->id }}" style="gap:.5rem;display:flex;flex-direction:column;">
+
+                        {{-- En-tête : nom + étoiles + signaler --}}
+                        <div class="d-flex align-items-center justify-content-between gap-2">
+                            <span class="fw-semibold" style="font-size:.85rem;">{{ $r->user?->name ?? 'Utilisateur supprimé' }}</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <div>
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <i class="bi {{ $i <= $r->rating ? 'bi-star-fill' : 'bi-star' }}" style="color:#fbbf24;font-size:.8rem;"></i>
+                                    @endfor
+                                </div>
+                                @auth
+                                    @if (Auth::id() !== $r->user_id)
+                                        <button type="button" class="btn btn-sm report-rating-btn"
+                                                style="color:var(--text-muted);border:none;background:transparent;padding:0;font-size:.8rem;"
+                                                data-rating-id="{{ $r->id }}" title="Signaler cet avis">
+                                            <i class="bi bi-flag"></i>
+                                        </button>
+                                    @endif
+                                @endauth
+                            </div>
+                        </div>
+
+                        {{-- Commentaire --}}
+                        <p style="font-size:.82rem;color:var(--text-muted);margin:0;">{{ $r->comment }}</p>
+
+                        {{-- Date --}}
+                        <div style="font-size:.75rem;color:var(--text-muted);">{{ $r->created_at->diffForHumans() }}</div>
+
+                        {{-- Barre de réactions --}}
+                        <div class="d-flex gap-1 flex-wrap align-items-center" id="reactions-bar-{{ $r->id }}">
+                            @foreach ($rReacts as $slug => $count)
+                                @php $emojiModel = \App\Models\Emoji::where('slug', $slug)->first(); @endphp
+                                @if ($emojiModel)
+                                    <button type="button"
+                                            class="btn btn-sm reaction-btn d-flex align-items-center gap-1 {{ in_array($slug, $rUserReact) ? 'btn-primary' : 'btn-outline-secondary' }}"
+                                            data-emoji="{{ $slug }}"
+                                            data-rating-id="{{ $r->id }}"
+                                            {{ Auth::check() ? '' : 'disabled' }}>
+                                        <img src="{{ $emojiModel->imageUrl() }}" alt="{{ $emojiModel->name }}" style="width:16px;height:16px;object-fit:contain;">
+                                        <span class="reaction-count">{{ $count > 0 ? $count : '' }}</span>
+                                    </button>
+                                @endif
+                            @endforeach
+
+                            @auth
+                                @if (!$isMuted)
+                                <div class="position-relative emoji-picker-wrapper" data-rating-id="{{ $r->id }}">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-more-btn" title="Réagir">
+                                        <i class="bi bi-emoji-smile" style="font-size:.8rem;"></i>
+                                    </button>
+                                    <div class="emoji-picker-container position-absolute d-none"
+                                         style="bottom:110%;right:0;z-index:200;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:12px;width:min(300px,calc(100vw - 1.5rem));box-shadow:0 8px 24px rgba(0,0,0,.2);">
+                                        <input type="search" class="form-control form-control-sm emoji-search mb-2" placeholder="Rechercher...">
+                                        <div class="emoji-recent-section d-none mb-2">
+                                            <p class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;">Récents</p>
+                                            <div class="emoji-recent-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;"></div>
+                                            <hr class="my-2" style="border-color:var(--card-border);">
+                                        </div>
+                                        <div class="emoji-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-height:180px;overflow-y:auto;"></div>
+                                        <p class="emoji-empty text-muted text-center small mt-2 d-none">Aucun emoji.</p>
+                                    </div>
+                                </div>
+                                @endif
+                            @endauth
+                        </div>
+
+                        {{-- Réponses --}}
+                        <div class="mt-1" id="replies-{{ $r->id }}">
+                            @foreach ($r->replies as $reply)
+                                <div class="d-flex gap-2 align-items-start mb-2" id="reply-{{ $reply->id }}" style="padding-left:.75rem;border-left:2px solid var(--card-border);">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fw-semibold" style="font-size:.8rem;">{{ $reply->user?->name ?? '-' }}</span>
+                                            <span style="font-size:.72rem;color:var(--text-muted);">{{ $reply->created_at->diffForHumans() }}</span>
+                                            @auth
+                                                @if (Auth::id() === $reply->user_id || Auth::user()->is_admin)
+                                                    <button type="button" class="delete-reply-btn btn btn-sm"
+                                                            style="color:#ef4444;border:none;background:transparent;padding:0;font-size:.75rem;"
+                                                            data-reply-id="{{ $reply->id }}"
+                                                            data-url="{{ route('modules.ratings.replies.destroy', $reply) }}"
+                                                            title="Supprimer">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                @endif
+                                            @endauth
+                                        </div>
+                                        <p style="font-size:.8rem;color:var(--text-primary);margin:.15rem 0 0;">{{ $reply->content }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Formulaire de réponse --}}
+                        @auth
+                            @if (!$isMuted)
+                            <div class="d-flex gap-2 mt-1">
+                                <input type="text" class="form-control form-control-sm reply-input"
+                                       placeholder="Répondre..."
+                                       maxlength="1000"
+                                       data-rating-id="{{ $r->id }}"
+                                       style="font-size:.82rem;background:var(--card-bg);color:var(--text-primary);border-color:var(--card-border);">
+                                <button type="button" class="btn btn-sm btn-primary reply-submit"
+                                        data-rating-id="{{ $r->id }}"
+                                        data-url="{{ route('modules.ratings.replies.store', $r) }}">
+                                    <i class="bi bi-send"></i>
+                                </button>
+                            </div>
+                            @else
+                                <p style="font-size:.75rem;color:#ef4444;margin:0;"><i class="bi bi-mic-mute me-1"></i>Muté - impossible de répondre.</p>
+                            @endif
+                        @endauth
+
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
 
 </x-app-layout>
