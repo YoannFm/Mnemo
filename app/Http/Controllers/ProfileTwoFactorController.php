@@ -7,6 +7,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use PragmaRX\Google2FA\Google2FA;
 
 class ProfileTwoFactorController extends Controller
@@ -86,6 +87,14 @@ class ProfileTwoFactorController extends Controller
 
     public function disable(Request $request)
     {
+        $request->validate([
+            'password' => ['required', 'string'],
+        ]);
+
+        if (!Hash::check($request->password, $request->user()->password)) {
+            return back()->withErrors(['password' => 'Mot de passe incorrect.']);
+        }
+
         $request->user()->forceFill([
             'two_factor_secret'         => null,
             'two_factor_recovery_codes' => null,
