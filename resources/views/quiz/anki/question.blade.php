@@ -133,13 +133,16 @@
 
                         {{-- Affichage du contenu de l'option selon le type (photo ou texte) --}}
                         @if ($question['field_answer'] === 'photo_path')
-                            {{-- Option = photo (ex: Q3 - répondre par une photo) avec zoom possible --}}
-                            <img src="{{ $option }}"
-                                 alt="Option {{ $index + 1 }}"
-                                 style="width:100%;height:120px;border-radius:8px;object-fit:cover;cursor:pointer;"
-                                 data-bs-toggle="modal"
-                                 data-bs-target="#zoomModal"
-                                 onclick="setZoomImage(this.src)">
+                            <div style="position:relative;width:100%;aspect-ratio:1/1;">
+                                <img src="{{ $option }}"
+                                     alt="Option {{ $index + 1 }}"
+                                     style="width:100%;height:100%;border-radius:8px;object-fit:cover;display:block;">
+                                <button type="button"
+                                        onclick="event.stopPropagation();setZoomImage('{{ $option }}')"
+                                        style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;border-radius:6px;padding:3px 6px;cursor:pointer;color:#fff;font-size:.75rem;z-index:2;">
+                                    <i class="bi bi-arrows-fullscreen"></i>
+                                </button>
+                            </div>
                         @else
                             {{-- Option = texte (ex: Q1 ou Q4 - répondre par le nom) --}}
                             <span style="font-size:.9rem;text-align:center;word-break:break-word;">
@@ -186,8 +189,11 @@
     </div>
 
     <script>
+        var zoomModal;
         function setZoomImage(src) {
             document.getElementById('zoomImage').src = src;
+            if (!zoomModal) zoomModal = new bootstrap.Modal(document.getElementById('zoomModal'));
+            zoomModal.show();
         }
     </script>
 

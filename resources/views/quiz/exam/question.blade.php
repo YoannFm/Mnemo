@@ -43,7 +43,8 @@
                         <div style="text-align:center;margin:1.5rem 0;">
                             <img src="{{ $question['question_content'] }}"
                                  alt="Question"
-                                 style="max-width:100%;max-height:300px;border-radius:12px;object-fit:cover;">
+                                 style="max-width:300px;width:100%;aspect-ratio:1/1;border-radius:12px;object-fit:cover;cursor:pointer;"
+                                 onclick="setZoomImage(this.src)">
                         </div>
                     @else
                         <div class="card" style="background:#0f1117;border:1px solid var(--card-border);margin:1.5rem 0;">
@@ -78,9 +79,16 @@
                                    required>
 
                             @if ($question['field_answer'] === 'photo_path')
-                                <img src="{{ $option }}"
-                                     alt="Option {{ $index + 1 }}"
-                                     style="width:100%;height:120px;border-radius:8px;object-fit:cover;">
+                                <div style="position:relative;width:100%;aspect-ratio:1/1;" onclick="event.stopPropagation()">
+                                    <img src="{{ $option }}"
+                                         alt="Option {{ $index + 1 }}"
+                                         style="width:100%;height:100%;border-radius:8px;object-fit:cover;display:block;">
+                                    <button type="button"
+                                            onclick="event.preventDefault();event.stopPropagation();setZoomImage('{{ $option }}')"
+                                            style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;border-radius:6px;padding:3px 6px;cursor:pointer;color:#fff;font-size:.75rem;z-index:2;">
+                                        <i class="bi bi-arrows-fullscreen"></i>
+                                    </button>
+                                </div>
                             @else
                                 <span style="font-size:.9rem;text-align:center;color:var(--text-primary);word-break:break-word;">
                                     {{ $option }}
@@ -105,4 +113,14 @@
         </div>
     </div>
 
+<div id="zoom-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;align-items:center;justify-content:center;" onclick="this.style.display='none'">
+    <img id="zoom-img" src="" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:10px;">
+    <button onclick="document.getElementById('zoom-modal').style.display='none'" style="position:absolute;top:1rem;right:1rem;background:rgba(255,255,255,.15);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:1.1rem;cursor:pointer;">×</button>
+</div>
+<script>
+function setZoomImage(src) {
+    document.getElementById('zoom-img').src = src;
+    document.getElementById('zoom-modal').style.display = 'flex';
+}
+</script>
 </x-app-layout>
