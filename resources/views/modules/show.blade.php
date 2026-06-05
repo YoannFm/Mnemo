@@ -349,10 +349,23 @@
                     <div class="card p-3" style="gap:.4rem;display:flex;flex-direction:column;">
                         <div class="d-flex align-items-center justify-content-between gap-2">
                             <span class="fw-semibold" style="font-size:.85rem;">{{ $r->user?->name ?? 'Utilisateur supprimé' }}</span>
-                            <div>
-                                @for ($i = 1; $i <= 5; $i++)
-                                    <i class="bi {{ $i <= $r->rating ? 'bi-star-fill' : 'bi-star' }}" style="color:#fbbf24;font-size:.8rem;"></i>
-                                @endfor
+                            <div class="d-flex align-items-center gap-2">
+                                <div>
+                                    @for ($i = 1; $i <= 5; $i++)
+                                        <i class="bi {{ $i <= $r->rating ? 'bi-star-fill' : 'bi-star' }}" style="color:#fbbf24;font-size:.8rem;"></i>
+                                    @endfor
+                                </div>
+                                @auth
+                                    @if (Auth::id() !== $r->user_id)
+                                        <button type="button"
+                                                class="btn btn-sm report-rating-btn"
+                                                style="color:var(--text-muted);border:none;background:transparent;padding:0;font-size:.8rem;"
+                                                data-rating-id="{{ $r->id }}"
+                                                title="Signaler cet avis">
+                                            <i class="bi bi-flag"></i>
+                                        </button>
+                                    @endif
+                                @endauth
                             </div>
                         </div>
                         <p style="font-size:.82rem;color:var(--text-muted);margin:0;">{{ $r->comment }}</p>
@@ -440,6 +453,109 @@
         </div>
     @endif
 
+
+{{-- Modal signalement d'avis --}}
+@auth
+<div class="modal fade" id="reportRatingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-flag me-2 text-danger"></i>Signaler cet avis</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Motif <span class="text-danger">*</span></label>
+                    <select id="reportRatingReason" class="form-select">
+                        <option value="">-- Choisir un motif --</option>
+                        <option value="spam">Spam</option>
+                        <option value="inappropriate">Contenu inapproprié</option>
+                        <option value="harassment">Harcèlement</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Note (optionnelle)</label>
+                    <textarea id="reportRatingNote" class="form-control" rows="2" maxlength="500"
+                              placeholder="Précisez..."></textarea>
+                </div>
+                <div id="reportRatingFeedback" class="d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="reportRatingSubmit">
+                    <i class="bi bi-flag me-1"></i>Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    let currentRatingId = null;
+
+    document.querySelectorAll('.report-rating-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            currentRatingId = this.dataset.ratingId;
+            document.getElementById('reportRatingReason').value = '';
+            document.getElementById('reportRatingNote').value = '';
+            const fb = document.getElementById('reportRatingFeedback');
+            fb.className = 'd-none';
+            fb.textContent = '';
+            document.getElementById('reportRatingSubmit').disabled = false;
+            new bootstrap.Modal(document.getElementById('reportRatingModal')).show();
+        });
+    });
+
+    document.getElementById('reportRatingSubmit')?.addEventListener('click', function () {
+        const reason = document.getElementById('reportRatingReason').value;
+        const note   = document.getElementById('reportRatingNote').value;
+        const fb     = document.getElementById('reportRatingFeedback');
+
+        if (!reason) {
+            fb.className = 'alert alert-warning';
+            fb.textContent = 'Veuillez choisir un motif.';
+            fb.classList.remove('d-none');
+            return;
+        }
+
+        this.disabled = true;
+
+        fetch(`/module-ratings/${currentRatingId}/report`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+            },
+            body: JSON.stringify({ reason, note })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                fb.className = 'alert alert-success';
+                fb.textContent = 'Signalement envoyé. Merci !';
+                document.getElementById('reportRatingSubmit').classList.add('d-none');
+            } else if (data.status === 'already_reported') {
+                fb.className = 'alert alert-info';
+                fb.textContent = 'Vous avez déjà signalé cet avis.';
+            } else {
+                fb.className = 'alert alert-danger';
+                fb.textContent = data.message ?? 'Une erreur est survenue.';
+                document.getElementById('reportRatingSubmit').disabled = false;
+            }
+            fb.classList.remove('d-none');
+        })
+        .catch(() => {
+            fb.className = 'alert alert-danger';
+            fb.textContent = 'Erreur réseau. Veuillez réessayer.';
+            fb.classList.remove('d-none');
+            document.getElementById('reportRatingSubmit').disabled = false;
+        });
+    });
+})();
+</script>
+@endauth
 
 <div id="zoom-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;cursor:pointer;align-items:center;justify-content:center;" onclick="this.style.display='none'">
     <img id="zoom-img" src="" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;">

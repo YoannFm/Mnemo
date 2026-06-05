@@ -13,6 +13,11 @@
             <i class="bi bi-collection me-1"></i> Modules
             <span class="badge {{ $type === 'modules' ? 'bg-light text-dark' : 'bg-secondary' }} ms-1">{{ $moduleReports->total() }}</span>
         </a>
+        <a href="{{ route('admin.reports.index', ['type' => 'ratings']) }}"
+           class="btn btn-sm {{ $type === 'ratings' ? 'btn-primary' : 'btn-outline-secondary' }}">
+            <i class="bi bi-star me-1"></i> Avis
+            <span class="badge {{ $type === 'ratings' ? 'bg-light text-dark' : 'bg-secondary' }} ms-1">{{ $ratingReports->total() }}</span>
+        </a>
     </div>
 
     @if($type === 'comments')
@@ -287,6 +292,166 @@
                 </table>
             </div>
             {{ $moduleReports->links() }}
+            @endif
+        </div>
+    </div>
+    @endif
+
+    @if($type === 'ratings')
+    {{-- Signalements d'avis --}}
+    <div class="card shadow mb-4">
+        <div class="card-header"><h5 class="card-title mb-0">Signalements d'avis sur les modules</h5></div>
+        <div class="card-body">
+            @if($ratingReports->isEmpty())
+                <p class="text-muted mb-0">Aucun signalement d'avis.</p>
+            @else
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Signalé par</th>
+                            <th>Auteur de l'avis</th>
+                            <th>Module</th>
+                            <th>Avis</th>
+                            <th>Note</th>
+                            <th>Motif</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($ratingReports as $report)
+                            @php $motifs = ['spam'=>'Spam','inappropriate'=>'Inapproprié','harassment'=>'Harcèlement','other'=>'Autre']; @endphp
+                            <tr>
+                                <td>{{ $report->id }}</td>
+                                <td>
+                                    @if($report->user)
+                                        <a href="{{ route('admin.users.edit', $report->user) }}">{{ $report->user->name }}</a>
+                                    @else -
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($report->moduleRating && $report->moduleRating->user)
+                                        <a href="{{ route('admin.users.edit', $report->moduleRating->user) }}">{{ $report->moduleRating->user->name }}</a>
+                                    @else -
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($report->moduleRating && $report->moduleRating->module)
+                                        <a href="{{ route('modules.show', $report->moduleRating->module) }}" target="_blank">
+                                            {{ Str::limit($report->moduleRating->module->title, 30) }}
+                                        </a>
+                                    @else -
+                                    @endif
+                                </td>
+                                <td style="max-width:200px;font-size:.8rem;">
+                                    @if($report->moduleRating)
+                                        @for($i=1;$i<=5;$i++)
+                                            <i class="bi {{ $i <= $report->moduleRating->rating ? 'bi-star-fill' : 'bi-star' }}" style="color:#fbbf24;font-size:.8rem;"></i>
+                                        @endfor
+                                        @if($report->moduleRating->comment)
+                                            <br><span class="text-muted">{{ Str::limit($report->moduleRating->comment, 80) }}</span>
+                                        @endif
+                                    @else
+                                        <em class="text-muted">[Avis supprimé]</em>
+                                    @endif
+                                </td>
+                                <td style="font-size:.8rem;max-width:150px;">{{ $report->note ?: '-' }}</td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">{{ $motifs[$report->reason] ?? $report->reason }}</span>
+                                </td>
+                                <td>
+                                    @if($report->status === 'pending')
+                                        <span class="badge bg-danger">En attente</span>
+                                    @elseif($report->status === 'treated')
+                                        <span class="badge bg-success">Traité</span>
+                                    @else
+                                        <span class="badge bg-secondary">Rejeté</span>
+                                    @endif
+                                </td>
+                                <td style="font-size:.8rem;">{{ $report->created_at->format('d/m/Y H:i') }}</td>
+                                <td>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        @if($report->status === 'pending')
+                                            <form method="POST" action="{{ route('admin.reports.ratings.treated', $report) }}" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Marquer traité">
+                                                    <i class="bi bi-check-lg"></i>
+                                                </button>
+                                            </form>
+                                            <form method="POST" action="{{ route('admin.reports.ratings.rejected', $report) }}" class="d-inline">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Rejeter">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if($report->moduleRating)
+                                            <form method="POST" action="{{ route('admin.reports.ratings.delete', $report) }}" class="d-inline"
+                                                  onsubmit="return confirm('Supprimer cet avis ?')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Supprimer l'avis">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if($report->moduleRating && $report->moduleRating->user)
+                                            <button type="button" class="btn btn-sm btn-warning" title="Muter l'utilisateur"
+                                                    data-bs-toggle="modal" data-bs-target="#muteRatingModal{{ $report->id }}">
+                                                <i class="bi bi-mic-mute"></i>
+                                            </button>
+                                            <div class="modal fade" id="muteRatingModal{{ $report->id }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <form method="POST" action="{{ route('admin.reports.ratings.mute-user', $report) }}">
+                                                            @csrf
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Muter {{ $report->moduleRating->user->name }}</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-bold">Durée</label>
+                                                                    <div class="input-group">
+                                                                        <input type="number" name="duration_value" class="form-control" min="1" placeholder="ex: 7" style="max-width:100px;">
+                                                                        <select name="duration_unit" class="form-select">
+                                                                            <option value="minutes">Minutes</option>
+                                                                            <option value="hours">Heures</option>
+                                                                            <option value="days" selected>Jours</option>
+                                                                            <option value="weeks">Semaines</option>
+                                                                            <option value="months">Mois</option>
+                                                                        </select>
+                                                                        <div class="input-group-text">
+                                                                            <input class="form-check-input mt-0 me-1" type="checkbox" name="duration_permanent" id="permR{{ $report->id }}" value="1"
+                                                                                   onchange="toggleDuration(this)">
+                                                                            <label class="form-check-label" for="permR{{ $report->id }}">Définitif</label>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label fw-bold">Raison</label>
+                                                                    <textarea name="reason" class="form-control" rows="3" maxlength="500" required placeholder="Motif du mute..."></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                                <button type="submit" class="btn btn-warning">Confirmer le mute</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            {{ $ratingReports->links() }}
             @endif
         </div>
     </div>
