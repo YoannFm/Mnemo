@@ -78,12 +78,16 @@
             var currentTab = 'simple';
 
             function sendReaction(slug, imgUrl, imgAlt) {
+                if (pickerContainer) pickerContainer.classList.add('d-none');
                 fetch(reactUrl, {
                     method: 'POST',
                     headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
                     body: JSON.stringify({emoji: slug})
                 })
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) return r.text().then(t => { throw new Error('HTTP ' + r.status + ': ' + t); });
+                    return r.json();
+                })
                 .then(data => {
                     if (data.status === 'muted') { showMuteAlert(data.message); return; }
                     var existing = document.querySelector('#reactions-bar .reaction-btn[data-emoji="' + slug + '"]');
@@ -102,6 +106,15 @@
                         newBtn.addEventListener('click', function(){ sendReaction(this.dataset.emoji, imgUrl, imgAlt); });
                         bar.insertBefore(newBtn, document.getElementById('emoji-picker-wrapper'));
                     }
+                })
+                .catch(err => {
+                    console.error('Erreur reaction:', err);
+                    var toast = document.createElement('div');
+                    toast.className = 'alert alert-danger position-fixed bottom-0 end-0 m-3';
+                    toast.style = 'z-index:9999;font-size:.85rem;';
+                    toast.textContent = 'Erreur : ' + err.message;
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 5000);
                 });
             }
 
