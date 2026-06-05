@@ -18,10 +18,12 @@
                                 </span>
                                 <span>
                                     <a href="{{ route('admin.navbar.edit', $navItem) }}" class="m-1" title="Modifier" data-bs-toggle="tooltip"><i class="bi bi-pencil-square"></i></a>
+                                    @if(!$navItem->is_protected)
                                     <form action="{{ route('admin.navbar.destroy', $navItem) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ?')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-link text-danger p-0 m-1" title="Supprimer" data-bs-toggle="tooltip"><i class="bi bi-trash"></i></button>
                                     </form>
+                                    @endif
                                 </span>
                             </div>
                         </div>
@@ -39,10 +41,12 @@
                                                 </span>
                                                 <span>
                                                     <a href="{{ route('admin.navbar.edit', $child) }}" class="m-1" title="Modifier" data-bs-toggle="tooltip"><i class="bi bi-pencil-square"></i></a>
+                                                    @if(!$child->is_protected)
                                                     <form action="{{ route('admin.navbar.destroy', $child) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer ?')">
                                                         @csrf @method('DELETE')
                                                         <button type="submit" class="btn btn-link text-danger p-0 m-1"><i class="bi bi-trash"></i></button>
                                                     </form>
+                                                    @endif
                                                 </span>
                                             </div>
                                         </div>

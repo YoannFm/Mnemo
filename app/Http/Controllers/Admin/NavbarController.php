@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\NavItem;
 use Illuminate\Http\Request;
@@ -41,7 +42,9 @@ class NavbarController extends Controller
         $data['is_active'] = $request->boolean('is_active', true);
         $data['position']  = NavItem::whereNull('parent_id')->max('position') + 1;
 
-        NavItem::create($data);
+        $item = NavItem::create($data);
+
+        LogHelper::log('created_nav_item', 'nav_item', $item->id, ['label' => $item->label, 'type' => $item->type]);
 
         return redirect()->route('admin.navbar.index')->with('success', 'Element ajoute.');
     }
@@ -70,15 +73,27 @@ class NavbarController extends Controller
         $data['new_tab']   = $request->boolean('new_tab');
         $data['is_active'] = $request->boolean('is_active', true);
 
+        $oldLabel = $navItem->label;
         $navItem->update($data);
+
+        LogHelper::log('updated_nav_item', 'nav_item', $navItem->id, ['label' => $navItem->label], 'info', $oldLabel, $navItem->label);
 
         return redirect()->route('admin.navbar.index')->with('success', 'Element modifie.');
     }
 
     public function destroy(NavItem $navItem)
     {
+        if ($navItem->is_protected) {
+            return back()->with('error', 'Cet element de navigation est protege et ne peut pas etre supprime.');
+        }
+
+        $label = $navItem->label;
+        $id    = $navItem->id;
+
         $navItem->children()->delete();
         $navItem->delete();
+
+        LogHelper::log('deleted_nav_item', 'nav_item', $id, ['label' => $label], 'warning');
 
         return redirect()->route('admin.navbar.index')->with('success', 'Element supprime.');
     }
@@ -88,6 +103,8 @@ class NavbarController extends Controller
         $order    = $request->input('order', []);
         $position = 0;
         $this->processOrder($order, null, $position);
+
+        LogHelper::log('reordered_nav', 'nav', null, ['count' => count($order)], 'info');
 
         return response()->json(['success' => true]);
     }
