@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Module;
 use App\Models\ModuleRating;
+use App\Models\ModuleRatingReport;
 use App\Models\ModuleReport;
 use App\Models\Progress;
 use Illuminate\Http\Request;
@@ -263,6 +264,36 @@ class ModuleController extends Controller
             ['user_id' => Auth::id(), 'module_id' => $module->id],
             ['rating' => $validated['rating'], 'comment' => $validated['comment'] ?? null]
         );
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function reportRating(Request $request, ModuleRating $rating)
+    {
+        if ($rating->user_id === Auth::id()) {
+            return response()->json(['status' => 'error', 'message' => 'Vous ne pouvez pas signaler votre propre avis.'], 403);
+        }
+
+        $validated = $request->validate([
+            'reason' => 'required|string|in:spam,inappropriate,harassment,other',
+            'note'   => 'nullable|string|max:500',
+        ]);
+
+        $already = ModuleRatingReport::where('module_rating_id', $rating->id)
+            ->where('user_id', Auth::id())
+            ->exists();
+
+        if ($already) {
+            return response()->json(['status' => 'already_reported']);
+        }
+
+        ModuleRatingReport::create([
+            'module_rating_id' => $rating->id,
+            'user_id'          => Auth::id(),
+            'reason'           => $validated['reason'],
+            'note'             => $validated['note'] ?? null,
+            'status'           => 'pending',
+        ]);
 
         return response()->json(['status' => 'ok']);
     }

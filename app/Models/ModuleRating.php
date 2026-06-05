@@ -17,4 +17,9 @@ class ModuleRating extends Model
     {
         return $this->belongsTo(Module::class);
     }
+
+    public function reports()
+    {
+        return $this->hasMany(ModuleRatingReport::class);
+    }
 }

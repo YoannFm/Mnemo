@@ -133,6 +133,9 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     // Noter un module (1 vote par compte)
     Route::post('/modules/{module}/rate', [ModuleController::class, 'rate'])->name('modules.rate');
 
+    // Signaler un avis sur un module
+    Route::post('/module-ratings/{rating}/report', [ModuleController::class, 'reportRating'])->name('modules.ratings.report');
+
     // ─── Bibliothèque publique ───
     Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');
 
@@ -258,6 +261,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::post('/reports/modules/{report}/rejected', [\App\Http\Controllers\Admin\ReportController::class, 'markModuleRejected'])->name('reports.modules.rejected');
     // Historique des commentaires
     Route::get('/comment-history', [\App\Http\Controllers\Admin\CommentHistoryController::class, 'index'])->name('comment-history.index');
+    // Signalements d'avis
+    Route::post('/reports/ratings/{report}/treated', [\App\Http\Controllers\Admin\ReportController::class, 'markRatingTreated'])->name('reports.ratings.treated');
+    Route::post('/reports/ratings/{report}/rejected', [\App\Http\Controllers\Admin\ReportController::class, 'markRatingRejected'])->name('reports.ratings.rejected');
+    Route::post('/reports/ratings/{report}/delete-rating', [\App\Http\Controllers\Admin\ReportController::class, 'deleteRating'])->name('reports.ratings.delete');
+    Route::post('/reports/ratings/{report}/mute-user', [\App\Http\Controllers\Admin\ReportController::class, 'muteRatingUser'])->name('reports.ratings.mute-user');
     // Sanctions
     Route::get('/sanctions', [\App\Http\Controllers\Admin\SanctionController::class, 'index'])->name('sanctions.index');
     Route::post('/sanctions/{sanction}/unmute', [\App\Http\Controllers\Admin\SanctionController::class, 'unmute'])->name('sanctions.unmute');
