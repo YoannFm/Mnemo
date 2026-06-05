@@ -53,27 +53,19 @@
                 <div class="card-body p-3" style="font-size:.85rem;">
                     <div class="row g-3 text-center">
                         <div class="col">
-                            <div id="stat-success" style="font-weight:600;color:var(--accent);">{{ $question['progress']['success_count'] }}</div>
+                            <div id="stat-success" style="font-weight:600;color:var(--accent);">{{ $question['session']['correct'] }}</div>
                             <div style="color:var(--text-muted);">Bonnes réponses</div>
                         </div>
 
                         <div class="col">
-                            <div id="stat-fail" style="font-weight:600;color:#ef4444;">{{ $question['progress']['fail_count'] }}</div>
+                            <div id="stat-fail" style="font-weight:600;color:#ef4444;">{{ $question['session']['wrong'] }}</div>
                             <div style="color:var(--text-muted);">Mauvaises réponses</div>
                         </div>
 
                         <div class="col">
-                            <div id="stat-streak" style="font-weight:600;color:#fbbf24;">{{ $question['progress']['streak'] }}</div>
+                            <div id="stat-streak" style="font-weight:600;color:#fbbf24;">{{ $question['session']['streak'] }}</div>
                             <div style="color:var(--text-muted);">Série actuelle</div>
                         </div>
-
-                        {{-- Badge "Maîtrisé" apparaît si streak >= 3 (maîtrise atteinte) --}}
-                        @if ($question['progress']['is_mastered'])
-                            <div class="col">
-                                <div style="font-weight:600;color:var(--success-color);">✓</div>
-                                <div style="color:var(--text-muted);">Maîtrisé</div>
-                            </div>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -333,10 +325,10 @@
             content.innerHTML = feedbackHtml;
             container.style.display = 'block';
 
-            // Mettre à jour les stats en temps réel
-            if (data.success_count !== undefined) document.getElementById('stat-success').textContent = data.success_count;
-            if (data.fail_count !== undefined)    document.getElementById('stat-fail').textContent    = data.fail_count;
-            if (data.streak !== undefined)        document.getElementById('stat-streak').textContent  = data.streak;
+            // Mettre à jour les stats de session en temps réel
+            if (data.session_correct !== undefined) document.getElementById('stat-success').textContent = data.session_correct;
+            if (data.session_wrong   !== undefined) document.getElementById('stat-fail').textContent    = data.session_wrong;
+            if (data.session_streak  !== undefined) document.getElementById('stat-streak').textContent  = data.session_streak;
         }
 
         /**
