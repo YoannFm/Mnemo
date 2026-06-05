@@ -55,6 +55,9 @@
                                     <a href="{{ route('modules.show', $module) }}" class="btn btn-sm btn-outline-secondary" title="Voir" target="_blank">
                                         <i class="bi bi-eye"></i>
                                     </a>
+                                    <a href="{{ route('modules.edit', $module) }}" class="btn btn-sm btn-outline-secondary" title="Modifier" target="_blank">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
                                     <a href="{{ route('modules.export', $module) }}" class="btn btn-sm btn-outline-secondary" title="Exporter">
                                         <i class="bi bi-download"></i>
                                     </a>
