@@ -23,4 +23,27 @@
             </form>
         </div>
     </div>
+
+<script src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
+<script>
+(function () {
+    function initTinyMCE() {
+        var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        if (tinymce.get('home_message')) tinymce.remove('#home_message');
+        tinymce.init({
+            selector: '#home_message',
+            base_url: '{{ asset('vendor/tinymce') }}',
+            license_key: 'gpl',
+            promotion: false,
+            height: 350,
+            plugins: 'searchreplace autolink code link lists',
+            toolbar: 'blocks bold italic underline strikethrough | link | alignleft aligncenter alignright | bullist numlist | removeformat code | undo redo',
+            skin: dark ? 'oxide-dark' : 'oxide',
+            content_css: dark ? 'dark' : 'default',
+        });
+    }
+    initTinyMCE();
+    new MutationObserver(function (m) { m.forEach(function (mm) { if (mm.attributeName === 'data-bs-theme') initTinyMCE(); }); }).observe(document.documentElement, { attributes: true });
+})();
+</script>
 </x-admin-layout>

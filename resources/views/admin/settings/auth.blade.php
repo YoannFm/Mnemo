@@ -15,7 +15,6 @@
                     <textarea id="registration_conditions" name="registration_conditions"
                               class="form-control @error('registration_conditions') is-invalid @enderror"
                               rows="4">{{ old('registration_conditions', $settings['registration_conditions']) }}</textarea>
-                    <div class="form-text">Supporte le format Markdown. Affiché lors de l'inscription.</div>
                     @error('registration_conditions')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
@@ -102,4 +101,27 @@
             </form>
         </div>
     </div>
+
+<script src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
+<script>
+(function () {
+    function initTinyMCE() {
+        var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        if (tinymce.get('registration_conditions')) tinymce.remove('#registration_conditions');
+        tinymce.init({
+            selector: '#registration_conditions',
+            base_url: '{{ asset('vendor/tinymce') }}',
+            license_key: 'gpl',
+            promotion: false,
+            height: 300,
+            plugins: 'searchreplace autolink code link lists',
+            toolbar: 'blocks bold italic underline strikethrough | link | alignleft aligncenter alignright | bullist numlist | removeformat code | undo redo',
+            skin: dark ? 'oxide-dark' : 'oxide',
+            content_css: dark ? 'dark' : 'default',
+        });
+    }
+    initTinyMCE();
+    new MutationObserver(function (m) { m.forEach(function (mm) { if (mm.attributeName === 'data-bs-theme') initTinyMCE(); }); }).observe(document.documentElement, { attributes: true });
+})();
+</script>
 </x-admin-layout>

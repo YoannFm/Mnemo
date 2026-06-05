@@ -34,7 +34,7 @@
                     <label class="form-label" for="site_description">Description du site</label>
                     <textarea id="site_description" name="site_description"
                               class="form-control @error('site_description') is-invalid @enderror"
-                              rows="3" maxlength="500">{{ old('site_description', $settings['site_description']) }}</textarea>
+                              rows="3">{{ old('site_description', $settings['site_description']) }}</textarea>
                     @error('site_description')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
@@ -96,16 +96,6 @@
                     </div>
                 </div>
 
-                {{-- Copyright --}}
-                <div class="mb-3">
-                    <label class="form-label" for="copyright">Copyright</label>
-                    <input type="text" id="copyright" name="copyright"
-                           class="form-control @error('copyright') is-invalid @enderror"
-                           value="{{ old('copyright', $settings['copyright']) }}"
-                           maxlength="255">
-                    @error('copyright')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                </div>
-
                 {{-- Clé du site + Webhook Discord --}}
                 <div class="row gx-3">
                     <div class="mb-3 col-md-6">
@@ -134,4 +124,29 @@
             </form>
         </div>
     </div>
+
+<script src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
+<script>
+(function () {
+    function initTinyMCE() {
+        var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        ['site_description'].forEach(function (id) {
+            if (tinymce.get(id)) tinymce.remove('#' + id);
+            tinymce.init({
+                selector: '#' + id,
+                base_url: '{{ asset('vendor/tinymce') }}',
+                license_key: 'gpl',
+                promotion: false,
+                height: 200,
+                plugins: 'searchreplace autolink code link lists',
+                toolbar: 'blocks bold italic underline strikethrough | link | alignleft aligncenter alignright | bullist numlist | removeformat code | undo redo',
+                skin: dark ? 'oxide-dark' : 'oxide',
+                content_css: dark ? 'dark' : 'default',
+            });
+        });
+    }
+    initTinyMCE();
+    new MutationObserver(function (m) { m.forEach(function (mm) { if (mm.attributeName === 'data-bs-theme') initTinyMCE(); }); }).observe(document.documentElement, { attributes: true });
+})();
+</script>
 </x-admin-layout>

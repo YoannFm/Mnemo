@@ -28,7 +28,6 @@ class SettingsController extends Controller
             'site_logo'        => Setting::get('site_logo', ''),
             'timezone'         => Setting::get('timezone', 'Europe/Paris'),
             'locale'           => Setting::get('locale', 'fr'),
-            'copyright'        => Setting::get('copyright', ''),
             'site_key'         => Setting::get('site_key', ''),
             'posts_webhook'    => Setting::get('posts_webhook', ''),
         ];
@@ -41,19 +40,18 @@ class SettingsController extends Controller
         $request->validate([
             'site_name'        => 'required|string|max:100',
             'site_url'         => 'nullable|url|max:255',
-            'site_description' => 'nullable|string|max:500',
+            'site_description' => 'nullable|string',
             'site_keywords'    => 'nullable|string|max:500',
             'site_logo'        => 'nullable|string|max:255',
             'timezone'         => 'nullable|string|max:100',
             'locale'           => 'nullable|in:fr,en',
-            'copyright'        => 'nullable|string|max:255',
             'site_key'         => 'nullable|string|max:255',
             'posts_webhook'    => 'nullable|url|max:500',
         ]);
 
         $fields = [
             'site_name', 'site_url', 'site_description', 'site_keywords',
-            'site_logo', 'timezone', 'locale', 'copyright', 'site_key', 'posts_webhook',
+            'site_logo', 'timezone', 'locale', 'site_key', 'posts_webhook',
         ];
 
         foreach ($fields as $field) {
