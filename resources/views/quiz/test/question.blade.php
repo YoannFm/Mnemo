@@ -77,7 +77,7 @@
 
                             {{-- Affichage de l'option selon son type (photo ou texte) --}}
                             @if ($question['field_answer'] === 'photo_path')
-                                <div style="position:relative;width:100%;aspect-ratio:1/1;" onclick="event.stopPropagation()">
+                                <div style="position:relative;width:100%;aspect-ratio:1/1;">
                                     <img src="{{ $option }}"
                                          alt="Option {{ $index + 1 }}"
                                          style="width:100%;height:100%;border-radius:8px;object-fit:cover;display:block;">
