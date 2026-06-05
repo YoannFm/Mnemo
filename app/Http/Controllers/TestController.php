@@ -210,7 +210,7 @@ class TestController extends Controller
         $user = Auth::user();
         $role = $user ? $user->role : null;
 
-        if (!$module->is_public && $module->owner_id !== $user?->id) {
+        if (!$module->is_public && $module->owner_id !== $user?->id && !$user?->is_admin) {
             abort(403, 'Ce module est prive.');
         }
 
