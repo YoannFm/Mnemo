@@ -234,6 +234,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     // Logs
     Route::get('/logs', [\App\Http\Controllers\Admin\LogController::class, 'index'])->name('logs.index');
     Route::get('/logs/{log}', [\App\Http\Controllers\Admin\LogController::class, 'show'])->name('logs.show');
+    Route::get('/logs/{log}/file', [\App\Http\Controllers\Admin\LogController::class, 'downloadFile'])->name('logs.file');
     Route::post('/logs/clear', [\App\Http\Controllers\Admin\LogController::class, 'clear'])->name('logs.clear');
     Route::delete('/logs/purge', [\App\Http\Controllers\Admin\LogController::class, 'purge'])->name('logs.purge');
     // Emojis

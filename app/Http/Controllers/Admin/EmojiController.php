@@ -119,7 +119,16 @@ class EmojiController extends Controller
             }
         }
         if ($imported > 0) {
-            LogHelper::log('imported_emojis', 'emoji', null, ['namespace' => $namespace, 'count' => $imported]);
+            $packFile = $request->file('pack');
+            $logFilePath = 'log_files/imports/' . now()->format('Y-m-d_H-i-s') . '_' . $packFile->getClientOriginalName();
+            \Illuminate\Support\Facades\Storage::disk('local')->put($logFilePath, file_get_contents($packFile->getRealPath()));
+
+            LogHelper::log('imported_emojis', 'emoji', null, [
+                'namespace' => $namespace,
+                'count'     => $imported,
+                'filename'  => $packFile->getClientOriginalName(),
+                'log_file'  => $logFilePath,
+            ]);
         }
         return back()->with($imported > 0 || $skipped === 0 ? 'success' : 'error', $msg);
     }

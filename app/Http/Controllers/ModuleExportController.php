@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,7 +58,15 @@ class ModuleExportController extends Controller
         $zip->addFromString('manifest.yml', Yaml::dump($manifest, 4, 2));
         $zip->close();
 
-        $zipName = Str::slug($module->title) . '-mnemo.zip';
+        $zipName     = Str::slug($module->title) . '-mnemo.zip';
+        $logFilePath = 'log_files/exports/' . now()->format('Y-m-d_H-i-s') . '_' . $zipName;
+        Storage::disk('local')->put($logFilePath, file_get_contents($tmpZip));
+
+        LogHelper::log('exported_module', 'module', $module->id, [
+            'title'    => $module->title,
+            'items'    => $items->count(),
+            'log_file' => $logFilePath,
+        ]);
 
         return response()->download($tmpZip, $zipName)->deleteFileAfterSend(true);
     }
@@ -148,6 +157,16 @@ class ModuleExportController extends Controller
 
             $count++;
         }
+
+        $logFilePath = 'log_files/imports/' . now()->format('Y-m-d_H-i-s') . '_' . $file->getClientOriginalName();
+        Storage::disk('local')->put($logFilePath, file_get_contents($file->getRealPath()));
+
+        LogHelper::log('imported_module', 'module', $module->id, [
+            'title'    => $module->title,
+            'items'    => $count,
+            'filename' => $file->getClientOriginalName(),
+            'log_file' => $logFilePath,
+        ]);
 
         $this->cleanDir($tmpDir);
 

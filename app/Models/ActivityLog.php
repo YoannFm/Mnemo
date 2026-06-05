@@ -26,7 +26,7 @@ class ActivityLog extends Model
             str_starts_with($this->action, 'updated_nav')         => ['color' => '#0ea5e9', 'icon' => 'layout-text-sidebar'],
             str_starts_with($this->action, 'deleted_nav')         => ['color' => '#0ea5e9', 'icon' => 'layout-text-sidebar'],
             $this->action === 'reordered_nav'                     => ['color' => '#0ea5e9', 'icon' => 'layout-text-sidebar'],
-            in_array($this->action, ['exported_user_data', 'exported_all_users', 'imported_users']) => ['color' => 'info', 'icon' => 'box-arrow-up'],
+            in_array($this->action, ['exported_user_data', 'exported_all_users', 'imported_users', 'exported_module', 'imported_module', 'imported_items_csv']) => ['color' => 'info', 'icon' => 'box-arrow-up'],
             // Post actions
             str_starts_with($this->action, 'created_post')        => ['color' => '#8b5cf6', 'icon' => 'bi-file-text-fill'],
             str_starts_with($this->action, 'updated_post')        => ['color' => '#8b5cf6', 'icon' => 'bi-file-text-fill'],
@@ -107,6 +107,9 @@ class ActivityLog extends Model
             'exported_user_data'   => 'Export données utilisateur',
             'exported_all_users'   => 'Export tous les utilisateurs',
             'imported_users'       => 'Import utilisateurs CSV',
+            'exported_module'      => 'Export module ZIP',
+            'imported_module'      => 'Import module ZIP',
+            'imported_items_csv'   => 'Import items CSV',
             'forced_password_change' => 'Changement de mot de passe forcé',
             'sent_notification'    => 'Notification envoyée',
             'deleted_notification' => 'Notification supprimée',

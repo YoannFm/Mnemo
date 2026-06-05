@@ -210,10 +210,17 @@ class UserController extends Controller
             'exported_at'    => now()->toIso8601String(),
         ];
 
-        LogHelper::log('exported_user_data', 'user', $user->id, ['name' => $user->name, 'email' => $user->email]);
-
         $filename = "user_{$user->id}_data.json";
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        $logFilePath = 'log_files/exports/' . now()->format('Y-m-d_H-i-s') . '_' . $filename;
+        \Illuminate\Support\Facades\Storage::disk('local')->put($logFilePath, $json);
+
+        LogHelper::log('exported_user_data', 'user', $user->id, [
+            'name'     => $user->name,
+            'email'    => $user->email,
+            'log_file' => $logFilePath,
+        ]);
 
         return response($json, 200, [
             'Content-Type'        => 'application/json',
@@ -293,7 +300,13 @@ class UserController extends Controller
 
         $zip->close();
 
-        LogHelper::log('exported_all_users', 'user', null, ['count' => $users->count()]);
+        $logFilePath = 'log_files/exports/' . now()->format('Y-m-d_H-i-s') . '_users_export.zip';
+        \Illuminate\Support\Facades\Storage::disk('local')->put($logFilePath, file_get_contents($zipPath));
+
+        LogHelper::log('exported_all_users', 'user', null, [
+            'count'    => $users->count(),
+            'log_file' => $logFilePath,
+        ]);
 
         return response()->download($zipPath, 'users_export_' . now()->format('Y-m-d') . '.zip')->deleteFileAfterSend(true);
     }
@@ -311,11 +324,9 @@ class UserController extends Controller
 
         $file = $request->file('csv_file');
 
-        $request->file('csv_file')->storeAs(
-            'imports/users',
-            now()->format('Y-m-d_H-i-s') . '_' . $file->getClientOriginalName(),
-            'local'
-        );
+        $storedName = now()->format('Y-m-d_H-i-s') . '_' . $file->getClientOriginalName();
+        $request->file('csv_file')->storeAs('imports/users', $storedName, 'local');
+        $logFilePath = 'imports/users/' . $storedName;
 
         $handle = fopen($file->getRealPath(), 'r');
 
@@ -352,7 +363,11 @@ class UserController extends Controller
 
         fclose($handle);
 
-        LogHelper::log('imported_users', 'user', null, ['count' => $imported, 'filename' => $file->getClientOriginalName()]);
+        LogHelper::log('imported_users', 'user', null, [
+            'count'    => $imported,
+            'filename' => $file->getClientOriginalName(),
+            'log_file' => $logFilePath,
+        ]);
 
         return back()->with('success', "{$imported} utilisateur(s) importe(s), {$skipped} ignore(s) (doublons).");
     }

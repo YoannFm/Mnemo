@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Item;
 use App\Models\Module;
 use Illuminate\Http\Request;
@@ -193,6 +194,16 @@ class ItemController extends Controller
         }
 
         fclose($handle);
+
+        $logFilePath = 'log_files/imports/' . now()->format('Y-m-d_H-i-s') . '_' . $file->getClientOriginalName();
+        Storage::disk('local')->put($logFilePath, file_get_contents($file->getRealPath()));
+
+        LogHelper::log('imported_items_csv', 'module', $module->id, [
+            'module_title' => $module->title,
+            'items'        => $count,
+            'filename'     => $file->getClientOriginalName(),
+            'log_file'     => $logFilePath,
+        ]);
 
         $message = "{$count} item(s) importé(s) avec succès.";
         if (!empty($errors)) {

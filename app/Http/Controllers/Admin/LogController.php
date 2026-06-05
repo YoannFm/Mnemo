@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class LogController extends Controller
 {
@@ -56,6 +57,17 @@ class LogController extends Controller
     {
         $log->load('user');
         return view('admin.logs.show', compact('log'));
+    }
+
+    public function downloadFile(ActivityLog $log)
+    {
+        $path = $log->data['log_file'] ?? null;
+
+        if (!$path || !Storage::disk('local')->exists($path)) {
+            abort(404, 'Fichier non disponible.');
+        }
+
+        return Storage::disk('local')->download($path);
     }
 
     public function clear()

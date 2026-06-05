@@ -69,6 +69,11 @@
             @else
                 <p class="text-muted mt-3">Aucune donnee supplementaire.</p>
             @endif
+            @if(!empty($log->data['log_file']))
+                <a href="{{ route('admin.logs.file', $log) }}" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-download"></i> Télécharger le fichier associé
+                </a>
+            @endif
             <a href="{{ route('admin.logs.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Retour</a>
         </div>
     </div>
