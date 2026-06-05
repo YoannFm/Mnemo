@@ -21,7 +21,7 @@
                                 <td>{{ $page->title }}</td>
                                 <td>
                                     <a href="{{ route('pages.show', $page->slug) }}" target="_blank" rel="noopener noreferrer">
-                                        /p/{{ $page->slug }}
+                                        {{ $page->slug }}
                                     </a>
                                 </td>
                                 <td>
