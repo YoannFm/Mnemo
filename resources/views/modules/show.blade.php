@@ -62,6 +62,33 @@
                     </button>
                 </form>
             </div>
+        @elseif (Auth::user()?->is_admin)
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+                <span class="badge bg-danger me-1">Admin</span>
+                <a href="{{ route('modules.items.create', $module) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-lg me-1"></i> Ajouter un item
+                </a>
+                <a href="{{ route('modules.edit', $module) }}" class="btn btn-sm btn-outline-warning">
+                    <i class="bi bi-pencil me-1"></i> Modifier
+                </a>
+                <a href="{{ route('modules.export', $module) }}" class="btn btn-sm" style="color:#f97316;border:1px solid #f97316;">
+                    <i class="bi bi-download me-1"></i> Exporter
+                </a>
+                <form method="POST" action="{{ route('modules.duplicate', $module) }}" class="d-inline"
+                      onsubmit="return confirm('Dupliquer ce module dans votre espace ?')">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-copy me-1"></i> Dupliquer
+                    </button>
+                </form>
+                <form method="POST" action="{{ route('modules.destroy', $module) }}" class="d-inline"
+                      onsubmit="return confirm('Supprimer ce module et tous ses items ?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
         @elseif (Auth::check() && $module->is_public)
             {{-- Bouton Signaler (visible uniquement pour les utilisateurs connectés non propriétaires) --}}
             <div>
