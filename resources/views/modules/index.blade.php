@@ -79,6 +79,15 @@
                                    class="btn btn-sm btn-outline-primary flex-grow-1">
                                     <i class="bi bi-eye me-1"></i>Ouvrir
                                 </a>
+                                <form method="POST" action="{{ route('modules.progress.reset', $module) }}"
+                                      onsubmit="return confirm('Réinitialiser ta progression sur ce module ?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm"
+                                            title="Réinitialiser ma progression"
+                                            style="color:var(--text-muted);border:1px solid var(--card-border);">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                    </button>
+                                </form>
                                 <a href="{{ route('modules.edit', $module) }}"
                                    class="btn btn-sm"
                                    style="color:var(--text-muted);border:1px solid var(--card-border);">
