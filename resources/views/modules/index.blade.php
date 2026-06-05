@@ -90,7 +90,7 @@
                                 </form>
                                 <a href="{{ route('modules.edit', $module) }}"
                                    class="btn btn-sm"
-                                   style="color:var(--text-muted);border:1px solid var(--card-border);">
+                                   style="color:var(--text-muted);border:1px solid var(--accent);background:transparent;">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 {{-- Bouton de suppression avec confirmation --}}
@@ -98,7 +98,7 @@
                                       onsubmit="return confirm('Supprimer ce module et tous ses items ?')">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm"
-                                            style="color:#ef4444;border:1px solid var(--card-border);">
+                                            style="color:#ef4444;border:1px solid var(--accent);background:transparent;">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
