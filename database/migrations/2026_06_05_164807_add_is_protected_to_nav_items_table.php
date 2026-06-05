@@ -6,23 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('nav_items', function (Blueprint $table) {
-            //
+            $table->boolean('is_protected')->default(false)->after('is_active');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('nav_items', function (Blueprint $table) {
-            //
+            $table->dropColumn('is_protected');
         });
     }
 };

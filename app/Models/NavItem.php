@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class NavItem extends Model
 {
-    protected $fillable = ['label', 'icon', 'type', 'value', 'parent_id', 'new_tab', 'position', 'is_active'];
+    protected $fillable = ['label', 'icon', 'type', 'value', 'parent_id', 'new_tab', 'position', 'is_active', 'is_protected'];
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'new_tab'   => 'boolean',
-        'position'  => 'integer',
-        'parent_id' => 'integer',
+        'is_active'    => 'boolean',
+        'new_tab'      => 'boolean',
+        'is_protected' => 'boolean',
+        'position'     => 'integer',
+        'parent_id'    => 'integer',
     ];
 
     public function children()

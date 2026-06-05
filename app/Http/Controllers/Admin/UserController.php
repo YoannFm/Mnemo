@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Role;
@@ -10,7 +11,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Symfony\Component\HttpFoundation\JsonResponse;
 
 class UserController extends Controller
 {
@@ -61,6 +61,8 @@ class UserController extends Controller
             'is_admin' => $role && $role->is_admin_role,
         ]);
 
+        LogHelper::log('created_user', 'user', $user->id, ['name' => $user->name, 'email' => $user->email, 'role_id' => $user->role_id]);
+
         return redirect()->route('admin.users.edit', $user)
             ->with('success', 'Utilisateur ' . $user->name . ' cree.');
     }
@@ -82,6 +84,10 @@ class UserController extends Controller
             'role_id'  => 'nullable|exists:roles,id',
         ]);
 
+        $oldName   = $user->name;
+        $oldEmail  = $user->email;
+        $oldRoleId = $user->role_id;
+
         $user->name  = $data['name'];
         $user->email = $data['email'];
 
@@ -97,6 +103,23 @@ class UserController extends Controller
 
         $user->save();
 
+        $changes = [];
+        if ($oldName !== $user->name) {
+            LogHelper::log('updated_user', 'user', $user->id, ['field' => 'name'], 'info', $oldName, $user->name);
+            $changes[] = 'name';
+        }
+        if ($oldEmail !== $user->email) {
+            LogHelper::log('updated_user', 'user', $user->id, ['field' => 'email'], 'info', $oldEmail, $user->email);
+            $changes[] = 'email';
+        }
+        if ((string) $oldRoleId !== (string) $user->role_id) {
+            LogHelper::log('updated_user', 'user', $user->id, ['field' => 'role_id'], 'info', (string) $oldRoleId, (string) $user->role_id);
+            $changes[] = 'role';
+        }
+        if (!empty($data['password'])) {
+            LogHelper::log('updated_user', 'user', $user->id, ['field' => 'password'], 'info', null, 'updated');
+        }
+
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur ' . $user->name . ' mis a jour.');
     }
@@ -107,7 +130,13 @@ class UserController extends Controller
             return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
         }
 
+        $name  = $user->name;
+        $email = $user->email;
+        $id    = $user->id;
+
         $user->delete();
+
+        LogHelper::log('deleted_user', 'user', $id, ['name' => $name, 'email' => $email], 'warning');
 
         return back()->with('success', 'Utilisateur supprime.');
     }
@@ -116,6 +145,8 @@ class UserController extends Controller
     {
         $user->force_password_change = true;
         $user->save();
+
+        LogHelper::log('forced_password_change', 'user', $user->id, ['name' => $user->name]);
 
         return back()->with('success', 'L\'utilisateur devra changer son mot de passe a la prochaine connexion.');
     }
@@ -178,6 +209,8 @@ class UserController extends Controller
             'activity_logs'  => $activityLogs,
             'exported_at'    => now()->toIso8601String(),
         ];
+
+        LogHelper::log('exported_user_data', 'user', $user->id, ['name' => $user->name, 'email' => $user->email]);
 
         $filename = "user_{$user->id}_data.json";
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
@@ -260,6 +293,8 @@ class UserController extends Controller
 
         $zip->close();
 
+        LogHelper::log('exported_all_users', 'user', null, ['count' => $users->count()]);
+
         return response()->download($zipPath, 'users_export_' . now()->format('Y-m-d') . '.zip')->deleteFileAfterSend(true);
     }
 
@@ -275,6 +310,13 @@ class UserController extends Controller
         ]);
 
         $file = $request->file('csv_file');
+
+        $request->file('csv_file')->storeAs(
+            'imports/users',
+            now()->format('Y-m-d_H-i-s') . '_' . $file->getClientOriginalName(),
+            'local'
+        );
+
         $handle = fopen($file->getRealPath(), 'r');
 
         // Skip header row
@@ -309,6 +351,8 @@ class UserController extends Controller
         }
 
         fclose($handle);
+
+        LogHelper::log('imported_users', 'user', null, ['count' => $imported, 'filename' => $file->getClientOriginalName()]);
 
         return back()->with('success', "{$imported} utilisateur(s) importe(s), {$skipped} ignore(s) (doublons).");
     }

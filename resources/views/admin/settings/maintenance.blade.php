@@ -29,18 +29,7 @@
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="maintenance_all"
-                               name="maintenance_all" value="1"
-                               {{ old('maintenance_all', $settings['maintenance_all']) == '1' ? 'checked' : '' }}>
-                        <label class="form-check-label" for="maintenance_all">
-                            Appliquer sur tout le site (y compris les admins)
-                        </label>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
+<button type="submit" class="btn btn-primary">
                     <i class="bi bi-save me-1"></i> Sauvegarder
                 </button>
             </form>

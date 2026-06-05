@@ -237,10 +237,12 @@
                                         <th scope="row">{{ $user->id }}</th>
                                         <td style="font-size:.85rem;">{{ $user->name }}</td>
                                         <td>
-                                            @if ($user->is_admin)
-                                                <span class="badge bg-primary">Admin</span>
+                                            @if ($user->role)
+                                                <span class="badge" style="{{ $user->role->getBadgeStyle() }}">
+                                                    @if($user->role->icon)<i class="{{ $user->role->icon }} me-1"></i>@endif{{ $user->role->name }}
+                                                </span>
                                             @else
-                                                <span class="badge bg-secondary">Utilisateur</span>
+                                                <span class="badge" style="background-color:#6c757d;color:#fff;">Aucun</span>
                                             @endif
                                         </td>
                                         <td style="font-size:.8rem;white-space:nowrap;">{{ $user->created_at->format('d/m/Y') }}</td>

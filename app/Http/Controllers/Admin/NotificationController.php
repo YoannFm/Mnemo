@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserNotification;
@@ -50,6 +51,7 @@ class NotificationController extends Controller
                 'title'   => $data['content'],
                 'type'    => $data['level'],
             ]);
+            LogHelper::log('sent_notification', 'user', $user->id, ['title' => $data['content'], 'type' => $data['level']]);
         }
 
         $count = $recipients->count();

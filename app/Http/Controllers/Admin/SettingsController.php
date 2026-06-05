@@ -29,8 +29,8 @@ class SettingsController extends Controller
             'site_logo'        => Setting::get('site_logo', ''),
             'timezone'         => Setting::get('timezone', 'Europe/Paris'),
             'locale'           => Setting::get('locale', 'fr'),
+            'copyright'        => Setting::get('copyright', ''),
             'site_key'         => Setting::get('site_key', ''),
-            'posts_webhook'    => Setting::get('posts_webhook', ''),
         ];
 
         return view('admin.settings.index', compact('settings', 'images', 'timezones'));
@@ -41,25 +41,32 @@ class SettingsController extends Controller
         $request->validate([
             'site_name'        => 'required|string|max:100',
             'site_url'         => 'nullable|url|max:255',
-            'site_description' => 'nullable|string',
+            'site_description' => 'nullable|string|max:500',
             'site_keywords'    => 'nullable|string|max:500',
             'site_logo'        => 'nullable|string|max:255',
             'timezone'         => 'nullable|string|max:100',
             'locale'           => 'nullable|in:fr,en',
+            'copyright'        => 'nullable|string|max:255',
             'site_key'         => 'nullable|string|max:255',
-            'posts_webhook'    => 'nullable|url|max:500',
         ]);
 
         $fields = [
             'site_name', 'site_url', 'site_description', 'site_keywords',
-            'site_logo', 'timezone', 'locale', 'site_key', 'posts_webhook',
+            'site_logo', 'timezone', 'locale', 'copyright', 'site_key',
         ];
+
+        $fieldsToLog = ['site_name', 'site_url', 'site_description', 'site_keywords', 'site_logo', 'timezone', 'locale', 'site_key'];
+        foreach ($fieldsToLog as $field) {
+            $old = Setting::get($field, '');
+            $new = $request->input($field, '');
+            if ($old !== $new) {
+                LogHelper::log('updated_setting', 'setting', null, ['field' => $field, 'section' => 'general'], 'info', $old, $new);
+            }
+        }
 
         foreach ($fields as $field) {
             Setting::set($field, $request->input($field, ''));
         }
-
-        LogHelper::log('updated_settings', 'settings', null, ['section' => 'general'], 'info');
 
         return back()->with('success', 'Paramètres sauvegardés.');
     }
@@ -80,9 +87,13 @@ class SettingsController extends Controller
             'home_message' => 'nullable|string',
         ]);
 
-        Setting::set('home_message', $request->input('home_message', ''));
+        $old = Setting::get('home_message', '');
+        $new = $request->input('home_message', '');
+        if ($old !== $new) {
+            LogHelper::log('updated_setting', 'setting', null, ['field' => 'home_message', 'section' => 'home'], 'info', $old, $new);
+        }
 
-        LogHelper::log('updated_settings', 'settings', null, ['section' => 'home'], 'info');
+        Setting::set('home_message', $new);
 
         return back()->with('success', 'Message d\'accueil sauvegardé.');
     }
@@ -112,13 +123,21 @@ class SettingsController extends Controller
             'email_verification_required', 'admin_2fa_required',
         ];
 
-        Setting::set('registration_conditions', $request->input('registration_conditions', ''));
+        $oldConditions = Setting::get('registration_conditions', '');
+        $newConditions = $request->input('registration_conditions', '');
+        if ($oldConditions !== $newConditions) {
+            LogHelper::log('updated_setting', 'setting', null, ['field' => 'registration_conditions', 'section' => 'auth'], 'info', $oldConditions, $newConditions);
+        }
+        Setting::set('registration_conditions', $newConditions);
 
         foreach ($booleans as $field) {
-            Setting::set($field, $request->boolean($field) ? '1' : '0');
+            $old = Setting::get($field, '');
+            $new = $request->boolean($field) ? '1' : '0';
+            if ($old !== $new) {
+                LogHelper::log('updated_setting', 'setting', null, ['field' => $field, 'section' => 'auth'], 'info', $old, $new);
+            }
+            Setting::set($field, $new);
         }
-
-        LogHelper::log('updated_settings', 'settings', null, ['section' => 'auth'], 'info');
 
         return back()->with('success', 'Paramètres d\'authentification sauvegardés.');
     }
@@ -153,6 +172,24 @@ class SettingsController extends Controller
             'smtp_username' => 'nullable|string|max:255',
             'smtp_password' => 'nullable|string|max:255',
         ]);
+
+        $mailFields = [
+            'mailer'       => config('mail.default', ''),
+            'from_address' => config('mail.from.address', ''),
+            'smtp_host'    => config('mail.mailers.smtp.host', ''),
+            'smtp_port'    => (string) config('mail.mailers.smtp.port', ''),
+            'smtp_username'=> config('mail.mailers.smtp.username', ''),
+            'smtp_scheme'  => config('mail.mailers.smtp.scheme', ''),
+        ];
+        foreach ($mailFields as $field => $oldVal) {
+            $newVal = (string) ($data[$field] ?? '');
+            if ($oldVal !== $newVal) {
+                LogHelper::log('updated_setting', 'setting', null, ['field' => $field, 'section' => 'mail'], 'info', $oldVal, $newVal);
+            }
+        }
+        if (!empty($data['smtp_password'])) {
+            LogHelper::log('updated_setting', 'setting', null, ['field' => 'smtp_password', 'section' => 'mail'], 'info', null, 'updated');
+        }
 
         $env = file_get_contents(base_path('.env'));
 
@@ -209,7 +246,6 @@ class SettingsController extends Controller
         $settings = [
             'maintenance_message' => Setting::get('maintenance_message', 'Le site est en maintenance. Merci de revenir plus tard.'),
             'maintenance_enabled' => Setting::get('maintenance_enabled', '0'),
-            'maintenance_all'     => Setting::get('maintenance_all', '0'),
         ];
 
         return view('admin.settings.maintenance', compact('settings'));
@@ -221,11 +257,20 @@ class SettingsController extends Controller
             'maintenance_message' => 'nullable|string',
         ]);
 
-        Setting::set('maintenance_message', $request->input('maintenance_message', ''));
-        Setting::set('maintenance_enabled', $request->boolean('maintenance_enabled') ? '1' : '0');
-        Setting::set('maintenance_all',     $request->boolean('maintenance_all') ? '1' : '0');
+        $oldMsg = Setting::get('maintenance_message', '');
+        $newMsg = $request->input('maintenance_message', '');
+        if ($oldMsg !== $newMsg) {
+            LogHelper::log('updated_setting', 'setting', null, ['field' => 'maintenance_message', 'section' => 'maintenance'], 'info', $oldMsg, $newMsg);
+        }
 
-        LogHelper::log('updated_settings', 'settings', null, ['section' => 'maintenance'], 'info');
+        $oldEnabled = Setting::get('maintenance_enabled', '0');
+        $newEnabled = $request->boolean('maintenance_enabled') ? '1' : '0';
+        if ($oldEnabled !== $newEnabled) {
+            LogHelper::log('updated_setting', 'setting', null, ['field' => 'maintenance_enabled', 'section' => 'maintenance'], 'info', $oldEnabled, $newEnabled);
+        }
+
+        Setting::set('maintenance_message', $newMsg);
+        Setting::set('maintenance_enabled', $newEnabled);
 
         return back()->with('success', 'Paramètres de maintenance sauvegardés.');
     }
