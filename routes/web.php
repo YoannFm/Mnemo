@@ -52,10 +52,8 @@ Route::get('/', function () {
 */
 
 // ─── 2FA Challenge (après login) ───
-Route::middleware('guest')->group(function () {
-    Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.show');
-    Route::post('/two-factor-challenge', [TwoFactorController::class, 'store'])->name('two-factor.store');
-});
+Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.show');
+Route::post('/two-factor-challenge', [TwoFactorController::class, 'store'])->name('two-factor.store');
 
 Route::middleware(['auth', 'two-factor'])->group(function () {
 
