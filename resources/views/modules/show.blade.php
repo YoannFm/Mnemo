@@ -192,7 +192,7 @@
         </div>
     @if ($items->total() >= 4)
         @auth
-            <div class="text-end mb-3" style="margin-top:-.5rem;">
+            <div class="d-flex justify-content-end gap-2 mb-3" style="margin-top:-.5rem;">
                 <form method="POST" action="{{ route('modules.progress.reset', $module) }}"
                       onsubmit="return confirm('Réinitialiser toute ta progression sur ce module ? Cette action est irréversible.')">
                     @csrf @method('DELETE')
