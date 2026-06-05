@@ -276,7 +276,7 @@ class ItemController extends Controller
      */
     private function authorizeOwner(Module $module): void
     {
-        if ($module->owner_id !== Auth::id()) {
+        if ($module->owner_id !== Auth::id() && !Auth::user()?->is_admin) {
             abort(403, 'Action non autorisée.');
         }
     }
