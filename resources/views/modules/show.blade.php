@@ -298,183 +298,6 @@
     @endif
 
 
-{{-- JS réactions + réponses sur les avis --}}
-@auth
-<script>
-(function () {
-    var emojisUrl = "{{ route('emojis.json') }}";
-    var csrf = document.querySelector('meta[name="csrf-token"]').content;
-    var allEmojis = [];
-    var emojisLoaded = false;
-    var RECENT_KEY = 'emoji_recent';
-    var MAX_RECENT = 12;
-
-    function getRecent() { try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e) { return []; } }
-    function addRecent(slug) {
-        var list = getRecent().filter(s => s !== slug);
-        list.unshift(slug);
-        localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, MAX_RECENT)));
-    }
-
-    function makeEmojiBtn(e, onSelect) {
-        var btn = document.createElement('button');
-        btn.type = 'button'; btn.title = e.name;
-        btn.style.cssText = 'background:none;border:1px solid transparent;border-radius:6px;padding:3px;cursor:pointer;transition:.15s;';
-        btn.innerHTML = '<img src="' + e.url + '" alt="' + e.name + '" style="width:28px;height:28px;object-fit:contain;">';
-        btn.addEventListener('mouseenter', () => btn.style.borderColor = 'var(--card-border)');
-        btn.addEventListener('mouseleave', () => btn.style.borderColor = 'transparent');
-        btn.addEventListener('click', () => onSelect(e));
-        return btn;
-    }
-
-    function initPicker(wrapper) {
-        var ratingId   = wrapper.dataset.ratingId;
-        var moreBtn    = wrapper.querySelector('.emoji-more-btn');
-        var container  = wrapper.querySelector('.emoji-picker-container');
-        var searchEl   = wrapper.querySelector('.emoji-search');
-        var gridEl     = wrapper.querySelector('.emoji-grid');
-        var emptyEl    = wrapper.querySelector('.emoji-empty');
-        var recentSec  = wrapper.querySelector('.emoji-recent-section');
-        var recentGrid = wrapper.querySelector('.emoji-recent-grid');
-
-        function renderGrid(emojis) {
-            gridEl.innerHTML = '';
-            if (!emojis.length) { emptyEl.classList.remove('d-none'); return; }
-            emptyEl.classList.add('d-none');
-            emojis.forEach(e => gridEl.appendChild(makeEmojiBtn(e, pick)));
-        }
-        function renderRecent() {
-            var recent = getRecent();
-            var matching = recent.map(s => allEmojis.find(x => x.slug === s)).filter(Boolean);
-            if (!matching.length) { recentSec.classList.add('d-none'); return; }
-            recentSec.classList.remove('d-none');
-            recentGrid.innerHTML = '';
-            matching.forEach(e => recentGrid.appendChild(makeEmojiBtn(e, pick)));
-        }
-        function filter() {
-            var q = (searchEl.value || '').toLowerCase();
-            renderRecent();
-            renderGrid(allEmojis.filter(e => !q || e.name.toLowerCase().includes(q) || e.slug.includes(q)));
-        }
-        function pick(e) {
-            container.classList.add('d-none');
-            addRecent(e.slug);
-            sendReaction(ratingId, e.slug, e.url, e.name);
-        }
-
-        moreBtn.addEventListener('click', ev => {
-            ev.stopPropagation();
-            container.classList.toggle('d-none');
-            if (!emojisLoaded) {
-                emojisLoaded = true;
-                fetch(emojisUrl).then(r => r.json()).then(data => { allEmojis = data; filter(); });
-            } else { filter(); }
-        });
-        container.addEventListener('click', ev => ev.stopPropagation());
-        searchEl.addEventListener('input', filter);
-    }
-
-    function sendReaction(ratingId, slug, imgUrl, imgAlt) {
-        fetch('/module-ratings/' + ratingId + '/react', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
-            body: JSON.stringify({emoji: slug})
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.status === 'muted') { alert(data.message); return; }
-            var bar = document.getElementById('reactions-bar-' + ratingId);
-            var existing = bar.querySelector('.reaction-btn[data-emoji="' + slug + '"]');
-            if (existing) {
-                existing.classList.toggle('btn-primary', data.active);
-                existing.classList.toggle('btn-outline-secondary', !data.active);
-                existing.querySelector('.reaction-count').textContent = data.count > 0 ? data.count : '';
-                if (!data.active && data.count === 0) existing.remove();
-            } else if (data.active) {
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'btn btn-sm reaction-btn d-flex align-items-center gap-1 btn-primary';
-                btn.dataset.emoji = slug;
-                btn.dataset.ratingId = ratingId;
-                btn.innerHTML = '<img src="' + imgUrl + '" alt="' + imgAlt + '" style="width:16px;height:16px;object-fit:contain;"> <span class="reaction-count">' + (data.count || '') + '</span>';
-                btn.addEventListener('click', function() { sendReaction(this.dataset.ratingId, this.dataset.emoji, imgUrl, imgAlt); });
-                var wrapper = bar.querySelector('.emoji-picker-wrapper');
-                bar.insertBefore(btn, wrapper || null);
-            }
-        });
-    }
-
-    // Init pickers
-    document.querySelectorAll('.emoji-picker-wrapper').forEach(initPicker);
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.emoji-picker-container').forEach(c => c.classList.add('d-none'));
-    });
-
-    // Réactions sur boutons existants
-    document.querySelectorAll('.reaction-btn[data-rating-id]').forEach(btn => {
-        btn.addEventListener('click', function() {
-            var img = this.querySelector('img');
-            sendReaction(this.dataset.ratingId, this.dataset.emoji, img ? img.src : '', img ? img.alt : '');
-        });
-    });
-
-    // Réponses
-    document.querySelectorAll('.reply-submit').forEach(btn => {
-        btn.addEventListener('click', function() {
-            var ratingId = this.dataset.ratingId;
-            var url      = this.dataset.url;
-            var input    = document.querySelector('.reply-input[data-rating-id="' + ratingId + '"]');
-            var content  = input.value.trim();
-            if (!content) return;
-            this.disabled = true;
-            var self = this;
-            fetch(url, {
-                method: 'POST',
-                headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
-                body: JSON.stringify({content})
-            })
-            .then(r => r.json())
-            .then(data => {
-                self.disabled = false;
-                if (data.status !== 'ok') { alert(data.message ?? 'Erreur.'); return; }
-                input.value = '';
-                var container = document.getElementById('replies-' + ratingId);
-                var div = document.createElement('div');
-                div.id = 'reply-' + data.id;
-                div.className = 'd-flex gap-2 align-items-start mb-2';
-                div.style.cssText = 'padding-left:.75rem;border-left:2px solid var(--card-border);';
-                div.innerHTML = '<div class="flex-grow-1">'
-                    + '<div class="d-flex align-items-center gap-2">'
-                    + '<span class="fw-semibold" style="font-size:.8rem;">' + data.author + '</span>'
-                    + '<span style="font-size:.72rem;color:var(--text-muted);">' + data.date + '</span>'
-                    + '<button type="button" class="delete-reply-btn btn btn-sm" style="color:#ef4444;border:none;background:transparent;padding:0;font-size:.75rem;" data-reply-id="' + data.id + '" data-url="' + data.delete_url + '" title="Supprimer"><i class="bi bi-trash"></i></button>'
-                    + '</div>'
-                    + '<p style="font-size:.8rem;color:var(--text-primary);margin:.15rem 0 0;">' + data.content.replace(/</g,'&lt;') + '</p>'
-                    + '</div>';
-                container.appendChild(div);
-                div.querySelector('.delete-reply-btn').addEventListener('click', handleDeleteReply);
-            })
-            .catch(() => { self.disabled = false; });
-        });
-    });
-
-    function handleDeleteReply() {
-        var replyId = this.dataset.replyId;
-        var url     = this.dataset.url;
-        if (!confirm('Supprimer cette réponse ?')) return;
-        fetch(url, {
-            method: 'DELETE',
-            headers: {'X-CSRF-TOKEN':csrf,'Accept':'application/json'}
-        })
-        .then(r => r.json())
-        .then(data => { if (data.status === 'ok') document.getElementById('reply-' + replyId)?.remove(); });
-    }
-
-    document.querySelectorAll('.delete-reply-btn').forEach(btn => btn.addEventListener('click', handleDeleteReply));
-})();
-</script>
-@endauth
-
 {{-- Modal signalement d'avis --}}
 @auth
 <div class="modal fade" id="reportRatingModal" tabindex="-1" aria-hidden="true">
@@ -877,5 +700,179 @@ function openZoom(src) {
             </div>
         </div>
     @endif
+
+{{-- JS réactions + réponses sur les avis (placé après le HTML des avis) --}}
+@auth
+<script>
+(function () {
+    var emojisUrl = "{{ route('emojis.json') }}";
+    var csrf = document.querySelector('meta[name="csrf-token"]').content;
+    var allEmojis = [];
+    var emojisLoaded = false;
+    var RECENT_KEY = 'emoji_recent';
+    var MAX_RECENT = 12;
+
+    function getRecent() { try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e) { return []; } }
+    function addRecent(slug) {
+        var list = getRecent().filter(s => s !== slug);
+        list.unshift(slug);
+        localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, MAX_RECENT)));
+    }
+
+    function makeEmojiBtn(e, onSelect) {
+        var btn = document.createElement('button');
+        btn.type = 'button'; btn.title = e.name;
+        btn.style.cssText = 'background:none;border:1px solid transparent;border-radius:6px;padding:3px;cursor:pointer;transition:.15s;';
+        btn.innerHTML = '<img src="' + e.url + '" alt="' + e.name + '" style="width:28px;height:28px;object-fit:contain;">';
+        btn.addEventListener('mouseenter', () => btn.style.borderColor = 'var(--card-border)');
+        btn.addEventListener('mouseleave', () => btn.style.borderColor = 'transparent');
+        btn.addEventListener('click', () => onSelect(e));
+        return btn;
+    }
+
+    function initPicker(wrapper) {
+        var ratingId   = wrapper.dataset.ratingId;
+        var moreBtn    = wrapper.querySelector('.emoji-more-btn');
+        var container  = wrapper.querySelector('.emoji-picker-container');
+        var searchEl   = wrapper.querySelector('.emoji-search');
+        var gridEl     = wrapper.querySelector('.emoji-grid');
+        var emptyEl    = wrapper.querySelector('.emoji-empty');
+        var recentSec  = wrapper.querySelector('.emoji-recent-section');
+        var recentGrid = wrapper.querySelector('.emoji-recent-grid');
+
+        function renderGrid(emojis) {
+            gridEl.innerHTML = '';
+            if (!emojis.length) { emptyEl.classList.remove('d-none'); return; }
+            emptyEl.classList.add('d-none');
+            emojis.forEach(e => gridEl.appendChild(makeEmojiBtn(e, pick)));
+        }
+        function renderRecent() {
+            var recent = getRecent();
+            var matching = recent.map(s => allEmojis.find(x => x.slug === s)).filter(Boolean);
+            if (!matching.length) { recentSec.classList.add('d-none'); return; }
+            recentSec.classList.remove('d-none');
+            recentGrid.innerHTML = '';
+            matching.forEach(e => recentGrid.appendChild(makeEmojiBtn(e, pick)));
+        }
+        function filter() {
+            var q = (searchEl.value || '').toLowerCase();
+            renderRecent();
+            renderGrid(allEmojis.filter(e => !q || e.name.toLowerCase().includes(q) || e.slug.includes(q)));
+        }
+        function pick(e) {
+            container.classList.add('d-none');
+            addRecent(e.slug);
+            sendReaction(ratingId, e.slug, e.url, e.name);
+        }
+
+        moreBtn.addEventListener('click', ev => {
+            ev.stopPropagation();
+            container.classList.toggle('d-none');
+            if (!emojisLoaded) {
+                emojisLoaded = true;
+                fetch(emojisUrl).then(r => r.json()).then(data => { allEmojis = data; filter(); });
+            } else { filter(); }
+        });
+        container.addEventListener('click', ev => ev.stopPropagation());
+        searchEl.addEventListener('input', filter);
+    }
+
+    function sendReaction(ratingId, slug, imgUrl, imgAlt) {
+        fetch('/module-ratings/' + ratingId + '/react', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+            body: JSON.stringify({emoji: slug})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'muted') { alert(data.message); return; }
+            var bar = document.getElementById('reactions-bar-' + ratingId);
+            var existing = bar.querySelector('.reaction-btn[data-emoji="' + slug + '"]');
+            if (existing) {
+                existing.classList.toggle('btn-primary', data.active);
+                existing.classList.toggle('btn-outline-secondary', !data.active);
+                existing.querySelector('.reaction-count').textContent = data.count > 0 ? data.count : '';
+                if (!data.active && data.count === 0) existing.remove();
+            } else if (data.active) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm reaction-btn d-flex align-items-center gap-1 btn-primary';
+                btn.dataset.emoji = slug;
+                btn.dataset.ratingId = ratingId;
+                btn.innerHTML = '<img src="' + imgUrl + '" alt="' + imgAlt + '" style="width:16px;height:16px;object-fit:contain;"> <span class="reaction-count">' + (data.count || '') + '</span>';
+                btn.addEventListener('click', function() { sendReaction(this.dataset.ratingId, this.dataset.emoji, imgUrl, imgAlt); });
+                var pickerWrapper = bar.querySelector('.emoji-picker-wrapper');
+                bar.insertBefore(btn, pickerWrapper || null);
+            }
+        });
+    }
+
+    document.querySelectorAll('.emoji-picker-wrapper').forEach(initPicker);
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.emoji-picker-container').forEach(c => c.classList.add('d-none'));
+    });
+
+    document.querySelectorAll('.reaction-btn[data-rating-id]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            var img = this.querySelector('img');
+            sendReaction(this.dataset.ratingId, this.dataset.emoji, img ? img.src : '', img ? img.alt : '');
+        });
+    });
+
+    document.querySelectorAll('.reply-submit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            var ratingId = this.dataset.ratingId;
+            var url      = this.dataset.url;
+            var input    = document.querySelector('.reply-input[data-rating-id="' + ratingId + '"]');
+            var content  = input.value.trim();
+            if (!content) return;
+            this.disabled = true;
+            var self = this;
+            fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                body: JSON.stringify({content})
+            })
+            .then(r => r.json())
+            .then(data => {
+                self.disabled = false;
+                if (data.status !== 'ok') { alert(data.message ?? 'Erreur.'); return; }
+                input.value = '';
+                var repliesContainer = document.getElementById('replies-' + ratingId);
+                var div = document.createElement('div');
+                div.id = 'reply-' + data.id;
+                div.className = 'd-flex gap-2 align-items-start mb-2';
+                div.style.cssText = 'padding-left:.75rem;border-left:2px solid var(--card-border);';
+                div.innerHTML = '<div class="flex-grow-1">'
+                    + '<div class="d-flex align-items-center gap-2">'
+                    + '<span class="fw-semibold" style="font-size:.8rem;">' + data.author + '</span>'
+                    + '<span style="font-size:.72rem;color:var(--text-muted);">' + data.date + '</span>'
+                    + '<button type="button" class="delete-reply-btn btn btn-sm" style="color:#ef4444;border:none;background:transparent;padding:0;font-size:.75rem;" data-reply-id="' + data.id + '" data-url="' + data.delete_url + '" title="Supprimer"><i class="bi bi-trash"></i></button>'
+                    + '</div>'
+                    + '<p style="font-size:.8rem;color:var(--text-primary);margin:.15rem 0 0;">' + data.content.replace(/</g,'&lt;') + '</p>'
+                    + '</div>';
+                repliesContainer.appendChild(div);
+                div.querySelector('.delete-reply-btn').addEventListener('click', handleDeleteReply);
+            })
+            .catch(() => { self.disabled = false; });
+        });
+    });
+
+    function handleDeleteReply() {
+        var replyId = this.dataset.replyId;
+        var url     = this.dataset.url;
+        if (!confirm('Supprimer cette réponse ?')) return;
+        fetch(url, {
+            method: 'DELETE',
+            headers: {'X-CSRF-TOKEN':csrf,'Accept':'application/json'}
+        })
+        .then(r => r.json())
+        .then(data => { if (data.status === 'ok') document.getElementById('reply-' + replyId)?.remove(); });
+    }
+
+    document.querySelectorAll('.delete-reply-btn').forEach(btn => btn.addEventListener('click', handleDeleteReply));
+})();
+</script>
+@endauth
 
 </x-app-layout>
