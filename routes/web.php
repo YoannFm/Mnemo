@@ -7,6 +7,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\AnkiController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\ModuleExportController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\InstallController;
@@ -109,6 +110,11 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::get('/modules/{module}/exam/question', [ExamController::class, 'question'])->name('exam.question');
     Route::post('/modules/{module}/exam/submit', [ExamController::class, 'submit'])->name('exam.submit');
     Route::get('/modules/{module}/exam/result', [ExamController::class, 'result'])->name('exam.result');
+
+    // Export / Import de modules au format ZIP
+    Route::get('/modules/{module}/export', [ModuleExportController::class, 'export'])->name('modules.export');
+    Route::get('/modules/import', [ModuleExportController::class, 'showImportForm'])->name('modules.import.form');
+    Route::post('/modules/import', [ModuleExportController::class, 'import'])->name('modules.import');
 
     // Dupliquer un module public dans son espace personnel
     Route::post('/modules/{module}/duplicate', [ModuleController::class, 'duplicate'])->name('modules.duplicate');
