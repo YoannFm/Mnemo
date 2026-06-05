@@ -29,8 +29,27 @@ class LogController extends Controller
             $query->where('level', $level);
         }
 
+        if ($targetType = $request->input('target_type')) {
+            $query->where('target_type', $targetType);
+        }
+
+        if ($userId = $request->input('user_id')) {
+            $query->where('user_id', $userId);
+        }
+
         $logs = $query->paginate(25)->withQueryString();
-        return view('admin.logs.index', compact('logs'));
+
+        $targetTypes = ActivityLog::whereNotNull('target_type')
+            ->distinct()
+            ->pluck('target_type')
+            ->sort()
+            ->values();
+
+        $admins = \App\Models\User::whereIn('id',
+            ActivityLog::whereNotNull('user_id')->distinct()->pluck('user_id')
+        )->orderBy('name')->get(['id', 'name']);
+
+        return view('admin.logs.index', compact('logs', 'targetTypes', 'admins'));
     }
 
     public function show(ActivityLog $log)

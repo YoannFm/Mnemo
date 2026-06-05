@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Module;
 
@@ -20,6 +21,8 @@ class ModuleController extends Controller
 
     public function destroy(Module $module)
     {
+        LogHelper::log('deleted_module', 'module', $module->id, ['title' => $module->title, 'owner_id' => $module->owner_id], 'warning');
+
         $module->delete();
 
         return back()->with('success', 'Module supprimé.');

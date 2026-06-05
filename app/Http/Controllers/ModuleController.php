@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Emoji;
 use App\Models\Module;
 use App\Models\ModuleRating;
@@ -13,6 +14,7 @@ use App\Models\ModuleRatingReport;
 use App\Models\ModuleReport;
 use App\Models\Mute;
 use App\Models\Progress;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,15 +29,21 @@ class ModuleController extends Controller
      * Affiche la liste des modules de l'utilisateur connecté.
      * Triés du plus récent au plus ancien.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // On récupère uniquement les modules appartenant à l'utilisateur connecté
-        $modules = Auth::user()->modules()
-            ->withCount('items') // Ajoute un attribut "items_count" à chaque module
-            ->latest()
-            ->paginate(12);
+        $query = Auth::user()->modules()->withCount('items')->latest();
 
-        return view('modules.index', compact('modules'));
+        $search = $request->input('search');
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $modules = $query->paginate(12)->withQueryString();
+
+        return view('modules.index', compact('modules', 'search'));
     }
 
     /**
@@ -152,6 +160,7 @@ class ModuleController extends Controller
             'new_owner_email'   => 'nullable|email|exists:users,email',
         ]);
 
+        $oldOwnerId = $module->owner_id;
         $newOwnerId = $module->owner_id;
 
         if (!empty($validated['new_owner_email'])) {
@@ -169,6 +178,21 @@ class ModuleController extends Controller
             'allow_duplication' => $request->boolean('allow_duplication'),
             'owner_id'          => $newOwnerId,
         ]);
+
+        if ($newOwnerId !== $oldOwnerId) {
+            LogHelper::log('transferred_module', 'module', $module->id, [
+                'from_user_id'  => $oldOwnerId,
+                'to_user_id'    => $newOwnerId,
+                'module_title'  => $module->title,
+            ], 'warning');
+
+            UserNotification::create([
+                'user_id' => $newOwnerId,
+                'title'   => 'Module transfere',
+                'message' => 'Le module "' . $module->title . '" vous a ete transfere.',
+                'type'    => 'info',
+            ]);
+        }
 
         return redirect()->route('modules.show', $module)
             ->with('success', 'Module mis à jour avec succès !');

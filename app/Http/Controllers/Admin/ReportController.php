@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\AdminSanction;
 use App\Models\ModuleRatingDeletion;
@@ -19,52 +20,81 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $type = $request->input('type', 'comments');
+        $type         = $request->input('type', 'comments');
+        $statusFilter = $request->input('status', 'pending');
 
-        $commentReports = PostCommentReport::with(['user', 'postComment.user', 'postComment.post'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(25, ['*'], 'comments_page')
-            ->withQueryString();
+        $commentQuery = PostCommentReport::with(['user', 'postComment.user', 'postComment.post'])
+            ->orderBy('created_at', 'desc');
+        if ($statusFilter !== 'all') {
+            $commentQuery->where('status', $statusFilter);
+        }
+        $commentReports = $commentQuery->paginate(25, ['*'], 'comments_page')->withQueryString();
 
-        $moduleReports = ModuleReport::with(['user', 'module.owner'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(25, ['*'], 'modules_page')
-            ->withQueryString();
+        $moduleQuery = ModuleReport::with(['user', 'module.owner'])
+            ->orderBy('created_at', 'desc');
+        if ($statusFilter !== 'all') {
+            $moduleQuery->where('status', $statusFilter);
+        }
+        $moduleReports = $moduleQuery->paginate(25, ['*'], 'modules_page')->withQueryString();
 
-        $ratingReports = ModuleRatingReport::with(['user', 'moduleRating.user', 'moduleRating.module'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(25, ['*'], 'ratings_page')
-            ->withQueryString();
+        $ratingQuery = ModuleRatingReport::with(['user', 'moduleRating.user', 'moduleRating.module'])
+            ->orderBy('created_at', 'desc');
+        if ($statusFilter !== 'all') {
+            $ratingQuery->where('status', $statusFilter);
+        }
+        $ratingReports = $ratingQuery->paginate(25, ['*'], 'ratings_page')->withQueryString();
 
-        $replyReports = ModuleRatingReplyReport::with(['user', 'reply.user', 'reply.moduleRating.module'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(25, ['*'], 'replies_page')
-            ->withQueryString();
+        $replyQuery = ModuleRatingReplyReport::with(['user', 'reply.user', 'reply.moduleRating.module'])
+            ->orderBy('created_at', 'desc');
+        if ($statusFilter !== 'all') {
+            $replyQuery->where('status', $statusFilter);
+        }
+        $replyReports = $replyQuery->paginate(25, ['*'], 'replies_page')->withQueryString();
 
-        return view('admin.reports.index', compact('commentReports', 'moduleReports', 'ratingReports', 'replyReports', 'type'));
+        // Counts per status for filter buttons
+        $statusCounts = [
+            'pending'  => PostCommentReport::where('status', 'pending')->count()
+                        + ModuleReport::where('status', 'pending')->count()
+                        + ModuleRatingReport::where('status', 'pending')->count()
+                        + ModuleRatingReplyReport::where('status', 'pending')->count(),
+            'treated'  => PostCommentReport::whereIn('status', ['treated', 'sanctioned', 'unsanctioned'])->count()
+                        + ModuleReport::where('status', 'treated')->count()
+                        + ModuleRatingReport::where('status', 'treated')->count()
+                        + ModuleRatingReplyReport::where('status', 'treated')->count(),
+            'rejected' => PostCommentReport::where('status', 'rejected')->count()
+                        + ModuleReport::where('status', 'rejected')->count()
+                        + ModuleRatingReport::where('status', 'rejected')->count()
+                        + ModuleRatingReplyReport::where('status', 'rejected')->count(),
+        ];
+
+        return view('admin.reports.index', compact('commentReports', 'moduleReports', 'ratingReports', 'replyReports', 'type', 'statusFilter', 'statusCounts'));
     }
 
     public function markModuleTreated(ModuleReport $report)
     {
         $report->update(['status' => 'treated']);
+        LogHelper::log('treated_module_report', 'module_report', $report->id, ['module_id' => $report->module_id]);
         return back()->with('success', 'Signalement module marqué comme traité.');
     }
 
     public function markModuleRejected(ModuleReport $report)
     {
         $report->update(['status' => 'rejected']);
+        LogHelper::log('rejected_module_report', 'module_report', $report->id, ['module_id' => $report->module_id]);
         return back()->with('success', 'Signalement module rejeté.');
     }
 
     public function markReplyTreated(ModuleRatingReplyReport $report)
     {
         $report->update(['status' => 'treated']);
+        LogHelper::log('treated_reply_report', 'reply_report', $report->id);
         return back()->with('success', 'Signalement marqué comme traité.');
     }
 
     public function markReplyRejected(ModuleRatingReplyReport $report)
     {
         $report->update(['status' => 'rejected']);
+        LogHelper::log('rejected_reply_report', 'reply_report', $report->id);
         return back()->with('success', 'Signalement rejeté.');
     }
 
@@ -83,6 +113,8 @@ class ReportController extends Controller
             'content'    => $reply->content,
             'deleted_by' => 'admin',
         ]);
+
+        LogHelper::log('deleted_reply', 'reply', $reply->id, ['content' => substr($reply->content, 0, 100), 'user_id' => $reply->user_id], 'warning');
 
         $userId = $reply->user_id;
         $reply->delete();
@@ -142,18 +174,22 @@ class ReportController extends Controller
             'type'    => 'warning',
         ]);
 
+        LogHelper::log('muted_user', 'user', $replyUser->id, ['reason' => $request->input('reason'), 'expires_at' => $expiresAt], 'warning');
+
         return back()->with('success', 'Utilisateur muté avec succès.');
     }
 
     public function markRatingTreated(ModuleRatingReport $report)
     {
         $report->update(['status' => 'treated']);
+        LogHelper::log('treated_rating_report', 'rating_report', $report->id);
         return back()->with('success', 'Signalement marqué comme traité.');
     }
 
     public function markRatingRejected(ModuleRatingReport $report)
     {
         $report->update(['status' => 'rejected']);
+        LogHelper::log('rejected_rating_report', 'rating_report', $report->id);
         return back()->with('success', 'Signalement rejeté.');
     }
 
@@ -164,6 +200,8 @@ class ReportController extends Controller
         if (!$rating) {
             return back()->with('error', 'Avis introuvable.');
         }
+
+        LogHelper::log('deleted_rating', 'rating', $rating->id, ['module_id' => $rating->module_id, 'user_id' => $rating->user_id, 'rating' => $rating->rating, 'comment' => substr($rating->comment ?? '', 0, 100)], 'warning');
 
         $userId = $rating->user_id;
 
@@ -233,6 +271,8 @@ class ReportController extends Controller
             'type'    => 'warning',
         ]);
 
+        LogHelper::log('muted_user', 'user', $ratingUser->id, ['reason' => $request->input('reason'), 'expires_at' => $expiresAt], 'warning');
+
         return back()->with('success', 'Utilisateur muté avec succès.');
     }
 
@@ -249,12 +289,15 @@ class ReportController extends Controller
             ]);
         }
 
+        LogHelper::log('sanctioned_comment', 'comment', $report->id, null, 'warning');
+
         return back()->with('success', 'Signalement marqué comme sanctionné.');
     }
 
     public function markUnsanctioned(PostCommentReport $report)
     {
         $report->update(['status' => 'unsanctioned']);
+        LogHelper::log('unsanctioned_comment', 'comment', $report->id);
         return back()->with('success', 'Signalement marqué comme non sanctionné.');
     }
 
@@ -278,6 +321,8 @@ class ReportController extends Controller
         $postUrl = $comment->post ? route('posts.show', $comment->post) : '#';
 
         $comment->update(['is_deleted' => true, 'content' => '']);
+
+        LogHelper::log('deleted_comment', 'comment', $comment->id, ['content' => substr($commentContent, 0, 100), 'post_title' => $postTitle], 'warning');
 
         if ($comment->user_id) {
             UserNotification::create([
@@ -337,6 +382,8 @@ class ReportController extends Controller
             'message' => 'Vous avez été rendu muet pour la raison suivante : ' . ($reason !== '' ? $reason : 'Aucune raison spécifiée'),
             'type'    => 'warning',
         ]);
+
+        LogHelper::log('muted_user', 'user', $comment->user->id, ['reason' => $request->input('reason'), 'expires_at' => $expiresAt], 'warning');
 
         return redirect()->route('admin.reports.index')->with('success', 'Utilisateur muté avec succès.');
     }

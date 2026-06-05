@@ -32,6 +32,22 @@
                         <option value="error" {{ request('level') === 'error' ? 'selected' : '' }}>Error</option>
                     </select>
                 </div>
+                <div class="col-md-2">
+                    <select name="target_type" class="form-select form-select-sm">
+                        <option value="">Tous les types</option>
+                        @foreach($targetTypes as $tt)
+                            <option value="{{ $tt }}" {{ request('target_type') === $tt ? 'selected' : '' }}>{{ $tt }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="user_id" class="form-select form-select-sm">
+                        <option value="">Tous les admins</option>
+                        @foreach($admins as $admin)
+                            <option value="{{ $admin->id }}" {{ request('user_id') == $admin->id ? 'selected' : '' }}>{{ $admin->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="col-md-2 d-flex gap-1">
                     <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i> Filtrer</button>
                     <a href="{{ route('admin.logs.index') }}" class="btn btn-outline-secondary btn-sm">Reset</a>
