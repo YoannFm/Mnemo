@@ -6,6 +6,7 @@ use App\Models\Module;
 use App\Models\ModuleRating;
 use App\Models\ModuleRatingReport;
 use App\Models\ModuleReport;
+use App\Models\Mute;
 use App\Models\Progress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -90,7 +91,11 @@ class ModuleController extends Controller
             ? $module->ratings()->where('user_id', Auth::id())->first()
             : null;
 
-        return view('modules.show', compact('module', 'items', 'avgRating', 'ratingCount', 'userRating'));
+        $isMuted = Auth::check() && Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->exists();
+
+        return view('modules.show', compact('module', 'items', 'avgRating', 'ratingCount', 'userRating', 'isMuted'));
     }
 
     /**
@@ -254,6 +259,14 @@ class ModuleController extends Controller
     public function rate(Request $request, Module $module)
     {
         $this->authorizeView($module);
+
+        $isMuted = Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->exists();
+
+        if ($isMuted) {
+            return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas poster d\'avis.'], 403);
+        }
 
         $validated = $request->validate([
             'rating'  => 'required|integer|min:1|max:5',

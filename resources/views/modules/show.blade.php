@@ -241,7 +241,11 @@
         </div>
 
         {{-- Formulaire de notation --}}
-        @if (Auth::id() !== $module->owner_id)
+        @if ($isMuted)
+            <p style="font-size:.82rem;color:#ef4444;margin:0;">
+                <i class="bi bi-mic-mute me-1"></i>Vous êtes muté et ne pouvez pas poster ou modifier un avis.
+            </p>
+        @elseif (Auth::id() !== $module->owner_id)
         <div id="rating-form-wrapper">
             <div class="d-flex align-items-center gap-2 mb-2">
                 <span style="font-size:.85rem;color:var(--text-muted);">
@@ -265,7 +269,7 @@
             </button>
             <div id="rating-feedback" class="d-none mt-2" style="font-size:.82rem;"></div>
         </div>
-        @else
+        @elseif (Auth::id() === $module->owner_id)
             <p style="font-size:.82rem;color:var(--text-muted);margin:0;">
                 <i class="bi bi-info-circle me-1"></i>Vous ne pouvez pas noter votre propre module.
             </p>
@@ -319,6 +323,10 @@
                     feedback.className = 'alert alert-success mt-2';
                     feedback.textContent = 'Votre avis a bien été enregistré.';
                     submitBtn.textContent = 'Modifier mon avis';
+                } else if (data.status === 'muted') {
+                    feedback.className = 'alert alert-warning mt-2';
+                    feedback.textContent = data.message ?? 'Vous êtes muté.';
+                    submitBtn.disabled = true;
                 } else {
                     feedback.className = 'alert alert-danger mt-2';
                     feedback.textContent = data.message ?? 'Une erreur est survenue.';
