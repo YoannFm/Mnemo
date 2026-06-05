@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Image;
 use App\Models\Setting;
@@ -58,6 +59,8 @@ class SettingsController extends Controller
             Setting::set($field, $request->input($field, ''));
         }
 
+        LogHelper::log('updated_settings', 'settings', null, ['section' => 'general'], 'info');
+
         return back()->with('success', 'Paramètres sauvegardés.');
     }
 
@@ -78,6 +81,8 @@ class SettingsController extends Controller
         ]);
 
         Setting::set('home_message', $request->input('home_message', ''));
+
+        LogHelper::log('updated_settings', 'settings', null, ['section' => 'home'], 'info');
 
         return back()->with('success', 'Message d\'accueil sauvegardé.');
     }
@@ -112,6 +117,8 @@ class SettingsController extends Controller
         foreach ($booleans as $field) {
             Setting::set($field, $request->boolean($field) ? '1' : '0');
         }
+
+        LogHelper::log('updated_settings', 'settings', null, ['section' => 'auth'], 'info');
 
         return back()->with('success', 'Paramètres d\'authentification sauvegardés.');
     }
@@ -217,6 +224,8 @@ class SettingsController extends Controller
         Setting::set('maintenance_message', $request->input('maintenance_message', ''));
         Setting::set('maintenance_enabled', $request->boolean('maintenance_enabled') ? '1' : '0');
         Setting::set('maintenance_all',     $request->boolean('maintenance_all') ? '1' : '0');
+
+        LogHelper::log('updated_settings', 'settings', null, ['section' => 'maintenance'], 'info');
 
         return back()->with('success', 'Paramètres de maintenance sauvegardés.');
     }

@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Mute;
 use App\Models\Post;
 use App\Models\PostComment;
@@ -211,6 +212,10 @@ class PostController extends Controller
 
         $comment->update(['content' => $data['content'], 'edited_at' => now()]);
 
+        if (Auth::user()?->is_admin && Auth::id() !== $comment->user_id) {
+            LogHelper::log('updated_comment', 'comment', $comment->id, null, 'info');
+        }
+
         if ($request->expectsJson()) {
             return response()->json(['status' => 'ok', 'content' => $comment->content]);
         }
@@ -229,7 +234,14 @@ class PostController extends Controller
             'created_at'      => now(),
         ]);
 
+        $savedContent = $comment->content;
+        $isAdminAction = Auth::user()?->is_admin && Auth::id() !== $comment->user_id;
+
         $comment->update(['is_deleted' => true, 'content' => '']);
+
+        if ($isAdminAction) {
+            LogHelper::log('deleted_comment', 'comment', $comment->id, ['content' => substr($savedContent, 0, 100)], 'warning');
+        }
 
         if ($request->expectsJson()) {
             return response()->json(['status' => 'ok']);

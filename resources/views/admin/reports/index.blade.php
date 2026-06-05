@@ -1,26 +1,49 @@
 <x-admin-layout>
     <x-slot name="pageTitle">Signalements</x-slot>
 
-    {{-- Filtre --}}
-    <div class="mb-3 d-flex gap-2">
-        <a href="{{ route('admin.reports.index', ['type' => 'comments']) }}"
+    {{-- Filtre par statut --}}
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+        <a href="{{ route('admin.reports.index', ['type' => $type, 'status' => 'pending']) }}"
+           class="btn btn-sm {{ $statusFilter === 'pending' ? 'btn-danger' : 'btn-outline-secondary' }}">
+            En attente
+            <span class="badge {{ $statusFilter === 'pending' ? 'bg-light text-dark' : 'bg-secondary' }} ms-1">{{ $statusCounts['pending'] }}</span>
+        </a>
+        <a href="{{ route('admin.reports.index', ['type' => $type, 'status' => 'treated']) }}"
+           class="btn btn-sm {{ $statusFilter === 'treated' ? 'btn-success' : 'btn-outline-secondary' }}">
+            Traite
+            <span class="badge {{ $statusFilter === 'treated' ? 'bg-light text-dark' : 'bg-secondary' }} ms-1">{{ $statusCounts['treated'] }}</span>
+        </a>
+        <a href="{{ route('admin.reports.index', ['type' => $type, 'status' => 'rejected']) }}"
+           class="btn btn-sm {{ $statusFilter === 'rejected' ? 'btn-secondary' : 'btn-outline-secondary' }}">
+            Rejete
+            <span class="badge {{ $statusFilter === 'rejected' ? 'bg-light text-dark' : 'bg-secondary' }} ms-1">{{ $statusCounts['rejected'] }}</span>
+        </a>
+        <a href="{{ route('admin.reports.index', ['type' => $type, 'status' => 'all']) }}"
+           class="btn btn-sm {{ $statusFilter === 'all' ? 'btn-primary' : 'btn-outline-secondary' }}">
+            Tous
+        </a>
+    </div>
+
+    {{-- Filtre par type --}}
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+        <a href="{{ route('admin.reports.index', ['type' => 'comments', 'status' => $statusFilter]) }}"
            class="btn btn-sm {{ $type === 'comments' ? 'btn-primary' : 'btn-outline-secondary' }}">
             <i class="bi bi-chat-left-text me-1"></i> Commentaires
             <span class="badge {{ $type === 'comments' ? 'bg-light text-dark' : 'bg-secondary' }} ms-1">{{ $commentReports->total() }}</span>
         </a>
-        <a href="{{ route('admin.reports.index', ['type' => 'modules']) }}"
+        <a href="{{ route('admin.reports.index', ['type' => 'modules', 'status' => $statusFilter]) }}"
            class="btn btn-sm {{ $type === 'modules' ? 'btn-primary' : 'btn-outline-secondary' }}">
             <i class="bi bi-collection me-1"></i> Modules
             <span class="badge {{ $type === 'modules' ? 'bg-light text-dark' : 'bg-secondary' }} ms-1">{{ $moduleReports->total() }}</span>
         </a>
-        <a href="{{ route('admin.reports.index', ['type' => 'ratings']) }}"
+        <a href="{{ route('admin.reports.index', ['type' => 'ratings', 'status' => $statusFilter]) }}"
            class="btn btn-sm {{ $type === 'ratings' ? 'btn-primary' : 'btn-outline-secondary' }}">
             <i class="bi bi-star me-1"></i> Avis
             <span class="badge {{ $type === 'ratings' ? 'bg-light text-dark' : 'bg-secondary' }} ms-1">{{ $ratingReports->total() }}</span>
         </a>
-        <a href="{{ route('admin.reports.index', ['type' => 'replies']) }}"
+        <a href="{{ route('admin.reports.index', ['type' => 'replies', 'status' => $statusFilter]) }}"
            class="btn btn-sm {{ $type === 'replies' ? 'btn-primary' : 'btn-outline-secondary' }}">
-            <i class="bi bi-reply me-1"></i> Réponses
+            <i class="bi bi-reply me-1"></i> Reponses
             <span class="badge {{ $type === 'replies' ? 'bg-light text-dark' : 'bg-secondary' }} ms-1">{{ $replyReports->total() }}</span>
         </a>
     </div>

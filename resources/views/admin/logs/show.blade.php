@@ -18,6 +18,17 @@
                 &nbsp;<span class="badge bg-{{ match($log->level ?? 'info') { 'success' => 'success', 'warning' => 'warning', 'error' => 'danger', default => 'info' } }}">{{ $log->level ?? 'info' }}</span>
             </p>
 
+            @if($log->target_type && $log->target_id)
+                <p>
+                    <strong>Cible :</strong> {{ $log->target_type }} #{{ $log->target_id }}
+                    @if($log->target_type === 'user')
+                        &mdash; <a href="{{ route('admin.users.edit', $log->target_id) }}">Voir l'utilisateur</a>
+                    @elseif($log->target_type === 'module')
+                        &mdash; <a href="{{ route('modules.show', $log->target_id) }}">Voir le module</a>
+                    @endif
+                </p>
+            @endif
+
             @if($log->old_value || $log->new_value)
                 <h5 class="mt-3">Avant / Apres</h5>
                 <div class="row">

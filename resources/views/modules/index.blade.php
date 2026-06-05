@@ -21,6 +21,27 @@
         </div>
     </div>
 
+    {{-- ── Barre de recherche ── --}}
+    <form method="GET" action="{{ route('modules.index') }}" class="mb-4">
+        <div class="input-group" style="max-width:400px;">
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                placeholder="Rechercher un module..."
+                value="{{ $search ?? '' }}"
+                style="background:var(--card-bg);border-color:var(--card-border);color:inherit;">
+            <button type="submit" class="btn" style="border-color:var(--card-border);color:var(--accent);">
+                <i class="bi bi-search"></i>
+            </button>
+            @if(!empty($search))
+                <a href="{{ route('modules.index') }}" class="btn" style="border-color:var(--card-border);color:var(--text-muted);">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            @endif
+        </div>
+    </form>
+
     {{-- ── Grille de modules ── --}}
     @if ($modules->isEmpty())
         {{-- État vide --}}
