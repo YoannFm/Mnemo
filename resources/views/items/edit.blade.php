@@ -64,7 +64,7 @@
                         {{-- Fonction / Description --}}
                         <div class="mb-3">
                             <label for="function_text" class="form-label">
-                                Fonction / Description <span style="color:#ef4444;">*</span>
+                                Fonction / Description <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(optionnel)</span>
                             </label>
                             <textarea id="function_text"
                                       name="function_text"
