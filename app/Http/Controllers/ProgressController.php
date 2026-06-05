@@ -23,12 +23,11 @@ class ProgressController extends Controller
     {
         $user = Auth::user();
 
-        // Récupérer les modules avec leur progression
+        // Récupérer uniquement les modules sur lesquels l'utilisateur a commencé à s'entraîner
         $modules = $user->modules()
             ->withCount('items')
             ->get()
             ->map(function ($module) use ($user) {
-                // Pour chaque module, calculer les stats de progression
                 $itemIds = $module->items()->pluck('id');
 
                 $progresses = Progress::where('user_id', $user->id)
@@ -42,7 +41,9 @@ class ProgressController extends Controller
                     : 0;
 
                 return $module;
-            });
+            })
+            ->filter(fn($module) => $module->practiced_count > 0)
+            ->values();
 
         // Historique des scores (20 derniers)
         $scores = Score::where('user_id', $user->id)
