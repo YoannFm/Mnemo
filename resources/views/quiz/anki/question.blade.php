@@ -31,6 +31,22 @@
                 </form>
             </div>
 
+            @if(isset($question['learn_total']) && $question['learn_total'] > 0)
+                @php
+                    $done = $question['learn_total'] - $question['learn_remaining'];
+                    $pct = round(($done / $question['learn_total']) * 100);
+                @endphp
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1" style="font-size:.78rem;color:var(--text-muted);">
+                        <span><i class="bi bi-mortarboard me-1"></i>Mode apprentissage</span>
+                        <span>{{ $done }} / {{ $question['learn_total'] }} réussis</span>
+                    </div>
+                    <div class="progress" style="height:6px;">
+                        <div class="progress-bar" style="width:{{ $pct }}%;background:var(--accent);"></div>
+                    </div>
+                </div>
+            @endif
+
             {{-- Barre de progression de cet item - affiche les stats personnalisées pour le mode Anki --}}
             {{-- La progression persiste entre les questions, montrant l'évolution de la maîtrise --}}
             <div class="card mb-4" style="background:var(--accent-light);border:none;">

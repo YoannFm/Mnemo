@@ -29,7 +29,7 @@ class QuizGenerator
         'Q1' => [
             'field_question' => 'photo_path',
             'field_answer'   => 'name_fr',
-            'question_text'  => 'Quel est le nom français de cet élément ?',
+            'question_text'  => 'Quel est le nom de cet élément ?',
         ],
         'Q2' => [
             'field_question' => 'photo_path',
@@ -44,7 +44,7 @@ class QuizGenerator
         'Q4' => [
             'field_question' => 'name_fr',
             'field_answer'   => 'name_en',
-            'question_text'  => 'Quel est le nom anglais ?',
+            'question_text'  => 'Quelle est la traduction ?',
         ],
         'Q5' => [
             'field_question' => 'name_en',
@@ -54,17 +54,17 @@ class QuizGenerator
         'Q6' => [
             'field_question' => 'function_text',
             'field_answer'   => 'name_fr',
-            'question_text'  => 'Quel est le nom français correspondant à cette fonction ?',
+            'question_text'  => 'Quel est le nom correspondant à cette description ?',
         ],
         'Q7' => [
             'field_question' => 'name_en',
             'field_answer'   => 'name_fr',
-            'question_text'  => 'Quel est le nom français de ce terme anglais ?',
+            'question_text'  => 'Quel est le nom de ce terme ?',
         ],
         'Q8' => [
             'field_question' => 'photo_path',
             'field_answer'   => 'name_en',
-            'question_text'  => 'Quel est le nom anglais de cet élément ?',
+            'question_text'  => 'Quelle est la traduction de cet élément ?',
         ],
         'Q9' => [
             'field_question' => 'name_fr',
@@ -79,7 +79,7 @@ class QuizGenerator
         'Q11' => [
             'field_question' => 'name_en',
             'field_answer'   => 'function_text',
-            'question_text'  => 'Quelle est la fonction correspondant à ce terme anglais ?',
+            'question_text'  => 'Quelle est la description correspondant à cette traduction ?',
         ],
     ];
 

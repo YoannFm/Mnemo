@@ -34,7 +34,7 @@
                         {{-- Sera utilisé dans les questions Q1 et Q4 en français --}}
                         <div class="mb-3">
                             <label for="name_fr" class="form-label">
-                                Nom français <span style="color:#ef4444;">*</span>
+                                Nom <span style="color:#ef4444;">*</span>
                             </label>
                             <input type="text"
                                    id="name_fr"
@@ -52,7 +52,7 @@
                         {{-- Sera utilisé dans la question Q4 (traduction anglaise) --}}
                         <div class="mb-3">
                             <label for="name_en" class="form-label">
-                                Nom anglais <span style="color:#ef4444;">*</span>
+                                Traduction <span style="color:#ef4444;">*</span>
                             </label>
                             <input type="text"
                                    id="name_en"

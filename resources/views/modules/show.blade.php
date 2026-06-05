@@ -182,6 +182,13 @@
                 <div style="font-weight:600;font-size:.9rem;">Mode Anki</div>
                 <div style="font-size:.75rem;color:var(--text-muted);">Infini</div>
             </a>
+            <a href="{{ route('exam.show', $module) }}" class="btn btn-outline-secondary" style="height:auto;padding:1rem;border-width:2px;">
+                <div style="font-size:1.5rem;margin-bottom:.25rem;">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+                <div style="font-weight:600;font-size:.9rem;">Mode Examen</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">Tous les items</div>
+            </a>
         </div>
     @elseif ($items->total() > 0 && $items->total() < 4)
         <div class="alert d-flex align-items-center gap-2 mb-4"
@@ -218,7 +225,7 @@
                     <div class="card h-100">
 
                         {{-- Photo de l'item --}}
-                        <div style="height:160px;overflow:hidden;border-radius:12px 12px 0 0;background:#0f1117;">
+                        <div style="height:160px;overflow:hidden;border-radius:12px 12px 0 0;background:#0f1117;cursor:pointer;" onclick="openZoom('{{ $item->photo_url }}')">
                             <img src="{{ $item->photo_url }}"
                                  alt="{{ $item->name_fr }}"
                                  style="width:100%;height:100%;object-fit:cover;opacity:.9;">
@@ -229,7 +236,7 @@
                             {{-- Noms FR / EN --}}
                             <div>
                                 <div class="fw-semibold" style="font-size:.95rem;">{{ $item->name_fr }}</div>
-                                <div style="font-size:.8rem;color:var(--accent);">{{ $item->name_en }}</div>
+                                <div style="font-size:.8rem;color:var(--accent);"><span style="color:var(--text-muted);font-size:.75rem;">Traduction :</span> {{ $item->name_en }}</div>
                             </div>
 
                             {{-- Fonction/Description --}}
@@ -270,5 +277,17 @@
             {{ $items->links('pagination::bootstrap-5') }}
         </div>
     @endif
+
+
+<div id="zoom-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;cursor:pointer;align-items:center;justify-content:center;" onclick="this.style.display='none'">
+    <img id="zoom-img" src="" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;">
+</div>
+
+<script>
+function openZoom(src) {
+    document.getElementById('zoom-img').src = src;
+    document.getElementById('zoom-modal').style.display = 'flex';
+}
+</script>
 
 </x-app-layout>

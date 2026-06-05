@@ -51,6 +51,19 @@ class AnkiController extends Controller
             'anki_mode'      => $mode,
         ]);
 
+        // Si mode spécifique (pas random), activer le mode apprentissage
+        if ($mode !== 'random') {
+            $allItemIds = $module->items()->pluck('id')->toArray();
+            shuffle($allItemIds);
+            session([
+                'anki_learn_mode'      => true,
+                'anki_learn_remaining' => $allItemIds,
+                'anki_learn_total'     => count($allItemIds),
+            ]);
+        } else {
+            session()->forget(['anki_learn_mode', 'anki_learn_remaining', 'anki_learn_total']);
+        }
+
         return redirect()->route('anki.question', $module);
     }
 
@@ -59,18 +72,14 @@ class AnkiController extends Controller
      */
     public function question(Module $module)
     {
-        \Log::info('=== DEBUG: Anki question() appelé ===');
-        \Log::info('Module ID: ' . $module->id);
-        \Log::info('User ID: ' . Auth::id());
-
         $this->authorize($module);
 
         if (!session()->has('anki_module_id') || session('anki_module_id') !== $module->id) {
             return redirect()->route('modules.show', $module)->with('error', 'Aucune session Anki en cours.');
         }
 
-        // Filtrer les types de questions selon le mode choisi
         $mode = session('anki_mode', 'random');
+        $learnMode = session('anki_learn_mode', false);
 
         $modeMap = [
             'photo_to_name_fr'    => ['Q1'],
@@ -95,90 +104,58 @@ class AnkiController extends Controller
 
         $questionType = $types[array_rand($types)];
 
-        \Log::info('Question type sélectionné: ' . $questionType);
-
-        // --- Priorisation des items ratés (ANKI-3) ---
-        // Au lieu d'un tirage purement aléatoire, on pondère les items
-        // selon la progression de l'utilisateur : les items ratés reviennent plus souvent.
         $allItems = $module->items()->get();
 
-        \Log::info('Nombre total d\'items: ' . $allItems->count());
+        if ($learnMode) {
+            $remaining = session('anki_learn_remaining', []);
+            $learnTotal = session('anki_learn_total', 0);
 
-        // Récupérer toutes les progressions de l'utilisateur pour ce module
-        $progressMap = Progress::where('user_id', Auth::id())
-            ->whereIn('item_id', $allItems->pluck('id'))
-            ->get()
-            ->keyBy('item_id');
-
-        \Log::info('Progressions existantes: ' . $progressMap->count());
-
-        // Construire une liste pondérée : items ratés et items dus (SM-2) apparaissent plus souvent
-        $weightedPool = [];
-        foreach ($allItems as $item) {
-            $prog = $progressMap->get($item->id);
-            if (!$prog) {
-                // Jamais vu : poids élevé (priorité haute)
-                $weight = 5;
-            } elseif ($prog->isMastered() && !$prog->isDueForReview()) {
-                // Maîtrisé et pas encore dû : poids très faible
-                $weight = 1;
-            } elseif ($prog->isDueForReview() && !$prog->isMastered()) {
-                // Dû pour révision et non maîtrisé : poids très élevé (SM-2 priorité)
-                $weight = max(5, $prog->fail_count - $prog->success_count + 5);
-            } elseif ($prog->isDueForReview()) {
-                // Dû pour révision (même si maîtrisé) : poids moyen
-                $weight = 3;
-            } else {
-                // En cours mais pas encore dû : poids selon les erreurs
-                $weight = max(1, $prog->fail_count - $prog->success_count + 3);
+            if (empty($remaining)) {
+                session()->forget(['anki_module_id', 'anki_mode', 'anki_learn_mode', 'anki_learn_remaining', 'anki_learn_total']);
+                return redirect()->route('modules.show', $module)->with('success', 'Bravo ! Vous avez maitrisé tous les items de ce module.');
             }
-            for ($i = 0; $i < $weight; $i++) {
-                $weightedPool[] = $item;
+
+            $targetItemId = $remaining[array_rand($remaining)];
+            $targetItem = $allItems->firstWhere('id', $targetItemId);
+        } else {
+            // Weighted pool (SM-2)
+            $progressMap = Progress::where('user_id', Auth::id())
+                ->whereIn('item_id', $allItems->pluck('id'))
+                ->get()
+                ->keyBy('item_id');
+
+            $weightedPool = [];
+            foreach ($allItems as $item) {
+                $prog = $progressMap->get($item->id);
+                if (!$prog) {
+                    $weight = 5;
+                } elseif ($prog->isMastered() && !$prog->isDueForReview()) {
+                    $weight = 1;
+                } elseif ($prog->isDueForReview() && !$prog->isMastered()) {
+                    $weight = max(5, $prog->fail_count - $prog->success_count + 5);
+                } elseif ($prog->isDueForReview()) {
+                    $weight = 3;
+                } else {
+                    $weight = max(1, $prog->fail_count - $prog->success_count + 3);
+                }
+                for ($i = 0; $i < $weight; $i++) {
+                    $weightedPool[] = $item;
+                }
             }
+
+            $targetItem = $weightedPool[array_rand($weightedPool)];
         }
-
-        \Log::info('Taille du pool pondéré: ' . count($weightedPool));
-
-        // Tirer l'item cible selon les poids calculés
-        $targetItem = $weightedPool[array_rand($weightedPool)];
-        \Log::info('Item cible sélectionné: ' . $targetItem->id . ' - ' . $targetItem->name_fr);
-        // --- Fin priorisation ---
 
         $question = QuizGenerator::generateQuestion($module, $questionType, $targetItem);
 
-        \Log::info('Question générée avec keys: ' . implode(', ', array_keys($question)));
-
         if (isset($question['error'])) {
-            return redirect()
-                ->route('modules.show', $module)
-                ->with('error', $question['error']);
+            return redirect()->route('modules.show', $module)->with('error', $question['error']);
         }
 
-        // Récupérer la progression actuelle de cet item
-        \Log::info('DEBUG: Créer/récupérer Progress pour item ' . $question['item_id']);
-
         $progress = Progress::firstOrCreate(
-            [
-                'user_id' => Auth::id(),
-                'item_id' => $question['item_id'],
-            ],
-            [
-                'success_count'   => 0,
-                'fail_count'      => 0,
-                'streak'          => 0,
-                'easiness_factor' => 2.5,
-                'interval_days'   => 1,
-            ]
+            ['user_id' => Auth::id(), 'item_id' => $question['item_id']],
+            ['success_count' => 0, 'fail_count' => 0, 'streak' => 0, 'easiness_factor' => 2.5, 'interval_days' => 1]
         );
-
-        \Log::info('Progress chargé/créé', [
-            'id' => $progress->id,
-            'success_count' => $progress->success_count,
-            'fail_count' => $progress->fail_count,
-            'streak' => $progress->streak,
-            'easiness_factor' => $progress->easiness_factor,
-            'interval_days' => $progress->interval_days,
-        ]);
 
         $question['progress'] = [
             'success_count' => $progress->success_count,
@@ -186,6 +163,11 @@ class AnkiController extends Controller
             'streak'        => $progress->streak,
             'is_mastered'   => $progress->isMastered(),
         ];
+
+        if ($learnMode) {
+            $question['learn_remaining'] = count($remaining);
+            $question['learn_total']     = $learnTotal;
+        }
 
         return view('quiz.anki.question', compact('module', 'question'));
     }
@@ -285,18 +267,22 @@ class AnkiController extends Controller
 
             $progress->save();
 
-            \Log::info('DEBUG: Progress sauvegardé avec succès');
+            // Mode apprentissage : retirer l'item du pool si réponse correcte
+            if (session('anki_learn_mode') && $isCorrect) {
+                $remaining = session('anki_learn_remaining', []);
+                $remaining = array_values(array_filter($remaining, fn($id) => $id !== $data['item_id']));
+                session(['anki_learn_remaining' => $remaining]);
+            }
 
             // Retourner le feedback
             $response = [
-                'is_correct'  => $isCorrect,
-                'correct_answer' => $question['correct_answer'],
-                'user_answer' => $question['options'][$data['answer']],
-                'streak'      => $progress->streak,
-                'is_mastered' => $progress->isMastered(),
+                'is_correct'      => $isCorrect,
+                'correct_answer'  => $question['correct_answer'],
+                'user_answer'     => $question['options'][$data['answer']],
+                'streak'          => $progress->streak,
+                'is_mastered'     => $progress->isMastered(),
+                'learn_remaining' => session('anki_learn_remaining') ? count(session('anki_learn_remaining')) : null,
             ];
-
-            \Log::info('DEBUG: Réponse JSON', $response);
 
             return response()->json($response);
         } catch (\Throwable $e) {
@@ -321,7 +307,7 @@ class AnkiController extends Controller
     {
         $this->authorize($module);
 
-        session()->forget('anki_module_id');
+        session()->forget(['anki_module_id', 'anki_mode', 'anki_learn_mode', 'anki_learn_remaining', 'anki_learn_total']);
 
         return redirect()
             ->route('modules.show', $module)

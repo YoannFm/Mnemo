@@ -6,6 +6,7 @@ use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\AnkiController;
+use App\Http\Controllers\ExamController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\InstallController;
@@ -101,6 +102,13 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::get('/modules/{module}/anki/question', [AnkiController::class, 'question'])->name('anki.question');
     Route::post('/modules/{module}/anki/submit', [AnkiController::class, 'submit'])->name('anki.submit');
     Route::post('/modules/{module}/anki/quit', [AnkiController::class, 'quit'])->name('anki.quit');
+
+    // ─── Mode Examen (tous les items, score final) ───
+    Route::get('/modules/{module}/exam', [ExamController::class, 'show'])->name('exam.show');
+    Route::post('/modules/{module}/exam/start', [ExamController::class, 'start'])->name('exam.start');
+    Route::get('/modules/{module}/exam/question', [ExamController::class, 'question'])->name('exam.question');
+    Route::post('/modules/{module}/exam/submit', [ExamController::class, 'submit'])->name('exam.submit');
+    Route::get('/modules/{module}/exam/result', [ExamController::class, 'result'])->name('exam.result');
 
     // Dupliquer un module public dans son espace personnel
     Route::post('/modules/{module}/duplicate', [ModuleController::class, 'duplicate'])->name('modules.duplicate');
