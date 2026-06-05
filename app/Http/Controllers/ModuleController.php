@@ -182,7 +182,7 @@ class ModuleController extends Controller
      */
     public function preview(Module $module)
     {
-        if (!$module->is_public && $module->owner_id !== Auth::id()) {
+        if (!$module->is_public && $module->owner_id !== Auth::id() && !Auth::user()?->is_admin) {
             abort(403);
         }
 
@@ -216,7 +216,7 @@ class ModuleController extends Controller
 
     public function duplicate(Module $module)
     {
-        if (!$module->is_public && $module->owner_id !== Auth::id()) {
+        if (!$module->is_public && $module->owner_id !== Auth::id() && !Auth::user()?->is_admin) {
             abort(403, 'Ce module est privé.');
         }
 
@@ -489,18 +489,18 @@ class ModuleController extends Controller
      */
     private function authorizeOwner(Module $module): void
     {
-        if ($module->owner_id !== Auth::id()) {
+        if ($module->owner_id !== Auth::id() && !Auth::user()?->is_admin) {
             abort(403, 'Action non autorisée.');
         }
     }
 
     /**
      * Vérifie que l'utilisateur peut voir ce module :
-     * soit il en est le propriétaire, soit le module est public.
+     * soit il en est le propriétaire, soit le module est public, soit c'est un admin.
      */
     private function authorizeView(Module $module): void
     {
-        if (!$module->is_public && $module->owner_id !== Auth::id()) {
+        if (!$module->is_public && $module->owner_id !== Auth::id() && !Auth::user()?->is_admin) {
             abort(403, 'Ce module est privé.');
         }
     }
