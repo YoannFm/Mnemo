@@ -2,7 +2,7 @@
     <x-slot name="pageTitle">Mode Anki - {{ $module->title }}</x-slot>
 
     <div class="row justify-content-center">
-        <div class="col-12 col-lg-7">
+        <div class="col-12 col-lg-6">
 
             <nav aria-label="breadcrumb" class="mb-4">
                 <ol class="breadcrumb" style="font-size:.85rem;">
@@ -23,208 +23,66 @@
                 </p>
             </div>
 
-            <form method="POST" action="{{ route('anki.start', $module) }}">
+            <form method="POST" action="{{ route('anki.start', $module) }}" id="anki-form">
                 @csrf
+                <input type="hidden" name="mode" id="mode-value" value="random">
 
                 {{-- Mode aléatoire --}}
-                <div class="card mb-3" style="cursor:pointer;" onclick="selectMode('random')">
-                    <div class="card-body p-3 d-flex align-items-center gap-3">
-                        <input type="radio" name="mode" id="mode_random" value="random" class="form-check-input mt-0" checked style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                        <label for="mode_random" style="cursor:pointer;flex:1;margin:0;">
-                            <div class="fw-semibold"><i class="bi bi-shuffle me-2" style="color:var(--accent);"></i>Aléatoire</div>
-                            <div style="font-size:.8rem;color:var(--text-muted);">Tous les types de questions mélangés</div>
-                        </label>
+                <div class="card mb-4">
+                    <div class="card-body p-3">
+                        <div class="form-check form-switch d-flex align-items-center gap-2" style="padding-left:0;">
+                            <input class="form-check-input" type="checkbox" id="random-toggle" checked style="width:2.5rem;height:1.25rem;cursor:pointer;margin:0;">
+                            <label class="form-check-label fw-semibold" for="random-toggle" style="cursor:pointer;">
+                                <i class="bi bi-shuffle me-1" style="color:var(--accent);"></i> Aléatoire
+                            </label>
+                        </div>
+                        <p class="mb-0 mt-1" style="font-size:.8rem;color:var(--text-muted);">Tous les types de questions mélangés, répétition espacée SM-2.</p>
                     </div>
                 </div>
 
-                {{-- Modes entrée/sortie --}}
-                <h6 class="mb-2 mt-4" style="color:var(--text-muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;">Entrée - Sortie</h6>
+                {{-- Choix entrée / sortie --}}
+                <div id="io-section">
+                    <h6 class="mb-3" style="color:var(--text-muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.5px;">Entrée - Sortie</h6>
 
-                <h6 class="mb-2" style="color:var(--text-muted);font-size:.75rem;font-weight:600;margin-top:1.5rem;">Image en entrée</h6>
-                <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('photo_to_name_fr')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_photo_name_fr" value="photo_to_name_fr" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_photo_name_fr" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-image me-1" style="color:var(--accent);"></i>Image
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Nom FR
-                                    </div>
-                                </label>
-                            </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem;">
+                                <i class="bi bi-eye me-1" style="color:var(--accent);"></i>Ce que je vois
+                            </label>
+                            <select id="input-field" class="form-select">
+                                <option value="photo_path">Photo</option>
+                                <option value="name_fr">Nom</option>
+                                <option value="name_en">Traduction</option>
+                                <option value="function_text">Description</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold" style="font-size:.85rem;">
+                                <i class="bi bi-pencil me-1" style="color:var(--accent);"></i>Ce que je réponds
+                            </label>
+                            <select id="output-field" class="form-select">
+                                <option value="name_fr">Nom</option>
+                                <option value="name_en">Traduction</option>
+                                <option value="function_text">Description</option>
+                                <option value="photo_path">Photo</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('photo_to_name_en')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_photo_name_en" value="photo_to_name_en" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_photo_name_en" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-image me-1" style="color:var(--accent);"></i>Image
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Nom EN
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
+                    <div id="invalid-combo" class="alert alert-warning d-none py-2" style="font-size:.85rem;">
+                        <i class="bi bi-exclamation-triangle me-1"></i> L'entrée et la sortie doivent être différentes.
                     </div>
 
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('photo_to_function')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_photo_function" value="photo_to_function" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_photo_function" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-image me-1" style="color:var(--accent);"></i>Image
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Description
-                                    </div>
-                                </label>
+                    {{-- Info mode apprentissage --}}
+                    <div class="card mb-2" style="background:rgba(var(--accent-rgb, 239,183,2),.08);border:1px solid rgba(var(--accent-rgb, 239,183,2),.2);">
+                        <div class="card-body p-3">
+                            <div class="fw-semibold mb-1" style="font-size:.85rem;color:var(--accent);">
+                                <i class="bi bi-mortarboard me-1"></i> Mode apprentissage actif
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <h6 class="mb-2" style="color:var(--text-muted);font-size:.75rem;font-weight:600;margin-top:1.5rem;">Description en entrée</h6>
-                <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('function_to_photo')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_function_photo" value="function_to_photo" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_function_photo" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-card-text me-1" style="color:var(--accent);"></i>Description
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Image
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('function_to_name_fr')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_function_name_fr" value="function_to_name_fr" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_function_name_fr" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-card-text me-1" style="color:var(--accent);"></i>Description
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Nom FR
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('function_to_name_en')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_function_name_en" value="function_to_name_en" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_function_name_en" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-card-text me-1" style="color:var(--accent);"></i>Description
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Nom EN
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <h6 class="mb-2" style="color:var(--text-muted);font-size:.75rem;font-weight:600;margin-top:1.5rem;">Noms en entrée</h6>
-                <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('name_fr_to_name_en')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_fr_en" value="name_fr_to_name_en" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_fr_en" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-translate me-1" style="color:var(--accent);"></i>Nom FR
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Nom EN
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('name_fr_to_photo')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_fr_photo" value="name_fr_to_photo" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_fr_photo" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-translate me-1" style="color:var(--accent);"></i>Nom FR
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Image
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('name_fr_to_function')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_fr_function" value="name_fr_to_function" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_fr_function" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-translate me-1" style="color:var(--accent);"></i>Nom FR
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Description
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('name_en_to_photo')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_en_photo" value="name_en_to_photo" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_en_photo" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-translate me-1" style="color:var(--accent);"></i>Nom EN
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Image
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('name_en_to_function')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_en_function" value="name_en_to_function" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_en_function" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-translate me-1" style="color:var(--accent);"></i>Nom EN
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Description
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <div class="card" style="cursor:pointer;" onclick="selectMode('name_en_to_name_fr')">
-                            <div class="card-body p-3 d-flex align-items-center gap-3">
-                                <input type="radio" name="mode" id="mode_en_fr" value="name_en_to_name_fr" class="form-check-input mt-0" style="width:1.25rem;height:1.25rem;cursor:pointer;">
-                                <label for="mode_en_fr" style="cursor:pointer;flex:1;margin:0;">
-                                    <div class="fw-semibold" style="font-size:.9rem;">
-                                        <i class="bi bi-translate me-1" style="color:var(--accent);"></i>Nom EN
-                                        <i class="bi bi-arrow-right mx-1" style="color:var(--text-muted);"></i>
-                                        Nom FR
-                                    </div>
-                                </label>
-                            </div>
+                            <p class="mb-0" style="font-size:.78rem;color:var(--text-muted);">
+                                Chaque item est posé une fois. Réponse juste = retiré de la liste. Réponse fausse = remis dans le pool.
+                                La session se termine quand tous les items sont réussis.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -233,7 +91,7 @@
                     <a href="{{ route('modules.show', $module) }}" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);">
                         Annuler
                     </a>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="start-btn">
                         <i class="bi bi-play-fill me-1"></i>Commencer
                     </button>
                 </div>
@@ -243,9 +101,56 @@
     </div>
 
     <script>
-        function selectMode(value) {
-            document.querySelector(`input[value="${value}"]`).checked = true;
+    var modeMap = {
+        'photo_path|name_fr': 'photo_to_name_fr',
+        'photo_path|name_en': 'photo_to_name_en',
+        'photo_path|function_text': 'photo_to_function',
+        'name_fr|photo_path': 'name_fr_to_photo',
+        'name_fr|name_en': 'name_fr_to_name_en',
+        'name_fr|function_text': 'name_fr_to_function',
+        'name_en|photo_path': 'name_en_to_photo',
+        'name_en|name_fr': 'name_en_to_name_fr',
+        'name_en|function_text': 'name_en_to_function',
+        'function_text|photo_path': 'function_to_photo',
+        'function_text|name_fr': 'function_to_name_fr',
+        'function_text|name_en': 'function_to_name_en',
+    };
+
+    var randomToggle = document.getElementById('random-toggle');
+    var ioSection = document.getElementById('io-section');
+    var inputField = document.getElementById('input-field');
+    var outputField = document.getElementById('output-field');
+    var modeValue = document.getElementById('mode-value');
+    var startBtn = document.getElementById('start-btn');
+    var invalidCombo = document.getElementById('invalid-combo');
+
+    function updateMode() {
+        if (randomToggle.checked) {
+            ioSection.style.opacity = '.4';
+            ioSection.style.pointerEvents = 'none';
+            modeValue.value = 'random';
+            startBtn.disabled = false;
+            return;
         }
+        ioSection.style.opacity = '1';
+        ioSection.style.pointerEvents = '';
+        var inp = inputField.value;
+        var out = outputField.value;
+        if (inp === out) {
+            invalidCombo.classList.remove('d-none');
+            startBtn.disabled = true;
+            modeValue.value = '';
+        } else {
+            invalidCombo.classList.add('d-none');
+            startBtn.disabled = false;
+            modeValue.value = modeMap[inp + '|' + out] || 'random';
+        }
+    }
+
+    randomToggle.addEventListener('change', updateMode);
+    inputField.addEventListener('change', updateMode);
+    outputField.addEventListener('change', updateMode);
+    updateMode();
     </script>
 
 </x-app-layout>

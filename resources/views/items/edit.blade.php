@@ -33,7 +33,7 @@
                         {{-- Nom français --}}
                         <div class="mb-3">
                             <label for="name_fr" class="form-label">
-                                Nom français <span style="color:#ef4444;">*</span>
+                                Nom <span style="color:#ef4444;">*</span>
                             </label>
                             <input type="text"
                                    id="name_fr"
@@ -49,7 +49,7 @@
                         {{-- Nom anglais --}}
                         <div class="mb-3">
                             <label for="name_en" class="form-label">
-                                Nom anglais <span style="color:#ef4444;">*</span>
+                                Traduction <span style="color:#ef4444;">*</span>
                             </label>
                             <input type="text"
                                    id="name_en"
