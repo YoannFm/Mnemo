@@ -337,6 +337,32 @@
     </script>
     @endauth
 
+    {{-- ── Avis des utilisateurs ── --}}
+    @php $allRatings = $module->ratings()->with('user')->whereNotNull('comment')->latest()->get(); @endphp
+    @if ($allRatings->isNotEmpty())
+        <div class="mb-4">
+            <h6 class="mb-3" style="font-size:.9rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">
+                Avis ({{ $allRatings->count() }})
+            </h6>
+            <div class="d-flex flex-column gap-2">
+                @foreach ($allRatings as $r)
+                    <div class="card p-3" style="gap:.4rem;display:flex;flex-direction:column;">
+                        <div class="d-flex align-items-center justify-content-between gap-2">
+                            <span class="fw-semibold" style="font-size:.85rem;">{{ $r->user?->name ?? 'Utilisateur supprimé' }}</span>
+                            <div>
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <i class="bi {{ $i <= $r->rating ? 'bi-star-fill' : 'bi-star' }}" style="color:#fbbf24;font-size:.8rem;"></i>
+                                @endfor
+                            </div>
+                        </div>
+                        <p style="font-size:.82rem;color:var(--text-muted);margin:0;">{{ $r->comment }}</p>
+                        <div style="font-size:.75rem;color:var(--text-muted);">{{ $r->created_at->diffForHumans() }}</div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
     {{-- ── Liste des items ── --}}
     @if ($items->isEmpty())
         {{-- État vide - aucun item dans le module --}}
