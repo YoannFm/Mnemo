@@ -103,15 +103,17 @@ class ModuleController extends Controller
         $this->authorizeOwner($module);
 
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'is_public'   => 'nullable|boolean',
+            'title'             => 'required|string|max:255',
+            'description'       => 'nullable|string|max:1000',
+            'is_public'         => 'nullable|boolean',
+            'allow_duplication' => 'nullable|boolean',
         ]);
 
         $module->update([
-            'title'       => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'is_public'   => $request->boolean('is_public'),
+            'title'             => $validated['title'],
+            'description'       => $validated['description'] ?? null,
+            'is_public'         => $request->boolean('is_public'),
+            'allow_duplication' => $request->boolean('allow_duplication'),
         ]);
 
         return redirect()->route('modules.show', $module)
@@ -138,9 +140,13 @@ class ModuleController extends Controller
      */
     public function duplicate(Module $module)
     {
-        // On peut dupliquer uniquement si le module est public ou si on en est l'auteur
         if (!$module->is_public && $module->owner_id !== Auth::id()) {
             abort(403, 'Ce module est privé.');
+        }
+
+        $user = Auth::user();
+        if (!$module->allow_duplication && $module->owner_id !== $user->id && !$user->is_admin) {
+            return redirect()->back()->with('error', 'Le créateur de ce module n\'autorise pas la duplication.');
         }
 
         // Créer une copie du module (privée par défaut)

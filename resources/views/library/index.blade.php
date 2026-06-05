@@ -83,14 +83,16 @@
                                    class="btn btn-sm btn-outline-primary flex-grow-1">
                                     <i class="bi bi-eye me-1"></i>Voir
                                 </a>
-                                {{-- Dupliquer ce module dans son espace personnel --}}
-                                <form method="POST" action="{{ route('modules.duplicate', $module) }}" style="display:inline;">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm" style="color:var(--accent);border:1px solid var(--accent);"
-                                            title="Copier ce module dans mon espace">
-                                        <i class="bi bi-copy me-1"></i>Dupliquer
-                                    </button>
-                                </form>
+                                {{-- Dupliquer ce module dans son espace personnel (si autorisé) --}}
+                                @if ($module->allow_duplication || Auth::user()->is_admin)
+                                    <form method="POST" action="{{ route('modules.duplicate', $module) }}" style="display:inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm" style="color:var(--accent);border:1px solid var(--accent);"
+                                                title="Copier ce module dans mon espace">
+                                            <i class="bi bi-copy me-1"></i>Dupliquer
+                                        </button>
+                                    </form>
+                                @endif
                                 @if ($module->items_count >= 4)
                                     <a href="{{ route('test.show', $module) }}"
                                        class="btn btn-sm btn-primary">
