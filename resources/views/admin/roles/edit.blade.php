@@ -4,6 +4,7 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <form action="{{ route('admin.roles.update', $role) }}" method="POST">
+                @csrf
                 @method('PUT')
                 @include('admin.roles._form')
 
