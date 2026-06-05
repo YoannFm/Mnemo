@@ -201,6 +201,10 @@
                         <i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser ma progression
                     </button>
                 </form>
+                <a href="#ratings-section" class="btn btn-sm"
+                   style="color:var(--text-muted);border:1px solid var(--accent);background:transparent;">
+                    <i class="bi bi-star me-1"></i>Voir les avis
+                </a>
             </div>
         @endauth
     @endif
@@ -586,6 +590,7 @@ function openZoom(src) {
 </script>
 
     {{-- ── Notation du module ── --}}
+    <div id="ratings-section"></div>
     @auth
     <div class="card mb-4 p-3">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
