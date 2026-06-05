@@ -139,6 +139,28 @@ class ModuleController extends Controller
      * Duplique un module public dans l'espace de l'utilisateur connecté.
      * Copie le module et tous ses items (sans les photos).
      */
+    public function preview(Module $module)
+    {
+        if (!$module->is_public && $module->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $items = $module->items()->select('name_fr', 'name_en', 'function_text', 'photo_path')->get()->map(function ($item) {
+            return [
+                'name_fr'       => $item->name_fr,
+                'name_en'       => $item->name_en,
+                'function_text' => $item->function_text,
+                'photo_url'     => $item->photo_url,
+            ];
+        });
+
+        return response()->json([
+            'title'       => $module->title,
+            'description' => $module->description,
+            'items'       => $items,
+        ]);
+    }
+
     public function resetProgress(Module $module)
     {
         $itemIds = $module->items()->pluck('id');
