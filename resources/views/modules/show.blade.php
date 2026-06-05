@@ -216,6 +216,127 @@
         </div>
     @endif
 
+    {{-- ── Notation du module ── --}}
+    @auth
+    <div class="card mb-4 p-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+                <span class="fw-semibold" style="font-size:.95rem;">Notation du module</span>
+                @if ($ratingCount > 0)
+                    <span style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;">
+                        {{ number_format($avgRating, 1) }}/5
+                        <span style="color:var(--text-muted);">({{ $ratingCount }} avis)</span>
+                    </span>
+                @else
+                    <span style="font-size:.8rem;color:var(--text-muted);margin-left:.5rem;">Aucun avis</span>
+                @endif
+            </div>
+            {{-- Etoiles moyennes (lecture seule) --}}
+            <div style="font-size:1.1rem;">
+                @for ($i = 1; $i <= 5; $i++)
+                    <i class="bi {{ $ratingCount > 0 && $i <= round($avgRating) ? 'bi-star-fill' : 'bi-star' }}"
+                       style="color:#fbbf24;"></i>
+                @endfor
+            </div>
+        </div>
+
+        {{-- Formulaire de notation --}}
+        @if (Auth::id() !== $module->owner_id)
+        <div id="rating-form-wrapper">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span style="font-size:.85rem;color:var(--text-muted);">
+                    {{ $userRating ? 'Votre note :' : 'Notez ce module :' }}
+                </span>
+                <div class="d-flex gap-1" id="star-picker">
+                    @for ($i = 1; $i <= 5; $i++)
+                        <i class="bi {{ $userRating && $i <= $userRating->rating ? 'bi-star-fill' : 'bi-star' }} star-btn"
+                           data-value="{{ $i }}"
+                           style="font-size:1.4rem;cursor:pointer;color:#fbbf24;transition:transform .1s;">
+                        </i>
+                    @endfor
+                </div>
+            </div>
+            <textarea id="rating-comment" class="form-control mb-2" rows="2"
+                      maxlength="1000"
+                      placeholder="Commentaire facultatif..."
+                      style="font-size:.85rem;background:var(--card-bg);color:var(--text-primary);border-color:var(--card-border);">{{ $userRating?->comment }}</textarea>
+            <button id="rating-submit" class="btn btn-sm btn-primary">
+                {{ $userRating ? 'Modifier mon avis' : 'Envoyer mon avis' }}
+            </button>
+            <div id="rating-feedback" class="d-none mt-2" style="font-size:.82rem;"></div>
+        </div>
+        @else
+            <p style="font-size:.82rem;color:var(--text-muted);margin:0;">
+                <i class="bi bi-info-circle me-1"></i>Vous ne pouvez pas noter votre propre module.
+            </p>
+        @endif
+    </div>
+
+    <script>
+    (function () {
+        const stars = document.querySelectorAll('#star-picker .star-btn');
+        const submitBtn = document.getElementById('rating-submit');
+        const commentEl = document.getElementById('rating-comment');
+        const feedback  = document.getElementById('rating-feedback');
+        let selected = {{ $userRating ? $userRating->rating : 0 }};
+
+        function renderStars(hovered) {
+            const val = hovered || selected;
+            stars.forEach((s, i) => {
+                s.className = 'bi ' + (i < val ? 'bi-star-fill' : 'bi-star') + ' star-btn';
+                s.style.fontSize = '1.4rem';
+                s.style.cursor = 'pointer';
+                s.style.color = '#fbbf24';
+                s.style.transition = 'transform .1s';
+            });
+        }
+
+        stars.forEach((s, i) => {
+            s.addEventListener('mouseenter', () => renderStars(i + 1));
+            s.addEventListener('mouseleave', () => renderStars(0));
+            s.addEventListener('click', () => { selected = i + 1; renderStars(0); });
+        });
+
+        submitBtn?.addEventListener('click', function () {
+            if (!selected) {
+                feedback.className = 'alert alert-warning mt-2';
+                feedback.textContent = 'Veuillez choisir une note.';
+                feedback.classList.remove('d-none');
+                return;
+            }
+            this.disabled = true;
+            fetch('{{ route('modules.rate', $module) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ rating: selected, comment: commentEl?.value ?? '' })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') {
+                    feedback.className = 'alert alert-success mt-2';
+                    feedback.textContent = 'Votre avis a bien été enregistré.';
+                    submitBtn.textContent = 'Modifier mon avis';
+                } else {
+                    feedback.className = 'alert alert-danger mt-2';
+                    feedback.textContent = data.message ?? 'Une erreur est survenue.';
+                    submitBtn.disabled = false;
+                }
+                feedback.classList.remove('d-none');
+            })
+            .catch(() => {
+                feedback.className = 'alert alert-danger mt-2';
+                feedback.textContent = 'Erreur réseau. Veuillez réessayer.';
+                feedback.classList.remove('d-none');
+                submitBtn.disabled = false;
+            });
+        });
+    })();
+    </script>
+    @endauth
+
     {{-- ── Liste des items ── --}}
     @if ($items->isEmpty())
         {{-- État vide - aucun item dans le module --}}

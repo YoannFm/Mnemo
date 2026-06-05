@@ -61,4 +61,9 @@ class Module extends Model
     {
         return $this->hasMany(Score::class);
     }
+
+    public function ratings()
+    {
+        return $this->hasMany(ModuleRating::class);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ModuleRating;
 use App\Models\PostCommentHistory;
 
 class CommentHistoryController extends Controller
@@ -13,6 +14,11 @@ class CommentHistoryController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 
-        return view('admin.comment-history.index', compact('entries'));
+        $ratings = ModuleRating::with(['user', 'module'])
+            ->whereNotNull('comment')
+            ->orderBy('created_at', 'desc')
+            ->paginate(25);
+
+        return view('admin.comment-history.index', compact('entries', 'ratings'));
     }
 }
