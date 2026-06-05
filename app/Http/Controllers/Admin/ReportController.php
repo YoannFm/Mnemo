@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminSanction;
+use App\Models\ModuleRatingDeletion;
 use App\Models\ModuleRatingReport;
 use App\Models\ModuleReport;
 use App\Models\Mute;
@@ -70,6 +71,16 @@ class ReportController extends Controller
         }
 
         $userId = $rating->user_id;
+
+        ModuleRatingDeletion::create([
+            'user_id'    => $rating->user_id,
+            'module_id'  => $rating->module_id,
+            'type'       => 'rating',
+            'rating'     => $rating->rating,
+            'content'    => $rating->comment,
+            'deleted_by' => 'admin',
+        ]);
+
         $rating->delete();
         $report->update(['status' => 'treated']);
 

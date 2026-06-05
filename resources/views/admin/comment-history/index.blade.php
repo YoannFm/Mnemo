@@ -53,6 +53,66 @@
         </div>
     </div>
 
+    {{-- Historique suppressions d'avis et réponses --}}
+    <div class="card shadow mb-4">
+        <div class="card-header"><h5 class="card-title mb-0">Suppressions d'avis et de réponses</h5></div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Utilisateur</th>
+                            <th>Module</th>
+                            <th>Type</th>
+                            <th>Note</th>
+                            <th>Contenu supprimé</th>
+                            <th>Supprimé par</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($deletions as $d)
+                            <tr>
+                                <td style="font-size:.8rem;white-space:nowrap;">{{ $d->created_at->format('d/m/Y H:i') }}</td>
+                                <td>
+                                    @if($d->user)
+                                        <a href="{{ route('admin.users.edit', $d->user) }}">{{ $d->user->name }}</a>
+                                    @else <span class="text-muted">-</span> @endif
+                                </td>
+                                <td>
+                                    @if($d->module)
+                                        <a href="{{ route('modules.show', $d->module) }}" target="_blank">{{ Str::limit($d->module->title, 30) }}</a>
+                                    @else <span class="text-muted">Supprimé</span> @endif
+                                </td>
+                                <td>
+                                    <span class="badge {{ $d->type === 'rating' ? 'bg-warning text-dark' : 'bg-secondary' }}">
+                                        {{ $d->type === 'rating' ? 'Avis' : 'Réponse' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if($d->rating)
+                                        @for($i=1;$i<=5;$i++)
+                                            <i class="bi {{ $i <= $d->rating ? 'bi-star-fill' : 'bi-star' }}" style="color:#fbbf24;font-size:.8rem;"></i>
+                                        @endfor
+                                    @else <span class="text-muted">-</span> @endif
+                                </td>
+                                <td style="font-size:.8rem;max-width:300px;">{{ Str::limit($d->content, 150) ?: '-' }}</td>
+                                <td>
+                                    <span class="badge {{ $d->deleted_by === 'admin' ? 'bg-danger' : 'bg-info text-dark' }}">
+                                        {{ $d->deleted_by === 'admin' ? 'Admin' : 'Utilisateur' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="7" class="text-center text-muted">Aucune suppression enregistrée.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            {{ $deletions->links() }}
+        </div>
+    </div>
+
     <div class="card shadow mb-4">
         <div class="card-header"><h5 class="card-title mb-0">Historique des modifications et suppressions</h5></div>
         <div class="card-body">

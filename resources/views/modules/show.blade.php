@@ -638,9 +638,18 @@ function openZoom(src) {
                       maxlength="1000"
                       placeholder="Commentaire facultatif..."
                       style="font-size:.85rem;background:var(--card-bg);color:var(--text-primary);border-color:var(--card-border);">{{ $userRating?->comment }}</textarea>
-            <button id="rating-submit" class="btn btn-sm btn-primary">
-                {{ $userRating ? 'Modifier mon avis' : 'Envoyer mon avis' }}
-            </button>
+            <div class="d-flex gap-2 align-items-center">
+                <button id="rating-submit" class="btn btn-sm btn-primary">
+                    {{ $userRating ? 'Modifier mon avis' : 'Envoyer mon avis' }}
+                </button>
+                @if ($userRating)
+                <button id="rating-delete" class="btn btn-sm"
+                        style="color:#ef4444;border:1px solid var(--accent);background:transparent;"
+                        data-url="{{ route('modules.ratings.destroy', $userRating) }}">
+                    <i class="bi bi-trash me-1"></i>Supprimer mon avis
+                </button>
+                @endif
+            </div>
             <div id="rating-feedback" class="d-none mt-2" style="font-size:.82rem;"></div>
         </div>
         @elseif (Auth::id() === $module->owner_id)
@@ -714,6 +723,25 @@ function openZoom(src) {
                 feedback.classList.remove('d-none');
                 submitBtn.disabled = false;
             });
+        });
+
+        const deleteBtn = document.getElementById('rating-delete');
+        deleteBtn?.addEventListener('click', function () {
+            if (!confirm('Supprimer définitivement votre avis ?')) return;
+            this.disabled = true;
+            fetch(this.dataset.url, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') location.reload();
+                else { this.disabled = false; }
+            })
+            .catch(() => { this.disabled = false; });
         });
     })();
     </script>
