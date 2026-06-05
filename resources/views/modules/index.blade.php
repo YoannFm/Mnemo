@@ -82,8 +82,9 @@
                                 <form method="POST" action="{{ route('modules.progress.reset', $module) }}"
                                       onsubmit="return confirm('Réinitialiser ta progression sur ce module ?')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary"
-                                            title="Réinitialiser ma progression">
+                                    <button type="submit" class="btn btn-sm"
+                                            title="Réinitialiser ma progression"
+                                            style="color:var(--text-muted);border:1px solid var(--card-border);background:transparent;">
                                         <i class="bi bi-arrow-counterclockwise"></i>
                                     </button>
                                 </form>

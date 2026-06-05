@@ -196,7 +196,8 @@
                 <form method="POST" action="{{ route('modules.progress.reset', $module) }}"
                       onsubmit="return confirm('Réinitialiser toute ta progression sur ce module ? Cette action est irréversible.')">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                    <button type="submit" class="btn btn-sm"
+                            style="color:var(--text-muted);border:1px solid var(--card-border);background:transparent;">
                         <i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser ma progression
                     </button>
                 </form>
