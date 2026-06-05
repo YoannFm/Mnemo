@@ -256,7 +256,7 @@
             <p style="color:var(--text-muted);font-size:.875rem;">
                 Ajoutez des éléments à mémoriser pour commencer à vous entraîner.
             </p>
-            @if (Auth::id() === $module->owner_id)
+            @if (Auth::id() === $module->owner_id || Auth::user()?->is_admin)
                 <a href="{{ route('modules.items.create', $module) }}"
                    class="btn btn-primary mx-auto" style="width:fit-content;">
                     <i class="bi bi-plus-lg me-1"></i> Ajouter le premier item
@@ -292,8 +292,8 @@
                                 {{ $item->function_text }}
                             </p>
 
-                            {{-- Boutons d'action (propriétaire uniquement) --}}
-                            @if (Auth::id() === $module->owner_id)
+                            {{-- Boutons d'action (propriétaire ou admin) --}}
+                            @if (Auth::id() === $module->owner_id || Auth::user()?->is_admin)
                                 <div class="d-flex gap-2 mt-auto">
                                     <a href="{{ route('modules.items.edit', [$module, $item]) }}"
                                        class="btn btn-sm flex-grow-1"
