@@ -75,6 +75,10 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Import de module ZIP (doit être avant le resource pour éviter le conflit avec {module})
+    Route::get('/modules/import', [ModuleExportController::class, 'showImportForm'])->name('modules.import.form');
+    Route::post('/modules/import', [ModuleExportController::class, 'import'])->name('modules.import');
+
     // ─── CRUD Modules ───
     // Génère : modules.index, modules.create, modules.store,
     //          modules.show, modules.edit, modules.update, modules.destroy
@@ -111,10 +115,8 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::post('/modules/{module}/exam/submit', [ExamController::class, 'submit'])->name('exam.submit');
     Route::get('/modules/{module}/exam/result', [ExamController::class, 'result'])->name('exam.result');
 
-    // Export / Import de modules au format ZIP
+    // Export de module ZIP
     Route::get('/modules/{module}/export', [ModuleExportController::class, 'export'])->name('modules.export');
-    Route::get('/modules/import', [ModuleExportController::class, 'showImportForm'])->name('modules.import.form');
-    Route::post('/modules/import', [ModuleExportController::class, 'import'])->name('modules.import');
 
     // Dupliquer un module public dans son espace personnel
     Route::post('/modules/{module}/duplicate', [ModuleController::class, 'duplicate'])->name('modules.duplicate');
