@@ -511,9 +511,9 @@
     <nav style="margin-top:1.5rem;">
         @if (count($navItems) > 0)
             @foreach ($navItems as $navItem)
-                <a href="{{ $navItem->url }}"
-                   class="mobile-nav-link {{ request()->is(ltrim($navItem->url, '/')) ? 'active' : '' }}"
-                   @if($navItem->open_new_tab) target="_blank" rel="noopener noreferrer" @endif>
+                <a href="{{ $navItem->getUrl() }}"
+                   class="mobile-nav-link {{ request()->is(ltrim($navItem->value ?? '', '/')) ? 'active' : '' }}"
+                   @if($navItem->new_tab) target="_blank" rel="noopener noreferrer" @endif>
                     @if($navItem->icon)<i class="bi {{ $navItem->icon }}"></i>@endif
                     {{ $navItem->label }}
                 </a>
@@ -583,9 +583,9 @@
             <div class="d-flex align-items-stretch">
                 @if (count($navItems) > 0)
                     @foreach ($navItems as $navItem)
-                        <a href="{{ $navItem->url }}"
-                           class="nav-link-custom {{ request()->is(ltrim($navItem->url, '/')) ? 'active' : '' }}"
-                           @if($navItem->open_new_tab) target="_blank" rel="noopener noreferrer" @endif>
+                        <a href="{{ $navItem->getUrl() }}"
+                           class="nav-link-custom {{ request()->is(ltrim($navItem->value ?? '', '/')) ? 'active' : '' }}"
+                           @if($navItem->new_tab) target="_blank" rel="noopener noreferrer" @endif>
                             @if($navItem->icon)<i class="bi {{ $navItem->icon }}"></i>@endif
                             {{ $navItem->label }}
                         </a>
