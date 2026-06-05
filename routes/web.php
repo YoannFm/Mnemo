@@ -118,6 +118,9 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     // Export de module ZIP
     Route::get('/modules/{module}/export', [ModuleExportController::class, 'export'])->name('modules.export');
 
+    // Réinitialiser sa progression sur un module
+    Route::delete('/modules/{module}/progress/reset', [ModuleController::class, 'resetProgress'])->name('modules.progress.reset');
+
     // Dupliquer un module public dans son espace personnel
     Route::post('/modules/{module}/duplicate', [ModuleController::class, 'duplicate'])->name('modules.duplicate');
 
