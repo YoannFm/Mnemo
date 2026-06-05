@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->text('note')->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
-            $table->unique(['module_rating_reply_id', 'user_id']);
+            $table->unique(['module_rating_reply_id', 'user_id'], 'mrr_reports_unique');
         });
     }
     public function down(): void { Schema::dropIfExists('module_rating_reply_reports'); }
