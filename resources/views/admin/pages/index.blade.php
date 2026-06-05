@@ -20,8 +20,8 @@
                                 <th scope="row">{{ $page->id }}</th>
                                 <td>{{ $page->title }}</td>
                                 <td>
-                                    <a href="{{ url('/' . $page->slug) }}" target="_blank" rel="noopener noreferrer">
-                                        {{ $page->slug }}
+                                    <a href="{{ route('pages.show', $page->slug) }}" target="_blank" rel="noopener noreferrer">
+                                        /p/{{ $page->slug }}
                                     </a>
                                 </td>
                                 <td>
