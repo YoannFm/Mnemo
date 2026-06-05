@@ -9,9 +9,16 @@
                 {{ $modules->total() }} module{{ $modules->total() > 1 ? 's' : '' }} au total
             </p>
         </div>
-        <a href="{{ route('modules.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i> Nouveau module
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('modules.import.form') }}"
+               class="btn"
+               style="color:var(--accent);border:1px solid var(--accent);">
+                <i class="bi bi-file-earmark-zip me-1"></i> Importer
+            </a>
+            <a href="{{ route('modules.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Nouveau module
+            </a>
+        </div>
     </div>
 
     {{-- ── Grille de modules ── --}}

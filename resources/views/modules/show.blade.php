@@ -47,6 +47,11 @@
                    style="color:var(--accent);border:1px solid var(--accent);">
                     <i class="bi bi-file-earmark-spreadsheet me-1"></i> Import CSV
                 </a>
+                <a href="{{ route('modules.export', $module) }}"
+                   class="btn"
+                   style="color:var(--text-muted);border:1px solid var(--card-border);">
+                    <i class="bi bi-file-earmark-zip me-1"></i> Exporter
+                </a>
                 <a href="{{ route('modules.edit', $module) }}"
                    class="btn"
                    style="color:var(--text-muted);border:1px solid var(--card-border);">
