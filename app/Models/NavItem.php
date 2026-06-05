@@ -27,12 +27,16 @@ class NavItem extends Model
 
     public function getUrl(): string
     {
-        return match ($this->type) {
-            'link'     => $this->value ?? '#',
-            'page'     => $this->value ? route('pages.show', $this->value) : '#',
-            'post'     => $this->value ? route('posts.show', $this->value) : '#',
-            'dropdown' => '#',
-            default    => $this->value ?? '#',
-        };
+        try {
+            return match ($this->type) {
+                'link'     => $this->value ?: '#',
+                'page'     => $this->value ? route('pages.show', ['slug' => $this->value]) : '#',
+                'post'     => $this->value ? route('posts.show', ['post' => $this->value]) : '#',
+                'dropdown' => '#',
+                default    => $this->value ?: '#',
+            };
+        } catch (\Throwable $e) {
+            return $this->value ?: '#';
+        }
     }
 }
