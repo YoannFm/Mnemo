@@ -11,7 +11,7 @@ class PrivateModuleController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Module::where('is_public', false)->with('owner');
+        $query = Module::where('is_public', false)->with('owner')->withCount('items');
 
         if ($userId = $request->input('user_id')) {
             $query->where('owner_id', $userId);

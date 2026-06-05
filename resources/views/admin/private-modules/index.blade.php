@@ -1,14 +1,13 @@
 <x-admin-layout>
-    <x-slot name="pageTitle">Modules prives</x-slot>
+    <x-slot name="pageTitle">Modules privés</x-slot>
 
     <div class="card shadow mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="card-title mb-0">Modules prives (is_public = false)</h5>
+            <h5 class="card-title mb-0">Modules privés</h5>
             <span class="badge bg-secondary">{{ $modules->total() }} module(s)</span>
         </div>
         <div class="card-body">
 
-            {{-- Filtres --}}
             <form method="GET" action="{{ route('admin.private-modules.index') }}" class="row g-2 mb-4">
                 <div class="col-md-4">
                     <select name="user_id" class="form-select form-select-sm">
@@ -27,14 +26,14 @@
             </form>
 
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table table-striped align-middle">
                     <thead>
                         <tr>
                             <th>#</th>
                             <th>Titre</th>
-                            <th>Proprietaire</th>
+                            <th>Propriétaire</th>
                             <th>Items</th>
-                            <th>Cree le</th>
+                            <th>Créé le</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -50,20 +49,34 @@
                                         <em class="text-muted">Inconnu</em>
                                     @endif
                                 </td>
-                                <td>{{ $module->items()->count() }}</td>
+                                <td>{{ $module->items_count }}</td>
                                 <td>{{ $module->created_at->format('d/m/Y') }}</td>
-                                <td>
-                                    <form action="{{ route('admin.private-modules.destroy', $module) }}" method="POST" class="d-inline"
-                                          onsubmit="return confirm('Supprimer ce module ?')">
+                                <td class="d-flex gap-2 flex-wrap">
+                                    <a href="{{ route('modules.show', $module) }}" class="btn btn-sm btn-outline-secondary" title="Voir" target="_blank">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('modules.export', $module) }}" class="btn btn-sm btn-outline-secondary" title="Exporter">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                    <form method="POST" action="{{ route('modules.duplicate', $module) }}" class="d-inline"
+                                          onsubmit="return confirm('Dupliquer ce module dans votre espace ?')">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Dupliquer">
+                                            <i class="bi bi-copy"></i>
+                                        </button>
+                                    </form>
+                                    <form id="del-priv-{{ $module->id }}" method="POST"
+                                          action="{{ route('admin.private-modules.destroy', $module) }}" class="d-inline">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="bi bi-trash"></i> Supprimer
+                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Supprimer"
+                                                onclick="if(confirm('Supprimer ce module ?')) document.getElementById('del-priv-{{ $module->id }}').submit()">
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="text-center text-muted">Aucun module prive.</td></tr>
+                            <tr><td colspan="6" class="text-center text-muted">Aucun module privé.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
