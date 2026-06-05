@@ -59,7 +59,7 @@ class RoleController extends Controller
             'name'               => 'required|string|max:50',
             'color'              => 'required|string|max:7',
             'icon'               => 'nullable|string|max:50',
-            'power'              => 'required|integer|min:0',
+            'power'              => 'sometimes|integer|min:0',
             'is_admin_role'      => 'sometimes|boolean',
             'can_create_module'  => 'sometimes|boolean',
             'can_train_own'      => 'sometimes|boolean',
