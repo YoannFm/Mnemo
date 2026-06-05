@@ -84,7 +84,7 @@
                                     @csrf @method('DELETE')
                                     <button type="submit" class="btn btn-sm"
                                             title="Réinitialiser ma progression"
-                                            style="color:var(--text-muted);border:1px solid var(--card-border);background:transparent;">
+                                            style="color:var(--text-muted);border:1px solid var(--accent);background:transparent;">
                                         <i class="bi bi-arrow-counterclockwise"></i>
                                     </button>
                                 </form>
