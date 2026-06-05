@@ -60,7 +60,7 @@
                         </div>
 
                         {{-- Visibilité --}}
-                        <div class="mb-4">
+                        <div class="mb-3">
                             <label class="form-label d-block">Visibilité</label>
                             <div class="form-check form-switch">
                                 <input class="form-check-input"
@@ -72,6 +72,22 @@
                                 <label class="form-check-label" for="is_public"
                                        style="font-size:.875rem;color:var(--text-muted);">
                                     Rendre ce module public (visible par tous)
+                                </label>
+                            </div>
+                        </div>
+
+                        {{-- Autoriser la duplication --}}
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"
+                                       type="checkbox"
+                                       id="allow_duplication"
+                                       name="allow_duplication"
+                                       value="1"
+                                       {{ old('allow_duplication', $module->allow_duplication ?? true) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="allow_duplication"
+                                       style="font-size:.875rem;color:var(--text-muted);">
+                                    Autoriser les autres utilisateurs à dupliquer ce module
                                 </label>
                             </div>
                         </div>

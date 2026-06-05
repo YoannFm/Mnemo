@@ -87,70 +87,88 @@ class QuizGenerator
      * Génère une question pour un module donné.
      *
      * @param Module $module Le module contenant les items
-     * @param string $questionType Code du type (Q1-Q8)
-     * @param Item|null $targetItem Item cible pré-sélectionné (ex : tirage pondéré par l'appelant). Si null, tirage aléatoire.
+     * @param string $questionType Code du type (Q1-Q11)
+     * @param Item|null $targetItem Item cible pré-sélectionné. Si null, tirage aléatoire.
      * @return array La question complète : énoncé, options mélangées, réponse correcte
      */
     public static function generateQuestion(Module $module, string $questionType = 'Q1', ?Item $targetItem = null): array
     {
-        // Récupérer le type demandé, sinon Q1 par défaut
-        $type = self::$questionTypes[$questionType] ?? self::$questionTypes['Q1'];
-
-        // Récupérer tous les items du module
         $allItems = $module->items()->get();
 
         if ($allItems->isEmpty()) {
-            return [
-                'error' => 'Aucun item dans ce module.',
-            ];
+            return ['error' => 'Aucun item dans ce module.'];
         }
 
-        // Utiliser l'item pré-sélectionné (ex : tirage pondéré) ou tirer aléatoirement
         $targetItem = $targetItem ?? $allItems->random();
 
-        // Récupérer 3 distracteurs (items différents du cible)
-        $distractors = $allItems
-            ->reject(fn ($item) => $item->id === $targetItem->id)
-            ->random(min(3, $allItems->count() - 1)); // Au moins 1 item, max 3 distracteurs
+        // Si le type demandé n'est pas jouable avec cet item, chercher un type compatible
+        $eligibleTypes = self::getEligibleTypes($allItems, $targetItem);
 
-        // Affichage de la question
-        $questionContent = $targetItem->{$type['field_question']};
-
-        // Si c'est une photo, on affiche l'URL
-        if ($type['field_question'] === 'photo_path') {
-            $questionContent = $targetItem->photo_url;
+        if (empty($eligibleTypes)) {
+            return ['error' => 'Cet item n\'a pas assez de données pour générer une question.'];
         }
 
-        // Réponse correcte
+        if (!in_array($questionType, $eligibleTypes)) {
+            $questionType = $eligibleTypes[array_rand($eligibleTypes)];
+        }
+
+        $type = self::$questionTypes[$questionType];
+
+        // 3 distracteurs ayant une valeur non-vide pour field_answer
+        $distractors = $allItems
+            ->reject(fn($item) => $item->id === $targetItem->id)
+            ->filter(fn($item) => !empty($item->{$type['field_answer']}))
+            ->shuffle()
+            ->take(3);
+
+        // Affichage de la question
+        $questionContent = $type['field_question'] === 'photo_path'
+            ? $targetItem->photo_url
+            : $targetItem->{$type['field_question']};
+
+        // Réponse correcte + distracteurs
         $correctAnswer = $targetItem->{$type['field_answer']};
+        $wrongAnswers  = $distractors->pluck($type['field_answer'])->toArray();
 
-        // Réponses distracteurs
-        $wrongAnswers = $distractors->pluck($type['field_answer'])->toArray();
-
-        // Mélanger toutes les réponses (correct + distracteurs)
         $allAnswers = array_merge([$correctAnswer], $wrongAnswers);
         shuffle($allAnswers);
 
-        // Si les réponses sont des photos, les convertir en URLs complètes
+        // Convertir les chemins photo en URLs
         if ($type['field_answer'] === 'photo_path') {
-            $allAnswers = array_map(fn($path) => asset('storage/' . $path), $allAnswers);
+            $allAnswers    = array_map(fn($p) => asset('storage/' . $p), $allAnswers);
             $correctAnswer = asset('storage/' . $correctAnswer);
         }
 
-        // Trouver l'indice de la bonne réponse après mélange
         $correctIndex = array_search($correctAnswer, $allAnswers, true);
 
         return [
-            'item_id'         => $targetItem->id,
-            'question_text'   => $type['question_text'],
-            'question_type'   => $questionType,
-            'field_question'  => $type['field_question'], // Ce qui est affiché (photo ou texte)
-            'field_answer'    => $type['field_answer'], // Ce qu'il faut répondre
-            'question_content'=> $questionContent, // URL de photo ou texte
-            'options'         => $allAnswers,
-            'correct_answer'  => $correctAnswer,
-            'correct_index'   => $correctIndex, // Indice de la bonne réponse (0-2)
+            'item_id'          => $targetItem->id,
+            'question_text'    => $type['question_text'],
+            'question_type'    => $questionType,
+            'field_question'   => $type['field_question'],
+            'field_answer'     => $type['field_answer'],
+            'question_content' => $questionContent,
+            'options'          => $allAnswers,
+            'correct_answer'   => $correctAnswer,
+            'correct_index'    => $correctIndex,
         ];
+    }
+
+    /**
+     * Retourne les types de questions jouables pour un item donné dans un module.
+     * Un type est éligible si :
+     * - l'item cible a une valeur non-vide pour field_question
+     * - au moins 1 autre item a une valeur non-vide pour field_answer
+     */
+    public static function getEligibleTypes(\Illuminate\Support\Collection $allItems, Item $targetItem): array
+    {
+        $others = $allItems->reject(fn($i) => $i->id === $targetItem->id);
+
+        return array_keys(array_filter(self::$questionTypes, function ($type) use ($targetItem, $others) {
+            $hasQuestion    = !empty($targetItem->{$type['field_question']});
+            $hasDistractors = $others->filter(fn($i) => !empty($i->{$type['field_answer']}))->count() >= 1;
+            return $hasQuestion && $hasDistractors;
+        }));
     }
 
     /**

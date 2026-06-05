@@ -21,13 +21,15 @@ class Module extends Model
         'title',
         'description',
         'is_public',
+        'allow_duplication',
     ];
 
     /**
      * Casts automatiques : is_public est traité comme un booléen PHP.
      */
     protected $casts = [
-        'is_public' => 'boolean',
+        'is_public'         => 'boolean',
+        'allow_duplication' => 'boolean',
     ];
 
     // ─────────────────────────────────────────────
