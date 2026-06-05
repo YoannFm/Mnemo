@@ -8,6 +8,7 @@ use App\Models\ModuleRating;
 use App\Models\ModuleRatingDeletion;
 use App\Models\ModuleRatingReaction;
 use App\Models\ModuleRatingReply;
+use App\Models\ModuleRatingReplyReport;
 use App\Models\ModuleRatingReport;
 use App\Models\ModuleReport;
 use App\Models\Mute;
@@ -398,6 +399,36 @@ class ModuleController extends Controller
             'mine'    => true,
             'delete_url' => route('modules.ratings.replies.destroy', $reply),
         ]);
+    }
+
+    public function reportRatingReply(Request $request, ModuleRatingReply $reply)
+    {
+        if ($reply->user_id === Auth::id()) {
+            return response()->json(['status' => 'error', 'message' => 'Vous ne pouvez pas signaler votre propre réponse.'], 403);
+        }
+
+        $validated = $request->validate([
+            'reason' => 'required|string|in:spam,inappropriate,harassment,other',
+            'note'   => 'nullable|string|max:500',
+        ]);
+
+        $already = ModuleRatingReplyReport::where('module_rating_reply_id', $reply->id)
+            ->where('user_id', Auth::id())
+            ->exists();
+
+        if ($already) {
+            return response()->json(['status' => 'already_reported']);
+        }
+
+        ModuleRatingReplyReport::create([
+            'module_rating_reply_id' => $reply->id,
+            'user_id'                => Auth::id(),
+            'reason'                 => $validated['reason'],
+            'note'                   => $validated['note'] ?? null,
+            'status'                 => 'pending',
+        ]);
+
+        return response()->json(['status' => 'ok']);
     }
 
     public function deleteRatingReply(ModuleRatingReply $reply)
