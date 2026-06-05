@@ -40,14 +40,16 @@
                     <h6 class="mb-3" style="font-size:1.1rem;">{{ $question['question_text'] }}</h6>
 
                     @if ($question['field_question'] === 'photo_path')
-                        <div style="text-align:center;margin:1.5rem 0;display:inline-block;position:relative;">
-                            <img src="{{ $question['question_content'] }}"
-                                 alt="Question"
-                                 style="max-width:300px;width:100%;aspect-ratio:1/1;border-radius:12px;object-fit:cover;display:block;">
-                            <button type="button" onclick="setZoomImage('{{ $question['question_content'] }}')"
-                                    style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);border:none;border-radius:8px;padding:5px 10px;color:#fff;cursor:pointer;font-size:.85rem;">
-                                <i class="bi bi-zoom-in"></i>
-                            </button>
+                        <div style="text-align:center;margin:1.5rem 0;">
+                            <div style="display:inline-block;position:relative;max-width:300px;width:100%;">
+                                <img src="{{ $question['question_content'] }}"
+                                     alt="Question"
+                                     style="width:100%;aspect-ratio:1/1;border-radius:12px;object-fit:cover;display:block;">
+                                <button type="button" onclick="setZoomImage('{{ $question['question_content'] }}')"
+                                        style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);border:none;border-radius:8px;padding:5px 10px;color:#fff;cursor:pointer;font-size:.85rem;">
+                                    <i class="bi bi-zoom-in"></i>
+                                </button>
+                            </div>
                         </div>
                     @else
                         <div class="card" style="background:#0f1117;border:1px solid var(--card-border);margin:1.5rem 0;">
