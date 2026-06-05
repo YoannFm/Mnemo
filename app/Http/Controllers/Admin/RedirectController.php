@@ -29,7 +29,7 @@ class RedirectController extends Controller
         ]);
         $data['is_enabled'] = $request->boolean('is_enabled');
         $redirect = Redirect::create($data);
-        LogHelper::log('created_redirect', 'redirect', $redirect->id);
+        LogHelper::log('created_redirect', 'redirect', $redirect->id, ['from' => $redirect->source, 'to' => $redirect->target]);
         return redirect()->route('admin.redirects.index')->with('success', 'Redirection créée.');
     }
 
@@ -48,13 +48,13 @@ class RedirectController extends Controller
         ]);
         $data['is_enabled'] = $request->boolean('is_enabled');
         $redirect->update($data);
-        LogHelper::log('updated_redirect', 'redirect', $redirect->id);
+        LogHelper::log('updated_redirect', 'redirect', $redirect->id, ['from' => $redirect->source, 'to' => $redirect->target]);
         return redirect()->route('admin.redirects.index')->with('success', 'Redirection mise à jour.');
     }
 
     public function destroy(Redirect $redirect)
     {
-        LogHelper::log('deleted_redirect', 'redirect', $redirect->id);
+        LogHelper::log('deleted_redirect', 'redirect', $redirect->id, ['from' => $redirect->source, 'to' => $redirect->target]);
         $redirect->delete();
         return redirect()->route('admin.redirects.index')->with('success', 'Redirection supprimée.');
     }

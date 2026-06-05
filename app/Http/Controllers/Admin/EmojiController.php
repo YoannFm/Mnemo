@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Emoji;
 use Illuminate\Http\Request;
@@ -28,12 +29,13 @@ class EmojiController extends Controller
 
         $path = $request->file('image')->store('emojis', 'public');
 
-        Emoji::create([
+        $emoji = Emoji::create([
             'name'       => $data['name'],
             'slug'       => $this->uniqueSlug(Str::slug($data['name'])),
             'type'       => $data['type'],
             'image_path' => $path,
         ]);
+        LogHelper::log('created_emoji', 'emoji', $emoji->id, ['name' => $emoji->name, 'slug' => $emoji->slug]);
 
         return back()->with('success', 'Emoji "' . $data['name'] . '" ajouté.');
     }
@@ -116,11 +118,15 @@ class EmojiController extends Controller
                 $msg .= '... (' . count($errors) . ' erreurs au total)';
             }
         }
+        if ($imported > 0) {
+            LogHelper::log('imported_emojis', 'emoji', null, ['namespace' => $namespace, 'count' => $imported]);
+        }
         return back()->with($imported > 0 || $skipped === 0 ? 'success' : 'error', $msg);
     }
 
     public function destroy(Emoji $emoji)
     {
+        LogHelper::log('deleted_emoji', 'emoji', $emoji->id, ['name' => $emoji->name, 'slug' => $emoji->slug], 'warning');
         Storage::disk('public')->delete($emoji->image_path);
         $emoji->delete();
         return back()->with('success', 'Emoji supprimé.');

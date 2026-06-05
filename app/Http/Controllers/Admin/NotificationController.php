@@ -61,6 +61,7 @@ class NotificationController extends Controller
 
     public function destroy(UserNotification $notification)
     {
+        LogHelper::log('deleted_notification', 'user', $notification->user_id, ['title' => $notification->title], 'warning');
         $notification->delete();
         return back()->with('success', 'Notification supprimee.');
     }

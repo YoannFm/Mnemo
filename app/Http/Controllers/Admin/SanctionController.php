@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\AdminSanction;
 use App\Models\Mute;
@@ -44,6 +45,7 @@ class SanctionController extends Controller
             'type'    => 'info',
         ]);
 
+        LogHelper::log('deleted_sanction', 'user', $sanction->user_id, ['user_id' => $sanction->user_id, 'type' => 'mute', 'reason' => $reason ?: null], 'warning');
         return back()->with('success', 'Utilisateur démute avec succès.');
     }
 }
