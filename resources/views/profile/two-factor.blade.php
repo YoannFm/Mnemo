@@ -115,15 +115,42 @@
                         <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:1.25rem;">
                             Votre compte est protégé par une double authentification TOTP.
                         </p>
-                        <form method="POST" action="{{ route('profile.2fa.disable') }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm"
-                                    style="background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);"
-                                    onclick="return confirm('Êtes-vous sûr de vouloir désactiver la double authentification ?')">
-                                <i class="bi bi-shield-x me-1"></i>Désactiver le 2FA
-                            </button>
-                        </form>
+                        @if ($errors->has('password'))
+                            <div class="alert alert-danger py-2 mb-3" style="font-size:.85rem;">{{ $errors->first('password') }}</div>
+                        @endif
+                        <button type="button" class="btn btn-sm"
+                                style="background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);"
+                                data-bs-toggle="modal" data-bs-target="#disable2faModal">
+                            <i class="bi bi-shield-x me-1"></i>Désactiver le 2FA
+                        </button>
+
+                        <div class="modal fade" id="disable2faModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content" style="background:var(--card-border);border:1px solid rgba(255,255,255,.1);">
+                                    <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,.08);">
+                                        <h5 class="modal-title" style="color:var(--text-primary);font-size:1rem;">Désactiver la double authentification</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form method="POST" action="{{ route('profile.2fa.disable') }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <div class="modal-body">
+                                            <p style="color:var(--text-muted);font-size:.875rem;">Confirmez votre mot de passe pour désactiver le 2FA.</p>
+                                            <div class="mb-3">
+                                                <label class="form-label" style="color:var(--text-primary);font-size:.875rem;">Mot de passe</label>
+                                                <input type="password" name="password" class="form-control" autofocus required placeholder="Votre mot de passe">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,.08);">
+                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                                            <button type="submit" class="btn btn-sm" style="background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.4);">
+                                                <i class="bi bi-shield-x me-1"></i>Désactiver
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     @else
                         <div class="d-flex align-items-center gap-2 mb-3">
                             <i class="bi bi-shield-x" style="color:var(--text-muted);font-size:1.2rem;"></i>
