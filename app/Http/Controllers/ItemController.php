@@ -49,18 +49,16 @@ class ItemController extends Controller
         $validated = $request->validate([
             'name_fr'       => 'required|string|max:255',
             'name_en'       => 'required|string|max:255',
-            'function_text' => 'required|string|max:2000',
-            'photo'         => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'function_text' => 'nullable|string|max:2000',
+            'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // La photo est obligatoire - on la compresse et on la stocke
-        $photoPath = $this->storePhoto($request->file('photo'));
+        $photoPath = $request->hasFile('photo') ? $this->storePhoto($request->file('photo')) : null;
 
-        // Création de l'item lié au module
         $module->items()->create([
             'name_fr'       => $validated['name_fr'],
             'name_en'       => $validated['name_en'],
-            'function_text' => $validated['function_text'],
+            'function_text' => $validated['function_text'] ?? '',
             'photo_path'    => $photoPath,
         ]);
 
@@ -91,7 +89,7 @@ class ItemController extends Controller
         $validated = $request->validate([
             'name_fr'       => 'required|string|max:255',
             'name_en'       => 'required|string|max:255',
-            'function_text' => 'required|string|max:2000',
+            'function_text' => 'nullable|string|max:2000',
             'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 

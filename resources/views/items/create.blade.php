@@ -70,7 +70,7 @@
                         {{-- Max 2000 caractères pour une description détaillée --}}
                         <div class="mb-3">
                             <label for="function_text" class="form-label">
-                                Fonction / Description <span style="color:#ef4444;">*</span>
+                                Fonction / Description <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(optionnel)</span>
                             </label>
                             <textarea id="function_text"
                                       name="function_text"
@@ -86,8 +86,7 @@
                         {{-- La photo sera utilisée dans les questions Q1, Q3, Q5, Q8 --}}
                         <div class="mb-4">
                             <label for="photo" class="form-label">
-                                Photo <span style="color:#ef4444;">*</span>
-                                <span style="color:var(--text-muted);font-weight:400;">(max 2 Mo, sera compressée)</span>
+                                Photo <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(optionnel, max 2 Mo)</span>
                             </label>
 
                             {{-- Zone de prévisualisation de la photo avant upload --}}
@@ -107,7 +106,6 @@
                                    name="photo"
                                    class="form-control @error('photo') is-invalid @enderror"
                                    accept="image/*"
-                                   required
                                    onchange="previewPhoto(this)">
                             @error('photo')
                                 <div class="invalid-feedback">{{ $message }}</div>
