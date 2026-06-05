@@ -346,15 +346,20 @@
     @endauth
 
     {{-- ── Avis des utilisateurs ── --}}
-    @php $allRatings = $module->ratings()->with('user')->whereNotNull('comment')->latest()->get(); @endphp
-    @if ($allRatings->isNotEmpty())
+    @if ($allRatingsWithData->isNotEmpty())
         <div class="mb-4">
             <h6 class="mb-3" style="font-size:.9rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">
-                Avis ({{ $allRatings->count() }})
+                Avis ({{ $allRatingsWithData->count() }})
             </h6>
             <div class="d-flex flex-column gap-2">
-                @foreach ($allRatings as $r)
-                    <div class="card p-3" style="gap:.4rem;display:flex;flex-direction:column;">
+                @foreach ($allRatingsWithData as $r)
+                    @php
+                        $rReacts    = $ratingReactions[$r->id] ?? [];
+                        $rUserReact = $userRatingReacts[$r->id] ?? [];
+                    @endphp
+                    <div class="card p-3" id="rating-card-{{ $r->id }}" style="gap:.5rem;display:flex;flex-direction:column;">
+
+                        {{-- En-tête : nom + étoiles + signaler --}}
                         <div class="d-flex align-items-center justify-content-between gap-2">
                             <span class="fw-semibold" style="font-size:.85rem;">{{ $r->user?->name ?? 'Utilisateur supprimé' }}</span>
                             <div class="d-flex align-items-center gap-2">
@@ -365,19 +370,106 @@
                                 </div>
                                 @auth
                                     @if (Auth::id() !== $r->user_id)
-                                        <button type="button"
-                                                class="btn btn-sm report-rating-btn"
+                                        <button type="button" class="btn btn-sm report-rating-btn"
                                                 style="color:var(--text-muted);border:none;background:transparent;padding:0;font-size:.8rem;"
-                                                data-rating-id="{{ $r->id }}"
-                                                title="Signaler cet avis">
+                                                data-rating-id="{{ $r->id }}" title="Signaler cet avis">
                                             <i class="bi bi-flag"></i>
                                         </button>
                                     @endif
                                 @endauth
                             </div>
                         </div>
+
+                        {{-- Commentaire --}}
                         <p style="font-size:.82rem;color:var(--text-muted);margin:0;">{{ $r->comment }}</p>
+
+                        {{-- Date --}}
                         <div style="font-size:.75rem;color:var(--text-muted);">{{ $r->created_at->diffForHumans() }}</div>
+
+                        {{-- Barre de réactions --}}
+                        <div class="d-flex gap-1 flex-wrap align-items-center" id="reactions-bar-{{ $r->id }}">
+                            @foreach ($rReacts as $slug => $count)
+                                @php $emojiModel = \App\Models\Emoji::where('slug', $slug)->first(); @endphp
+                                @if ($emojiModel)
+                                    <button type="button"
+                                            class="btn btn-sm reaction-btn d-flex align-items-center gap-1 {{ in_array($slug, $rUserReact) ? 'btn-primary' : 'btn-outline-secondary' }}"
+                                            data-emoji="{{ $slug }}"
+                                            data-rating-id="{{ $r->id }}"
+                                            {{ Auth::check() ? '' : 'disabled' }}>
+                                        <img src="{{ $emojiModel->imageUrl() }}" alt="{{ $emojiModel->name }}" style="width:16px;height:16px;object-fit:contain;">
+                                        <span class="reaction-count">{{ $count > 0 ? $count : '' }}</span>
+                                    </button>
+                                @endif
+                            @endforeach
+
+                            @auth
+                                @if (!$isMuted)
+                                <div class="position-relative emoji-picker-wrapper" data-rating-id="{{ $r->id }}">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary emoji-more-btn" title="Réagir">
+                                        <i class="bi bi-emoji-smile" style="font-size:.8rem;"></i>
+                                    </button>
+                                    <div class="emoji-picker-container position-absolute d-none"
+                                         style="bottom:110%;right:0;z-index:200;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:12px;width:min(300px,calc(100vw - 1.5rem));box-shadow:0 8px 24px rgba(0,0,0,.2);">
+                                        <input type="search" class="form-control form-control-sm emoji-search mb-2" placeholder="Rechercher...">
+                                        <div class="emoji-recent-section d-none mb-2">
+                                            <p class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;">Récents</p>
+                                            <div class="emoji-recent-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;"></div>
+                                            <hr class="my-2" style="border-color:var(--card-border);">
+                                        </div>
+                                        <div class="emoji-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;max-height:180px;overflow-y:auto;"></div>
+                                        <p class="emoji-empty text-muted text-center small mt-2 d-none">Aucun emoji.</p>
+                                    </div>
+                                </div>
+                                @endif
+                            @endauth
+                        </div>
+
+                        {{-- Réponses --}}
+                        <div class="mt-1" id="replies-{{ $r->id }}">
+                            @foreach ($r->replies as $reply)
+                                <div class="d-flex gap-2 align-items-start mb-2" id="reply-{{ $reply->id }}" style="padding-left:.75rem;border-left:2px solid var(--card-border);">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="fw-semibold" style="font-size:.8rem;">{{ $reply->user?->name ?? '-' }}</span>
+                                            <span style="font-size:.72rem;color:var(--text-muted);">{{ $reply->created_at->diffForHumans() }}</span>
+                                            @auth
+                                                @if (Auth::id() === $reply->user_id || Auth::user()->is_admin)
+                                                    <button type="button" class="delete-reply-btn btn btn-sm"
+                                                            style="color:#ef4444;border:none;background:transparent;padding:0;font-size:.75rem;"
+                                                            data-reply-id="{{ $reply->id }}"
+                                                            data-url="{{ route('modules.ratings.replies.destroy', $reply) }}"
+                                                            title="Supprimer">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                @endif
+                                            @endauth
+                                        </div>
+                                        <p style="font-size:.8rem;color:var(--text-primary);margin:.15rem 0 0;">{{ $reply->content }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Formulaire de réponse --}}
+                        @auth
+                            @if (!$isMuted)
+                            <div class="d-flex gap-2 mt-1">
+                                <input type="text" class="form-control form-control-sm reply-input"
+                                       placeholder="Répondre..."
+                                       maxlength="1000"
+                                       data-rating-id="{{ $r->id }}"
+                                       style="font-size:.82rem;background:var(--card-bg);color:var(--text-primary);border-color:var(--card-border);">
+                                <button type="button" class="btn btn-sm btn-primary reply-submit"
+                                        data-rating-id="{{ $r->id }}"
+                                        data-url="{{ route('modules.ratings.replies.store', $r) }}">
+                                    <i class="bi bi-send"></i>
+                                </button>
+                            </div>
+                            @else
+                                <p style="font-size:.75rem;color:#ef4444;margin:0;"><i class="bi bi-mic-mute me-1"></i>Muté - impossible de répondre.</p>
+                            @endif
+                        @endauth
+
                     </div>
                 @endforeach
             </div>
@@ -461,6 +553,183 @@
         </div>
     @endif
 
+
+{{-- JS réactions + réponses sur les avis --}}
+@auth
+<script>
+(function () {
+    var emojisUrl = "{{ route('emojis.json') }}";
+    var csrf = document.querySelector('meta[name="csrf-token"]').content;
+    var allEmojis = [];
+    var emojisLoaded = false;
+    var RECENT_KEY = 'emoji_recent';
+    var MAX_RECENT = 12;
+
+    function getRecent() { try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e) { return []; } }
+    function addRecent(slug) {
+        var list = getRecent().filter(s => s !== slug);
+        list.unshift(slug);
+        localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, MAX_RECENT)));
+    }
+
+    function makeEmojiBtn(e, onSelect) {
+        var btn = document.createElement('button');
+        btn.type = 'button'; btn.title = e.name;
+        btn.style.cssText = 'background:none;border:1px solid transparent;border-radius:6px;padding:3px;cursor:pointer;transition:.15s;';
+        btn.innerHTML = '<img src="' + e.url + '" alt="' + e.name + '" style="width:28px;height:28px;object-fit:contain;">';
+        btn.addEventListener('mouseenter', () => btn.style.borderColor = 'var(--card-border)');
+        btn.addEventListener('mouseleave', () => btn.style.borderColor = 'transparent');
+        btn.addEventListener('click', () => onSelect(e));
+        return btn;
+    }
+
+    function initPicker(wrapper) {
+        var ratingId   = wrapper.dataset.ratingId;
+        var moreBtn    = wrapper.querySelector('.emoji-more-btn');
+        var container  = wrapper.querySelector('.emoji-picker-container');
+        var searchEl   = wrapper.querySelector('.emoji-search');
+        var gridEl     = wrapper.querySelector('.emoji-grid');
+        var emptyEl    = wrapper.querySelector('.emoji-empty');
+        var recentSec  = wrapper.querySelector('.emoji-recent-section');
+        var recentGrid = wrapper.querySelector('.emoji-recent-grid');
+
+        function renderGrid(emojis) {
+            gridEl.innerHTML = '';
+            if (!emojis.length) { emptyEl.classList.remove('d-none'); return; }
+            emptyEl.classList.add('d-none');
+            emojis.forEach(e => gridEl.appendChild(makeEmojiBtn(e, pick)));
+        }
+        function renderRecent() {
+            var recent = getRecent();
+            var matching = recent.map(s => allEmojis.find(x => x.slug === s)).filter(Boolean);
+            if (!matching.length) { recentSec.classList.add('d-none'); return; }
+            recentSec.classList.remove('d-none');
+            recentGrid.innerHTML = '';
+            matching.forEach(e => recentGrid.appendChild(makeEmojiBtn(e, pick)));
+        }
+        function filter() {
+            var q = (searchEl.value || '').toLowerCase();
+            renderRecent();
+            renderGrid(allEmojis.filter(e => !q || e.name.toLowerCase().includes(q) || e.slug.includes(q)));
+        }
+        function pick(e) {
+            container.classList.add('d-none');
+            addRecent(e.slug);
+            sendReaction(ratingId, e.slug, e.url, e.name);
+        }
+
+        moreBtn.addEventListener('click', ev => {
+            ev.stopPropagation();
+            container.classList.toggle('d-none');
+            if (!emojisLoaded) {
+                emojisLoaded = true;
+                fetch(emojisUrl).then(r => r.json()).then(data => { allEmojis = data; filter(); });
+            } else { filter(); }
+        });
+        container.addEventListener('click', ev => ev.stopPropagation());
+        searchEl.addEventListener('input', filter);
+    }
+
+    function sendReaction(ratingId, slug, imgUrl, imgAlt) {
+        fetch('/module-ratings/' + ratingId + '/react', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+            body: JSON.stringify({emoji: slug})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'muted') { alert(data.message); return; }
+            var bar = document.getElementById('reactions-bar-' + ratingId);
+            var existing = bar.querySelector('.reaction-btn[data-emoji="' + slug + '"]');
+            if (existing) {
+                existing.classList.toggle('btn-primary', data.active);
+                existing.classList.toggle('btn-outline-secondary', !data.active);
+                existing.querySelector('.reaction-count').textContent = data.count > 0 ? data.count : '';
+                if (!data.active && data.count === 0) existing.remove();
+            } else if (data.active) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm reaction-btn d-flex align-items-center gap-1 btn-primary';
+                btn.dataset.emoji = slug;
+                btn.dataset.ratingId = ratingId;
+                btn.innerHTML = '<img src="' + imgUrl + '" alt="' + imgAlt + '" style="width:16px;height:16px;object-fit:contain;"> <span class="reaction-count">' + (data.count || '') + '</span>';
+                btn.addEventListener('click', function() { sendReaction(this.dataset.ratingId, this.dataset.emoji, imgUrl, imgAlt); });
+                var wrapper = bar.querySelector('.emoji-picker-wrapper');
+                bar.insertBefore(btn, wrapper || null);
+            }
+        });
+    }
+
+    // Init pickers
+    document.querySelectorAll('.emoji-picker-wrapper').forEach(initPicker);
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.emoji-picker-container').forEach(c => c.classList.add('d-none'));
+    });
+
+    // Réactions sur boutons existants
+    document.querySelectorAll('.reaction-btn[data-rating-id]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            var img = this.querySelector('img');
+            sendReaction(this.dataset.ratingId, this.dataset.emoji, img ? img.src : '', img ? img.alt : '');
+        });
+    });
+
+    // Réponses
+    document.querySelectorAll('.reply-submit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            var ratingId = this.dataset.ratingId;
+            var url      = this.dataset.url;
+            var input    = document.querySelector('.reply-input[data-rating-id="' + ratingId + '"]');
+            var content  = input.value.trim();
+            if (!content) return;
+            this.disabled = true;
+            var self = this;
+            fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json','X-CSRF-TOKEN':csrf,'Accept':'application/json'},
+                body: JSON.stringify({content})
+            })
+            .then(r => r.json())
+            .then(data => {
+                self.disabled = false;
+                if (data.status !== 'ok') { alert(data.message ?? 'Erreur.'); return; }
+                input.value = '';
+                var container = document.getElementById('replies-' + ratingId);
+                var div = document.createElement('div');
+                div.id = 'reply-' + data.id;
+                div.className = 'd-flex gap-2 align-items-start mb-2';
+                div.style.cssText = 'padding-left:.75rem;border-left:2px solid var(--card-border);';
+                div.innerHTML = '<div class="flex-grow-1">'
+                    + '<div class="d-flex align-items-center gap-2">'
+                    + '<span class="fw-semibold" style="font-size:.8rem;">' + data.author + '</span>'
+                    + '<span style="font-size:.72rem;color:var(--text-muted);">' + data.date + '</span>'
+                    + '<button type="button" class="delete-reply-btn btn btn-sm" style="color:#ef4444;border:none;background:transparent;padding:0;font-size:.75rem;" data-reply-id="' + data.id + '" data-url="' + data.delete_url + '" title="Supprimer"><i class="bi bi-trash"></i></button>'
+                    + '</div>'
+                    + '<p style="font-size:.8rem;color:var(--text-primary);margin:.15rem 0 0;">' + data.content.replace(/</g,'&lt;') + '</p>'
+                    + '</div>';
+                container.appendChild(div);
+                div.querySelector('.delete-reply-btn').addEventListener('click', handleDeleteReply);
+            })
+            .catch(() => { self.disabled = false; });
+        });
+    });
+
+    function handleDeleteReply() {
+        var replyId = this.dataset.replyId;
+        var url     = this.dataset.url;
+        if (!confirm('Supprimer cette réponse ?')) return;
+        fetch(url, {
+            method: 'DELETE',
+            headers: {'X-CSRF-TOKEN':csrf,'Accept':'application/json'}
+        })
+        .then(r => r.json())
+        .then(data => { if (data.status === 'ok') document.getElementById('reply-' + replyId)?.remove(); });
+    }
+
+    document.querySelectorAll('.delete-reply-btn').forEach(btn => btn.addEventListener('click', handleDeleteReply));
+})();
+</script>
+@endauth
 
 {{-- Modal signalement d'avis --}}
 @auth

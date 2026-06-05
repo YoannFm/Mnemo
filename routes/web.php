@@ -136,6 +136,11 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     // Signaler un avis sur un module
     Route::post('/module-ratings/{rating}/report', [ModuleController::class, 'reportRating'])->name('modules.ratings.report');
 
+    // Réactions et réponses sur un avis
+    Route::post('/module-ratings/{rating}/react', [ModuleController::class, 'reactToRating'])->name('modules.ratings.react');
+    Route::post('/module-ratings/{rating}/replies', [ModuleController::class, 'replyToRating'])->name('modules.ratings.replies.store');
+    Route::delete('/module-rating-replies/{reply}', [ModuleController::class, 'deleteRatingReply'])->name('modules.ratings.replies.destroy');
+
     // ─── Bibliothèque publique ───
     Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');
 

@@ -22,4 +22,14 @@ class ModuleRating extends Model
     {
         return $this->hasMany(ModuleRatingReport::class);
     }
+
+    public function reactions()
+    {
+        return $this->hasMany(ModuleRatingReaction::class);
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(ModuleRatingReply::class);
+    }
 }
