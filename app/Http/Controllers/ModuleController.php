@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Module;
+use App\Models\ModuleRating;
 use App\Models\ModuleReport;
 use App\Models\Progress;
 use Illuminate\Http\Request;
@@ -82,7 +83,13 @@ class ModuleController extends Controller
 
         $items = $module->items()->paginate(20);
 
-        return view('modules.show', compact('module', 'items'));
+        $avgRating  = $module->ratings()->avg('rating');
+        $ratingCount = $module->ratings()->count();
+        $userRating = Auth::check()
+            ? $module->ratings()->where('user_id', Auth::id())->first()
+            : null;
+
+        return view('modules.show', compact('module', 'items', 'avgRating', 'ratingCount', 'userRating'));
     }
 
     /**
@@ -239,6 +246,23 @@ class ModuleController extends Controller
             'note'      => $validated['note'] ?? null,
             'status'    => 'pending',
         ]);
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function rate(Request $request, Module $module)
+    {
+        $this->authorizeView($module);
+
+        $validated = $request->validate([
+            'rating'  => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:1000',
+        ]);
+
+        ModuleRating::updateOrCreate(
+            ['user_id' => Auth::id(), 'module_id' => $module->id],
+            ['rating' => $validated['rating'], 'comment' => $validated['comment'] ?? null]
+        );
 
         return response()->json(['status' => 'ok']);
     }

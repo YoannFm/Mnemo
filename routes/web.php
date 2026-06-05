@@ -130,6 +130,9 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     // Signaler un module public
     Route::post('/modules/{module}/report', [ModuleController::class, 'report'])->name('modules.report');
 
+    // Noter un module (1 vote par compte)
+    Route::post('/modules/{module}/rate', [ModuleController::class, 'rate'])->name('modules.rate');
+
     // ─── Bibliothèque publique ───
     Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');
 
