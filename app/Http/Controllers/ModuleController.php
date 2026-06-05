@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Module;
 use App\Models\ModuleReport;
+use App\Models\Progress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -138,6 +139,18 @@ class ModuleController extends Controller
      * Duplique un module public dans l'espace de l'utilisateur connecté.
      * Copie le module et tous ses items (sans les photos).
      */
+    public function resetProgress(Module $module)
+    {
+        $itemIds = $module->items()->pluck('id');
+
+        Progress::where('user_id', Auth::id())
+            ->whereIn('item_id', $itemIds)
+            ->delete();
+
+        return redirect()->route('modules.show', $module)
+            ->with('success', 'Progression réinitialisée.');
+    }
+
     public function duplicate(Module $module)
     {
         if (!$module->is_public && $module->owner_id !== Auth::id()) {

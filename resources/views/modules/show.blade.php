@@ -190,6 +190,21 @@
                 <div style="font-size:.75rem;color:var(--text-muted);">Tous les items</div>
             </a>
         </div>
+    @if ($items->total() >= 4)
+        @auth
+            <div class="text-end mb-3" style="margin-top:-.5rem;">
+                <form method="POST" action="{{ route('modules.progress.reset', $module) }}"
+                      onsubmit="return confirm('Réinitialiser toute ta progression sur ce module ? Cette action est irréversible.')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-sm"
+                            style="color:var(--text-muted);font-size:.78rem;border:none;background:none;padding:0;text-decoration:underline;">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser ma progression
+                    </button>
+                </form>
+            </div>
+        @endauth
+    @endif
+
     @elseif ($items->total() > 0 && $items->total() < 4)
         <div class="alert d-flex align-items-center gap-2 mb-4"
              style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:#fbbf24;border-radius:10px;">
