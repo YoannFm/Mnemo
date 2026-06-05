@@ -218,7 +218,7 @@
                                         @endif
                                     </small>
                                     @auth
-                                        @if(Auth::id() === $comment->user_id && !$comment->is_deleted)
+                                        @if((Auth::id() === $comment->user_id || Auth::user()?->is_admin) && !$comment->is_deleted)
                                             <button type="button" class="btn btn-link p-0 edit-comment-btn"
                                                     data-id="{{ $comment->id }}"
                                                     data-content="{{ $comment->content }}"
@@ -235,7 +235,7 @@
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>
-                                        @elseif(Auth::id() !== $comment->user_id && !$comment->is_deleted)
+                                        @elseif(Auth::id() !== $comment->user_id && !Auth::user()?->is_admin && !$comment->is_deleted)
                                             <button type="button" class="btn btn-link p-0 report-btn"
                                                     data-url="{{ route('posts.comment.report', $comment) }}"
                                                     title="Signaler" style="font-size:.8rem;color:var(--text-muted);">
@@ -265,7 +265,7 @@
                                                     @if($reply->edited_at) · <em>modifié</em> @endif
                                                 </small>
                                                 @auth
-                                                    @if(Auth::id() === $reply->user_id && !$reply->is_deleted)
+                                                    @if((Auth::id() === $reply->user_id || Auth::user()?->is_admin) && !$reply->is_deleted)
                                                         <button type="button" class="btn btn-link p-0 edit-comment-btn"
                                                                 data-id="{{ $reply->id }}"
                                                                 data-content="{{ $reply->content }}"
@@ -282,7 +282,7 @@
                                                                 <i class="bi bi-trash"></i>
                                                             </button>
                                                         </form>
-                                                    @elseif(Auth::id() !== $reply->user_id && !$reply->is_deleted)
+                                                    @elseif(Auth::id() !== $reply->user_id && !Auth::user()?->is_admin && !$reply->is_deleted)
                                                         <button type="button" class="btn btn-link p-0 report-btn"
                                                                 data-url="{{ route('posts.comment.report', $reply) }}"
                                                                 style="font-size:.75rem;color:var(--text-muted);">
