@@ -9,7 +9,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('post_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('emoji', 10);
+            $table->string('emoji', 100);
             $table->timestamps();
             $table->unique(['post_id', 'user_id', 'emoji']);
         });
