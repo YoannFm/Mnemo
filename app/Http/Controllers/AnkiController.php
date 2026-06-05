@@ -47,8 +47,11 @@ class AnkiController extends Controller
         $mode = $request->input('mode', 'random');
 
         session([
-            'anki_module_id' => $module->id,
-            'anki_mode'      => $mode,
+            'anki_module_id'      => $module->id,
+            'anki_mode'           => $mode,
+            'anki_session_correct' => 0,
+            'anki_session_wrong'   => 0,
+            'anki_session_streak'  => 0,
         ]);
 
         // Si mode spécifique (pas random), activer le mode apprentissage
@@ -111,7 +114,7 @@ class AnkiController extends Controller
             $learnTotal = session('anki_learn_total', 0);
 
             if (empty($remaining)) {
-                session()->forget(['anki_module_id', 'anki_mode', 'anki_learn_mode', 'anki_learn_remaining', 'anki_learn_total']);
+                session()->forget(['anki_module_id', 'anki_mode', 'anki_learn_mode', 'anki_learn_remaining', 'anki_learn_total', 'anki_session_correct', 'anki_session_wrong', 'anki_session_streak']);
                 return redirect()->route('modules.show', $module)->with('success', 'Bravo ! Vous avez maitrisé tous les items de ce module.');
             }
 
@@ -152,16 +155,11 @@ class AnkiController extends Controller
             return redirect()->route('modules.show', $module)->with('error', $question['error']);
         }
 
-        $progress = Progress::firstOrCreate(
-            ['user_id' => Auth::id(), 'item_id' => $question['item_id']],
-            ['success_count' => 0, 'fail_count' => 0, 'streak' => 0, 'easiness_factor' => 2.5, 'interval_days' => 1]
-        );
-
-        $question['progress'] = [
-            'success_count' => $progress->success_count,
-            'fail_count'    => $progress->fail_count,
-            'streak'        => $progress->streak,
-            'is_mastered'   => $progress->isMastered(),
+        // Stats de session (globales, pas par item)
+        $question['session'] = [
+            'correct' => session('anki_session_correct', 0),
+            'wrong'   => session('anki_session_wrong', 0),
+            'streak'  => session('anki_session_streak', 0),
         ];
 
         if ($learnMode) {
@@ -225,13 +223,22 @@ class AnkiController extends Controller
                 session(['anki_learn_remaining' => $remaining]);
             }
 
+            // Stats de session globales
+            if ($isCorrect) {
+                session(['anki_session_correct' => session('anki_session_correct', 0) + 1]);
+                session(['anki_session_streak'  => session('anki_session_streak',  0) + 1]);
+            } else {
+                session(['anki_session_wrong'  => session('anki_session_wrong', 0) + 1]);
+                session(['anki_session_streak' => 0]);
+            }
+
             return response()->json([
                 'is_correct'      => $isCorrect,
                 'correct_answer'  => $question['correct_answer'],
                 'user_answer'     => $question['options'][$data['answer']],
-                'streak'          => $progress->streak,
-                'success_count'   => $progress->success_count,
-                'fail_count'      => $progress->fail_count,
+                'session_correct' => session('anki_session_correct'),
+                'session_wrong'   => session('anki_session_wrong'),
+                'session_streak'  => session('anki_session_streak'),
                 'is_mastered'     => $progress->isMastered(),
                 'learn_remaining' => session('anki_learn_remaining') ? count(session('anki_learn_remaining')) : null,
             ]);
@@ -248,7 +255,7 @@ class AnkiController extends Controller
     {
         $this->authorize($module);
 
-        session()->forget(['anki_module_id', 'anki_mode', 'anki_learn_mode', 'anki_learn_remaining', 'anki_learn_total']);
+        session()->forget(['anki_module_id', 'anki_mode', 'anki_learn_mode', 'anki_learn_remaining', 'anki_learn_total', 'anki_session_correct', 'anki_session_wrong', 'anki_session_streak']);
 
         return redirect()
             ->route('modules.show', $module)

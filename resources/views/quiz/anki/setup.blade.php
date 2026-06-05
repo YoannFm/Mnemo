@@ -74,7 +74,7 @@
                     </div>
 
                     {{-- Info mode apprentissage --}}
-                    <div class="card mb-2" style="background:rgba(var(--accent-rgb, 239,183,2),.08);border:1px solid rgba(var(--accent-rgb, 239,183,2),.2);">
+                    <div class="card mb-2" style="border:1px solid var(--card-border);">
                         <div class="card-body p-3">
                             <div class="fw-semibold mb-1" style="font-size:.85rem;color:var(--accent);">
                                 <i class="bi bi-mortarboard me-1"></i> Mode apprentissage actif
