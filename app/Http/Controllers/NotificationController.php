@@ -16,7 +16,7 @@ class NotificationController extends Controller
 
     public function markRead(UserNotification $notification)
     {
-        if ($notification->user_id === auth()->id()) {
+        if ($notification->user_id === auth()->id() || auth()->user()?->is_admin) {
             $notification->update(['read_at' => now()]);
         }
         return back();

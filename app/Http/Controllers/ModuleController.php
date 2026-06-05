@@ -311,7 +311,7 @@ class ModuleController extends Controller
 
     public function deleteRating(ModuleRating $rating)
     {
-        if ($rating->user_id !== Auth::id()) {
+        if ($rating->user_id !== Auth::id() && !Auth::user()?->is_admin) {
             abort(403);
         }
 

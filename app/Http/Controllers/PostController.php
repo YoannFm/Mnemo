@@ -198,7 +198,7 @@ class PostController extends Controller
 
     public function updateComment(Request $request, PostComment $comment)
     {
-        if (!Auth::check() || Auth::id() !== $comment->user_id) abort(403);
+        if (!Auth::check() || (Auth::id() !== $comment->user_id && !Auth::user()?->is_admin)) abort(403);
 
         $data = $request->validate(['content' => 'required|string|max:1000']);
 
@@ -220,7 +220,7 @@ class PostController extends Controller
 
     public function deleteComment(Request $request, PostComment $comment)
     {
-        if (!Auth::check() || Auth::id() !== $comment->user_id) abort(403);
+        if (!Auth::check() || (Auth::id() !== $comment->user_id && !Auth::user()?->is_admin)) abort(403);
 
         // Sauvegarde dans l'historique avant suppression logique
         DB::table('post_comment_history')->insert([
