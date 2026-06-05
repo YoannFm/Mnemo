@@ -54,7 +54,7 @@
 
     @if ($modules->isEmpty())
         <div class="card text-center py-4 mb-4">
-            <p style="color:var(--text-muted);margin:0;">Aucun module créé.</p>
+            <p style="color:var(--text-muted);margin:0;">Aucun module utilisé.</p>
         </div>
     @else
         <div class="row g-3 mb-4">
