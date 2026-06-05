@@ -68,21 +68,30 @@ class EmojiController extends Controller
         $namespace = Str::slug($manifest['namespace']);
         $imported = 0;
         $skipped  = 0;
+        $errors   = [];
 
         Storage::disk('public')->makeDirectory('emojis');
 
         foreach ($manifest['emojis'] as $entry) {
-            if (empty($entry['name']) || empty($entry['file'])) { $skipped++; continue; }
+            if (empty($entry['name']) || empty($entry['file'])) {
+                $skipped++;
+                $errors[] = 'Entrée invalide (name ou file manquant)';
+                continue;
+            }
 
             $fileContent = $zip->getFromName($entry['file']);
             if ($fileContent === false) {
                 $fileContent = $zip->getFromName(basename($entry['file']));
             }
-            if ($fileContent === false) { $skipped++; continue; }
+            if ($fileContent === false) {
+                $skipped++;
+                $errors[] = '"' . $entry['file'] . '" introuvable dans le ZIP';
+                continue;
+            }
 
-            $ext      = strtolower(pathinfo($entry['file'], PATHINFO_EXTENSION));
-            $type     = in_array($ext, ['gif', 'webp']) ? 'animated' : 'simple';
-            $slug     = $this->uniqueSlug($namespace . '-' . Str::slug($entry['name']));
+            $ext  = strtolower(pathinfo($entry['file'], PATHINFO_EXTENSION));
+            $type = in_array($ext, ['gif', 'webp']) ? 'animated' : 'simple';
+            $slug = $this->uniqueSlug($namespace . '-' . Str::slug($entry['name']));
             $filename = 'emojis/' . $slug . '.' . $ext;
 
             Storage::disk('public')->put($filename, $fileContent);
@@ -99,7 +108,15 @@ class EmojiController extends Controller
 
         $zip->close();
 
-        return back()->with('success', "{$imported} emoji(s) importé(s), {$skipped} ignoré(s).");
+        $msg = "{$imported} emoji(s) importé(s), {$skipped} ignoré(s).";
+        if (!empty($errors)) {
+            $shown = array_slice($errors, 0, 3);
+            $msg .= ' Raisons : ' . implode(' ; ', $shown);
+            if (count($errors) > 3) {
+                $msg .= '... (' . count($errors) . ' erreurs au total)';
+            }
+        }
+        return back()->with($imported > 0 || $skipped === 0 ? 'success' : 'error', $msg);
     }
 
     public function destroy(Emoji $emoji)

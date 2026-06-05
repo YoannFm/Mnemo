@@ -626,6 +626,7 @@
                                 </span>
                             @endif
                         </div>
+                        <span class="d-none d-lg-inline" style="color:var(--text-primary);font-size:.9rem;font-weight:600;">{{ Auth::user()->name }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom">
                         <li>
