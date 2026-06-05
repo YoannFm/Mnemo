@@ -96,13 +96,14 @@
                     {{-- Contenu de la question selon le type - photo ou texte --}}
                     @if ($question['field_question'] === 'photo_path')
                         {{-- Si question est une photo, l'afficher avec zoom possible --}}
-                        <div style="text-align:center;margin:1.5rem 0;">
+                        <div style="text-align:center;margin:1.5rem 0;display:inline-block;position:relative;">
                             <img src="{{ $question['question_content'] }}"
                                  alt="Question"
-                                 style="max-width:100%;max-height:300px;border-radius:12px;object-fit:cover;cursor:pointer;"
-                                 data-bs-toggle="modal"
-                                 data-bs-target="#zoomModal"
-                                 onclick="setZoomImage(this.src)">
+                                 style="max-width:300px;width:100%;aspect-ratio:1/1;border-radius:12px;object-fit:cover;display:block;">
+                            <button type="button" onclick="setZoomImage('{{ $question['question_content'] }}')"
+                                    style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);border:none;border-radius:8px;padding:5px 10px;color:#fff;cursor:pointer;font-size:.85rem;">
+                                <i class="bi bi-zoom-in"></i>
+                            </button>
                         </div>
                     @else
                         {{-- Si question est du texte (fonction/description), l'afficher stylisé --}}
