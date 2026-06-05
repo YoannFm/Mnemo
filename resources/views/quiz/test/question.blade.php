@@ -61,12 +61,11 @@
                         {{-- Chaque option est un bouton radio stylisé en carte cliquable --}}
                         <label for="option_{{ $index }}"
                                style="cursor:pointer;background:var(--card-bg);border:2px solid var(--card-border);
-                                      border-radius:12px;padding:.75rem;display:flex;flex-direction:column;
+                                      border-radius:12px;padding:.5rem;display:flex;flex-direction:column;
                                       align-items:center;justify-content:center;gap:.5rem;min-height:80px;
-                                      transition:.2s;"
+                                      transition:.2s;position:relative;"
                                onclick="this.style.borderColor='var(--accent)'">
 
-                            {{-- Input radio caché (la couleur du label indique la sélection) --}}
                             <input type="radio"
                                    id="option_{{ $index }}"
                                    name="answer"
@@ -75,20 +74,16 @@
                                    style="display:none;"
                                    required>
 
-                            {{-- Affichage de l'option selon son type (photo ou texte) --}}
                             @if ($question['field_answer'] === 'photo_path')
-                                <div style="position:relative;width:100%;aspect-ratio:1/1;">
-                                    <img src="{{ $option }}"
-                                         alt="Option {{ $index + 1 }}"
-                                         style="width:100%;height:100%;border-radius:8px;object-fit:cover;display:block;">
-                                    <button type="button"
-                                            onclick="event.preventDefault();event.stopPropagation();setZoomImage('{{ $option }}')"
-                                            style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;border-radius:6px;padding:3px 6px;cursor:pointer;color:#fff;font-size:.75rem;z-index:2;">
-                                        <i class="bi bi-arrows-fullscreen"></i>
-                                    </button>
-                                </div>
+                                <img src="{{ $option }}"
+                                     alt="Option {{ $index + 1 }}"
+                                     style="width:100%;aspect-ratio:1/1;border-radius:6px;object-fit:cover;display:block;">
+                                <button type="button"
+                                        onclick="event.preventDefault();event.stopPropagation();setZoomImage('{{ $option }}')"
+                                        style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;border-radius:6px;padding:3px 7px;cursor:pointer;color:#fff;font-size:.75rem;z-index:2;">
+                                    <i class="bi bi-arrows-fullscreen"></i>
+                                </button>
                             @else
-                                {{-- Option = texte (ex: Q1 ou Q4 - le nom français ou anglais) --}}
                                 <span style="font-size:.9rem;text-align:center;color:var(--text-primary);word-break:break-word;">
                                     {{ $option }}
                                 </span>

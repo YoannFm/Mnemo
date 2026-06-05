@@ -126,23 +126,20 @@
                             class="btn anki-option"
                             data-index="{{ $index }}"
                             onclick="submitAnswer({{ $index }}, event)"
-                            style="padding:.75rem;background:var(--card-bg);border:2px solid var(--card-border);
+                            style="padding:.5rem;background:var(--card-bg);border:2px solid var(--card-border);
                                    color:var(--text-primary);transition:.2s;border-radius:12px;
                                    display:flex;flex-direction:column;align-items:center;
-                                   justify-content:center;gap:.5rem;min-height:80px;">
+                                   justify-content:center;gap:.5rem;min-height:80px;position:relative;">
 
-                        {{-- Affichage du contenu de l'option selon le type (photo ou texte) --}}
                         @if ($question['field_answer'] === 'photo_path')
-                            <div style="position:relative;width:100%;aspect-ratio:1/1;">
-                                <img src="{{ $option }}"
-                                     alt="Option {{ $index + 1 }}"
-                                     style="width:100%;height:100%;border-radius:8px;object-fit:cover;display:block;">
-                                <button type="button"
-                                        onclick="event.stopPropagation();setZoomImage('{{ $option }}')"
-                                        style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;border-radius:6px;padding:3px 6px;cursor:pointer;color:#fff;font-size:.75rem;z-index:2;">
-                                    <i class="bi bi-arrows-fullscreen"></i>
-                                </button>
-                            </div>
+                            <img src="{{ $option }}"
+                                 alt="Option {{ $index + 1 }}"
+                                 style="width:100%;aspect-ratio:1/1;border-radius:6px;object-fit:cover;display:block;">
+                            <button type="button"
+                                    onclick="event.stopPropagation();setZoomImage('{{ $option }}')"
+                                    style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;border-radius:6px;padding:3px 7px;cursor:pointer;color:#fff;font-size:.75rem;z-index:2;">
+                                <i class="bi bi-arrows-fullscreen"></i>
+                            </button>
                         @else
                             {{-- Option = texte (ex: Q1 ou Q4 - répondre par le nom) --}}
                             <span style="font-size:.9rem;text-align:center;word-break:break-word;">
