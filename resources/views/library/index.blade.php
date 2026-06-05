@@ -79,9 +79,15 @@
 
                             {{-- Boutons --}}
                             <div class="d-flex gap-2 mt-auto flex-wrap">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="Prévisualiser les items"
+                                        onclick="previewModule('{{ route('modules.preview', $module) }}', '{{ addslashes($module->title) }}')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
                                 <a href="{{ route('modules.show', $module) }}"
                                    class="btn btn-sm btn-outline-primary flex-grow-1">
-                                    <i class="bi bi-eye me-1"></i>Voir
+                                    <i class="bi bi-box-arrow-up-right me-1"></i>Voir
                                 </a>
                                 {{-- Dupliquer ce module dans son espace personnel (si autorisé) --}}
                                 @if ($module->allow_duplication || Auth::user()->is_admin)
@@ -128,6 +134,70 @@
             {{ $modules->links('pagination::bootstrap-5') }}
         </div>
     @endif
+
+    {{-- Modal prévisualisation --}}
+    <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--card-border);">
+                <div class="modal-header" style="border-bottom:1px solid var(--card-border);">
+                    <h5 class="modal-title" id="previewModalTitle" style="color:var(--text-primary);"></h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0" id="previewModalBody">
+                    <div class="text-center py-5" style="color:var(--text-muted);">
+                        <i class="bi bi-hourglass-split" style="font-size:2rem;"></i>
+                        <p class="mt-2">Chargement…</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var previewModalInstance;
+
+    function previewModule(url, title) {
+        if (!previewModalInstance) {
+            previewModalInstance = new bootstrap.Modal(document.getElementById('previewModal'));
+        }
+
+        document.getElementById('previewModalTitle').textContent = title;
+        document.getElementById('previewModalBody').innerHTML = '<div class="text-center py-5" style="color:var(--text-muted);"><i class="bi bi-hourglass-split" style="font-size:2rem;"></i><p class="mt-2">Chargement…</p></div>';
+        previewModalInstance.show();
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.items || data.items.length === 0) {
+                document.getElementById('previewModalBody').innerHTML = '<p class="text-center py-4" style="color:var(--text-muted);">Aucun item dans ce module.</p>';
+                return;
+            }
+
+            let html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1rem;padding:1rem;">';
+            data.items.forEach(function(item) {
+                html += '<div style="background:var(--header-bg);border:1px solid var(--card-border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;">';
+                if (item.photo_url) {
+                    html += '<img src="' + item.photo_url + '" alt="' + item.name_fr + '" style="width:100%;aspect-ratio:1/1;object-fit:cover;">';
+                } else {
+                    html += '<div style="width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;background:var(--card-border);"><i class="bi bi-image" style="font-size:2rem;color:var(--text-muted);"></i></div>';
+                }
+                html += '<div style="padding:.5rem;">';
+                html += '<div style="font-weight:600;font-size:.85rem;color:var(--text-primary);">' + item.name_fr + '</div>';
+                if (item.name_en) html += '<div style="font-size:.75rem;color:var(--accent);">' + item.name_en + '</div>';
+                if (item.function_text) html += '<div style="font-size:.72rem;color:var(--text-muted);margin-top:.25rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">' + item.function_text + '</div>';
+                html += '</div></div>';
+            });
+            html += '</div>';
+
+            document.getElementById('previewModalBody').innerHTML = html;
+        })
+        .catch(function() {
+            document.getElementById('previewModalBody').innerHTML = '<p class="text-center py-4 text-danger">Erreur de chargement.</p>';
+        });
+    }
+    </script>
 
     {{-- Modals de signalement (un par module) --}}
     @auth

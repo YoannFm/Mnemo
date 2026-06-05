@@ -75,6 +75,9 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Prévisualisation rapide d'un module (JSON pour le modal bibliothèque)
+    Route::get('/modules/{module}/preview', [ModuleController::class, 'preview'])->name('modules.preview');
+
     // Import de module ZIP (doit être avant le resource pour éviter le conflit avec {module})
     Route::get('/modules/import', [ModuleExportController::class, 'showImportForm'])->name('modules.import.form');
     Route::post('/modules/import', [ModuleExportController::class, 'import'])->name('modules.import');
