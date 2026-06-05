@@ -441,16 +441,17 @@
 (function () {
     let currentReplyUrl = null;
 
-    document.querySelectorAll('.report-reply-btn').forEach(btn => {
-        btn.addEventListener('click', function () {
-            currentReplyUrl = this.dataset.url;
-            document.getElementById('reportReplyReason').value = '';
-            document.getElementById('reportReplyNote').value = '';
-            const fb = document.getElementById('reportReplyFeedback');
-            fb.className = 'd-none'; fb.textContent = '';
-            document.getElementById('reportReplySubmit').disabled = false;
-            new bootstrap.Modal(document.getElementById('reportReplyModal')).show();
-        });
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.report-reply-btn');
+        if (!btn) return;
+        currentReplyUrl = btn.dataset.url;
+        document.getElementById('reportReplyReason').value = '';
+        document.getElementById('reportReplyNote').value = '';
+        const fb = document.getElementById('reportReplyFeedback');
+        fb.className = 'd-none'; fb.textContent = '';
+        document.getElementById('reportReplySubmit').disabled = false;
+        document.getElementById('reportReplySubmit').classList.remove('d-none');
+        new bootstrap.Modal(document.getElementById('reportReplyModal')).show();
     });
 
     document.getElementById('reportReplySubmit')?.addEventListener('click', function () {
