@@ -149,13 +149,25 @@ class ModuleController extends Controller
             'description'       => 'nullable|string|max:1000',
             'is_public'         => 'nullable|boolean',
             'allow_duplication' => 'nullable|boolean',
+            'new_owner_email'   => 'nullable|email|exists:users,email',
         ]);
+
+        $newOwnerId = $module->owner_id;
+
+        if (!empty($validated['new_owner_email'])) {
+            $newOwner = \App\Models\User::where('email', $validated['new_owner_email'])->first();
+            if ($newOwner->id === $module->owner_id) {
+                return back()->withErrors(['new_owner_email' => 'Cet utilisateur est déjà le propriétaire du module.'])->withInput();
+            }
+            $newOwnerId = $newOwner->id;
+        }
 
         $module->update([
             'title'             => $validated['title'],
             'description'       => $validated['description'] ?? null,
             'is_public'         => $request->boolean('is_public'),
             'allow_duplication' => $request->boolean('allow_duplication'),
+            'owner_id'          => $newOwnerId,
         ]);
 
         return redirect()->route('modules.show', $module)
