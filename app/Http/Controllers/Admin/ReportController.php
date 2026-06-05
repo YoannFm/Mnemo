@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AdminSanction;
 use App\Models\ModuleRatingDeletion;
 use App\Models\ModuleRatingReport;
+use App\Models\ModuleRatingReplyReport;
 use App\Models\ModuleReport;
 use App\Models\Mute;
 use App\Models\PostCommentReport;
@@ -35,7 +36,12 @@ class ReportController extends Controller
             ->paginate(25, ['*'], 'ratings_page')
             ->withQueryString();
 
-        return view('admin.reports.index', compact('commentReports', 'moduleReports', 'ratingReports', 'type'));
+        $replyReports = ModuleRatingReplyReport::with(['user', 'reply.user', 'reply.moduleRating.module'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(25, ['*'], 'replies_page')
+            ->withQueryString();
+
+        return view('admin.reports.index', compact('commentReports', 'moduleReports', 'ratingReports', 'replyReports', 'type'));
     }
 
     public function markModuleTreated(ModuleReport $report)
@@ -48,6 +54,95 @@ class ReportController extends Controller
     {
         $report->update(['status' => 'rejected']);
         return back()->with('success', 'Signalement module rejeté.');
+    }
+
+    public function markReplyTreated(ModuleRatingReplyReport $report)
+    {
+        $report->update(['status' => 'treated']);
+        return back()->with('success', 'Signalement marqué comme traité.');
+    }
+
+    public function markReplyRejected(ModuleRatingReplyReport $report)
+    {
+        $report->update(['status' => 'rejected']);
+        return back()->with('success', 'Signalement rejeté.');
+    }
+
+    public function deleteReply(Request $request, ModuleRatingReplyReport $report)
+    {
+        $reply = $report->reply;
+
+        if (!$reply) {
+            return back()->with('error', 'Réponse introuvable.');
+        }
+
+        ModuleRatingDeletion::create([
+            'user_id'    => $reply->user_id,
+            'module_id'  => $reply->moduleRating?->module_id,
+            'type'       => 'reply',
+            'content'    => $reply->content,
+            'deleted_by' => 'admin',
+        ]);
+
+        $userId = $reply->user_id;
+        $reply->delete();
+        $report->update(['status' => 'treated']);
+
+        if ($userId) {
+            UserNotification::create([
+                'user_id' => $userId,
+                'title'   => 'Votre réponse a été supprimée',
+                'message' => 'Votre réponse à un avis a été supprimée par un administrateur.',
+                'type'    => 'warning',
+            ]);
+        }
+
+        return back()->with('success', 'Réponse supprimée.');
+    }
+
+    public function muteReplyUser(Request $request, ModuleRatingReplyReport $report)
+    {
+        $request->validate([
+            'reason'             => 'required|string|max:500',
+            'duration_value'     => 'nullable|integer|min:1',
+            'duration_unit'      => 'nullable|in:minutes,hours,days,weeks,months',
+            'duration_permanent' => 'nullable',
+        ]);
+
+        $replyUser = $report->reply?->user;
+
+        if (!$replyUser) {
+            return back()->with('error', 'Utilisateur introuvable.');
+        }
+
+        $permanent = $request->boolean('duration_permanent');
+        $expiresAt = $permanent ? null : now()->add(
+            $request->input('duration_unit', 'days'),
+            (int) $request->input('duration_value', 1)
+        );
+
+        Mute::create([
+            'user_id'    => $replyUser->id,
+            'admin_id'   => Auth::id(),
+            'reason'     => $request->input('reason'),
+            'expires_at' => $expiresAt,
+        ]);
+
+        AdminSanction::create([
+            'user_id'  => $replyUser->id,
+            'admin_id' => Auth::id(),
+            'reason'   => $request->input('reason'),
+            'type'     => 'mute',
+        ]);
+
+        UserNotification::create([
+            'user_id' => $replyUser->id,
+            'title'   => 'Vous avez été rendu muet',
+            'message' => 'Vous avez été rendu muet pour la raison suivante : ' . $request->input('reason'),
+            'type'    => 'warning',
+        ]);
+
+        return back()->with('success', 'Utilisateur muté avec succès.');
     }
 
     public function markRatingTreated(ModuleRatingReport $report)

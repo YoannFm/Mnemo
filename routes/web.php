@@ -141,6 +141,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::delete('/module-ratings/{rating}', [ModuleController::class, 'deleteRating'])->name('modules.ratings.destroy');
     Route::post('/module-ratings/{rating}/replies', [ModuleController::class, 'replyToRating'])->name('modules.ratings.replies.store');
     Route::delete('/module-rating-replies/{reply}', [ModuleController::class, 'deleteRatingReply'])->name('modules.ratings.replies.destroy');
+    Route::post('/module-rating-replies/{reply}/report', [ModuleController::class, 'reportRatingReply'])->name('modules.ratings.replies.report');
 
     // ─── Bibliothèque publique ───
     Route::get('/bibliotheque', [LibraryController::class, 'index'])->name('library.index');
@@ -272,6 +273,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::post('/reports/ratings/{report}/rejected', [\App\Http\Controllers\Admin\ReportController::class, 'markRatingRejected'])->name('reports.ratings.rejected');
     Route::post('/reports/ratings/{report}/delete-rating', [\App\Http\Controllers\Admin\ReportController::class, 'deleteRating'])->name('reports.ratings.delete');
     Route::post('/reports/ratings/{report}/mute-user', [\App\Http\Controllers\Admin\ReportController::class, 'muteRatingUser'])->name('reports.ratings.mute-user');
+    // Signalements de réponses
+    Route::post('/reports/replies/{report}/treated', [\App\Http\Controllers\Admin\ReportController::class, 'markReplyTreated'])->name('reports.replies.treated');
+    Route::post('/reports/replies/{report}/rejected', [\App\Http\Controllers\Admin\ReportController::class, 'markReplyRejected'])->name('reports.replies.rejected');
+    Route::post('/reports/replies/{report}/delete-reply', [\App\Http\Controllers\Admin\ReportController::class, 'deleteReply'])->name('reports.replies.delete');
+    Route::post('/reports/replies/{report}/mute-user', [\App\Http\Controllers\Admin\ReportController::class, 'muteReplyUser'])->name('reports.replies.mute-user');
     // Sanctions
     Route::get('/sanctions', [\App\Http\Controllers\Admin\SanctionController::class, 'index'])->name('sanctions.index');
     Route::post('/sanctions/{sanction}/unmute', [\App\Http\Controllers\Admin\SanctionController::class, 'unmute'])->name('sanctions.unmute');

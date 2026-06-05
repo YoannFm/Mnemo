@@ -17,4 +17,9 @@ class ModuleRatingReply extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function reports()
+    {
+        return $this->hasMany(ModuleRatingReplyReport::class, 'module_rating_reply_id');
+    }
 }

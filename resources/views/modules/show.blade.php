@@ -401,6 +401,95 @@
 </script>
 @endauth
 
+{{-- Modal signalement de réponse --}}
+@auth
+<div class="modal fade" id="reportReplyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-flag me-2 text-danger"></i>Signaler cette réponse</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Motif <span class="text-danger">*</span></label>
+                    <select id="reportReplyReason" class="form-select">
+                        <option value="">-- Choisir un motif --</option>
+                        <option value="spam">Spam</option>
+                        <option value="inappropriate">Contenu inapproprié</option>
+                        <option value="harassment">Harcèlement</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Note (optionnelle)</label>
+                    <textarea id="reportReplyNote" class="form-control" rows="2" maxlength="500" placeholder="Précisez..."></textarea>
+                </div>
+                <div id="reportReplyFeedback" class="d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="reportReplySubmit">
+                    <i class="bi bi-flag me-1"></i>Envoyer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    let currentReplyUrl = null;
+
+    document.querySelectorAll('.report-reply-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            currentReplyUrl = this.dataset.url;
+            document.getElementById('reportReplyReason').value = '';
+            document.getElementById('reportReplyNote').value = '';
+            const fb = document.getElementById('reportReplyFeedback');
+            fb.className = 'd-none'; fb.textContent = '';
+            document.getElementById('reportReplySubmit').disabled = false;
+            new bootstrap.Modal(document.getElementById('reportReplyModal')).show();
+        });
+    });
+
+    document.getElementById('reportReplySubmit')?.addEventListener('click', function () {
+        const reason = document.getElementById('reportReplyReason').value;
+        const note   = document.getElementById('reportReplyNote').value;
+        const fb     = document.getElementById('reportReplyFeedback');
+        if (!reason) {
+            fb.className = 'alert alert-warning'; fb.textContent = 'Veuillez choisir un motif.';
+            fb.classList.remove('d-none'); return;
+        }
+        this.disabled = true;
+        fetch(currentReplyUrl, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content},
+            body: JSON.stringify({ reason, note })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'ok') {
+                fb.className = 'alert alert-success'; fb.textContent = 'Signalement envoyé. Merci !';
+                document.getElementById('reportReplySubmit').classList.add('d-none');
+            } else if (data.status === 'already_reported') {
+                fb.className = 'alert alert-info'; fb.textContent = 'Vous avez déjà signalé cette réponse.';
+            } else {
+                fb.className = 'alert alert-danger'; fb.textContent = data.message ?? 'Une erreur est survenue.';
+                document.getElementById('reportReplySubmit').disabled = false;
+            }
+            fb.classList.remove('d-none');
+        })
+        .catch(() => {
+            fb.className = 'alert alert-danger'; fb.textContent = 'Erreur réseau.';
+            fb.classList.remove('d-none');
+            document.getElementById('reportReplySubmit').disabled = false;
+        });
+    });
+})();
+</script>
+@endauth
+
 <div id="zoom-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;cursor:pointer;align-items:center;justify-content:center;" onclick="this.style.display='none'">
     <img id="zoom-img" src="" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;">
 </div>
@@ -666,6 +755,14 @@ function openZoom(src) {
                                                             title="Supprimer">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
+                                                @elseif (Auth::id() !== $reply->user_id)
+                                                    <button type="button" class="report-reply-btn btn btn-sm"
+                                                            style="color:var(--text-muted);border:none;background:transparent;padding:0;font-size:.75rem;"
+                                                            data-reply-id="{{ $reply->id }}"
+                                                            data-url="{{ route('modules.ratings.replies.report', $reply) }}"
+                                                            title="Signaler cette réponse">
+                                                        <i class="bi bi-flag"></i>
+                                                    </button>
                                                 @endif
                                             @endauth
                                         </div>
@@ -767,7 +864,15 @@ function openZoom(src) {
 
         moreBtn.addEventListener('click', ev => {
             ev.stopPropagation();
-            container.classList.toggle('d-none');
+            var wasHidden = container.classList.contains('d-none');
+            document.querySelectorAll('.emoji-picker-container').forEach(c => c.classList.add('d-none'));
+            if (!wasHidden) return;
+            container.classList.remove('d-none');
+            // Repositionner pour rester dans le viewport
+            var rect = container.getBoundingClientRect();
+            if (rect.left < 0) { container.style.right = 'auto'; container.style.left = '0'; }
+            if (rect.right > window.innerWidth) { container.style.left = 'auto'; container.style.right = '0'; }
+            if (rect.top < 0) { container.style.bottom = 'auto'; container.style.top = '110%'; }
             if (!emojisLoaded) {
                 emojisLoaded = true;
                 fetch(emojisUrl).then(r => r.json()).then(data => { allEmojis = data; filter(); });
