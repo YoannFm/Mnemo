@@ -17,7 +17,7 @@
 <div class="mb-3">
     <label class="form-label" for="slugInput">Slug</label>
     <div class="input-group @error('slug') has-validation @enderror">
-        <span class="input-group-text">{{ url('/') }}/</span>
+        <span class="input-group-text">{{ url('/') }}/p/</span>
         <input type="text" class="form-control @error('slug') is-invalid @enderror"
                id="slugInput" name="slug" value="{{ old('slug', $page->slug ?? '') }}" required>
         @error('slug')<span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>@enderror
