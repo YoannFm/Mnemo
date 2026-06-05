@@ -54,11 +54,12 @@
                             <div id="emoji-picker-container" class="position-absolute d-none"
                                  style="bottom:110%;right:0;z-index:200;background:var(--card-bg);border:1px solid var(--card-border);border-radius:10px;padding:12px;width:min(320px, calc(100vw - 1.5rem));box-shadow:0 8px 24px rgba(0,0,0,.2);">
                                 <input type="search" id="emoji-search" class="form-control form-control-sm mb-2" placeholder="Rechercher...">
-                                <div class="d-flex gap-2 mb-2" id="emoji-type-tabs">
-                                    <button type="button" class="btn btn-sm btn-primary active" data-tab="simple">Simples</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary" data-tab="animated">Animés</button>
+                                <div id="emoji-recent-section" class="d-none mb-2">
+                                    <p class="text-muted mb-1" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;">Récents</p>
+                                    <div id="emoji-recent-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;"></div>
+                                    <hr class="my-2" style="border-color:var(--card-border);">
                                 </div>
-                                <div id="emoji-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:240px;overflow-y:auto;"></div>
+                                <div id="emoji-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:200px;overflow-y:auto;"></div>
                                 <p id="emoji-empty" class="text-muted text-center small mt-2 d-none">Aucun emoji.</p>
                             </div>
                         </div>
@@ -75,7 +76,38 @@
             var emojisUrl = "{{ route('emojis.json') }}";
             var csrf = document.querySelector('meta[name="csrf-token"]').content;
             var allEmojis = [];
-            var currentTab = 'simple';
+            var RECENT_KEY = 'emoji_recent';
+            var MAX_RECENT = 12;
+
+            function getRecent() {
+                try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); } catch(e) { return []; }
+            }
+            function addRecent(slug) {
+                var list = getRecent().filter(s => s !== slug);
+                list.unshift(slug);
+                localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, MAX_RECENT)));
+            }
+            function renderRecentSection() {
+                var recent = getRecent();
+                var section = document.getElementById('emoji-recent-section');
+                var grid = document.getElementById('emoji-recent-grid');
+                var matching = recent.map(s => allEmojis.find(e => e.slug === s)).filter(Boolean);
+                if (!matching.length) { section.classList.add('d-none'); return; }
+                section.classList.remove('d-none');
+                grid.innerHTML = '';
+                matching.forEach(e => grid.appendChild(makeEmojiBtn(e)));
+            }
+            function makeEmojiBtn(e) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.title = e.name;
+                btn.style = 'background:none;border:1px solid transparent;border-radius:6px;padding:4px;cursor:pointer;transition:.15s;';
+                btn.innerHTML = '<img src="' + e.url + '" alt="' + e.name + '" style="width:32px;height:32px;object-fit:contain;">';
+                btn.addEventListener('mouseenter', () => btn.style.borderColor = 'var(--card-border)');
+                btn.addEventListener('mouseleave', () => btn.style.borderColor = 'transparent');
+                btn.addEventListener('click', () => { addRecent(e.slug); sendReaction(e.slug, e.url, e.name); });
+                return btn;
+            }
 
             function sendReaction(slug, imgUrl, imgAlt) {
                 if (pickerContainer) pickerContainer.classList.add('d-none');
@@ -90,6 +122,7 @@
                 })
                 .then(data => {
                     if (data.status === 'muted') { showMuteAlert(data.message); return; }
+                    if (data.active) addRecent(slug);
                     var existing = document.querySelector('#reactions-bar .reaction-btn[data-emoji="' + slug + '"]');
                     if (existing) {
                         existing.classList.toggle('btn-primary', data.active);
@@ -131,22 +164,13 @@
                 grid.innerHTML = '';
                 if (!emojis.length) { empty.classList.remove('d-none'); return; }
                 empty.classList.add('d-none');
-                emojis.forEach(e => {
-                    var btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.title = e.name;
-                    btn.style = 'background:none;border:1px solid transparent;border-radius:6px;padding:4px;cursor:pointer;transition:.15s;';
-                    btn.innerHTML = '<img src="' + e.url + '" alt="' + e.name + '" style="width:32px;height:32px;object-fit:contain;">';
-                    btn.addEventListener('mouseenter', () => btn.style.borderColor = 'var(--card-border)');
-                    btn.addEventListener('mouseleave', () => btn.style.borderColor = 'transparent');
-                    btn.addEventListener('click', () => sendReaction(e.slug, e.url, e.name));
-                    grid.appendChild(btn);
-                });
+                emojis.forEach(e => grid.appendChild(makeEmojiBtn(e)));
             }
 
             function filterAndRender() {
                 var q = (document.getElementById('emoji-search').value || '').toLowerCase();
-                var filtered = allEmojis.filter(e => e.type === currentTab && (!q || e.name.toLowerCase().includes(q) || e.slug.toLowerCase().includes(q)));
+                var filtered = allEmojis.filter(e => !q || e.name.toLowerCase().includes(q) || e.slug.toLowerCase().includes(q));
+                renderRecentSection();
                 renderEmojiGrid(filtered);
             }
 
@@ -170,18 +194,6 @@
                 pickerContainer.addEventListener('click', e => e.stopPropagation());
 
                 document.getElementById('emoji-search').addEventListener('input', filterAndRender);
-
-                document.querySelectorAll('#emoji-type-tabs button').forEach(tab => {
-                    tab.addEventListener('click', function() {
-                        currentTab = this.dataset.tab;
-                        document.querySelectorAll('#emoji-type-tabs button').forEach(b => {
-                            b.className = 'btn btn-sm btn-outline-secondary';
-                        });
-                        this.className = 'btn btn-sm btn-primary active';
-                        document.getElementById('emoji-search').value = '';
-                        filterAndRender();
-                    });
-                });
             }
             </script>
         @endif
