@@ -92,6 +92,26 @@
                             </div>
                         </div>
 
+                        {{-- Transfert de propriété --}}
+                        <div class="mb-4 p-3" style="border:1px solid var(--card-border);border-radius:8px;">
+                            <label class="form-label fw-semibold" style="font-size:.875rem;">
+                                <i class="bi bi-person-check me-1" style="color:var(--accent);"></i>
+                                Transférer la propriété
+                            </label>
+                            <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:.5rem;">
+                                Entrez l'adresse email de l'utilisateur à qui transférer ce module. Vous n'en serez plus le propriétaire.
+                            </p>
+                            <input type="email"
+                                   id="new_owner_email"
+                                   name="new_owner_email"
+                                   class="form-control @error('new_owner_email') is-invalid @enderror"
+                                   placeholder="email@exemple.com"
+                                   value="{{ old('new_owner_email') }}">
+                            @error('new_owner_email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         {{-- Boutons --}}
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
