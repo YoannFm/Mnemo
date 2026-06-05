@@ -106,7 +106,13 @@
 
         function showField(type) {
             Object.keys(fields).forEach(function (key) {
-                fields[key].style.display = key === type ? '' : 'none';
+                const el = fields[key];
+                const active = key === type;
+                el.style.display = active ? '' : 'none';
+                // Désactiver les champs cachés pour qu'ils ne soient pas soumis
+                el.querySelectorAll('input, select, textarea').forEach(function (input) {
+                    input.disabled = !active;
+                });
             });
         }
 
