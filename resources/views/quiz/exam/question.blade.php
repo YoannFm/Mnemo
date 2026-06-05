@@ -87,11 +87,10 @@
                                 <img src="{{ $option }}"
                                      alt="Option {{ $index + 1 }}"
                                      style="width:100%;aspect-ratio:1/1;border-radius:6px;object-fit:cover;display:block;">
-                                <button type="button"
-                                        onclick="event.preventDefault();event.stopPropagation();setZoomImage('{{ $option }}')"
-                                        style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;border-radius:6px;padding:3px 7px;cursor:pointer;color:#fff;font-size:.75rem;z-index:2;">
-                                    <i class="bi bi-arrows-fullscreen"></i>
-                                </button>
+                                <span onclick="event.preventDefault();event.stopPropagation();setZoomImage('{{ $option }}')"
+                                      style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border-radius:6px;padding:4px 8px;cursor:pointer;color:#fff;font-size:.8rem;z-index:10;line-height:1;">
+                                    <i class="bi bi-zoom-in"></i>
+                                </span>
                             @else
                                 <span style="font-size:.9rem;text-align:center;color:var(--text-primary);word-break:break-word;">
                                     {{ $option }}
