@@ -109,6 +109,15 @@
                                        style="color:var(--accent);border:1px solid var(--accent);">
                                         <i class="bi bi-arrow-repeat"></i>
                                     </a>
+                                    <form method="POST" action="{{ route('modules.progress.reset', $module) }}"
+                                          onsubmit="return confirm('Réinitialiser ta progression sur ce module ?')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-sm"
+                                                title="Réinitialiser ma progression"
+                                                style="color:var(--text-muted);border:1px solid var(--card-border);">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </form>
                                 @endif
                                 @auth
                                     @if (Auth::id() !== $module->owner_id)
