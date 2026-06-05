@@ -83,9 +83,19 @@
                                 </td>
                                 <td>
                                     @if($log->data)
-                                        {{ Str::limit(json_encode($log->data), 80) }}
+                                        <small>{{ Str::limit(json_encode($log->data), 60) }}</small>
                                     @else
                                         <span class="text-muted">-</span>
+                                    @endif
+                                    @if($log->old_value || $log->new_value)
+                                        <div class="mt-1 d-flex gap-1 flex-wrap">
+                                            @if($log->old_value !== null)
+                                                <span class="badge text-bg-danger" title="Avant">{{ Str::limit($log->old_value, 40) }}</span>
+                                            @endif
+                                            @if($log->new_value !== null)
+                                                <span class="badge text-bg-success" title="Après">{{ Str::limit($log->new_value, 40) }}</span>
+                                            @endif
+                                        </div>
                                     @endif
                                 </td>
                                 <td>
