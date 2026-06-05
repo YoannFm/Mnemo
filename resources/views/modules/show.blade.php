@@ -666,6 +666,26 @@ function openZoom(src) {
         });
 
         const deleteBtn = document.getElementById('rating-delete');
+        document.addEventListener('click', function (e) {
+            const adminBtn = e.target.closest('.admin-delete-rating-btn');
+            if (!adminBtn) return;
+            if (!confirm('Supprimer définitivement cet avis ?')) return;
+            adminBtn.disabled = true;
+            fetch(adminBtn.dataset.url, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'ok') location.reload();
+                else adminBtn.disabled = false;
+            })
+            .catch(() => { adminBtn.disabled = false; });
+        });
+
         deleteBtn?.addEventListener('click', function () {
             if (!confirm('Supprimer définitivement votre avis ?')) return;
             this.disabled = true;
@@ -711,7 +731,14 @@ function openZoom(src) {
                                     @endfor
                                 </div>
                                 @auth
-                                    @if (Auth::id() !== $r->user_id)
+                                    @if (Auth::user()?->is_admin)
+                                        <button type="button" class="btn btn-sm admin-delete-rating-btn"
+                                                style="color:#ef4444;border:none;background:transparent;padding:0;font-size:.8rem;"
+                                                data-url="{{ route('modules.ratings.destroy', $r) }}"
+                                                title="Supprimer cet avis (admin)">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    @elseif (Auth::id() !== $r->user_id)
                                         <button type="button" class="btn btn-sm report-rating-btn"
                                                 style="color:var(--text-muted);border:none;background:transparent;padding:0;font-size:.8rem;"
                                                 data-rating-id="{{ $r->id }}" title="Signaler cet avis">
