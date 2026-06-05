@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Emoji;
 use App\Models\Module;
 use App\Models\ModuleRating;
+use App\Models\ModuleRatingReaction;
+use App\Models\ModuleRatingReply;
 use App\Models\ModuleRatingReport;
 use App\Models\ModuleReport;
 use App\Models\Mute;
@@ -85,9 +88,9 @@ class ModuleController extends Controller
 
         $items = $module->items()->paginate(20);
 
-        $avgRating  = $module->ratings()->avg('rating');
+        $avgRating   = $module->ratings()->avg('rating');
         $ratingCount = $module->ratings()->count();
-        $userRating = Auth::check()
+        $userRating  = Auth::check()
             ? $module->ratings()->where('user_id', Auth::id())->first()
             : null;
 
@@ -95,7 +98,30 @@ class ModuleController extends Controller
             ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->exists();
 
-        return view('modules.show', compact('module', 'items', 'avgRating', 'ratingCount', 'userRating', 'isMuted'));
+        // Réactions par avis : [rating_id => [slug => count]]
+        // Réactions de l'utilisateur : [rating_id => [slug, ...]]
+        $allRatingsWithData = $module->ratings()
+            ->with(['user', 'replies.user', 'reactions'])
+            ->whereNotNull('comment')
+            ->latest()
+            ->get();
+
+        $ratingReactions  = [];
+        $userRatingReacts = [];
+        foreach ($allRatingsWithData as $r) {
+            $ratingReactions[$r->id] = $r->reactions
+                ->groupBy('emoji')
+                ->map(fn($g) => $g->count())
+                ->toArray();
+            $userRatingReacts[$r->id] = Auth::check()
+                ? $r->reactions->where('user_id', Auth::id())->pluck('emoji')->toArray()
+                : [];
+        }
+
+        return view('modules.show', compact(
+            'module', 'items', 'avgRating', 'ratingCount', 'userRating', 'isMuted',
+            'allRatingsWithData', 'ratingReactions', 'userRatingReacts'
+        ));
     }
 
     /**
@@ -278,6 +304,88 @@ class ModuleController extends Controller
             ['rating' => $validated['rating'], 'comment' => $validated['comment'] ?? null]
         );
 
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function reactToRating(Request $request, ModuleRating $rating)
+    {
+        $isMuted = Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->exists();
+
+        if ($isMuted) {
+            return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas réagir.'], 403);
+        }
+
+        $emoji = $request->input('emoji');
+
+        if (!Emoji::where('slug', $emoji)->exists()) {
+            return response()->json(['status' => 'error', 'message' => 'Emoji invalide.'], 422);
+        }
+
+        $existing = ModuleRatingReaction::where([
+            'module_rating_id' => $rating->id,
+            'user_id'          => Auth::id(),
+            'emoji'            => $emoji,
+        ])->first();
+
+        if ($existing) {
+            $existing->delete();
+            $active = false;
+        } else {
+            ModuleRatingReaction::create([
+                'module_rating_id' => $rating->id,
+                'user_id'          => Auth::id(),
+                'emoji'            => $emoji,
+            ]);
+            $active = true;
+        }
+
+        $count = ModuleRatingReaction::where('module_rating_id', $rating->id)
+            ->where('emoji', $emoji)
+            ->count();
+
+        return response()->json(['active' => $active, 'count' => $count]);
+    }
+
+    public function replyToRating(Request $request, ModuleRating $rating)
+    {
+        $isMuted = Mute::where('user_id', Auth::id())
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->exists();
+
+        if ($isMuted) {
+            return response()->json(['status' => 'muted', 'message' => 'Vous êtes muté et ne pouvez pas répondre.'], 403);
+        }
+
+        $validated = $request->validate(['content' => 'required|string|max:1000']);
+
+        $reply = ModuleRatingReply::create([
+            'module_rating_id' => $rating->id,
+            'user_id'          => Auth::id(),
+            'content'          => $validated['content'],
+        ]);
+
+        $reply->load('user');
+
+        return response()->json([
+            'status'  => 'ok',
+            'id'      => $reply->id,
+            'author'  => $reply->user->name,
+            'content' => $reply->content,
+            'date'    => $reply->created_at->diffForHumans(),
+            'mine'    => true,
+            'delete_url' => route('modules.ratings.replies.destroy', $reply),
+        ]);
+    }
+
+    public function deleteRatingReply(ModuleRatingReply $reply)
+    {
+        if ($reply->user_id !== Auth::id() && !Auth::user()->is_admin) {
+            abort(403);
+        }
+
+        $reply->delete();
         return response()->json(['status' => 'ok']);
     }
 
