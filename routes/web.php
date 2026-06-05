@@ -138,6 +138,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
 
     // Réactions et réponses sur un avis
     Route::post('/module-ratings/{rating}/react', [ModuleController::class, 'reactToRating'])->name('modules.ratings.react');
+    Route::delete('/module-ratings/{rating}', [ModuleController::class, 'deleteRating'])->name('modules.ratings.destroy');
     Route::post('/module-ratings/{rating}/replies', [ModuleController::class, 'replyToRating'])->name('modules.ratings.replies.store');
     Route::delete('/module-rating-replies/{reply}', [ModuleController::class, 'deleteRatingReply'])->name('modules.ratings.replies.destroy');
 

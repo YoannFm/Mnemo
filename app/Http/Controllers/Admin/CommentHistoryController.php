@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ModuleRating;
+use App\Models\ModuleRatingDeletion;
 use App\Models\PostCommentHistory;
 
 class CommentHistoryController extends Controller
@@ -19,6 +20,10 @@ class CommentHistoryController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 
-        return view('admin.comment-history.index', compact('entries', 'ratings'));
+        $deletions = ModuleRatingDeletion::with(['user', 'module'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(25);
+
+        return view('admin.comment-history.index', compact('entries', 'ratings', 'deletions'));
     }
 }

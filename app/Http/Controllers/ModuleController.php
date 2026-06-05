@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Emoji;
 use App\Models\Module;
 use App\Models\ModuleRating;
+use App\Models\ModuleRatingDeletion;
 use App\Models\ModuleRatingReaction;
 use App\Models\ModuleRatingReply;
 use App\Models\ModuleRatingReport;
@@ -307,6 +308,26 @@ class ModuleController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
+    public function deleteRating(ModuleRating $rating)
+    {
+        if ($rating->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        ModuleRatingDeletion::create([
+            'user_id'    => $rating->user_id,
+            'module_id'  => $rating->module_id,
+            'type'       => 'rating',
+            'rating'     => $rating->rating,
+            'content'    => $rating->comment,
+            'deleted_by' => 'user',
+        ]);
+
+        $rating->delete();
+
+        return response()->json(['status' => 'ok']);
+    }
+
     public function reactToRating(Request $request, ModuleRating $rating)
     {
         $isMuted = Mute::where('user_id', Auth::id())
@@ -384,6 +405,14 @@ class ModuleController extends Controller
         if ($reply->user_id !== Auth::id() && !Auth::user()->is_admin) {
             abort(403);
         }
+
+        ModuleRatingDeletion::create([
+            'user_id'    => $reply->user_id,
+            'module_id'  => $reply->moduleRating?->module_id,
+            'type'       => 'reply',
+            'content'    => $reply->content,
+            'deleted_by' => Auth::user()->is_admin && Auth::id() !== $reply->user_id ? 'admin' : 'user',
+        ]);
 
         $reply->delete();
         return response()->json(['status' => 'ok']);
