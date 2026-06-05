@@ -52,19 +52,19 @@
                                 <td>{{ $module->items_count }}</td>
                                 <td>{{ $module->created_at->format('d/m/Y') }}</td>
                                 <td class="d-flex gap-2 flex-wrap">
-                                    <a href="{{ route('modules.show', $module) }}" class="btn btn-sm btn-outline-primary" title="Voir" target="_blank">
+                                    <a href="{{ route('modules.show', $module) }}" class="btn btn-sm btn-outline-success" title="Voir" target="_blank">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('modules.edit', $module) }}" class="btn btn-sm btn-outline-primary" title="Modifier" target="_blank">
+                                    <a href="{{ route('modules.edit', $module) }}" class="btn btn-sm btn-outline-warning" title="Modifier" target="_blank">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="{{ route('modules.export', $module) }}" class="btn btn-sm btn-outline-primary" title="Exporter">
+                                    <a href="{{ route('modules.export', $module) }}" class="btn btn-sm btn-outline-secondary" title="Exporter" style="color:#f97316;border-color:#f97316;">
                                         <i class="bi bi-download"></i>
                                     </a>
                                     <form method="POST" action="{{ route('modules.duplicate', $module) }}" class="d-inline"
                                           onsubmit="return confirm('Dupliquer ce module dans votre espace ?')">
                                         @csrf
-                                        <button type="submit" class="btn btn-sm btn-outline-primary" title="Dupliquer">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary" title="Dupliquer">
                                             <i class="bi bi-copy"></i>
                                         </button>
                                     </form>
