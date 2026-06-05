@@ -29,8 +29,8 @@ class NavItem extends Model
     {
         return match ($this->type) {
             'link'     => $this->value ?? '#',
-            'page'     => route('page.show', $this->value ?? ''),
-            'post'     => route('post.show', $this->value ?? ''),
+            'page'     => $this->value ? route('pages.show', $this->value) : '#',
+            'post'     => $this->value ? route('posts.show', $this->value) : '#',
             'dropdown' => '#',
             default    => $this->value ?? '#',
         };
