@@ -255,6 +255,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::delete('/themes/{theme}', [\App\Http\Controllers\Admin\ThemeController::class, 'destroy'])->name('themes.destroy');
     Route::post('/themes/{theme}/activate', [\App\Http\Controllers\Admin\ThemeController::class, 'activate'])->name('themes.activate');
     Route::post('/themes/{theme}/duplicate', [\App\Http\Controllers\Admin\ThemeController::class, 'duplicate'])->name('themes.duplicate');
+    // Plugins
+    Route::get('/plugins', [\App\Http\Controllers\Admin\PluginController::class, 'index'])->name('admin.plugins.index');
+    Route::post('/plugins/reload', [\App\Http\Controllers\Admin\PluginController::class, 'reload'])->name('admin.plugins.reload');
+    Route::post('/plugins/{plugin}/enable', [\App\Http\Controllers\Admin\PluginController::class, 'enable'])->name('admin.plugins.enable');
+    Route::post('/plugins/{plugin}/disable', [\App\Http\Controllers\Admin\PluginController::class, 'disable'])->name('admin.plugins.disable');
+    Route::post('/plugins/{slug}/install', [\App\Http\Controllers\Admin\PluginController::class, 'install'])->name('admin.plugins.install');
+    Route::post('/plugins/{plugin}/update', [\App\Http\Controllers\Admin\PluginController::class, 'update'])->name('admin.plugins.update');
+    Route::delete('/plugins/{plugin}', [\App\Http\Controllers\Admin\PluginController::class, 'delete'])->name('admin.plugins.delete');
     // Private modules
     Route::get('/private-modules', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'index'])->name('private-modules.index');
     Route::delete('/private-modules/{module}', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'destroy'])->name('private-modules.destroy');
