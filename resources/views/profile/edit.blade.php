@@ -89,6 +89,50 @@
             </div>
         </div>
 
+        {{-- ── Couleur d'accentuation ── --}}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-palette-fill" style="color:var(--accent);"></i>
+                    <span class="fw-semibold">Couleur d'accentuation</span>
+                </div>
+                <div class="card-body p-4">
+                    <p style="font-size:.875rem;color:var(--text-muted);margin-bottom:1.25rem;">
+                        Personnalisez la couleur d'accentuation de l'interface pour votre compte uniquement.
+                    </p>
+                    <form method="POST" action="{{ route('profile.accent') }}">
+                        @csrf
+                        @method('PATCH')
+                        <div class="d-flex align-items-center gap-3 flex-wrap">
+                            <div class="d-flex align-items-center gap-2">
+                                <label for="accent_color" class="form-label mb-0">Couleur</label>
+                                <input type="color"
+                                       id="accent_color"
+                                       name="accent_color"
+                                       class="form-control form-control-color"
+                                       value="{{ auth()->user()->accent_color ?? setting('theme_accent', '#EFB702') }}"
+                                       style="width:48px;height:36px;padding:2px;">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-check-lg me-1"></i>Appliquer
+                            </button>
+                            @if (auth()->user()->accent_color)
+                                <a href="{{ route('profile.accent.reset') }}" class="btn btn-sm"
+                                   style="color:var(--text-muted);border:1px solid var(--card-border);">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser
+                                </a>
+                            @endif
+                            @if (session('status') === 'accent-updated')
+                                <span style="color:var(--success-color);font-size:.875rem;">
+                                    <i class="bi bi-check-circle me-1"></i>Couleur mise à jour !
+                                </span>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         {{-- ── Changer le mot de passe ── --}}
         <div class="col-12">
             <div class="card">
