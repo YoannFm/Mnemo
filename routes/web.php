@@ -263,6 +263,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::post('/plugins/{slug}/install', [\App\Http\Controllers\Admin\PluginController::class, 'install'])->name('admin.plugins.install');
     Route::post('/plugins/{plugin}/update', [\App\Http\Controllers\Admin\PluginController::class, 'update'])->name('admin.plugins.update');
     Route::delete('/plugins/{plugin}', [\App\Http\Controllers\Admin\PluginController::class, 'delete'])->name('admin.plugins.delete');
+    // Updates
+    Route::get('/update', [\App\Http\Controllers\Admin\UpdateController::class, 'index'])->name('admin.update.index');
+    Route::post('/update/fetch', [\App\Http\Controllers\Admin\UpdateController::class, 'fetch'])->name('admin.update.fetch');
+    Route::post('/update/download', [\App\Http\Controllers\Admin\UpdateController::class, 'download'])->name('admin.update.download');
+    Route::post('/update/install', [\App\Http\Controllers\Admin\UpdateController::class, 'install'])->name('admin.update.install');
     // Private modules
     Route::get('/private-modules', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'index'])->name('private-modules.index');
     Route::delete('/private-modules/{module}', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'destroy'])->name('private-modules.destroy');
