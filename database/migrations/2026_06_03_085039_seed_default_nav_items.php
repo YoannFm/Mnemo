@@ -12,17 +12,16 @@ return new class extends Migration
         }
 
         $defaults = [
-            ['label' => 'Accueil',      'value' => '/dashboard',    'icon' => 'bi bi-house',      'position' => 1],
-            ['label' => 'Mes modules',  'value' => '/modules',      'icon' => 'bi bi-collection', 'position' => 2],
-            ['label' => 'Bibliothèque', 'value' => '/bibliotheque', 'icon' => 'bi bi-book',       'position' => 3],
-            ['label' => 'Progression',  'value' => '/progression',  'icon' => 'bi bi-graph-up',   'position' => 4],
+            ['label' => 'Accueil',      'url' => '/dashboard',    'icon' => 'bi bi-house',      'position' => 1],
+            ['label' => 'Mes modules',  'url' => '/modules',      'icon' => 'bi bi-collection', 'position' => 2],
+            ['label' => 'Bibliothèque', 'url' => '/bibliotheque', 'icon' => 'bi bi-book',       'position' => 3],
+            ['label' => 'Progression',  'url' => '/progression',  'icon' => 'bi bi-graph-up',   'position' => 4],
         ];
 
         foreach ($defaults as $item) {
             DB::table('nav_items')->insert(array_merge($item, [
-                'type'       => 'link',
                 'is_active'  => true,
-                'new_tab'    => false,
+                'open_new_tab' => false,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]));
@@ -32,7 +31,7 @@ return new class extends Migration
     public function down(): void
     {
         DB::table('nav_items')
-            ->whereIn('value', ['/dashboard', '/modules', '/bibliotheque', '/progression'])
+            ->whereIn('url', ['/dashboard', '/modules', '/bibliotheque', '/progression'])
             ->delete();
     }
 };
