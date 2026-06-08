@@ -25,7 +25,7 @@ class ThemeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'             => 'required|string|max:100',
+            'name'             => 'required|string|max:100|unique:themes,name',
             'body_bg'          => 'required|string|max:20',
             'content_bg'       => 'required|string|max:20',
             'card_bg'          => 'required|string|max:20',
@@ -56,7 +56,7 @@ class ThemeController extends Controller
     public function update(Request $request, Theme $theme)
     {
         $data = $request->validate([
-            'name'             => 'required|string|max:100',
+            'name'             => 'required|string|max:100|unique:themes,name,' . $theme->id,
             'body_bg'          => 'required|string|max:20',
             'content_bg'       => 'required|string|max:20',
             'card_bg'          => 'required|string|max:20',
