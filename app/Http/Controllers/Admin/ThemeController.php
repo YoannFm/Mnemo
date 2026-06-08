@@ -39,7 +39,7 @@ class ThemeController extends Controller
             'light_text_color' => 'required|string|max:20',
         ]);
 
-        $data['slug'] = Str::slug($data['name']);
+        $data['slug'] = $this->uniqueSlug(Str::slug($data['name']));
         $data['is_active'] = false;
 
         $theme = Theme::create($data);
@@ -70,7 +70,7 @@ class ThemeController extends Controller
             'light_text_color' => 'required|string|max:20',
         ]);
 
-        $data['slug'] = Str::slug($data['name']);
+        $data['slug'] = $this->uniqueSlug(Str::slug($data['name']), $theme->id);
 
         $theme->update($data);
         LogHelper::log('updated_theme', 'theme', $theme->id, ['name' => $theme->name]);
@@ -86,6 +86,16 @@ class ThemeController extends Controller
         LogHelper::log('deleted_theme', 'theme', $theme->id, ['name' => $theme->name], 'warning');
         $theme->delete();
         return back()->with('success', 'Theme supprime.');
+    }
+
+    private function uniqueSlug(string $base, ?int $ignoreId = null): string
+    {
+        $slug = $base;
+        $i = 2;
+        while (Theme::where('slug', $slug)->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))->exists()) {
+            $slug = $base . '-' . $i++;
+        }
+        return $slug;
     }
 
     public function duplicate(Theme $theme)
