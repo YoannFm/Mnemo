@@ -11,7 +11,6 @@ class LicenseService
     const CACHE_KEY   = 'license_status_v1';
     const CACHE_TTL   = 10800; // 3 heures
     const SETTING_KEY = 'site_key';
-    const CLOUD_URL   = 'mnemocloud_url';
 
     public static function isValid(): bool
     {
@@ -20,9 +19,9 @@ class LicenseService
 
     public static function check(): array
     {
-        $siteKey   = setting(self::SETTING_KEY);
-        $cloudUrl  = rtrim(setting(self::CLOUD_URL, config('services.mnemocloud.url', '')), '/');
-        $domain    = parse_url(config('app.url'), PHP_URL_HOST) ?? request()->getHost();
+        $siteKey  = setting(self::SETTING_KEY);
+        $cloudUrl = rtrim(config('mnemo.cloud_url', ''), '/');
+        $domain   = parse_url(config('app.url'), PHP_URL_HOST) ?? request()->getHost();
 
         if (empty($siteKey) || empty($cloudUrl)) {
             $result = ['valid' => false, 'reason' => 'not_configured'];

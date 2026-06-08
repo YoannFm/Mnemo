@@ -42,7 +42,7 @@ class UpdateManager
         }
 
         $siteKey  = setting('site_key');
-        $cloudUrl = rtrim(setting('mnemocloud_url', ''), '/');
+        $cloudUrl = rtrim(config('mnemo.cloud_url', ''), '/');
 
         if (!$siteKey || !$cloudUrl) {
             return [];

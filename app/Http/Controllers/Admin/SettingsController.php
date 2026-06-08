@@ -31,7 +31,6 @@ class SettingsController extends Controller
             'locale'           => Setting::get('locale', 'fr'),
             'copyright'        => Setting::get('copyright', ''),
             'site_key'         => Setting::get('site_key', ''),
-            'mnemocloud_url'   => Setting::get('mnemocloud_url', ''),
         ];
 
         return view('admin.settings.index', compact('settings', 'images', 'timezones'));
@@ -49,15 +48,14 @@ class SettingsController extends Controller
             'locale'           => 'nullable|in:fr,en',
             'copyright'        => 'nullable|string|max:255',
             'site_key'         => 'nullable|string|max:255',
-            'mnemocloud_url'   => 'nullable|url|max:255',
         ]);
 
         $fields = [
             'site_name', 'site_url', 'site_description', 'site_keywords',
-            'site_logo', 'timezone', 'locale', 'copyright', 'site_key', 'mnemocloud_url',
+            'site_logo', 'timezone', 'locale', 'copyright', 'site_key',
         ];
 
-        $fieldsToLog = ['site_name', 'site_url', 'site_description', 'site_keywords', 'site_logo', 'timezone', 'locale', 'site_key', 'mnemocloud_url'];
+        $fieldsToLog = ['site_name', 'site_url', 'site_description', 'site_keywords', 'site_logo', 'timezone', 'locale', 'site_key'];
         foreach ($fieldsToLog as $field) {
             $old = Setting::get($field, '');
             $new = $request->input($field, '');

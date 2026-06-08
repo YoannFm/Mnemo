@@ -248,7 +248,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'db_database'     => trim($_POST['db_database'] ?? 'mnemo'),
         'db_username'     => trim($_POST['db_username'] ?? 'root'),
         'db_password'     => $_POST['db_password'] ?? '',
-        'mnemocloud_url'  => rtrim(trim($_POST['mnemocloud_url'] ?? ''), '/'),
         'site_key'        => trim($_POST['site_key'] ?? ''),
     ];
 
@@ -311,7 +310,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     // 4. Écriture des settings licence en DB
-    if (empty($installErrors) && (!empty($cfg['mnemocloud_url']) || !empty($cfg['site_key']))) {
+    if (empty($installErrors) && !empty($cfg['site_key'])) {
         try {
             $dbConn = $cfg['db_connection'] ?? 'sqlite';
             if ($dbConn === 'sqlite') {
@@ -324,9 +323,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $now = date('Y-m-d H:i:s');
 
             $settingsToSave = [];
-            if (!empty($cfg['mnemocloud_url'])) {
-                $settingsToSave['mnemocloud_url'] = $cfg['mnemocloud_url'];
-            }
             if (!empty($cfg['site_key'])) {
                 $settingsToSave['site_key'] = $cfg['site_key'];
             }
@@ -907,18 +903,11 @@ $allOk        = ($step === 1) ? allRequirementsMet($requirements) : true;
             </div>
 
             <!-- Licence MnemoCloud -->
-            <div class="check-group-title mt-4"><i class="bi bi-key me-1"></i>Licence MnemoCloud</div>
+            <div class="check-group-title mt-4"><i class="bi bi-key me-1"></i>Licence</div>
 
             <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:.75rem 1rem;font-size:.85rem;color:#c7d2fe;margin-bottom:1rem;">
                 <i class="bi bi-info-circle me-2" style="color:var(--accent)"></i>
-                Renseignez votre clé de site pour activer Mnémo. Ces informations sont disponibles sur votre espace MnemoCloud.
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">URL MnemoCloud</label>
-                <input type="url" class="form-control" name="mnemocloud_url"
-                       value="<?= htmlspecialchars($savedCfg['mnemocloud_url'] ?? '') ?>"
-                       placeholder="https://cloud.mnemo.fr">
+                Renseignez votre clé de site pour activer Mnémo. Elle est disponible dans votre espace MnemoCloud.
             </div>
 
             <div class="mb-3">

@@ -160,7 +160,7 @@ class PluginManager
     public function install(string $slug): void
     {
         $siteKey  = setting('site_key');
-        $cloudUrl = rtrim(setting('mnemocloud_url', ''), '/');
+        $cloudUrl = rtrim(config('mnemo.cloud_url', ''), '/');
 
         if (!$siteKey || !$cloudUrl) {
             throw new \RuntimeException('MnemoCloud non configuré (clé ou URL manquante).');
@@ -240,7 +240,7 @@ class PluginManager
         }
 
         $siteKey  = setting('site_key');
-        $cloudUrl = rtrim(setting('mnemocloud_url', ''), '/');
+        $cloudUrl = rtrim(config('mnemo.cloud_url', ''), '/');
 
         if (!$siteKey || !$cloudUrl) {
             return [];
