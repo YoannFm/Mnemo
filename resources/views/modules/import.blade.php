@@ -67,18 +67,41 @@
                 </div>
             </div>
 
-            {{-- Info format --}}
+            {{-- Structure du ZIP --}}
             <div class="card mt-3">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-folder2-open" style="color:var(--accent);"></i>
+                    <span class="fw-semibold" style="font-size:.875rem;">Structure du fichier ZIP</span>
+                </div>
                 <div class="card-body p-3">
-                    <p class="mb-1 fw-semibold" style="font-size:.85rem;">
-                        <i class="bi bi-info-circle me-1" style="color:var(--accent);"></i>
-                        Format du ZIP
-                    </p>
-                    <p style="font-size:.8rem;color:var(--text-muted);margin:0;">
-                        Le ZIP doit contenir un fichier <code>manifest.yml</code> à la racine
-                        et un dossier <code>images/</code> pour les photos.
-                        Ce format est produit automatiquement par l'export de module Mnemo.
-                    </p>
+                    <pre style="background:var(--body-bg);border:1px solid var(--card-border);border-radius:4px;padding:.75rem 1rem;font-size:.78rem;color:var(--text-muted);margin:0;line-height:1.7;">
+<span style="color:var(--accent);">mon-module.zip</span>
+├── <span style="color:var(--accent);">manifest.yml</span>
+└── images/
+    ├── photo-item1.jpg
+    └── photo-item2.png</pre>
+                </div>
+            </div>
+
+            {{-- Structure du manifest --}}
+            <div class="card mt-3">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-code" style="color:var(--accent);"></i>
+                    <span class="fw-semibold" style="font-size:.875rem;">Structure du manifest.yml</span>
+                </div>
+                <div class="card-body p-3">
+                    <pre style="background:var(--body-bg);border:1px solid var(--card-border);border-radius:4px;padding:.75rem 1rem;font-size:.78rem;color:var(--text-primary);margin:0;line-height:1.7;"><span style="color:var(--text-muted);">title:</span> <span style="color:var(--accent);">Nom du module</span>
+<span style="color:var(--text-muted);">description:</span> Description optionnelle
+
+<span style="color:var(--text-muted);">items:</span>
+  - <span style="color:var(--text-muted);">name_fr:</span>       <span style="color:var(--accent);">Nom en français</span>     <span style="color:#6c757d;"># obligatoire</span>
+    <span style="color:var(--text-muted);">name_en:</span>       <span style="color:var(--accent);">Nom en anglais</span>      <span style="color:#6c757d;"># obligatoire</span>
+    <span style="color:var(--text-muted);">function_text:</span> Description / définition  <span style="color:#6c757d;"># optionnel</span>
+    <span style="color:var(--text-muted);">image:</span>         images/photo.jpg  <span style="color:#6c757d;"># optionnel</span>
+  - <span style="color:var(--text-muted);">name_fr:</span>       Autre élément
+    <span style="color:var(--text-muted);">name_en:</span>       Another item
+    <span style="color:var(--text-muted);">function_text:</span> <span style="color:#6c757d;">""</span>
+    <span style="color:var(--text-muted);">image:</span>         <span style="color:#6c757d;">""</span></pre>
                 </div>
             </div>
         </div>
