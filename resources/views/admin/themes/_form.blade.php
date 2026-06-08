@@ -75,26 +75,71 @@
 <div class="mt-3"></div>
 
 <script>
-document.getElementById('generateLight').addEventListener('click', function () {
-    document.querySelectorAll('.dark-color').forEach(function (input) {
-        var lightTarget = input.dataset.lightTarget;
-        var lightInput = document.querySelector('[name="' + lightTarget + '"]');
-        if (!lightInput) return;
-        lightInput.value = invertColor(input.value);
+function hexToHsl(hex) {
+    var r = parseInt(hex.slice(1,3),16)/255;
+    var g = parseInt(hex.slice(3,5),16)/255;
+    var b = parseInt(hex.slice(5,7),16)/255;
+    var max = Math.max(r,g,b), min = Math.min(r,g,b);
+    var h, s, l = (max+min)/2;
+    if (max === min) { h = s = 0; }
+    else {
+        var d = max - min;
+        s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+        switch(max) {
+            case r: h = ((g-b)/d + (g<b?6:0))/6; break;
+            case g: h = ((b-r)/d + 2)/6; break;
+            case b: h = ((r-g)/d + 4)/6; break;
+        }
+    }
+    return [h*360, s*100, l*100];
+}
+
+function hslToHex(h, s, l) {
+    h /= 360; s /= 100; l /= 100;
+    var r, g, b;
+    if (s === 0) { r = g = b = l; }
+    else {
+        var q = l < 0.5 ? l*(1+s) : l+s-l*s;
+        var p = 2*l-q;
+        var hue2rgb = function(p,q,t){ if(t<0)t+=1; if(t>1)t-=1; if(t<1/6)return p+(q-p)*6*t; if(t<1/2)return q; if(t<2/3)return p+(q-p)*(2/3-t)*6; return p; };
+        r = hue2rgb(p,q,h+1/3); g = hue2rgb(p,q,h); b = hue2rgb(p,q,h-1/3);
+    }
+    return '#'+[r,g,b].map(function(v){ return Math.round(v*255).toString(16).padStart(2,'0'); }).join('');
+}
+
+function darkToLight(hex) {
+    var hsl = hexToHsl(hex);
+    var h = hsl[0], s = hsl[1], l = hsl[2];
+    // Invert lightness: dark (l≈5) → light (l≈92), light (l≈90) → dark (l≈15)
+    var newL = 100 - l;
+    // Clamp: backgrounds stay light (85-96), text stays dark (10-25)
+    newL = Math.min(96, Math.max(8, newL));
+    // Reduce saturation slightly for a neutral look
+    var newS = Math.min(s, 12);
+    return hslToHex(h, newS, newL);
+}
+
+function generateLightColors() {
+    document.querySelectorAll('.dark-color').forEach(function(input) {
+        var lightInput = document.querySelector('[name="' + input.dataset.lightTarget + '"]');
+        if (lightInput) lightInput.value = darkToLight(input.value);
     });
-    // Switch to light tab
+}
+
+// Auto-generate on each dark color change
+document.querySelectorAll('.dark-color').forEach(function(input) {
+    input.addEventListener('input', generateLightColors);
+});
+
+// Button: generate + switch to light tab
+document.getElementById('generateLight').addEventListener('click', function() {
+    generateLightColors();
     var lightTabBtn = document.querySelector('[data-bs-target="#lightTab"]');
     if (lightTabBtn) bootstrap.Tab.getOrCreateInstance(lightTabBtn).show();
 });
 
-function invertColor(hex) {
-    var r = parseInt(hex.slice(1,3), 16);
-    var g = parseInt(hex.slice(3,5), 16);
-    var b = parseInt(hex.slice(5,7), 16);
-    // Lighten: mix with white
-    r = Math.min(255, Math.round(r * 0.1 + 245));
-    g = Math.min(255, Math.round(g * 0.1 + 245));
-    b = Math.min(255, Math.round(b * 0.1 + 245));
-    return '#' + [r,g,b].map(function(v){ return v.toString(16).padStart(2,'0'); }).join('');
-}
+// Generate on load if it's a new theme (no existing light values)
+@if(!isset($theme))
+generateLightColors();
+@endif
 </script>
