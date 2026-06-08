@@ -239,15 +239,17 @@ $logs    = [];
 // POST step 2 → 3 : validation config
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'configure') {
     $cfg = [
-        'app_name'      => trim($_POST['app_name'] ?? 'Mnémo'),
-        'app_url'       => trim($_POST['app_url'] ?? 'http://localhost:8000'),
-        'db_connection' => $_POST['db_connection'] ?? 'sqlite',
-        'debug'         => $_POST['debug'] ?? 'false',
-        'db_host'       => trim($_POST['db_host'] ?? '127.0.0.1'),
-        'db_port'       => trim($_POST['db_port'] ?? '3306'),
-        'db_database'   => trim($_POST['db_database'] ?? 'mnemo'),
-        'db_username'   => trim($_POST['db_username'] ?? 'root'),
-        'db_password'   => $_POST['db_password'] ?? '',
+        'app_name'        => trim($_POST['app_name'] ?? 'Mnémo'),
+        'app_url'         => trim($_POST['app_url'] ?? 'http://localhost:8000'),
+        'db_connection'   => $_POST['db_connection'] ?? 'sqlite',
+        'debug'           => $_POST['debug'] ?? 'false',
+        'db_host'         => trim($_POST['db_host'] ?? '127.0.0.1'),
+        'db_port'         => trim($_POST['db_port'] ?? '3306'),
+        'db_database'     => trim($_POST['db_database'] ?? 'mnemo'),
+        'db_username'     => trim($_POST['db_username'] ?? 'root'),
+        'db_password'     => $_POST['db_password'] ?? '',
+        'mnemocloud_url'  => rtrim(trim($_POST['mnemocloud_url'] ?? ''), '/'),
+        'site_key'        => trim($_POST['site_key'] ?? ''),
     ];
 
     if (empty($cfg['app_name'])) $errors[] = "Le nom de l'application est requis.";
@@ -308,7 +310,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
     }
 
-    // 4. Storage link
+    // 4. Écriture des settings licence en DB
+    if (empty($installErrors) && (!empty($cfg['mnemocloud_url']) || !empty($cfg['site_key']))) {
+        try {
+            $dbConn = $cfg['db_connection'] ?? 'sqlite';
+            if ($dbConn === 'sqlite') {
+                $pdo = new PDO('sqlite:' . ROOT_PATH . '/database/database.sqlite');
+            } else {
+                $dsn = "mysql:host={$cfg['db_host']};port={$cfg['db_port']};dbname={$cfg['db_database']};charset=utf8mb4";
+                $pdo = new PDO($dsn, $cfg['db_username'], $cfg['db_password']);
+            }
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $now = date('Y-m-d H:i:s');
+
+            $settingsToSave = [];
+            if (!empty($cfg['mnemocloud_url'])) {
+                $settingsToSave['mnemocloud_url'] = $cfg['mnemocloud_url'];
+            }
+            if (!empty($cfg['site_key'])) {
+                $settingsToSave['site_key'] = $cfg['site_key'];
+            }
+
+            foreach ($settingsToSave as $key => $value) {
+                $stmt = $pdo->prepare("SELECT id FROM settings WHERE `key` = ?");
+                $stmt->execute([$key]);
+                if ($stmt->fetchColumn()) {
+                    $u = $pdo->prepare("UPDATE settings SET `value` = ?, updated_at = ? WHERE `key` = ?");
+                    $u->execute([$value, $now, $key]);
+                } else {
+                    $i = $pdo->prepare("INSERT INTO settings (`key`, `value`, created_at, updated_at) VALUES (?, ?, ?, ?)");
+                    $i->execute([$key, $value, $now, $now]);
+                }
+            }
+            $installLogs[] = ['ok' => true, 'msg' => 'Clé de licence enregistrée.'];
+        } catch (\Throwable $e) {
+            $installLogs[] = ['ok' => false, 'msg' => 'Avertissement : impossible d\'enregistrer la clé de licence : ' . $e->getMessage()];
+        }
+    }
+
+    // 5. Storage link
     if (empty($installErrors)) {
         $phpBin = PHP_BINARY ?: 'php';
         $result = runCommand("{$phpBin} artisan storage:link --force 2>&1", ROOT_PATH);
@@ -866,6 +906,32 @@ $allOk        = ($step === 1) ? allRequirementsMet($requirements) : true;
                 </div>
             </div>
 
+            <!-- Licence MnemoCloud -->
+            <div class="check-group-title mt-4"><i class="bi bi-key me-1"></i>Licence MnemoCloud</div>
+
+            <div style="background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.25);border-radius:10px;padding:.75rem 1rem;font-size:.85rem;color:#c7d2fe;margin-bottom:1rem;">
+                <i class="bi bi-info-circle me-2" style="color:var(--accent)"></i>
+                Renseignez votre clé de site pour activer Mnémo. Ces informations sont disponibles sur votre espace MnemoCloud.
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">URL MnemoCloud</label>
+                <input type="url" class="form-control" name="mnemocloud_url"
+                       value="<?= htmlspecialchars($savedCfg['mnemocloud_url'] ?? '') ?>"
+                       placeholder="https://cloud.mnemo.fr">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Clé du site <span style="color:var(--danger)">*</span></label>
+                <input type="text" class="form-control" name="site_key"
+                       value="<?= htmlspecialchars($savedCfg['site_key'] ?? '') ?>"
+                       placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                       style="font-family:monospace;letter-spacing:.05em;">
+                <div style="font-size:.78rem;color:var(--text-muted);margin-top:.3rem;">
+                    Clé unique associée à votre domaine. Sans elle, l'application ne démarrera pas.
+                </div>
+            </div>
+
             <hr class="divider">
 
             <div class="d-flex justify-content-between">
@@ -925,6 +991,12 @@ $allOk        = ($step === 1) ? allRequirementsMet($requirements) : true;
                     <span style="color:var(--text-muted)">Mode debug :</span>
                     <strong><?= ($cfg['debug'] ?? 'false') === 'true' ? 'Activé' : 'Désactivé' ?></strong>
                 </div>
+                <?php if (!empty($cfg['site_key'])): ?>
+                <div class="col-12">
+                    <span style="color:var(--text-muted)">Clé du site :</span>
+                    <strong style="font-family:monospace"><?= htmlspecialchars(substr($cfg['site_key'], 0, 8) . '••••••••••••••••••••••••••••••••••••••••••••••••••••••••' . substr($cfg['site_key'], -4)) ?></strong>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
 
