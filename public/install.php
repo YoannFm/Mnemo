@@ -123,10 +123,6 @@ function buildEnvContent(array $cfg): string
     $appUrl       = rtrim($cfg['app_url'] ?? 'http://localhost:8000', '/');
 
     if ($dbConnection === 'sqlite') {
-        $dbBlock = <<<ENV
-DB_CONNECTION=sqlite
-DB_DATABASE={$dbPath}
-ENV;
         $dbPath  = ROOT_PATH . '/database/database.sqlite';
         $dbBlock = "DB_CONNECTION=sqlite\nDB_DATABASE=" . $dbPath;
     } else {
