@@ -88,6 +88,26 @@ class ThemeController extends Controller
         return back()->with('success', 'Theme supprime.');
     }
 
+    public function duplicate(Theme $theme)
+    {
+        $baseName = $theme->name . ' (copie)';
+        $name = $baseName;
+        $i = 2;
+        while (Theme::where('name', $name)->exists()) {
+            $name = $baseName . ' ' . $i++;
+        }
+
+        $new = $theme->replicate();
+        $new->name = $name;
+        $new->slug = Str::slug($name);
+        $new->is_active = false;
+        $new->save();
+
+        LogHelper::log('duplicated_theme', 'theme', $new->id, ['name' => $new->name]);
+
+        return redirect()->route('admin.themes.edit', $new)->with('success', 'Thème dupliqué.');
+    }
+
     public function activate(Theme $theme)
     {
         Theme::where('is_active', true)->update(['is_active' => false]);

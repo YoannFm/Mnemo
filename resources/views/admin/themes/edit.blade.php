@@ -10,5 +10,24 @@
                 <a href="{{ route('admin.themes.index') }}" class="btn btn-secondary">Annuler</a>
             </form>
         </div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <form action="{{ route('admin.themes.duplicate', $theme) }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-copy me-1"></i> Dupliquer
+                </button>
+            </form>
+            @if(!$theme->is_active)
+                <form action="{{ route('admin.themes.destroy', $theme) }}" method="POST"
+                      onsubmit="return confirm('Supprimer ce thème ?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-trash me-1"></i> Supprimer
+                    </button>
+                </form>
+            @else
+                <span class="text-muted small"><i class="bi bi-lock me-1"></i>Thème actif — impossible à supprimer</span>
+            @endif
+        </div>
     </div>
 </x-admin-layout>

@@ -253,6 +253,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::put('/themes/{theme}', [\App\Http\Controllers\Admin\ThemeController::class, 'update'])->name('themes.update');
     Route::delete('/themes/{theme}', [\App\Http\Controllers\Admin\ThemeController::class, 'destroy'])->name('themes.destroy');
     Route::post('/themes/{theme}/activate', [\App\Http\Controllers\Admin\ThemeController::class, 'activate'])->name('themes.activate');
+    Route::post('/themes/{theme}/duplicate', [\App\Http\Controllers\Admin\ThemeController::class, 'duplicate'])->name('themes.duplicate');
     // Private modules
     Route::get('/private-modules', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'index'])->name('private-modules.index');
     Route::delete('/private-modules/{module}', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'destroy'])->name('private-modules.destroy');

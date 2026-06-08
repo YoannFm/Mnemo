@@ -45,6 +45,12 @@
                             <a href="{{ route('admin.themes.edit', $theme) }}" class="btn btn-outline-primary btn-sm">
                                 <i class="bi bi-pencil"></i> Modifier
                             </a>
+                            <form action="{{ route('admin.themes.duplicate', $theme) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-secondary btn-sm" title="Dupliquer">
+                                    <i class="bi bi-copy"></i>
+                                </button>
+                            </form>
                             @if(!$theme->is_active)
                                 <form action="{{ route('admin.themes.destroy', $theme) }}" method="POST"
                                       onsubmit="return confirm('Supprimer ce theme ?')">
