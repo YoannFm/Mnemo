@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Extensions\Plugin\PluginManager;
 use App\Http\Controllers\Controller;
+use Throwable;
 
 class PluginController extends Controller
 {
@@ -11,12 +12,18 @@ class PluginController extends Controller
 
     public function index()
     {
-        $plugins = $this->plugins->discoverPlugins()->map(function ($plugin) {
+        $installed = $this->plugins->discoverPlugins()->map(function ($plugin) {
             $plugin->is_enabled = $this->plugins->isEnabled($plugin->id);
             return $plugin;
         });
 
-        return view('admin.plugins.index', compact('plugins'));
+        try {
+            $available = $this->plugins->getAvailablePlugins();
+        } catch (Throwable) {
+            $available = collect();
+        }
+
+        return view('admin.plugins.index', compact('installed', 'available'));
     }
 
     public function reload()
@@ -38,12 +45,22 @@ class PluginController extends Controller
 
     public function install(string $slug)
     {
-        return back()->with('success', 'Plugin installé.');
+        try {
+            $this->plugins->install($slug);
+            return back()->with('success', 'Plugin installé. Vous pouvez maintenant l\'activer.');
+        } catch (Throwable $t) {
+            return back()->with('error', $t->getMessage());
+        }
     }
 
     public function update(string $plugin)
     {
-        return back()->with('success', 'Plugin mis à jour.');
+        try {
+            $this->plugins->install($plugin);
+            return back()->with('success', 'Plugin mis à jour.');
+        } catch (Throwable $t) {
+            return back()->with('error', $t->getMessage());
+        }
     }
 
     public function delete(string $plugin)
