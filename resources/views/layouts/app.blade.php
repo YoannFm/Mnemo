@@ -433,15 +433,15 @@
             padding: 14px 16px;
         }
 
-        .table tbody { background: #212227; }
+        .table tbody { background: var(--card-bg); }
 
         .table tbody td {
-            background: #212227;
+            background: var(--card-bg);
             color: var(--text-primary);
             padding: 10px 16px;
         }
 
-        .breadcrumb { background-color: #212227; }
+        .breadcrumb { background-color: var(--card-bg); }
 
         /* ── Footer ── */
         #main-footer {
