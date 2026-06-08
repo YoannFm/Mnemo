@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('accent_color', 20)->nullable()->after('locale');
+            $table->string('accent_color', 20)->nullable();
         });
     }
 
