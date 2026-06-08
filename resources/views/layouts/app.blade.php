@@ -49,12 +49,12 @@
         }
 
         [data-bs-theme="light"] {
-            --body-bg: {{ setting('theme_light_body_bg') ?: '#f4f4f0' }};
-            --card-bg: {{ setting('theme_light_card_bg') ?: '#faf9f7' }};
-            --card-border: {{ setting('theme_light_content_bg') ?: '#e0ddd7' }};
-            --header-bg: {{ setting('theme_light_header_bg') ?: '#f0ede8' }};
-            --text-primary: {{ setting('theme_light_text_color') ?: '#2c2c2c' }};
-            --text-muted: #7a7570;
+            --body-bg: {{ setting('theme_light_body_bg') ?: '#eaeaec' }};
+            --card-bg: {{ setting('theme_light_card_bg') ?: '#f2f2f4' }};
+            --card-border: {{ setting('theme_light_content_bg') ?: '#d8d8dc' }};
+            --header-bg: {{ setting('theme_light_header_bg') ?: '#e4e4e8' }};
+            --text-primary: {{ setting('theme_light_text_color') ?: '#2c2c2e' }};
+            --text-muted: #78787e;
         }
 
         [data-bs-theme="light"] body,
@@ -63,13 +63,13 @@
         [data-bs-theme="light"] .card,
         [data-bs-theme="light"] .table,
         [data-bs-theme="light"] .table > :not(caption) > * > * {
-            color: #2c2c2c !important;
+            color: #2c2c2e !important;
         }
 
         [data-bs-theme="light"] .form-label,
         [data-bs-theme="light"] .text-muted,
         [data-bs-theme="light"] [style*="var(--text-muted)"] {
-            color: #7a7570 !important;
+            color: #78787e !important;
         }
 
         body {
