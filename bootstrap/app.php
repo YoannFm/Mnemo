@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\CheckInstallation::class,
             \App\Http\Middleware\CheckMaintenance::class,
             \App\Http\Middleware\CheckForcePasswordChange::class,
+            \App\Http\Middleware\RecordUserActivity::class,
         ]);
         $middleware->alias([
             'two-factor' => \App\Http\Middleware\TwoFactorAuth::class,

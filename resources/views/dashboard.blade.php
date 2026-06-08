@@ -155,4 +155,6 @@
         </div>
     @endif
 
+    @stack('dashboard_widgets')
+
 </x-app-layout>
