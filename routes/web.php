@@ -71,6 +71,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     // ─── Profil utilisateur ───
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Prévisualisation rapide d'un module (JSON pour le modal bibliothèque)

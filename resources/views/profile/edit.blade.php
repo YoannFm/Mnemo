@@ -154,6 +154,45 @@
             </div>
         </div>
 
+        {{-- ── Préférences ── --}}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-palette-fill" style="color:var(--accent);"></i>
+                    <span class="fw-semibold">Préférences</span>
+                </div>
+                <div class="card-body p-4">
+                    @if(session('status') === 'preferences-updated')
+                        <div class="alert alert-success py-2"><i class="bi bi-check-circle-fill me-1"></i> Préférences sauvegardées.</div>
+                    @endif
+                    <form method="POST" action="{{ route('profile.preferences') }}">
+                        @csrf @method('PATCH')
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="accent_color">Couleur d'accentuation</label>
+                            <div class="d-flex align-items-center gap-3">
+                                <input type="color" id="accent_color" name="accent_color"
+                                       class="form-control form-control-color"
+                                       value="{{ Auth::user()->accent_color ?? setting('theme_accent', '#EFB702') }}"
+                                       style="width:3rem;height:2.5rem;padding:.2rem;cursor:pointer;">
+                                <div>
+                                    <div class="text-muted small">Personnalise la couleur principale de l'interface.</div>
+                                    @if(Auth::user()->accent_color)
+                                        <a href="#" onclick="document.getElementById('accent_color').value='{{ setting('theme_accent', '#EFB702') }}';this.closest('form').submit();return false;"
+                                           class="small">Réinitialiser au thème par défaut</a>
+                                    @else
+                                        <span class="small text-muted">Thème par défaut actif.</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-sm" style="border:1px solid var(--accent);color:var(--accent);">
+                            <i class="bi bi-save me-1"></i> Sauvegarder les préférences
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         {{-- ── Supprimer le compte ── --}}
         <div class="col-12">
             <div class="card" style="border-color:rgba(239,68,68,.3);">

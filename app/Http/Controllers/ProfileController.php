@@ -49,6 +49,19 @@ class ProfileController extends Controller
      * Supprime complètement le compte utilisateur.
      * Valide le mot de passe avant suppression, déconnecte l'utilisateur et invalidate la session.
      */
+    public function updatePreferences(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'accent_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+        ]);
+
+        $request->user()->update([
+            'accent_color' => $request->input('accent_color') ?: null,
+        ]);
+
+        return Redirect::route('profile.edit')->with('status', 'preferences-updated');
+    }
+
     public function destroy(Request $request): RedirectResponse
     {
         // Valider que l'utilisateur a entré le bon mot de passe
