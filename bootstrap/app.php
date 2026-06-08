@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetTimezone::class,
             \App\Http\Middleware\CheckInstallation::class,
+            \App\Http\Middleware\CheckLicense::class,
             \App\Http\Middleware\CheckMaintenance::class,
             \App\Http\Middleware\CheckForcePasswordChange::class,
         ]);

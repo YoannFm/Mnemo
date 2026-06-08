@@ -106,15 +106,43 @@
                     @error('copyright')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
-                {{-- Clé du site --}}
+                {{-- MnemoCloud --}}
+                <hr class="my-4">
+                <h6 class="mb-3"><i class="bi bi-cloud me-1"></i> MnemoCloud – Licence</h6>
+
                 <div class="mb-3">
-                    <label class="form-label" for="site_key">Clé du site</label>
-                    <input type="text" id="site_key" name="site_key"
-                           class="form-control @error('site_key') is-invalid @enderror"
-                           value="{{ old('site_key', $settings['site_key']) }}"
+                    <label class="form-label" for="mnemocloud_url">URL de MnemoCloud</label>
+                    <input type="url" id="mnemocloud_url" name="mnemocloud_url"
+                           class="form-control @error('mnemocloud_url') is-invalid @enderror"
+                           value="{{ old('mnemocloud_url', $settings['mnemocloud_url']) }}"
+                           placeholder="https://cloud.mnemo.fr"
                            maxlength="255">
-                    <div class="form-text">Sera utilisée pour accéder au marketplace.</div>
+                    @error('mnemocloud_url')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" for="site_key">Clé de licence</label>
+                    <input type="text" id="site_key" name="site_key"
+                           class="form-control font-monospace @error('site_key') is-invalid @enderror"
+                           value="{{ old('site_key', $settings['site_key']) }}"
+                           placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                           maxlength="255">
                     @error('site_key')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
+
+                @php $licenseData = \App\Services\LicenseService::getData(); @endphp
+                <div class="mb-4 d-flex align-items-center gap-3 flex-wrap">
+                    @if($licenseData['valid'] ?? false)
+                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Licence active — {{ $licenseData['plan'] ?? 'n/a' }}</span>
+                        @if(!empty($licenseData['expires_at']))
+                            <span class="text-muted small">Expire le {{ \Carbon\Carbon::parse($licenseData['expires_at'])->format('d/m/Y') }}</span>
+                        @endif
+                    @else
+                        <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Licence invalide — {{ $licenseData['reason'] ?? 'non vérifiée' }}</span>
+                    @endif
+                    <a href="{{ route('admin.license.check') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Vérifier maintenant
+                    </a>
                 </div>
 
                 <button type="submit" class="btn btn-primary">

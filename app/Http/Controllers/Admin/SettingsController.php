@@ -31,6 +31,7 @@ class SettingsController extends Controller
             'locale'           => Setting::get('locale', 'fr'),
             'copyright'        => Setting::get('copyright', ''),
             'site_key'         => Setting::get('site_key', ''),
+            'mnemocloud_url'   => Setting::get('mnemocloud_url', ''),
         ];
 
         return view('admin.settings.index', compact('settings', 'images', 'timezones'));
@@ -48,14 +49,15 @@ class SettingsController extends Controller
             'locale'           => 'nullable|in:fr,en',
             'copyright'        => 'nullable|string|max:255',
             'site_key'         => 'nullable|string|max:255',
+            'mnemocloud_url'   => 'nullable|url|max:255',
         ]);
 
         $fields = [
             'site_name', 'site_url', 'site_description', 'site_keywords',
-            'site_logo', 'timezone', 'locale', 'copyright', 'site_key',
+            'site_logo', 'timezone', 'locale', 'copyright', 'site_key', 'mnemocloud_url',
         ];
 
-        $fieldsToLog = ['site_name', 'site_url', 'site_description', 'site_keywords', 'site_logo', 'timezone', 'locale', 'site_key'];
+        $fieldsToLog = ['site_name', 'site_url', 'site_description', 'site_keywords', 'site_logo', 'timezone', 'locale', 'site_key', 'mnemocloud_url'];
         foreach ($fieldsToLog as $field) {
             $old = Setting::get($field, '');
             $new = $request->input($field, '');
@@ -68,7 +70,17 @@ class SettingsController extends Controller
             Setting::set($field, $request->input($field, ''));
         }
 
+        // Vider le cache licence si la clé ou l'URL a changé
+        \App\Services\LicenseService::forget();
+
         return back()->with('success', 'Paramètres sauvegardés.');
+    }
+
+    public function checkLicense()
+    {
+        \App\Services\LicenseService::forget();
+        \App\Services\LicenseService::check();
+        return back()->with('success', 'Statut de licence mis à jour.');
     }
 
     // ─────────────────────────────────────────────
