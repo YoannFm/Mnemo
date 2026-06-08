@@ -58,7 +58,11 @@ class Item extends Model
             return asset('storage/' . $this->photo_path);
         }
 
-        // Image de remplacement générique si aucune photo n'a été uploadée
         return asset('images/no-photo.svg');
+    }
+
+    public function getDisplayFunctionTextAttribute(): string
+    {
+        return $this->function_text ?: 'Aucune description renseignée.';
     }
 }

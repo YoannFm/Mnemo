@@ -289,7 +289,7 @@
                             <p style="font-size:.78rem;color:var(--text-muted);margin:0;
                                       display:-webkit-box;-webkit-line-clamp:3;
                                       -webkit-box-orient:vertical;overflow:hidden;">
-                                {{ $item->function_text }}
+                                {{ $item->display_function_text }}
                             </p>
 
                             {{-- Boutons d'action (propriétaire ou admin) --}}
