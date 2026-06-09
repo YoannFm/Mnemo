@@ -19,7 +19,7 @@ class Item extends Model
     protected $fillable = [
         'module_id',
         'name_fr',
-        'name_en',
+        'name_alt',
         'function_text',
         'photo_path',
     ];

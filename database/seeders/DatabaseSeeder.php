@@ -47,7 +47,7 @@ class DatabaseSeeder extends Seeder
         foreach ($items as [$fr, $en, $func]) {
             $module->items()->firstOrCreate(
                 ['name_fr' => $fr],
-                ['name_en' => $en, 'function_text' => $func, 'photo_path' => null]
+                ['name_alt' => $en, 'function_text' => $func, 'photo_path' => null]
             );
         }
     }

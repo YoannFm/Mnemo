@@ -11,7 +11,7 @@ use App\Models\Module;
  *
  * Structure générique :
  * - field_question : champ affiché (ex : photo_path, function_text)
- * - field_answer : champ à trouver (ex : name_fr, name_en)
+ * - field_answer : champ à trouver (ex : name_fr, name_alt)
  * - question_text : texte descriptif du type de question
  *
  * Chaque question = 1 item cible + 3 distracteurs tirés du même module.
@@ -43,11 +43,11 @@ class QuizGenerator
         ],
         'Q4' => [
             'field_question' => 'name_fr',
-            'field_answer'   => 'name_en',
+            'field_answer'   => 'name_alt',
             'question_text'  => 'Traduction',
         ],
         'Q5' => [
-            'field_question' => 'name_en',
+            'field_question' => 'name_alt',
             'field_answer'   => 'photo_path',
             'question_text'  => 'Correspondance',
         ],
@@ -57,14 +57,14 @@ class QuizGenerator
             'question_text'  => 'Désignation',
         ],
         'Q7' => [
-            'field_question' => 'name_en',
+            'field_question' => 'name_alt',
             'field_answer'   => 'name_fr',
             'question_text'  => 'Traduction',
         ],
         'Q8' => [
             'field_question' => 'photo_path',
-            'field_answer'   => 'name_en',
-            'question_text'  => 'Anglais',
+            'field_answer'   => 'name_alt',
+            'question_text'  => 'Traduction',
         ],
         'Q9' => [
             'field_question' => 'name_fr',
@@ -77,14 +77,14 @@ class QuizGenerator
             'question_text'  => 'Définition',
         ],
         'Q11' => [
-            'field_question' => 'name_en',
+            'field_question' => 'name_alt',
             'field_answer'   => 'function_text',
             'question_text'  => 'Signification',
         ],
         'Q12' => [
             'field_question' => 'function_text',
-            'field_answer'   => 'name_en',
-            'question_text'  => 'Anglais',
+            'field_answer'   => 'name_alt',
+            'question_text'  => 'Traduction',
         ],
     ];
 

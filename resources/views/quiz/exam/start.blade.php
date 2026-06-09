@@ -38,7 +38,7 @@
                                     <select id="input-field" class="form-select form-select-sm">
                                         <option value="photo_path">Photo</option>
                                         <option value="name_fr">Nom</option>
-                                        <option value="name_en">Traduction</option>
+                                        <option value="name_alt">Traduction</option>
                                         <option value="function_text">Description</option>
                                     </select>
                                 </div>
@@ -46,7 +46,7 @@
                                     <label class="form-label" style="font-size:.85rem;">Ce que je réponds</label>
                                     <select id="output-field" class="form-select form-select-sm">
                                         <option value="name_fr">Nom</option>
-                                        <option value="name_en">Traduction</option>
+                                        <option value="name_alt">Traduction</option>
                                         <option value="function_text">Description</option>
                                         <option value="photo_path">Photo</option>
                                     </select>
@@ -134,17 +134,17 @@
     <script>
     var modeMap = {
         'photo_path|name_fr': 'photo_to_name_fr',
-        'photo_path|name_en': 'photo_to_name_en',
+        'photo_path|name_alt': 'photo_to_name_alt',
         'photo_path|function_text': 'photo_to_function',
         'name_fr|photo_path': 'name_fr_to_photo',
-        'name_fr|name_en': 'name_fr_to_name_en',
+        'name_fr|name_alt': 'name_fr_to_name_alt',
         'name_fr|function_text': 'name_fr_to_function',
-        'name_en|photo_path': 'name_en_to_photo',
-        'name_en|name_fr': 'name_en_to_name_fr',
-        'name_en|function_text': 'name_en_to_function',
+        'name_alt|photo_path': 'name_alt_to_photo',
+        'name_alt|name_fr': 'name_alt_to_name_fr',
+        'name_alt|function_text': 'name_alt_to_function',
         'function_text|photo_path': 'function_to_photo',
         'function_text|name_fr': 'function_to_name_fr',
-        'function_text|name_en': 'function_to_name_en',
+        'function_text|name_alt': 'function_to_name_alt',
     };
     var randomToggle = document.getElementById('random-toggle');
     var ioSection = document.getElementById('io-section');

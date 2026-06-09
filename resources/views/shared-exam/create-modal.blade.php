@@ -29,17 +29,17 @@
                         <select class="form-select" id="share_mode" name="mode" required>
                             <option value="random">Aléatoire</option>
                             <option value="photo_to_name_fr">Photo → Nom FR</option>
-                            <option value="photo_to_name_en">Photo → Nom EN</option>
+                            <option value="photo_to_name_alt">Photo → Nom EN</option>
                             <option value="photo_to_function">Photo → Fonction</option>
                             <option value="function_to_photo">Fonction → Photo</option>
                             <option value="function_to_name_fr">Fonction → Nom FR</option>
-                            <option value="function_to_name_en">Fonction → Nom EN</option>
-                            <option value="name_fr_to_name_en">Nom FR → Nom EN</option>
+                            <option value="function_to_name_alt">Fonction → Nom EN</option>
+                            <option value="name_fr_to_name_alt">Nom FR → Nom EN</option>
                             <option value="name_fr_to_photo">Nom FR → Photo</option>
                             <option value="name_fr_to_function">Nom FR → Fonction</option>
-                            <option value="name_en_to_photo">Nom EN → Photo</option>
-                            <option value="name_en_to_function">Nom EN → Fonction</option>
-                            <option value="name_en_to_name_fr">Nom EN → Nom FR</option>
+                            <option value="name_alt_to_photo">Nom EN → Photo</option>
+                            <option value="name_alt_to_function">Nom EN → Fonction</option>
+                            <option value="name_alt_to_name_fr">Nom EN → Nom FR</option>
                         </select>
                     </div>
                     <div class="mb-3">

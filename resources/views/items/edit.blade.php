@@ -48,15 +48,15 @@
 
                         {{-- Nom anglais --}}
                         <div class="mb-3">
-                            <label for="name_en" class="form-label">
+                            <label for="name_alt" class="form-label">
                                 Traduction <span style="color:#ef4444;">*</span>
                             </label>
                             <input type="text"
-                                   id="name_en"
-                                   name="name_en"
-                                   class="form-control @error('name_en') is-invalid @enderror"
-                                   value="{{ old('name_en', $item->name_en) }}">
-                            @error('name_en')
+                                   id="name_alt"
+                                   name="name_alt"
+                                   class="form-control @error('name_alt') is-invalid @enderror"
+                                   value="{{ old('name_alt', $item->name_alt) }}">
+                            @error('name_alt')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

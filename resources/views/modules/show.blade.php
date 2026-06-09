@@ -299,7 +299,7 @@
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <div class="fw-semibold" style="font-size:.95rem;">{{ $item->name_fr }}</div>
-                                    <div style="font-size:.8rem;color:var(--accent);"><span style="color:var(--text-muted);font-size:.75rem;">Traduction :</span> {{ $item->name_en }}</div>
+                                    <div style="font-size:.8rem;color:var(--accent);"><span style="color:var(--text-muted);font-size:.75rem;">Traduction :</span> {{ $item->name_alt }}</div>
                                 </div>
                                 @if(\App\Models\Setting::get('feature_item_badges', '1'))
                                 @auth

@@ -37,7 +37,7 @@ class ModuleExportController extends Controller
         foreach ($items as $item) {
             $entry = [
                 'name_fr'       => $item->name_fr,
-                'name_en'       => $item->name_en,
+                'name_alt'       => $item->name_alt,
                 'function_text' => $item->function_text ?? '',
                 'image'         => '',
             ];
@@ -121,7 +121,7 @@ class ModuleExportController extends Controller
         $count = 0;
         foreach ($data['items'] ?? [] as $row) {
             $nameFr   = trim($row['name_fr']   ?? '');
-            $nameEn   = trim($row['name_en']   ?? '');
+            $nameEn   = trim($row['name_alt']   ?? '');
 
             if (empty($nameFr) || empty($nameEn)) {
                 continue;
@@ -141,7 +141,7 @@ class ModuleExportController extends Controller
 
             $module->items()->create([
                 'name_fr'       => mb_substr($nameFr, 0, 255),
-                'name_en'       => mb_substr($nameEn, 0, 255),
+                'name_alt'       => mb_substr($nameEn, 0, 255),
                 'function_text' => mb_substr(trim($row['function_text'] ?? ''), 0, 2000),
                 'photo_path'    => $photoPath,
             ]);

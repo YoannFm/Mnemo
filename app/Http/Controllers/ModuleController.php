@@ -237,10 +237,10 @@ class ModuleController extends Controller
             abort(403);
         }
 
-        $items = $module->items()->select('name_fr', 'name_en', 'function_text', 'photo_path')->get()->map(function ($item) {
+        $items = $module->items()->select('name_fr', 'name_alt', 'function_text', 'photo_path')->get()->map(function ($item) {
             return [
                 'name_fr'       => $item->name_fr,
-                'name_en'       => $item->name_en,
+                'name_alt'       => $item->name_alt,
                 'function_text' => $item->function_text,
                 'photo_url'     => $item->photo_url,
             ];
@@ -287,7 +287,7 @@ class ModuleController extends Controller
         foreach ($module->items as $item) {
             $copy->items()->create([
                 'name_fr'       => $item->name_fr,
-                'name_en'       => $item->name_en,
+                'name_alt'       => $item->name_alt,
                 'function_text' => $item->function_text,
                 'photo_path'    => $item->photo_path, // Partager le même chemin de photo
             ]);

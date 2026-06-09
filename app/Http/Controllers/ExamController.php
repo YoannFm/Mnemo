@@ -35,17 +35,17 @@ class ExamController extends Controller
         $allItems = $module->items()->get();
         $modeMap = [
             'photo_to_name_fr'    => ['Q1'],
-            'photo_to_name_en'    => ['Q8'],
+            'photo_to_name_alt'    => ['Q8'],
             'photo_to_function'   => ['Q2'],
             'function_to_photo'   => ['Q3'],
             'function_to_name_fr' => ['Q6'],
-            'function_to_name_en' => ['Q11'],
-            'name_fr_to_name_en'  => ['Q4'],
+            'function_to_name_alt' => ['Q11'],
+            'name_fr_to_name_alt'  => ['Q4'],
             'name_fr_to_photo'    => ['Q9'],
             'name_fr_to_function' => ['Q10'],
-            'name_en_to_photo'    => ['Q5'],
-            'name_en_to_function' => ['Q11'],
-            'name_en_to_name_fr'  => ['Q7'],
+            'name_alt_to_photo'    => ['Q5'],
+            'name_alt_to_function' => ['Q11'],
+            'name_alt_to_name_fr'  => ['Q7'],
         ];
 
         // Generate one question per item (shuffle items)

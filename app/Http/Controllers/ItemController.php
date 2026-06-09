@@ -48,7 +48,7 @@ class ItemController extends Controller
         // Validation des champs du formulaire
         $validated = $request->validate([
             'name_fr'       => 'required|string|max:255',
-            'name_en'       => 'required|string|max:255',
+            'name_alt'      => 'required|string|max:255',
             'function_text' => 'nullable|string|max:2000',
             'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
@@ -57,7 +57,7 @@ class ItemController extends Controller
 
         $module->items()->create([
             'name_fr'       => $validated['name_fr'],
-            'name_en'       => $validated['name_en'],
+            'name_alt'      => $validated['name_alt'],
             'function_text' => $validated['function_text'] ?? '',
             'photo_path'    => $photoPath,
         ]);
@@ -88,7 +88,7 @@ class ItemController extends Controller
 
         $validated = $request->validate([
             'name_fr'       => 'required|string|max:255',
-            'name_en'       => 'required|string|max:255',
+            'name_alt'      => 'required|string|max:255',
             'function_text' => 'nullable|string|max:2000',
             'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
@@ -105,7 +105,7 @@ class ItemController extends Controller
 
         $item->update([
             'name_fr'       => $validated['name_fr'],
-            'name_en'       => $validated['name_en'],
+            'name_alt'      => $validated['name_alt'],
             'function_text' => $validated['function_text'],
             'photo_path'    => $photoPath,
         ]);
@@ -148,7 +148,7 @@ class ItemController extends Controller
 
     /**
      * Traite l'import CSV.
-     * Format attendu : name_fr,name_en,function_text (sans en-tête ou avec)
+     * Format attendu : name_fr,name_alt,function_text (sans en-tête ou avec)
      * La colonne photo est ignorée (import texte uniquement).
      */
     public function importCsv(Request $request, Module $module)
@@ -185,7 +185,7 @@ class ItemController extends Controller
 
             $module->items()->create([
                 'name_fr'       => mb_substr($nameFr, 0, 255),
-                'name_en'       => mb_substr($nameEn, 0, 255),
+                'name_alt'      => mb_substr($nameEn, 0, 255),
                 'function_text' => mb_substr($function, 0, 2000),
                 'photo_path'    => null,
             ]);
