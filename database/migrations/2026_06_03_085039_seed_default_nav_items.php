@@ -11,21 +11,44 @@ return new class extends Migration
             return;
         }
 
+        $hasValue = \Illuminate\Support\Facades\Schema::hasColumn('nav_items', 'value');
+        $hasType  = \Illuminate\Support\Facades\Schema::hasColumn('nav_items', 'type');
+        $hasNewTab = \Illuminate\Support\Facades\Schema::hasColumn('nav_items', 'new_tab');
+
         $defaults = [
-            ['label' => 'Accueil',      'value' => '/dashboard',    'icon' => 'bi bi-house',      'position' => 1],
-            ['label' => 'Mes modules',  'value' => '/modules',      'icon' => 'bi bi-collection', 'position' => 2],
-            ['label' => 'Bibliothèque', 'value' => '/bibliotheque', 'icon' => 'bi bi-book',       'position' => 3],
-            ['label' => 'Progression',  'value' => '/progression',  'icon' => 'bi bi-graph-up',   'position' => 4],
+            ['label' => 'Accueil',      'url_or_value' => '/dashboard',    'icon' => 'bi bi-house',      'position' => 1],
+            ['label' => 'Mes modules',  'url_or_value' => '/modules',      'icon' => 'bi bi-collection', 'position' => 2],
+            ['label' => 'Bibliothèque', 'url_or_value' => '/bibliotheque', 'icon' => 'bi bi-book',       'position' => 3],
+            ['label' => 'Progression',  'url_or_value' => '/progression',  'icon' => 'bi bi-graph-up',   'position' => 4],
         ];
 
         foreach ($defaults as $item) {
-            DB::table('nav_items')->insert(array_merge($item, [
-                'type'       => 'link',
+            $row = [
+                'label'      => $item['label'],
+                'icon'       => $item['icon'],
+                'position'   => $item['position'],
                 'is_active'  => true,
-                'new_tab'    => false,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]));
+            ];
+
+            if ($hasValue) {
+                $row['value'] = $item['url_or_value'];
+            } else {
+                $row['url'] = $item['url_or_value'];
+            }
+
+            if ($hasType) {
+                $row['type'] = 'link';
+            }
+
+            if ($hasNewTab) {
+                $row['new_tab'] = false;
+            } else {
+                $row['open_new_tab'] = false;
+            }
+
+            DB::table('nav_items')->insert($row);
         }
     }
 
