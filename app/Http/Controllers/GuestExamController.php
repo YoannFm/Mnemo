@@ -153,7 +153,7 @@ class GuestExamController extends Controller
         $score     = collect($answers)->where('is_correct', true)->count();
         $guestName = session('guest_exam_name', 'Invité');
 
-        SharedExamAttempt::create([
+        $attempt = SharedExamAttempt::create([
             'shared_exam_id' => $sharedExam->id,
             'user_id'        => Auth::id(),
             'guest_name'     => $guestName,
@@ -172,6 +172,12 @@ class GuestExamController extends Controller
             'guest_exam_name',
         ]);
 
-        return view('shared-exam.guest.finish', compact('sharedExam'));
+        // Classement parmi tous les participants
+        $allAttempts = $sharedExam->attempts()->whereNotNull('finished_at')->orderBy('score', 'desc')->orderBy('finished_at')->get();
+        $rank = $allAttempts->search(fn($a) => $a->id === $attempt->id);
+        $rank = $rank !== false ? $rank + 1 : null;
+        $totalParticipants = $allAttempts->count();
+
+        return view('shared-exam.guest.finish', compact('sharedExam', 'attempt', 'rank', 'totalParticipants'));
     }
 }

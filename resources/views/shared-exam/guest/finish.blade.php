@@ -10,10 +10,32 @@
                     Vos résultats ont été transmis à
                     <strong>{{ $sharedExam->user->name }}</strong>.
                 </p>
+
+                {{-- Score --}}
+                <div class="card p-3 mb-3" style="background:var(--accent-light);border:none;">
+                    <div style="font-size:2rem;font-weight:800;color:var(--accent);">
+                        {{ $attempt->grade }}
+                    </div>
+                    <div style="font-size:.9rem;color:var(--text-muted);">
+                        {{ $attempt->score }} / {{ $attempt->total }} — {{ $attempt->percentage }}%
+                    </div>
+                </div>
+
+                {{-- Classement --}}
+                @if ($rank && $totalParticipants > 1)
+                    <div class="card p-3 mb-3">
+                        <div style="font-size:.85rem;color:var(--text-muted);">
+                            <i class="bi bi-trophy me-1" style="color:#fbbf24;"></i>
+                            Vous êtes <strong>{{ $rank }}{{ $rank === 1 ? 'er' : 'ème' }}</strong>
+                            sur {{ $totalParticipants }} participant{{ $totalParticipants > 1 ? 's' : '' }}
+                        </div>
+                    </div>
+                @endif
+
                 <div class="card p-3 mb-3">
                     <p style="color:var(--text-muted);font-size:.85rem;margin:0;">
                         <i class="bi bi-info-circle me-1"></i>
-                        Merci d'avoir participé. Les résultats détaillés seront consultés par votre enseignant.
+                        Les résultats détaillés seront consultables après envoi par votre enseignant.
                     </p>
                 </div>
                 <a href="{{ route('dashboard') }}" class="btn btn-sm" style="border:1px solid var(--card-border);color:var(--text-muted);">

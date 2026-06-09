@@ -123,6 +123,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::get('/modules/{module}/anki/question', [AnkiController::class, 'question'])->name('anki.question');
     Route::post('/modules/{module}/anki/submit', [AnkiController::class, 'submit'])->name('anki.submit');
     Route::post('/modules/{module}/anki/quit', [AnkiController::class, 'quit'])->name('anki.quit');
+    Route::post('/modules/{module}/anki/review', [AnkiController::class, 'reviewStart'])->name('anki.review');
 
     // ─── Mode Examen (tous les items, score final) ───
     Route::get('/modules/{module}/exam', [ExamController::class, 'show'])->name('exam.show');
@@ -180,6 +181,14 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::get('/shared-exam/{sharedExam}/export-grades', [SharedExamController::class, 'exportGrades'])->name('shared-exam.export-grades');
     Route::get('/shared-exam/{sharedExam}/export', [SharedExamController::class, 'export'])->name('shared-exam.export');
     Route::get('/shared-exam/{sharedExam}/export-excel', [SharedExamController::class, 'exportExcel'])->name('shared-exam.export-excel');
+
+    // ─── Groupes / classes ───
+    Route::get('/groupes', [\App\Http\Controllers\GroupController::class, 'index'])->name('groups.index');
+    Route::post('/groupes', [\App\Http\Controllers\GroupController::class, 'store'])->name('groups.store');
+    Route::get('/groupes/{group}', [\App\Http\Controllers\GroupController::class, 'show'])->name('groups.show');
+    Route::delete('/groupes/{group}', [\App\Http\Controllers\GroupController::class, 'destroy'])->name('groups.destroy');
+    Route::post('/groupes/{group}/membres', [\App\Http\Controllers\GroupController::class, 'addMember'])->name('groups.members.add');
+    Route::delete('/groupes/{group}/membres/{user}', [\App\Http\Controllers\GroupController::class, 'removeMember'])->name('groups.members.remove');
 });
 
 // ─── Sitemap XML dynamique ───

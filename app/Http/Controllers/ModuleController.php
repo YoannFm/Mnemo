@@ -132,9 +132,20 @@ class ModuleController extends Controller
             ? $module->sharedExams()->withCount('attempts')->latest()->get()
             : collect();
 
+        // Progression par item pour l'utilisateur connecté
+        $progressMap = Auth::check()
+            ? Progress::where('user_id', Auth::id())
+                      ->whereIn('item_id', $module->items()->pluck('id'))
+                      ->get()
+                      ->keyBy('item_id')
+            : collect();
+
+        $failedItemsCount = $progressMap->filter(fn($p) => $p->fail_count > 0 && $p->streak < 3)->count();
+
         return view('modules.show', compact(
             'module', 'items', 'avgRating', 'ratingCount', 'userRating', 'isMuted',
-            'allRatingsWithData', 'ratingReactions', 'userRatingReacts', 'sharedExams'
+            'allRatingsWithData', 'ratingReactions', 'userRatingReacts', 'sharedExams',
+            'progressMap', 'failedItemsCount'
         ));
     }
 

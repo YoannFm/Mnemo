@@ -118,6 +118,17 @@
                     </div>
                 </div>
 
+                {{-- Examens --}}
+                <div class="mb-3">
+                    <label class="form-label" for="exam_default_expires_days">Expiration par défaut des examens (jours)</label>
+                    <input type="number" id="exam_default_expires_days" name="exam_default_expires_days"
+                           class="form-control @error('exam_default_expires_days') is-invalid @enderror"
+                           value="{{ old('exam_default_expires_days', $settings['exam_default_expires_days']) }}"
+                           min="1" max="365" placeholder="Laisser vide = pas de limite par défaut">
+                    <div class="form-text">Pré-remplit le champ "Date d'expiration" lors de la création d'un examen partagé.</div>
+                    @error('exam_default_expires_days')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
+
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-save me-1"></i> Sauvegarder
                 </button>

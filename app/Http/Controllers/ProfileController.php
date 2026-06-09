@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Progress;
+use App\Models\Score;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,9 +22,20 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        $user = $request->user();
+
+        $stats = [
+            'mastered'     => Progress::where('user_id', $user->id)->where('streak', '>=', 3)->count(),
+            'practiced'    => Progress::where('user_id', $user->id)->count(),
+            'tests'        => Score::where('user_id', $user->id)->count(),
+            'avg_score'    => (int) round(Score::where('user_id', $user->id)->avg(\DB::raw('score / total * 100')) ?? 0),
+            'best_streak'  => Progress::where('user_id', $user->id)->max('streak') ?? 0,
+            'modules_used' => Progress::where('user_id', $user->id)->distinct('item_id')
+                              ->join('items', 'progress.item_id', '=', 'items.id')
+                              ->distinct('items.module_id')->count('items.module_id'),
+        ];
+
+        return view('profile.edit', compact('user', 'stats'));
     }
 
     /**

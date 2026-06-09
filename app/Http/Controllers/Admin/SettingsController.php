@@ -22,15 +22,16 @@ class SettingsController extends Controller
         $images    = Image::orderBy('name')->get();
         $timezones = timezone_identifiers_list();
         $settings  = [
-            'site_name'        => Setting::get('site_name', 'Mnémo'),
-            'site_url'         => Setting::get('site_url', config('app.url')),
-            'site_description' => Setting::get('site_description', ''),
-            'site_keywords'    => Setting::get('site_keywords', ''),
-            'site_logo'        => Setting::get('site_logo', ''),
-            'timezone'         => Setting::get('timezone', 'Europe/Paris'),
-            'locale'           => Setting::get('locale', 'fr'),
-            'site_key'         => Setting::get('site_key', ''),
-            'posts_webhook'    => Setting::get('posts_webhook', ''),
+            'site_name'                  => Setting::get('site_name', 'Mnémo'),
+            'site_url'                   => Setting::get('site_url', config('app.url')),
+            'site_description'           => Setting::get('site_description', ''),
+            'site_keywords'              => Setting::get('site_keywords', ''),
+            'site_logo'                  => Setting::get('site_logo', ''),
+            'timezone'                   => Setting::get('timezone', 'Europe/Paris'),
+            'locale'                     => Setting::get('locale', 'fr'),
+            'site_key'                   => Setting::get('site_key', ''),
+            'posts_webhook'              => Setting::get('posts_webhook', ''),
+            'exam_default_expires_days'  => Setting::get('exam_default_expires_days', ''),
         ];
 
         return view('admin.settings.index', compact('settings', 'images', 'timezones'));
@@ -39,20 +40,22 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'site_name'        => 'required|string|max:100',
-            'site_url'         => 'nullable|url|max:255',
-            'site_description' => 'nullable|string',
-            'site_keywords'    => 'nullable|string|max:500',
-            'site_logo'        => 'nullable|string|max:255',
-            'timezone'         => 'nullable|string|max:100',
-            'locale'           => 'nullable|in:fr,en',
-            'site_key'         => 'nullable|string|max:255',
-            'posts_webhook'    => 'nullable|url|max:500',
+            'site_name'                 => 'required|string|max:100',
+            'site_url'                  => 'nullable|url|max:255',
+            'site_description'          => 'nullable|string',
+            'site_keywords'             => 'nullable|string|max:500',
+            'site_logo'                 => 'nullable|string|max:255',
+            'timezone'                  => 'nullable|string|max:100',
+            'locale'                    => 'nullable|in:fr,en',
+            'site_key'                  => 'nullable|string|max:255',
+            'posts_webhook'             => 'nullable|url|max:500',
+            'exam_default_expires_days' => 'nullable|integer|min:1|max:365',
         ]);
 
         $fields = [
             'site_name', 'site_url', 'site_description', 'site_keywords',
             'site_logo', 'timezone', 'locale', 'site_key', 'posts_webhook',
+            'exam_default_expires_days',
         ];
 
         foreach ($fields as $field) {

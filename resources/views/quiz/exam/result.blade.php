@@ -54,7 +54,22 @@
                 <a href="{{ route('modules.show', $module) }}" class="btn" style="color:var(--text-muted);border:1px solid var(--card-border);">
                     Retour au module
                 </a>
+                <button type="button" onclick="window.print()" class="btn" style="color:var(--text-muted);border:1px solid var(--card-border);">
+                    <i class="bi bi-printer me-1"></i>Imprimer
+                </button>
             </div>
         </div>
     </div>
+
+    @push('styles')
+    <style>
+    @media print {
+        nav, .breadcrumb, .d-flex.gap-2.flex-wrap { display: none !important; }
+        .card { border: 1px solid #ccc !important; box-shadow: none !important; page-break-inside: avoid; }
+        body, .card, .card-body { background: white !important; color: black !important; }
+        .badge.bg-success { background: #198754 !important; color: white !important; }
+        .badge.bg-danger  { background: #dc3545 !important; color: white !important; }
+    }
+    </style>
+    @endpush
 </x-app-layout>

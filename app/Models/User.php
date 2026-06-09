@@ -105,4 +105,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserNotification::class)->latest();
     }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'group_user')->withPivot('joined_at');
+    }
 }

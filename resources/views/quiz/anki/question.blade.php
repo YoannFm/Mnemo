@@ -342,14 +342,40 @@
          * 4. La page se recharge avec la prochaine question
          */
         function nextQuestion() {
-            // Afficher le spinner "Génération de la prochaine question…"
             document.getElementById('loading').style.display = 'block';
-            // Masquer le feedback
             document.getElementById('feedback').style.display = 'none';
-            // Redirection vers la page anki.question pour charger une nouvelle question
-            // Cette route appellera le contrôleur AnkiController@question
             window.location.href = "{{ route('anki.question', $module) }}";
         }
+
+        document.addEventListener('keydown', function(e) {
+            var feedback = document.getElementById('feedback');
+            var isFeedbackVisible = feedback && feedback.style.display !== 'none';
+
+            if (isFeedbackVisible) {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    nextQuestion();
+                }
+                return;
+            }
+
+            if (['1','2','3','4'].includes(e.key)) {
+                var idx = parseInt(e.key) - 1;
+                var btns = document.querySelectorAll('.anki-option:not([disabled])');
+                if (btns[idx]) btns[idx].click();
+            }
+        });
     </script>
+
+    <div style="text-align:center;margin-top:.5rem;">
+        <small style="color:var(--text-muted);font-size:.75rem;">
+            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">1</kbd>
+            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">2</kbd>
+            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">3</kbd>
+            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">4</kbd>
+            pour répondre &nbsp;·&nbsp;
+            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">Espace</kbd> pour continuer
+        </small>
+    </div>
 
 </x-app-layout>

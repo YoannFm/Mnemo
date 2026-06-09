@@ -46,10 +46,15 @@
                         <label for="share_expires_at" class="form-label" style="font-size:.875rem;color:var(--text-muted);">
                             Date d'expiration <span style="font-size:.8rem;">(optionnel)</span>
                         </label>
+                        @php
+                            $defaultDays = \App\Models\Setting::get('exam_default_expires_days');
+                            $defaultExpiry = $defaultDays ? now()->addDays((int)$defaultDays)->format('Y-m-d\TH:i') : '';
+                        @endphp
                         <input type="datetime-local"
                                class="form-control"
                                id="share_expires_at"
-                               name="expires_at">
+                               name="expires_at"
+                               value="{{ $defaultExpiry }}">
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top:1px solid var(--card-border);">

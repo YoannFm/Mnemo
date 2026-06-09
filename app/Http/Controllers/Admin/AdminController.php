@@ -41,6 +41,23 @@ class AdminController extends Controller
         $recentLogs  = ActivityLog::with('user')->latest()->take(5)->get();
         $latestUsers = User::latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('stats', 'latestUsers', 'recentLogs'));
+        // Données pour les graphiques (30 derniers jours)
+        $days = collect(range(29, 0))->map(fn($d) => now()->subDays($d)->format('Y-m-d'));
+
+        $testsByDay = Score::selectRaw('DATE(created_at) as day, COUNT(*) as total')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('day')
+            ->pluck('total', 'day');
+
+        $usersByDay = User::selectRaw('DATE(created_at) as day, COUNT(*) as total')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('day')
+            ->pluck('total', 'day');
+
+        $chartLabels   = $days->map(fn($d) => \Carbon\Carbon::parse($d)->format('d/m'))->values()->toArray();
+        $chartTests    = $days->map(fn($d) => (int)($testsByDay[$d] ?? 0))->values()->toArray();
+        $chartUsers    = $days->map(fn($d) => (int)($usersByDay[$d] ?? 0))->values()->toArray();
+
+        return view('admin.dashboard', compact('stats', 'latestUsers', 'recentLogs', 'chartLabels', 'chartTests', 'chartUsers'));
     }
 }

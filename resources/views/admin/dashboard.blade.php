@@ -267,4 +267,68 @@
             </div>
         </div>
     </div>
+
+    {{-- Graphiques --}}
+    <div class="row g-3 mt-1">
+        <div class="col-12 col-xl-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-bar-chart me-2"></i>Tests par jour (30 derniers jours)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartTests" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="card-title mb-0"><i class="bi bi-person-plus me-2"></i>Inscriptions par jour (30 derniers jours)</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartUsers" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+    (function() {
+        var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        var gridColor = isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.06)';
+        var textColor = isDark ? '#aaa' : '#555';
+        var labels = @json($chartLabels);
+
+        function makeChart(id, data, label, color) {
+            var ctx = document.getElementById(id);
+            if (!ctx) return;
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        backgroundColor: color + '33',
+                        borderColor: color,
+                        borderWidth: 1.5,
+                        borderRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: gridColor }, ticks: { color: textColor, maxTicksLimit: 10 } },
+                        y: { grid: { color: gridColor }, ticks: { color: textColor, precision: 0 }, beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        makeChart('chartTests', @json($chartTests), 'Tests', '#6366f1');
+        makeChart('chartUsers', @json($chartUsers), 'Inscriptions', '#22c55e');
+    })();
+    </script>
 </x-admin-layout>

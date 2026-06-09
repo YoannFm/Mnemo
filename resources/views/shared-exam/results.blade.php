@@ -67,15 +67,26 @@
     {{-- Lien partageable --}}
     <div class="card mb-4">
         <div class="card-body" style="padding:.75rem 1.25rem;">
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <span style="font-size:.78rem;color:var(--text-muted);"><i class="bi bi-link-45deg me-1"></i>Lien :</span>
-                <code style="font-size:.82rem;color:var(--accent);word-break:break-all;">{{ route('guest.exam.show', $sharedExam->uuid) }}</code>
-                <button type="button"
-                        onclick="navigator.clipboard.writeText('{{ route('guest.exam.show', $sharedExam->uuid) }}').then(()=>this.innerHTML='<i class=\'bi bi-check-lg\'></i> Copié')"
-                        class="btn btn-sm"
-                        style="color:var(--text-muted);border:1px solid var(--card-border);white-space:nowrap;">
-                    <i class="bi bi-clipboard"></i> Copier
-                </button>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div style="flex:1;min-width:200px;">
+                    <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
+                        <span style="font-size:.78rem;color:var(--text-muted);"><i class="bi bi-link-45deg me-1"></i>Lien :</span>
+                        <code style="font-size:.82rem;color:var(--accent);word-break:break-all;">{{ route('guest.exam.show', $sharedExam->uuid) }}</code>
+                    </div>
+                    <button type="button"
+                            onclick="navigator.clipboard.writeText('{{ route('guest.exam.show', $sharedExam->uuid) }}').then(()=>this.innerHTML='<i class=\'bi bi-check-lg\'></i> Copié')"
+                            class="btn btn-sm"
+                            style="color:var(--text-muted);border:1px solid var(--card-border);white-space:nowrap;">
+                        <i class="bi bi-clipboard"></i> Copier
+                    </button>
+                </div>
+                <div style="text-align:center;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?data={{ urlencode(route('guest.exam.show', $sharedExam->uuid)) }}&size=90x90&margin=4"
+                         alt="QR Code"
+                         style="border-radius:6px;display:block;border:1px solid var(--card-border);"
+                         title="Scanner pour accéder à l'examen">
+                    <div style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;">QR Code</div>
+                </div>
             </div>
         </div>
     </div>

@@ -216,6 +216,20 @@
                 <div style="font-weight:600;font-size:.9rem;">Mode Examen</div>
                 <div style="font-size:.75rem;color:var(--text-muted);">Tous les items</div>
             </a>
+            @auth
+                @if ($failedItemsCount > 0)
+                    <form method="POST" action="{{ route('anki.review', $module) }}" style="display:contents;">
+                        @csrf
+                        <button type="submit" class="btn" style="height:auto;padding:1rem;border-width:2px;border:2px solid #ef4444;color:#ef4444;background:transparent;border-radius:var(--bs-btn-border-radius);">
+                            <div style="font-size:1.5rem;margin-bottom:.25rem;">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                            <div style="font-weight:600;font-size:.9rem;">Révision rapide</div>
+                            <div style="font-size:.75rem;">{{ $failedItemsCount }} à revoir</div>
+                        </button>
+                    </form>
+                @endif
+            @endauth
         </div>
     @if ($items->total() >= 4)
         @auth
@@ -280,9 +294,29 @@
                         <div class="card-body p-3" style="gap:.5rem;display:flex;flex-direction:column;">
 
                             {{-- Noms FR / EN --}}
-                            <div>
-                                <div class="fw-semibold" style="font-size:.95rem;">{{ $item->name_fr }}</div>
-                                <div style="font-size:.8rem;color:var(--accent);"><span style="color:var(--text-muted);font-size:.75rem;">Traduction :</span> {{ $item->name_en }}</div>
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="fw-semibold" style="font-size:.95rem;">{{ $item->name_fr }}</div>
+                                    <div style="font-size:.8rem;color:var(--accent);"><span style="color:var(--text-muted);font-size:.75rem;">Traduction :</span> {{ $item->name_en }}</div>
+                                </div>
+                                @auth
+                                    @php $prog = $progressMap->get($item->id); @endphp
+                                    @if ($prog)
+                                        @if ($prog->streak >= 3)
+                                            <span class="badge" style="background:rgba(34,197,94,.15);color:#22c55e;font-size:.7rem;white-space:nowrap;flex-shrink:0;" title="{{ $prog->success_count }}✓ {{ $prog->fail_count }}✗">
+                                                <i class="bi bi-check-circle-fill"></i> Maîtrisé
+                                            </span>
+                                        @elseif ($prog->fail_count > 0)
+                                            <span class="badge" style="background:rgba(239,68,68,.15);color:#ef4444;font-size:.7rem;white-space:nowrap;flex-shrink:0;" title="{{ $prog->success_count }}✓ {{ $prog->fail_count }}✗">
+                                                <i class="bi bi-exclamation-triangle-fill"></i> {{ $prog->fail_count }}✗
+                                            </span>
+                                        @else
+                                            <span class="badge" style="background:rgba(251,191,36,.15);color:#fbbf24;font-size:.7rem;white-space:nowrap;flex-shrink:0;" title="{{ $prog->success_count }}✓ {{ $prog->fail_count }}✗">
+                                                <i class="bi bi-clock"></i> En cours
+                                            </span>
+                                        @endif
+                                    @endif
+                                @endauth
                             </div>
 
                             {{-- Fonction/Description --}}

@@ -8,6 +8,46 @@
         </p>
     </div>
 
+    {{-- ── Statistiques rapides ── --}}
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-2">
+            <div class="card p-3 text-center">
+                <div style="font-size:1.5rem;font-weight:700;color:#22c55e;">{{ $stats['mastered'] }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);">Maîtrisés</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card p-3 text-center">
+                <div style="font-size:1.5rem;font-weight:700;color:var(--accent);">{{ $stats['practiced'] }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);">Pratiqués</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card p-3 text-center">
+                <div style="font-size:1.5rem;font-weight:700;color:#fbbf24;">{{ $stats['tests'] }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);">Tests</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card p-3 text-center">
+                <div style="font-size:1.5rem;font-weight:700;color:#a855f7;">{{ $stats['avg_score'] }}%</div>
+                <div style="font-size:.72rem;color:var(--text-muted);">Score moyen</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card p-3 text-center">
+                <div style="font-size:1.5rem;font-weight:700;color:#f97316;">{{ $stats['best_streak'] }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);">Meilleure série</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-2">
+            <div class="card p-3 text-center">
+                <div style="font-size:1.5rem;font-weight:700;color:#06b6d4;">{{ $stats['modules_used'] }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);">Modules</div>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4" style="max-width:700px;">
 
         {{-- ── Informations du profil ── --}}

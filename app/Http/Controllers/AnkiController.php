@@ -249,6 +249,43 @@ class AnkiController extends Controller
     }
 
     /**
+     * Lance une session de révision rapide sur les items ratés non maîtrisés.
+     */
+    public function reviewStart(Module $module)
+    {
+        $this->authorize($module);
+
+        $itemIds = $module->items()->pluck('id')->toArray();
+
+        $reviewItemIds = Progress::where('user_id', Auth::id())
+            ->whereIn('item_id', $itemIds)
+            ->where('fail_count', '>', 0)
+            ->where('streak', '<', 3)
+            ->pluck('item_id')
+            ->toArray();
+
+        if (empty($reviewItemIds)) {
+            return redirect()->route('anki.show', $module)
+                ->with('success', 'Aucun item à réviser - tous vos items sont maîtrisés !');
+        }
+
+        shuffle($reviewItemIds);
+
+        session([
+            'anki_module_id'       => $module->id,
+            'anki_mode'            => 'random',
+            'anki_learn_mode'      => true,
+            'anki_learn_remaining' => $reviewItemIds,
+            'anki_learn_total'     => count($reviewItemIds),
+            'anki_session_correct' => 0,
+            'anki_session_wrong'   => 0,
+            'anki_session_streak'  => 0,
+        ]);
+
+        return redirect()->route('anki.question', $module);
+    }
+
+    /**
      * Quitter une session Anki.
      */
     public function quit(Module $module)
