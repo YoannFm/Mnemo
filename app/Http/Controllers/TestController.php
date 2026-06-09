@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Module;
+use App\Models\Progress;
 use App\Models\Score;
 use App\Services\QuizGenerator;
 use Illuminate\Http\Request;
@@ -152,6 +153,23 @@ class TestController extends Controller
             'is_correct'      => $isCorrect,
             'elapsed_seconds' => (int) ($validated['elapsed_seconds'] ?? 0),
         ];
+
+        // Mettre à jour la progression par item (comme en mode Anki)
+        if (Auth::check()) {
+            $progress = Progress::firstOrCreate(
+                ['user_id' => Auth::id(), 'item_id' => $question['item_id']],
+                ['success_count' => 0, 'fail_count' => 0, 'streak' => 0, 'easiness_factor' => 2.5, 'interval_days' => 1]
+            );
+            $progress->last_seen = now();
+            if ($isCorrect) {
+                $progress->success_count++;
+                $progress->streak++;
+            } else {
+                $progress->fail_count++;
+                $progress->streak = 0;
+            }
+            $progress->save();
+        }
 
         // Incrémenter le score si correct
         $score = session('test_score', 0);
