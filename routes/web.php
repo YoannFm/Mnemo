@@ -53,12 +53,14 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 
-// ─── Examens partagés (accès invité, sans authentification) ───
-Route::get('/e/{uuid}', [GuestExamController::class, 'show'])->name('guest.exam.show');
-Route::post('/e/{uuid}/start', [GuestExamController::class, 'start'])->name('guest.exam.start');
-Route::get('/e/{uuid}/question', [GuestExamController::class, 'question'])->name('guest.exam.question');
-Route::post('/e/{uuid}/answer', [GuestExamController::class, 'answer'])->name('guest.exam.answer');
-Route::get('/e/{uuid}/finish', [GuestExamController::class, 'finish'])->name('guest.exam.finish');
+// ─── Examens partagés (authentification requise) ───
+Route::middleware(['auth', 'two-factor'])->group(function () {
+    Route::get('/e/{uuid}', [GuestExamController::class, 'show'])->name('guest.exam.show');
+    Route::post('/e/{uuid}/start', [GuestExamController::class, 'start'])->name('guest.exam.start');
+    Route::get('/e/{uuid}/question', [GuestExamController::class, 'question'])->name('guest.exam.question');
+    Route::post('/e/{uuid}/answer', [GuestExamController::class, 'answer'])->name('guest.exam.answer');
+    Route::get('/e/{uuid}/finish', [GuestExamController::class, 'finish'])->name('guest.exam.finish');
+});
 
 // ─── 2FA Challenge (après login) ───
 Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.show');

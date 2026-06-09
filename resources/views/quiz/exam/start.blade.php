@@ -59,12 +59,6 @@
                     </div>
                 </div>
 
-                <div class="d-flex gap-2">
-                    <a href="{{ route('modules.show', $module) }}" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);">Annuler</a>
-                    <button type="submit" class="btn btn-primary" id="start-btn">
-                        <i class="bi bi-pencil-square me-1"></i>Commencer l'examen
-                    </button>
-                </div>
             </form>
 
             @if (Auth::id() === $module->owner_id)

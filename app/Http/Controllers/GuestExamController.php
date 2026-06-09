@@ -6,6 +6,7 @@ use App\Models\SharedExam;
 use App\Models\SharedExamAttempt;
 use App\Services\QuizGenerator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class GuestExamController extends Controller
 {
@@ -35,17 +36,13 @@ class GuestExamController extends Controller
         return view('shared-exam.guest.start', compact('sharedExam'));
     }
 
-    public function start(Request $request, string $uuid)
+    public function start(string $uuid)
     {
         $sharedExam = SharedExam::where('uuid', $uuid)->with('module')->firstOrFail();
 
         if ($sharedExam->isExpired()) {
             abort(410, 'Ce lien d\'examen a expiré.');
         }
-
-        $validated = $request->validate([
-            'guest_name' => 'required|string|max:100',
-        ]);
 
         $module   = $sharedExam->module;
         $allItems = $module->items()->get();
@@ -73,7 +70,7 @@ class GuestExamController extends Controller
             'guest_exam_questions' => $questions,
             'guest_exam_current'   => 0,
             'guest_exam_answers'   => [],
-            'guest_exam_name'      => $validated['guest_name'],
+            'guest_exam_name'      => Auth::user()->name,
         ]);
 
         return redirect()->route('guest.exam.question', $uuid);
