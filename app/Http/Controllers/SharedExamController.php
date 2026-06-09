@@ -9,6 +9,8 @@ use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class SharedExamController extends Controller
 {
@@ -112,103 +114,140 @@ class SharedExamController extends Controller
 
     public function exportGrades(SharedExam $sharedExam)
     {
-        if ($sharedExam->user_id !== Auth::id()) {
-            abort(403);
-        }
+        if ($sharedExam->user_id !== Auth::id()) abort(403);
 
         $attempts = $sharedExam->attempts()->orderBy('created_at', 'desc')->get();
         $label    = $sharedExam->label ?? 'examen';
-        $filename = 'notes-' . Str::slug($label) . '.csv';
 
-        $headers = [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function () use ($attempts) {
-            $handle = fopen('php://output', 'w');
-            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
-
-            fputcsv($handle, ['Participant', 'Note /20'], ';');
-
-            foreach ($attempts as $attempt) {
-                fputcsv($handle, [
-                    $attempt->guest_name,
-                    $attempt->grade,
-                ], ';');
+        return response()->stream(function () use ($attempts) {
+            $h = fopen('php://output', 'w');
+            fprintf($h, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($h, ['Participant', 'Note /20'], ';');
+            foreach ($attempts as $a) {
+                fputcsv($h, [$a->guest_name, $a->grade], ';');
             }
-
-            fclose($handle);
-        };
-
-        return response()->stream($callback, 200, $headers);
+            fclose($h);
+        }, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="notes-' . Str::slug($label) . '.csv"',
+        ]);
     }
 
     public function export(SharedExam $sharedExam)
     {
-        if ($sharedExam->user_id !== Auth::id()) {
-            abort(403);
-        }
+        if ($sharedExam->user_id !== Auth::id()) abort(403);
 
         $attempts = $sharedExam->attempts()->orderBy('created_at', 'desc')->get();
         $label    = $sharedExam->label ?? 'examen';
-        $filename = 'resultats-' . Str::slug($label) . '.csv';
 
-        $headers = [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function () use ($attempts, $sharedExam) {
-            $handle = fopen('php://output', 'w');
-            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM UTF-8
-
-            fputcsv($handle, ['Participant', 'Score', 'Note /20', '%', 'Date', 'Question', 'Réponse donnée', 'Bonne réponse', 'Résultat'], ';');
+        return response()->stream(function () use ($attempts) {
+            $h = fopen('php://output', 'w');
+            fprintf($h, chr(0xEF) . chr(0xBB) . chr(0xBF));
+            fputcsv($h, ['Participant', 'Score', 'Note /20', '%', 'Date', 'Question', 'Réponse donnée', 'Bonne réponse', 'Résultat'], ';');
 
             foreach ($attempts as $attempt) {
                 $answers = $attempt->answers ?? [];
                 $first   = true;
-
                 if (count($answers) > 0) {
                     foreach ($answers as $ans) {
                         $content = $ans['question_content'] ?? null;
                         $isPhoto = $content && str_contains((string) $content, '/storage/');
-                        $questionLabel = $isPhoto
-                            ? ($ans['question_text'] ?? '-')
-                            : ($content ?? $ans['question_text'] ?? '-');
-
-                        fputcsv($handle, [
+                        $q = $isPhoto ? ($ans['question_text'] ?? '-') : ($content ?? $ans['question_text'] ?? '-');
+                        fputcsv($h, [
                             $first ? $attempt->guest_name : '',
                             $first ? $attempt->score . '/' . $attempt->total : '',
                             $first ? $attempt->grade : '',
                             $first ? $attempt->percentage . '%' : '',
-                            $first ? ($attempt->finished_at ? $attempt->finished_at->format('d/m/Y H:i') : '-') : '',
-                            $questionLabel,
+                            $first ? ($attempt->finished_at?->format('d/m/Y H:i') ?? '-') : '',
+                            $q,
                             $ans['user_answer'] ?? '-',
                             $ans['correct_answer'] ?? '-',
                             $ans['is_correct'] ? 'Réussi' : 'Échoué',
                         ], ';');
-
                         $first = false;
                     }
                 } else {
-                    fputcsv($handle, [
-                        $attempt->guest_name,
-                        $attempt->score . '/' . $attempt->total,
-                        $attempt->grade,
-                        $attempt->percentage . '%',
-                        $attempt->finished_at ? $attempt->finished_at->format('d/m/Y H:i') : '-',
-                        '-', '-', '-', '-',
-                    ], ';');
+                    fputcsv($h, [$attempt->guest_name, $attempt->score . '/' . $attempt->total, $attempt->grade, $attempt->percentage . '%', $attempt->finished_at?->format('d/m/Y H:i') ?? '-', '-', '-', '-', '-'], ';');
                 }
-
-                fputcsv($handle, [], ';');
+                fputcsv($h, [], ';');
             }
+            fclose($h);
+        }, 200, [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="resultats-' . Str::slug($label) . '.csv"',
+        ]);
+    }
 
-            fclose($handle);
-        };
+    public function exportExcel(SharedExam $sharedExam)
+    {
+        if ($sharedExam->user_id !== Auth::id()) abort(403);
 
-        return response()->stream($callback, 200, $headers);
+        $attempts = $sharedExam->attempts()->orderBy('created_at', 'desc')->get();
+        $label    = $sharedExam->label ?? 'examen';
+
+        $spreadsheet = new Spreadsheet();
+
+        // Feuille 1 : Notes
+        $sheet1 = $spreadsheet->getActiveSheet();
+        $sheet1->setTitle('Notes');
+        $sheet1->fromArray(['Participant', 'Score', 'Note /20', '%', 'Date'], null, 'A1');
+        $row = 2;
+        foreach ($attempts as $a) {
+            $sheet1->fromArray([
+                $a->guest_name,
+                $a->score . '/' . $a->total,
+                $a->grade,
+                $a->percentage . '%',
+                $a->finished_at?->format('d/m/Y H:i') ?? '-',
+            ], null, 'A' . $row);
+            $row++;
+        }
+
+        // Feuille 2 : Réponses détaillées
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle('Réponses');
+        $sheet2->fromArray(['Participant', 'Score', 'Note /20', '%', 'Date', 'Question', 'Réponse donnée', 'Bonne réponse', 'Résultat'], null, 'A1');
+        $row = 2;
+        foreach ($attempts as $attempt) {
+            $answers = $attempt->answers ?? [];
+            $first   = true;
+            if (count($answers) > 0) {
+                foreach ($answers as $ans) {
+                    $content = $ans['question_content'] ?? null;
+                    $isPhoto = $content && str_contains((string) $content, '/storage/');
+                    $q = $isPhoto ? ($ans['question_text'] ?? '-') : ($content ?? $ans['question_text'] ?? '-');
+                    $sheet2->fromArray([
+                        $first ? $attempt->guest_name : '',
+                        $first ? $attempt->score . '/' . $attempt->total : '',
+                        $first ? $attempt->grade : '',
+                        $first ? $attempt->percentage . '%' : '',
+                        $first ? ($attempt->finished_at?->format('d/m/Y H:i') ?? '-') : '',
+                        $q,
+                        $ans['user_answer'] ?? '-',
+                        $ans['correct_answer'] ?? '-',
+                        $ans['is_correct'] ? 'Réussi' : 'Échoué',
+                    ], null, 'A' . $row);
+                    $first = false;
+                    $row++;
+                }
+            } else {
+                $sheet2->fromArray([$attempt->guest_name, $attempt->score . '/' . $attempt->total, $attempt->grade, $attempt->percentage . '%', $attempt->finished_at?->format('d/m/Y H:i') ?? '-', '-', '-', '-', '-'], null, 'A' . $row);
+                $row++;
+            }
+            $row++;
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $filename = 'resultats-' . Str::slug($label) . '.xlsx';
+        $path = storage_path('app/temp/' . $filename);
+        if (!is_dir(storage_path('app/temp'))) mkdir(storage_path('app/temp'), 0755, true);
+
+        (new Xlsx($spreadsheet))->save($path);
+
+        return response()->download($path, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ])->deleteFileAfterSend(true);
     }
 
     public function sendAllResults(SharedExam $sharedExam)

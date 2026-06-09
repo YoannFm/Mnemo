@@ -32,9 +32,15 @@
             </div>
         </div>
         <div class="d-flex gap-2 flex-wrap">
-            {{-- Exporter CSV --}}
+            {{-- Exports --}}
+            <a href="{{ route('shared-exam.export-grades', $sharedExam) }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download me-1"></i>CSV Notes
+            </a>
             <a href="{{ route('shared-exam.export', $sharedExam) }}" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-download me-1"></i>Exporter CSV
+                <i class="bi bi-download me-1"></i>CSV Détail
+            </a>
+            <a href="{{ route('shared-exam.export-excel', $sharedExam) }}" class="btn btn-sm btn-outline-success">
+                <i class="bi bi-file-earmark-excel me-1"></i>Excel
             </a>
             {{-- Envoyer tous les résultats --}}
             <form method="POST" action="{{ route('shared-exam.send-all-results', $sharedExam) }}">
