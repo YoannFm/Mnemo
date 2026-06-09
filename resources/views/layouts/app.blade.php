@@ -716,10 +716,15 @@
     </div>
 
     @if (setting('site_description'))
-        <div style="padding:2rem 1.5rem 1rem;border-top:1px solid var(--card-border);">
-            <div style="max-width:420px;">
-                <div style="font-weight:600;margin-bottom:.25rem;font-size:.85rem;">{{ setting('site_name', 'Mnémo') }}</div>
-                <div style="font-size:.78rem;color:var(--text-muted);line-height:1.6;">{{ strip_tags(setting('site_description')) }}</div>
+        <div style="padding:2.5rem 2rem 2rem;border-top:1px solid var(--card-border);">
+            <div style="max-width:380px;">
+                <div style="font-size:1rem;font-weight:700;letter-spacing:-.3px;margin-bottom:.5rem;">
+                    {{ setting('site_name', 'Mnémo') }}
+                </div>
+                <div style="width:2rem;height:2px;background:var(--accent);border-radius:2px;margin-bottom:.75rem;"></div>
+                <div style="font-size:.8rem;color:var(--text-muted);line-height:1.7;">
+                    {{ html_entity_decode(strip_tags(setting('site_description')), ENT_QUOTES | ENT_HTML5, 'UTF-8') }}
+                </div>
             </div>
         </div>
     @endif
