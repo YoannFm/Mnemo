@@ -315,7 +315,7 @@
                         © Copyright - Tout droit réservé
                     </p>
                     <p class="mb-0 py-1 text-center text-muted" style="font-size:.78rem;">
-                        Fait avec ♥️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a>
+                        Fait avec ❤️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a>
                     </p>
                 </div>
             </footer>

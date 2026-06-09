@@ -720,7 +720,7 @@
         <div class="footer-left"></div>
         <div class="footer-center">
             <div>© Copyright - Tout droit réservé</div>
-            <div style="margin-top:.2rem;">Fait avec ♥️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
+            <div style="margin-top:.2rem;">Fait avec ❤️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
         </div>
     </footer>
 
