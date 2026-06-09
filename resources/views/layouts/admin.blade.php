@@ -312,13 +312,28 @@
             <footer class="footer">
                 <div class="container-fluid">
                     <p class="mb-0 py-1 text-center text-muted" style="font-size:.78rem;">
-                        Licence MIT - Copyright (c) 2026 Yoann
+                        © 2026 YoannFM · <a href="#" data-bs-toggle="modal" data-bs-target="#licenseModal">Licence MIT</a>
                     </p>
                     <p class="mb-0 py-1 text-center text-muted" style="font-size:.78rem;">
                         Fait avec ❤️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a>
                     </p>
                 </div>
             </footer>
+
+            {{-- Modal Licence MIT --}}
+            <div class="modal fade" id="licenseModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Licence MIT</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <pre style="font-size:.82rem;white-space:pre-wrap;word-break:break-word;margin:0;">{{ file_get_contents(base_path('LICENSE')) }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 <script>
