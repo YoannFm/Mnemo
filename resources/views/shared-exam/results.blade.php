@@ -87,10 +87,12 @@
                     </button>
                 </div>
                 <div style="text-align:center;">
+                    @php $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?data=' . urlencode(route('guest.exam.show', $sharedExam->uuid)) . '&size=300x300&margin=8'; @endphp
                     <img src="https://api.qrserver.com/v1/create-qr-code/?data={{ urlencode(route('guest.exam.show', $sharedExam->uuid)) }}&size=90x90&margin=4"
                          alt="QR Code"
-                         style="border-radius:6px;display:block;border:1px solid var(--card-border);"
-                         title="Scanner pour accéder à l'examen">
+                         onclick="document.getElementById('qr-backdrop').style.display='flex'"
+                         style="border-radius:6px;display:block;border:1px solid var(--card-border);cursor:zoom-in;"
+                         title="Cliquer pour agrandir">
                     <div style="font-size:.7rem;color:var(--text-muted);margin-top:.25rem;">QR Code</div>
                 </div>
             </div>
@@ -219,14 +221,40 @@
         </div>
     </div>
 
+    {{-- QR Code zoom --}}
+    <div id="qr-backdrop"
+         onclick="this.style.display='none'"
+         style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;">
+        <div onclick="event.stopPropagation()" style="background:#fff;border-radius:12px;padding:1.5rem;text-align:center;">
+            <img src="{{ $qrUrl }}"
+                 alt="QR Code"
+                 style="display:block;width:280px;height:280px;border-radius:6px;">
+            <p style="margin:.75rem 0 0;font-size:.8rem;color:#555;">
+                {{ route('guest.exam.show', $sharedExam->uuid) }}
+            </p>
+            <button onclick="document.getElementById('qr-backdrop').style.display='none'"
+                    style="margin-top:.75rem;background:none;border:1px solid #ccc;border-radius:6px;padding:.3rem 1rem;cursor:pointer;font-size:.85rem;">
+                Fermer
+            </button>
+        </div>
+    </div>
+
     @push('styles')
     <style>
     @media print {
-        nav, .breadcrumb, .d-flex.gap-2.flex-wrap, .card:has(code) { display: none !important; }
-        .card { border: 1px solid #ccc !important; box-shadow: none !important; }
-        body, .card, .card-body { background: white !important; color: black !important; }
+        nav, .breadcrumb, .d-flex.gap-2.flex-wrap { display: none !important; }
+        #qr-backdrop { display: none !important; }
+        body { background: white !important; color: #111 !important; }
+        .card { background: white !important; border: 1px solid #ccc !important; box-shadow: none !important; }
+        .card-body { background: white !important; }
+        code { color: #0055cc !important; background: #f0f4ff !important; padding: 1px 4px; border-radius: 3px; }
+        .table { color: #111 !important; }
+        .table th, .table td { border-color: #ccc !important; }
+        thead tr { background: #f3f4f6 !important; }
+        .badge { border: 1px solid currentColor; }
+        [style*="color:var(--text-muted)"] { color: #555 !important; }
+        [style*="color:var(--accent)"] { color: #0055cc !important; }
         .collapse { display: table-row !important; }
-        .table { font-size: .8rem !important; }
     }
     </style>
     @endpush
