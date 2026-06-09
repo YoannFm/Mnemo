@@ -188,7 +188,7 @@ class PluginManager
     {
         $baseDir = base_path("plugins/{$slug}/");
         $srcDir  = base_path("plugins/{$slug}/src/");
-        $prefix = 'Plugins\\' . ucfirst($slug) . '\\';
+        $prefix = 'Plugins\\' . str_replace('-', '', ucwords($slug, '-')) . '\\';
         $prefixLen = strlen($prefix);
 
         spl_autoload_register(function (string $class) use ($prefix, $prefixLen, $baseDir, $srcDir) {
