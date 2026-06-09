@@ -121,14 +121,15 @@ class GuestExamController extends Controller
         $isCorrect = QuizGenerator::validateAnswer($question, $validated['answer']);
         $answers   = session('guest_exam_answers', []);
         $answers[$current] = [
-            'item_id'        => $question['item_id'],
-            'question_type'  => $question['question_type'],
-            'user_answer'    => $question['options'][$validated['answer']],
-            'correct_answer' => $question['correct_answer'],
-            'is_correct'     => $isCorrect,
-            'field_question' => $question['field_question'],
-            'field_answer'   => $question['field_answer'],
-            'question_text'  => $question['question_text'],
+            'item_id'          => $question['item_id'],
+            'question_type'    => $question['question_type'],
+            'user_answer'      => $question['options'][$validated['answer']],
+            'correct_answer'   => $question['correct_answer'],
+            'is_correct'       => $isCorrect,
+            'field_question'   => $question['field_question'],
+            'field_answer'     => $question['field_answer'],
+            'question_text'    => $question['question_text'],
+            'question_content' => $question['question_content'] ?? null,
         ];
 
         session([

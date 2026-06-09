@@ -143,9 +143,15 @@ class SharedExamController extends Controller
                 if ($attempt->answers && count($attempt->answers) > 0) {
                     fputcsv($handle, ['', 'Question', 'Réponse donnée', 'Bonne réponse', 'Résultat'], ';');
                     foreach ($attempt->answers as $ans) {
+                        $content = $ans['question_content'] ?? null;
+                        $isPhoto = $content && str_contains((string) $content, '/storage/');
+                        $questionLabel = $isPhoto
+                            ? ($ans['question_text'] ?? '-')
+                            : ($content ?? $ans['question_text'] ?? '-');
+
                         fputcsv($handle, [
                             '',
-                            $ans['question_text'] ?? '-',
+                            $questionLabel,
                             $ans['user_answer'] ?? '-',
                             $ans['correct_answer'] ?? '-',
                             $ans['is_correct'] ? 'Réussi' : 'Échoué',
