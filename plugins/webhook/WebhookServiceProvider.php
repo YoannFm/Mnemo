@@ -2,15 +2,14 @@
 
 namespace Plugins\Webhook;
 
-use Illuminate\Support\ServiceProvider;
+use App\Extensions\Plugin\BasePluginServiceProvider;
 
-class WebhookServiceProvider extends ServiceProvider
+class WebhookServiceProvider extends BasePluginServiceProvider
 {
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
-
-        $this->loadViewsFrom(__DIR__ . '/resources/views', 'webhook');
+        $this->loadMigrations();
+        $this->loadViews();
 
         \App\Models\SharedExamAttempt::updated(function ($attempt) {
             if (
