@@ -5,6 +5,7 @@ namespace App\Extensions\Plugin;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class PluginManager
 {
@@ -59,6 +60,61 @@ class PluginManager
         );
     }
 
+    public function getAvailablePlugins(): Collection
+    {
+        $response = Http::withHeaders($this->cloudHeaders())
+            ->get(config('mnemo.cloud_url') . '/api/v1/plugins');
+
+        if (!$response->successful()) {
+            return collect();
+        }
+
+        $installed = $this->discoverPlugins()->pluck('id')->toArray();
+
+        return collect($response->json())->map(function ($p) use ($installed) {
+            $p = (object) $p;
+            $p->is_installed = in_array($p->slug, $installed);
+            return $p;
+        });
+    }
+
+    public function install(string $slug): void
+    {
+        $response = Http::withHeaders($this->cloudHeaders())
+            ->get(config('mnemo.cloud_url') . "/api/v1/plugins/{$slug}");
+
+        if (!$response->successful()) {
+            throw new \RuntimeException("Plugin introuvable sur MnemoCloud.");
+        }
+
+        $plugin = $response->json();
+        $version = collect($plugin['versions'] ?? [])->first()['version'] ?? null;
+
+        if (!$version) {
+            throw new \RuntimeException("Aucune version disponible pour ce plugin.");
+        }
+
+        $download = Http::withHeaders($this->cloudHeaders())
+            ->get(config('mnemo.cloud_url') . "/api/v1/plugins/{$slug}/download/{$version}");
+
+        if (!$download->successful()) {
+            throw new \RuntimeException("Échec du téléchargement du plugin.");
+        }
+
+        $tmpZip = storage_path("app/plugins/{$slug}-{$version}.zip");
+        $this->files->ensureDirectoryExists(storage_path('app/plugins'));
+        $this->files->put($tmpZip, $download->body());
+
+        $archive = new \ZipArchive();
+        if ($archive->open($tmpZip) !== true) {
+            throw new \RuntimeException("Impossible d'ouvrir l'archive du plugin.");
+        }
+
+        $archive->extractTo(base_path("plugins/{$slug}"));
+        $archive->close();
+        $this->files->delete($tmpZip);
+    }
+
     public function delete(string $slug): void
     {
         $path = base_path("plugins/{$slug}");
@@ -66,6 +122,14 @@ class PluginManager
             $this->files->deleteDirectory($path);
         }
         DB::table('plugins')->where('slug', $slug)->delete();
+    }
+
+    protected function cloudHeaders(): array
+    {
+        return [
+            'X-Site-Key'      => setting('site_key', ''),
+            'X-Mnemo-Version' => \App\Mnemo::version(),
+        ];
     }
 
     public function isEnabled(string $slug): bool
