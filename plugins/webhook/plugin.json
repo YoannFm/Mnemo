@@ -1,0 +1,8 @@
+{
+    "id": "webhook",
+    "name": "Webhook",
+    "version": "1.0.0",
+    "description": "Envoie les résultats d'examens vers une URL externe (Google Sheets, Zapier, Make, etc.).",
+    "author": "YoannFM",
+    "provider": "Plugins\\Webhook\\WebhookServiceProvider"
+}
