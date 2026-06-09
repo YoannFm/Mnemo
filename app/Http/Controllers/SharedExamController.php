@@ -9,6 +9,7 @@ use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -273,5 +274,19 @@ class SharedExamController extends Controller
         }
 
         return redirect()->back()->with('success', $sent > 0 ? "{$sent} résultat(s) envoyé(s)." : 'Tous les résultats ont déjà été envoyés.');
+    }
+
+    public function exportPdf(SharedExam $sharedExam)
+    {
+        if ($sharedExam->user_id !== Auth::id()) abort(403);
+
+        $sharedExam->load('module');
+        $attempts = $sharedExam->attempts()->orderBy('score', 'desc')->get();
+        $label    = $sharedExam->label ?? 'examen';
+
+        $pdf = Pdf::loadView('shared-exam.pdf', compact('sharedExam', 'attempts'))
+                  ->setPaper('a4', 'portrait');
+
+        return $pdf->download('resultats-' . Str::slug($label) . '.pdf');
     }
 }

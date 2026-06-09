@@ -42,6 +42,12 @@
             <a href="{{ route('shared-exam.export-excel', $sharedExam) }}" class="btn btn-sm btn-outline-success">
                 <i class="bi bi-file-earmark-excel me-1"></i>Excel
             </a>
+            <a href="{{ route('shared-exam.export-pdf', $sharedExam) }}" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+            </a>
+            <button type="button" onclick="window.print()" class="btn btn-sm" style="border:1px solid var(--card-border);color:var(--text-muted);">
+                <i class="bi bi-printer me-1"></i>Imprimer
+            </button>
             {{-- Envoyer tous les résultats --}}
             <form method="POST" action="{{ route('shared-exam.send-all-results', $sharedExam) }}">
                 @csrf
@@ -212,5 +218,17 @@
             @endif
         </div>
     </div>
+
+    @push('styles')
+    <style>
+    @media print {
+        nav, .breadcrumb, .d-flex.gap-2.flex-wrap, .card:has(code) { display: none !important; }
+        .card { border: 1px solid #ccc !important; box-shadow: none !important; }
+        body, .card, .card-body { background: white !important; color: black !important; }
+        .collapse { display: table-row !important; }
+        .table { font-size: .8rem !important; }
+    }
+    </style>
+    @endpush
 
 </x-app-layout>

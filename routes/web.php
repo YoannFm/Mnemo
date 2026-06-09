@@ -181,6 +181,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::get('/shared-exam/{sharedExam}/export-grades', [SharedExamController::class, 'exportGrades'])->name('shared-exam.export-grades');
     Route::get('/shared-exam/{sharedExam}/export', [SharedExamController::class, 'export'])->name('shared-exam.export');
     Route::get('/shared-exam/{sharedExam}/export-excel', [SharedExamController::class, 'exportExcel'])->name('shared-exam.export-excel');
+    Route::get('/shared-exam/{sharedExam}/export-pdf', [SharedExamController::class, 'exportPdf'])->name('shared-exam.export-pdf');
 
     // ─── Groupes / classes ───
     Route::get('/groupes', [\App\Http\Controllers\GroupController::class, 'index'])->name('groups.index');
