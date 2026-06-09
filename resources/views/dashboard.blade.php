@@ -159,4 +159,6 @@
         {!! $widget !!}
     @endforeach
 
+    @includeIf('onboarding::modal')
+
 </x-app-layout>

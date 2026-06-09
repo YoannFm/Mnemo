@@ -1,0 +1,8 @@
+{
+    "id": "onboarding",
+    "name": "Onboarding",
+    "version": "1.0.0",
+    "description": "Affiche un guide de bienvenue aux nouveaux utilisateurs pour les aider à démarrer.",
+    "author": "YoannFM",
+    "provider": "Plugins\\Onboarding\\OnboardingServiceProvider"
+}
