@@ -85,7 +85,11 @@
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body" style="font-size:.875rem;color:var(--text-muted);">
-                            {!! setting('registration_conditions') !!}
+                            @php
+                                $terms = setting('registration_conditions');
+                                $terms = preg_replace('/\[([^\]]+)\]\(([^)]+)\)/', '<a href="$2" target="_blank" style="color:var(--accent);">$1</a>', $terms);
+                            @endphp
+                            {!! $terms !!}
                         </div>
                     </div>
                 </div>

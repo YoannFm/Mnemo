@@ -447,7 +447,11 @@
         #main-footer {
             border-top: 1px solid var(--card-border);
             padding: 1.25rem 1.5rem;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: .5rem;
             font-size: .78rem;
             color: var(--text-muted);
             background: var(--header-bg);
@@ -706,10 +710,10 @@
     </div>
 
     <footer id="main-footer">
-        @if (setting('site_description'))
-            <div style="margin-bottom:.5rem;color:var(--text-muted);font-size:.8rem;">{{ setting('site_description') }}</div>
-        @endif
         <div>© Copyright - Tout droit réservé</div>
+        @if (setting('site_description'))
+            <div>{{ strip_tags(setting('site_description')) }}</div>
+        @endif
         <div>Fait avec ♥️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
     </footer>
 
