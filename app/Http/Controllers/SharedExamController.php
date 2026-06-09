@@ -163,20 +163,14 @@ class SharedExamController extends Controller
             $handle = fopen('php://output', 'w');
             fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM UTF-8
 
-            fputcsv($handle, ['Participant', 'Score', 'Note /20', '%', 'Date'], ';');
+            fputcsv($handle, ['Participant', 'Score', 'Note /20', '%', 'Date', 'Question', 'Réponse donnée', 'Bonne réponse', 'Résultat'], ';');
 
             foreach ($attempts as $attempt) {
-                fputcsv($handle, [
-                    $attempt->guest_name,
-                    $attempt->score . '/' . $attempt->total,
-                    $attempt->grade,
-                    $attempt->percentage . '%',
-                    $attempt->finished_at ? $attempt->finished_at->format('d/m/Y H:i') : '-',
-                ], ';');
+                $answers = $attempt->answers ?? [];
+                $first   = true;
 
-                if ($attempt->answers && count($attempt->answers) > 0) {
-                    fputcsv($handle, ['', 'Question', 'Réponse donnée', 'Bonne réponse', 'Résultat'], ';');
-                    foreach ($attempt->answers as $ans) {
+                if (count($answers) > 0) {
+                    foreach ($answers as $ans) {
                         $content = $ans['question_content'] ?? null;
                         $isPhoto = $content && str_contains((string) $content, '/storage/');
                         $questionLabel = $isPhoto
@@ -184,15 +178,31 @@ class SharedExamController extends Controller
                             : ($content ?? $ans['question_text'] ?? '-');
 
                         fputcsv($handle, [
-                            '',
+                            $first ? $attempt->guest_name : '',
+                            $first ? $attempt->score . '/' . $attempt->total : '',
+                            $first ? $attempt->grade : '',
+                            $first ? $attempt->percentage . '%' : '',
+                            $first ? ($attempt->finished_at ? $attempt->finished_at->format('d/m/Y H:i') : '-') : '',
                             $questionLabel,
                             $ans['user_answer'] ?? '-',
                             $ans['correct_answer'] ?? '-',
                             $ans['is_correct'] ? 'Réussi' : 'Échoué',
                         ], ';');
+
+                        $first = false;
                     }
-                    fputcsv($handle, [], ';');
+                } else {
+                    fputcsv($handle, [
+                        $attempt->guest_name,
+                        $attempt->score . '/' . $attempt->total,
+                        $attempt->grade,
+                        $attempt->percentage . '%',
+                        $attempt->finished_at ? $attempt->finished_at->format('d/m/Y H:i') : '-',
+                        '-', '-', '-', '-',
+                    ], ';');
                 }
+
+                fputcsv($handle, [], ';');
             }
 
             fclose($handle);

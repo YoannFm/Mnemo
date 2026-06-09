@@ -178,7 +178,6 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::post('/shared-exam/{sharedExam}/attempt/{attempt}/send-results', [SharedExamController::class, 'sendResults'])->name('shared-exam.send-results');
     Route::post('/shared-exam/{sharedExam}/send-all-results', [SharedExamController::class, 'sendAllResults'])->name('shared-exam.send-all-results');
     Route::get('/shared-exam/{sharedExam}/export', [SharedExamController::class, 'export'])->name('shared-exam.export');
-    Route::get('/shared-exam/{sharedExam}/export-grades', [SharedExamController::class, 'exportGrades'])->name('shared-exam.export-grades');
 });
 
 // ─── Sitemap XML dynamique ───
