@@ -177,6 +177,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::delete('/shared-exam/{sharedExam}/attempt/{attempt}', [SharedExamController::class, 'resetAttempt'])->name('shared-exam.reset-attempt');
     Route::post('/shared-exam/{sharedExam}/attempt/{attempt}/send-results', [SharedExamController::class, 'sendResults'])->name('shared-exam.send-results');
     Route::post('/shared-exam/{sharedExam}/send-all-results', [SharedExamController::class, 'sendAllResults'])->name('shared-exam.send-all-results');
+    Route::get('/shared-exam/{sharedExam}/export', [SharedExamController::class, 'export'])->name('shared-exam.export');
 });
 
 // ─── Sitemap XML dynamique ───

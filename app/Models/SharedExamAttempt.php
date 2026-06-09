@@ -42,4 +42,13 @@ class SharedExamAttempt extends Model
 
         return (int) round(($this->score / $this->total) * 100);
     }
+
+    public function getGradeAttribute(): string
+    {
+        if ($this->total === 0) {
+            return '0/20';
+        }
+
+        return round(($this->score / $this->total) * 20, 2) . '/20';
+    }
 }

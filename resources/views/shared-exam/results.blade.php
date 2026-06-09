@@ -32,6 +32,10 @@
             </div>
         </div>
         <div class="d-flex gap-2 flex-wrap">
+            {{-- Exporter CSV --}}
+            <a href="{{ route('shared-exam.export', $sharedExam) }}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-download me-1"></i>Exporter CSV
+            </a>
             {{-- Envoyer tous les résultats --}}
             <form method="POST" action="{{ route('shared-exam.send-all-results', $sharedExam) }}">
                 @csrf
@@ -92,6 +96,7 @@
                             <tr style="color:var(--text-muted);">
                                 <th style="padding:.75rem 1.25rem;">Participant</th>
                                 <th>Score</th>
+                                <th>/20</th>
                                 <th>%</th>
                                 <th>Date</th>
                                 <th>Résultats</th>
@@ -103,6 +108,7 @@
                                 <tr>
                                     <td style="padding:.75rem 1.25rem;font-weight:500;">{{ $attempt->guest_name }}</td>
                                     <td>{{ $attempt->score }} / {{ $attempt->total }}</td>
+                                    <td style="color:var(--text-muted);">{{ $attempt->grade }}</td>
                                     <td>
                                         @php $pct = $attempt->percentage; @endphp
                                         @if ($pct >= 70)
@@ -155,7 +161,7 @@
                                     </td>
                                 </tr>
                                 <tr class="collapse" id="detail-{{ $attempt->id }}">
-                                    <td colspan="6" style="padding:0 1.25rem 1rem;background:var(--card-bg);">
+                                    <td colspan="7" style="padding:0 1.25rem 1rem;background:var(--card-bg);">
                                         <div style="padding-top:.75rem;">
                                             @if ($attempt->answers && count($attempt->answers) > 0)
                                                 @foreach ($attempt->answers as $i => $ans)

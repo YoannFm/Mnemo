@@ -110,6 +110,57 @@ class SharedExamController extends Controller
         return redirect()->back()->with('success', 'Résultats envoyés à ' . $attempt->guest_name . '.');
     }
 
+    public function export(SharedExam $sharedExam)
+    {
+        if ($sharedExam->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $attempts = $sharedExam->attempts()->orderBy('created_at', 'desc')->get();
+        $label    = $sharedExam->label ?? 'examen';
+        $filename = 'resultats-' . Str::slug($label) . '.csv';
+
+        $headers = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function () use ($attempts, $sharedExam) {
+            $handle = fopen('php://output', 'w');
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM UTF-8
+
+            fputcsv($handle, ['Participant', 'Score', 'Note /20', '%', 'Date'], ';');
+
+            foreach ($attempts as $attempt) {
+                fputcsv($handle, [
+                    $attempt->guest_name,
+                    $attempt->score . '/' . $attempt->total,
+                    $attempt->grade,
+                    $attempt->percentage . '%',
+                    $attempt->finished_at ? $attempt->finished_at->format('d/m/Y H:i') : '-',
+                ], ';');
+
+                if ($attempt->answers && count($attempt->answers) > 0) {
+                    fputcsv($handle, ['', 'Question', 'Réponse donnée', 'Bonne réponse', 'Résultat'], ';');
+                    foreach ($attempt->answers as $ans) {
+                        fputcsv($handle, [
+                            '',
+                            $ans['question_text'] ?? '-',
+                            $ans['user_answer'] ?? '-',
+                            $ans['correct_answer'] ?? '-',
+                            $ans['is_correct'] ? 'Réussi' : 'Échoué',
+                        ], ';');
+                    }
+                    fputcsv($handle, [], ';');
+                }
+            }
+
+            fclose($handle);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
     public function sendAllResults(SharedExam $sharedExam)
     {
         if ($sharedExam->user_id !== Auth::id()) {
