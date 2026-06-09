@@ -1,8 +1,0 @@
-{
-    "id": "quizlet-import",
-    "name": "Import Quizlet",
-    "version": "1.0.0",
-    "description": "Importe un set Quizlet (copier-coller du texte exporté) comme module Mnemo.",
-    "author": "YoannFM",
-    "provider": "Plugins\\QuizletImport\\QuizletImportServiceProvider"
-}
