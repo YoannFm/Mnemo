@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-06-09 (suite)
+
+### Ajouts
+
+- **Raccourcis clavier Anki** : touches `1` `2` `3` `4` pour répondre, `Espace` pour passer à la question suivante
+- **Révision rapide** : bouton sur la page module pour relancer Anki uniquement sur les items ratés non maîtrisés
+- **Statistiques par item** : badge Maîtrisé / En cours / erreurs sur chaque carte de module
+- **Profil enrichi** : 6 widgets de stats (maîtrisés, pratiqués, tests, score moyen, meilleure série, modules)
+- **Impression résultats** : bouton Imprimer sur les pages résultat d'examen et résultats partagés, CSS adapté
+- **Export PDF** : export des résultats d'examen partagé en fichier `.pdf` (tableau des notes)
+- **QR Code** : affiché sur la page résultats d'examen partagé, zoom au clic
+- **Classement anonymisé** : l'élève voit sa note /20 et son classement à la fin d'un examen partagé
+- **Date limite par défaut** : paramètre admin pour pré-remplir la date d'expiration des examens
+- **Groupes / Classes** : création de groupes, ajout et retrait de membres par e-mail, navigation dédiée `/groupes`
+- **Graphiques admin** : dashboard avec 2 graphiques sur 30 jours (tests/jour, inscriptions/jour)
+
+### Corrections
+
+- **Mode Test** : sélection exclusive des réponses (reset visuel des autres options au clic)
+- **Mode Test** : mise à jour de la progression par item (`fail_count`, `streak`) pour activer la révision rapide
+
+---
+
 ## 2026-06-09
 
 ### Ajouts
