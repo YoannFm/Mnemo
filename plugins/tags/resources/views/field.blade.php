@@ -1,5 +1,5 @@
 {{-- Tags field for module create/edit forms --}}
-@if (isset($allTags) && $allTags->isNotEmpty())
+@if (isset($allTags))
 <div class="mb-4 p-3" style="border:1px solid var(--card-border);border-radius:8px;">
     <label class="form-label fw-semibold" style="font-size:.875rem;">
         <i class="bi bi-tags me-1" style="color:var(--accent);"></i>
@@ -30,13 +30,13 @@
             </div>
         @endif
 
-        {{-- Add a new tag --}}
+        {{-- Add an existing tag --}}
         @php $availableTags = $allTags->whereNotIn('id', $moduleTags->pluck('id')); @endphp
         @if ($availableTags->isNotEmpty())
-            <form method="POST" action="{{ route('modules.tags.attach', $module) }}" class="d-flex gap-2 align-items-center">
+            <form method="POST" action="{{ route('modules.tags.attach', $module) }}" class="d-flex gap-2 align-items-center mb-2">
                 @csrf
                 <select name="tag_id" class="form-select form-select-sm" style="max-width:220px;">
-                    <option value="">— Ajouter un tag —</option>
+                    <option value="">— Ajouter un tag existant —</option>
                     @foreach ($availableTags as $tag)
                         <option value="{{ $tag->id }}">{{ $tag->name }}</option>
                     @endforeach
@@ -46,6 +46,14 @@
                 </button>
             </form>
         @endif
+        {{-- Create a new tag --}}
+        <div class="d-flex gap-2 align-items-center" id="new-tag-form-{{ $module->id ?? 'edit' }}" style="margin-top:.25rem;">
+            <input type="text" id="new-tag-name-{{ $module->id ?? 'edit' }}" class="form-control form-control-sm" placeholder="Nouveau tag..." style="max-width:180px;" maxlength="50">
+            <input type="color" id="new-tag-color-{{ $module->id ?? 'edit' }}" value="#6b7280" style="width:36px;height:31px;border:1px solid var(--card-border);border-radius:6px;padding:2px;background:var(--card-bg);cursor:pointer;">
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="tagsCreateNew('{{ $module->id ?? 'edit' }}', '{{ route('tags.store') }}', '{{ route('modules.tags.attach', $module) }}')">
+                <i class="bi bi-plus-circle me-1"></i>Créer
+            </button>
+        </div>
 
     @else
         {{-- Create mode: select tags to attach (submitted as hidden inputs via JS) --}}
@@ -115,6 +123,30 @@
             };
         })();
         </script>
+    <script>
+    window.tagsCreateNew = function(moduleKey, storeUrl, attachUrl) {
+        var nameInput = document.getElementById('new-tag-name-' + moduleKey);
+        var colorInput = document.getElementById('new-tag-color-' + moduleKey);
+        var name = nameInput.value.trim();
+        if (!name) return;
+        var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        fetch(storeUrl, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json'},
+            body: JSON.stringify({name: name, color: colorInput.value})
+        }).then(function(r) { return r.json(); }).then(function(tag) {
+            // Attach tag to module
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = attachUrl;
+            var t = document.createElement('input'); t.type='hidden'; t.name='_token'; t.value=token;
+            var id = document.createElement('input'); id.type='hidden'; id.name='tag_id'; id.value=tag.id;
+            form.appendChild(t); form.appendChild(id);
+            document.body.appendChild(form);
+            form.submit();
+        }).catch(function() { alert('Ce tag existe peut-être déjà.'); });
+    };
+    </script>
     @endif
 </div>
 @endif
