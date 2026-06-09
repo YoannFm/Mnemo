@@ -23,6 +23,16 @@ class PluginController extends Controller
             $available = collect();
         }
 
+        // Build a map of slug => latest_version from cloud data
+        $cloudVersions = $available->keyBy('slug')->map(fn ($p) => $p->latest_version ?? null);
+
+        $installed = $installed->map(function ($plugin) use ($cloudVersions) {
+            $cloud = $cloudVersions->get($plugin->id);
+            $plugin->has_update = $cloud && version_compare($cloud, $plugin->version ?? '0', '>');
+            $plugin->latest_version = $cloud;
+            return $plugin;
+        });
+
         return view('admin.plugins.index', compact('installed', 'available'));
     }
 
@@ -45,6 +55,11 @@ class PluginController extends Controller
 
     public function install(string $slug)
     {
+        $installed = $this->plugins->discoverPlugins()->pluck('id')->toArray();
+        if (in_array($slug, $installed)) {
+            return back()->with('error', 'Ce plugin est déjà installé.');
+        }
+
         try {
             $this->plugins->install($slug);
             return back()->with('success', 'Plugin installé. Vous pouvez maintenant l\'activer.');

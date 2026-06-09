@@ -7,7 +7,7 @@
 
     <title>{{ isset($pageTitle) ? $pageTitle . ' - Mnémo' : 'Mnémo - Apprenez par la répétition espacée' }}</title>
 
-    <meta name="description" content="{{ isset($metaDescription) ? $metaDescription : 'Mnémo est une application de mémorisation par répétition espacée. Créez vos modules, apprenez avec le mode Anki ou testez vos connaissances.' }}">
+    <meta name="description" content="{{ isset($metaDescription) ? $metaDescription : setting('site_description', 'Mnémo est une application de mémorisation par répétition espacée.') }}">
     <meta name="keywords" content="mémorisation, répétition espacée, anki, flashcard, apprentissage, quiz, mnémo">
     <meta name="author" content="YoannFM">
     <meta name="robots" content="index, follow">
@@ -446,11 +446,21 @@
         /* ── Footer ── */
         #main-footer {
             border-top: 1px solid var(--card-border);
-            padding: 1.25rem 1.5rem;
-            text-align: center;
+            padding: 1.5rem 1.5rem 1.25rem;
             font-size: .78rem;
             color: var(--text-muted);
             background: var(--header-bg);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: end;
+            gap: .75rem;
+        }
+        #main-footer .footer-left { grid-column: 1; }
+        #main-footer .footer-center { grid-column: 2; text-align: center; }
+        @media (max-width: 768px) {
+            #main-footer { grid-template-columns: 1fr; }
+            #main-footer .footer-left { grid-column: 1; order: 2; }
+            #main-footer .footer-center { grid-column: 1; order: 1; }
         }
 
         #main-footer a {
@@ -531,6 +541,9 @@
             <a href="{{ route('progress.index') }}" class="mobile-nav-link {{ request()->routeIs('progress.*') ? 'active' : '' }}">
                 <i class="bi bi-bar-chart-line"></i> Progression
             </a>
+            <a href="{{ route('shared-exam.index') }}" class="mobile-nav-link {{ request()->routeIs('shared-exam.*') ? 'active' : '' }}">
+                <i class="bi bi-share"></i> Examens
+            </a>
         @endif
     </nav>
 
@@ -603,6 +616,9 @@
                     <a href="{{ route('progress.index') }}" class="nav-link-custom {{ request()->routeIs('progress.*') ? 'active' : '' }}">
                         <i class="bi bi-bar-chart-line"></i> Progression
                     </a>
+                    <a href="{{ route('shared-exam.index') }}" class="nav-link-custom {{ request()->routeIs('shared-exam.*') ? 'active' : '' }}">
+                        <i class="bi bi-share"></i> Examens
+                    </a>
                 @endif
             </div>
 
@@ -644,6 +660,7 @@
                             </a>
                         </li>
                         <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person"></i> Mon profil</a></li>
+                        <li><a class="dropdown-item" href="{{ route('my-exam-results') }}"><i class="bi bi-clipboard-check"></i> Mes résultats</a></li>
                         @if(Auth::user()->isAdmin())
                         <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}" style="color:var(--accent);"><i class="bi bi-shield-check"></i> Administration</a></li>
                         @endif
@@ -699,10 +716,29 @@
         {{ $slot }}
     </div>
 
+
     <footer id="main-footer">
-        <div>© Copyright - Tout droit réservé</div>
-        <div>Fait avec ♥️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
+        <div class="footer-left"></div>
+        <div class="footer-center">
+            <div>© 2026 YoannFM · <a href="#" data-bs-toggle="modal" data-bs-target="#licenseModal">Licence MIT</a></div>
+            <div style="margin-top:.2rem;">Fait avec ❤️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
+        </div>
     </footer>
+
+    {{-- Modal Licence MIT --}}
+    <div class="modal fade" id="licenseModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-file-text me-2"></i>Licence MIT</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <pre style="font-size:.82rem;white-space:pre-wrap;word-break:break-word;margin:0;">{{ file_get_contents(base_path('LICENSE')) }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </div>
 

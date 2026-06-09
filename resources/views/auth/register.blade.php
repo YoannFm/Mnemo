@@ -68,6 +68,22 @@
                    placeholder="Répétez le mot de passe">
         </div>
 
+        {{-- Conditions d'inscription --}}
+        @if (setting('registration_conditions'))
+            @php
+                $terms = setting('registration_conditions');
+                $terms = strip_tags($terms);
+                $terms = html_entity_decode($terms, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $terms = preg_replace('/\[([^\]]+)\]\(([^)]+)\)/', '<a href="$2" target="_blank" style="color:var(--accent);">$1</a>', $terms);
+            @endphp
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="accept_terms" required>
+                <label class="form-check-label" for="accept_terms" style="font-size:.85rem;">
+                    {!! $terms !!}
+                </label>
+            </div>
+        @endif
+
         {{-- Bouton d'inscription --}}
         <button type="submit" class="btn btn-primary w-100 mb-3">
             Créer mon compte

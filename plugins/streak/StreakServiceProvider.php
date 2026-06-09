@@ -25,7 +25,6 @@ class StreakServiceProvider extends BasePluginServiceProvider
             );
 
             $html = view('streak::widget', ['userStreak' => $streak])->render();
-
             $widgets = $view->getData()['pluginWidgets'] ?? [];
             $view->with('pluginWidgets', array_merge($widgets, [$html]));
         });

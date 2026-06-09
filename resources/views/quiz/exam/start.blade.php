@@ -59,13 +59,75 @@
                     </div>
                 </div>
 
-                <div class="d-flex gap-2">
-                    <a href="{{ route('modules.show', $module) }}" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);">Annuler</a>
-                    <button type="submit" class="btn btn-primary" id="start-btn">
-                        <i class="bi bi-pencil-square me-1"></i>Commencer l'examen
-                    </button>
-                </div>
             </form>
+
+            @if (Auth::id() === $module->owner_id)
+            <div class="card mt-4">
+                <div class="card-body p-3">
+                    <h6 class="mb-3" style="font-size:.875rem;font-weight:600;">
+                        <i class="bi bi-share me-1" style="color:var(--accent);"></i>Générer un lien d'examen partagé
+                    </h6>
+                    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;">
+                        Les invités passent l'examen sans compte. Seul toi vois leurs résultats.
+                    </p>
+
+                    <form method="POST" action="{{ route('shared-exam.create', $module) }}">
+                        @csrf
+                        <input type="hidden" name="mode" value="random">
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:.8rem;color:var(--text-muted);">Étiquette <span style="opacity:.6;">(optionnel)</span></label>
+                                <input type="text" class="form-control form-control-sm" name="label" placeholder="Ex: Classe terminale" maxlength="255">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:.8rem;color:var(--text-muted);">Expiration <span style="opacity:.6;">(optionnel)</span></label>
+                                <input type="datetime-local" class="form-control form-control-sm" name="expires_at">
+                            </div>
+                        </div>
+
+                        <button type="submit" id="share-submit-btn" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-link-45deg me-1"></i>Générer le lien
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            @if (isset($sharedExams) && $sharedExams->isNotEmpty())
+            <div class="card mt-3">
+                <div class="card-body p-0">
+                    <div style="padding:.6rem 1rem;border-bottom:1px solid var(--card-border);">
+                        <span style="font-size:.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Liens existants</span>
+                    </div>
+                    <ul class="list-unstyled mb-0">
+                        @foreach ($sharedExams as $se)
+                        <li style="padding:.6rem 1rem;border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;">
+                            <div style="font-size:.83rem;">
+                                <span style="font-weight:500;">{{ $se->label ?? 'Sans étiquette' }}</span>
+                                <span style="color:var(--text-muted);font-size:.78rem;margin-left:.4rem;">&middot; {{ $se->attempts_count }} participant{{ $se->attempts_count > 1 ? 's' : '' }}</span>
+                                @if ($se->isExpired())
+                                    <span style="background:rgba(239,68,68,.12);color:#ef4444;font-size:.72rem;padding:.1rem .4rem;border-radius:.25rem;margin-left:.3rem;">Expiré</span>
+                                @endif
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" onclick="copyLink('{{ route('guest.exam.show', $se->uuid) }}')" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);font-size:.78rem;">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <a href="{{ route('shared-exam.results', $se) }}" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);font-size:.78rem;">
+                                    <i class="bi bi-bar-chart me-1"></i>Résultats
+                                </a>
+                                <form method="POST" action="{{ route('shared-exam.destroy', $se) }}" onsubmit="return confirm('Supprimer ce lien ?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm" style="color:#ef4444;border:1px solid var(--card-border);font-size:.78rem;"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+            @endif
+            @endif
         </div>
     </div>
 
@@ -117,5 +179,14 @@
     inputField.addEventListener('change', updateMode);
     outputField.addEventListener('change', updateMode);
     updateMode();
+
+    function copyLink(url) {
+        navigator.clipboard.writeText(url).then(function() {
+            var btn = event.currentTarget;
+            var icon = btn.querySelector('i');
+            icon.className = 'bi bi-check2';
+            setTimeout(function() { icon.className = 'bi bi-clipboard'; }, 2000);
+        });
+    }
     </script>
 </x-app-layout>

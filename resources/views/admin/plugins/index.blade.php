@@ -52,6 +52,11 @@
                                     @else
                                         <span class="badge bg-danger">Désactivé</span>
                                     @endif
+                                    @if (!empty($plugin->has_update))
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-arrow-up-circle me-1"></i>v{{ $plugin->latest_version }} disponible
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                             <div class="d-flex gap-2">
@@ -72,8 +77,9 @@
                                 @endif
                                 <form method="POST" action="{{ route('admin.plugins.update', $plugin->id) }}">
                                     @csrf
-                                    <button class="btn btn-sm btn-outline-info" title="Mettre à jour">
-                                        <i class="bi bi-arrow-up-circle"></i>
+                                    <button class="btn btn-sm {{ !empty($plugin->has_update) ? 'btn-warning' : 'btn-outline-info' }}" title="Mettre à jour">
+                                        <i class="bi bi-arrow-up-circle{{ !empty($plugin->has_update) ? '-fill' : '' }} me-1"></i>
+                                        {{ !empty($plugin->has_update) ? 'Mettre à jour' : 'Réinstaller' }}
                                     </button>
                                 </form>
                                 <form method="POST" action="{{ route('admin.plugins.delete', $plugin->id) }}"
@@ -109,14 +115,15 @@
                                 <div class="fw-semibold">{{ $plugin->name }}</div>
                                 <div class="text-muted small">{{ $plugin->description ?? '' }}</div>
                                 <div class="mt-1">
-                                    <span class="badge bg-secondary">v{{ $plugin->latest_version ?? '—' }}</span>
+                                    <span class="badge bg-secondary">v{{ $plugin->latest_version ?? '-' }}</span>
                                     @if ($plugin->is_installed)
                                         <span class="badge bg-success">Installé</span>
                                     @endif
                                 </div>
                             </div>
                             <div>
-                                @if (!$plugin->is_installed)
+                                @php $alreadyInstalled = $plugin->is_installed || $installed->contains('id', $plugin->slug); @endphp
+                                @if (!$alreadyInstalled)
                                     <form method="POST" action="{{ route('admin.plugins.install', $plugin->slug) }}">
                                         @csrf
                                         <button class="btn btn-sm btn-primary">

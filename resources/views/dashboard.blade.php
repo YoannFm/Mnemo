@@ -6,7 +6,7 @@
             Bonjour, <span style="color:var(--accent);">{{ Auth::user()->name }}</span>
         </h3>
         <p style="color:var(--text-muted);font-size:.9rem;margin:0;">
-            Prêt à mémoriser quelque chose aujourd'hui ?
+            {!! setting('home_message', 'Prêt à mémoriser quelque chose aujourd\'hui ?') !!}
         </p>
     </div>
 

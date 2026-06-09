@@ -128,9 +128,13 @@ class ModuleController extends Controller
                 : [];
         }
 
+        $sharedExams = Auth::id() === $module->owner_id
+            ? $module->sharedExams()->withCount('attempts')->latest()->get()
+            : collect();
+
         return view('modules.show', compact(
             'module', 'items', 'avgRating', 'ratingCount', 'userRating', 'isMuted',
-            'allRatingsWithData', 'ratingReactions', 'userRatingReacts'
+            'allRatingsWithData', 'ratingReactions', 'userRatingReacts', 'sharedExams'
         ));
     }
 
