@@ -16,6 +16,8 @@ class QuizletImportServiceProvider extends BasePluginServiceProvider
                 ->name('quizlet-import.show');
             Route::post('/quizlet-import', [Controllers\QuizletImportController::class, 'import'])
                 ->name('quizlet-import.import');
+            Route::post('/quizlet-import/url', [Controllers\QuizletImportController::class, 'importFromUrl'])
+                ->name('quizlet-import.url');
         });
 
         $this->registerUserNavigation();
