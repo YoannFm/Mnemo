@@ -16,14 +16,9 @@
                         Merci d'avoir participé. Les résultats détaillés seront consultés par votre enseignant.
                     </p>
                 </div>
-                <div class="d-flex gap-2 justify-content-center">
-                    <a href="{{ route('my-exam-results') }}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-clipboard-check me-1"></i>Voir mes résultats
-                    </a>
-                    <a href="{{ route('dashboard') }}" class="btn btn-sm" style="border:1px solid var(--card-border);color:var(--text-muted);">
-                        <i class="bi bi-house me-1"></i>Accueil
-                    </a>
-                </div>
+                <a href="{{ route('dashboard') }}" class="btn btn-sm" style="border:1px solid var(--card-border);color:var(--text-muted);">
+                    <i class="bi bi-house me-1"></i>Retour à l'accueil
+                </a>
             </div>
         </div>
     </div>

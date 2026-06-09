@@ -12,6 +12,7 @@ class MyExamResultsController extends Controller
         $attempts = SharedExamAttempt::where('user_id', Auth::id())
             ->with('sharedExam.module', 'sharedExam.user')
             ->whereNotNull('finished_at')
+            ->whereNotNull('results_sent_at')
             ->latest('finished_at')
             ->get();
 
