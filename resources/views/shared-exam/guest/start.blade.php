@@ -45,7 +45,9 @@
                     <p style="color:var(--text-muted);font-size:.85rem;text-align:center;">
                         Tentative {{ $attemptsDone + 1 }} / {{ $sharedExam->max_attempts }}
                     </p>
-                    <button type="submit" class="btn btn-primary w-100">
+                    <form method="POST" action="{{ route('guest.exam.start', $sharedExam->uuid) }}">
+                        @csrf
+                        <button type="submit" class="btn btn-primary w-100">
                             <i class="bi bi-play-fill me-1"></i>Commencer l'examen
                         </button>
                     </form>
