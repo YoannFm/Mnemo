@@ -715,18 +715,6 @@
         {{ $slot }}
     </div>
 
-    @if (setting('site_description'))
-        <div style="padding:2.5rem 1.5rem;max-width:1200px;width:100%;border-top:1px solid var(--card-border);">
-            <div style="max-width:360px;">
-                <div style="font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:.5rem;">
-                    {{ setting('site_name', 'Mnémo') }}
-                </div>
-                <div style="font-size:.875rem;font-weight:300;color:var(--text-muted);line-height:1.8;font-style:italic;">
-                    {{ html_entity_decode(strip_tags(setting('site_description')), ENT_QUOTES | ENT_HTML5, 'UTF-8') }}
-                </div>
-            </div>
-        </div>
-    @endif
 
     <footer id="main-footer">
         <div class="footer-left"></div>
