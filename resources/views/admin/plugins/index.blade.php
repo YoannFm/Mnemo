@@ -116,7 +116,8 @@
                                 </div>
                             </div>
                             <div>
-                                @if (!$plugin->is_installed)
+                                @php $alreadyInstalled = $plugin->is_installed || $installed->contains('id', $plugin->slug); @endphp
+                                @if (!$alreadyInstalled)
                                     <form method="POST" action="{{ route('admin.plugins.install', $plugin->slug) }}">
                                         @csrf
                                         <button class="btn btn-sm btn-primary">
