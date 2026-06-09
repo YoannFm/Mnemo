@@ -187,16 +187,21 @@ class PluginManager
     protected function registerAutoloader(string $slug): void
     {
         $baseDir = base_path("plugins/{$slug}/");
+        $srcDir  = base_path("plugins/{$slug}/src/");
         $prefix = 'Plugins\\' . ucfirst($slug) . '\\';
         $prefixLen = strlen($prefix);
 
-        spl_autoload_register(function (string $class) use ($prefix, $prefixLen, $baseDir) {
+        spl_autoload_register(function (string $class) use ($prefix, $prefixLen, $baseDir, $srcDir) {
             if (strncmp($prefix, $class, $prefixLen) !== 0) {
                 return;
             }
-            $file = $baseDir . str_replace('\\', '/', substr($class, $prefixLen)) . '.php';
-            if (file_exists($file)) {
-                require $file;
+            $relative = str_replace('\\', '/', substr($class, $prefixLen)) . '.php';
+            foreach ([$baseDir, $srcDir] as $dir) {
+                $file = $dir . $relative;
+                if (file_exists($file)) {
+                    require $file;
+                    return;
+                }
             }
         });
     }
