@@ -531,6 +531,9 @@
             <a href="{{ route('progress.index') }}" class="mobile-nav-link {{ request()->routeIs('progress.*') ? 'active' : '' }}">
                 <i class="bi bi-bar-chart-line"></i> Progression
             </a>
+            <a href="{{ route('shared-exam.index') }}" class="mobile-nav-link {{ request()->routeIs('shared-exam.*') ? 'active' : '' }}">
+                <i class="bi bi-share"></i> Examens
+            </a>
         @endif
     </nav>
 
@@ -602,6 +605,9 @@
                     </a>
                     <a href="{{ route('progress.index') }}" class="nav-link-custom {{ request()->routeIs('progress.*') ? 'active' : '' }}">
                         <i class="bi bi-bar-chart-line"></i> Progression
+                    </a>
+                    <a href="{{ route('shared-exam.index') }}" class="nav-link-custom {{ request()->routeIs('shared-exam.*') ? 'active' : '' }}">
+                        <i class="bi bi-share"></i> Examens
                     </a>
                 @endif
             </div>
