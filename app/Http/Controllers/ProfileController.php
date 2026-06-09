@@ -45,6 +45,19 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
+    public function updateAccent(Request $request): RedirectResponse
+    {
+        $request->validate(['accent_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/']]);
+        $request->user()->update(['accent_color' => $request->accent_color]);
+        return Redirect::route('profile.edit')->with('status', 'accent-updated');
+    }
+
+    public function resetAccent(Request $request): RedirectResponse
+    {
+        $request->user()->update(['accent_color' => null]);
+        return Redirect::route('profile.edit')->with('status', 'accent-updated');
+    }
+
     /**
      * Supprime complètement le compte utilisateur.
      * Valide le mot de passe avant suppression, déconnecte l'utilisateur et invalidate la session.

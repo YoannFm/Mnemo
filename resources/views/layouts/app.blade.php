@@ -35,9 +35,9 @@
 
     <style>
         :root {
-            --accent: {{ setting('theme_accent', '#EFB702') }};
-            --accent-hover: color-mix(in srgb, {{ setting('theme_accent', '#EFB702') }} 85%, black);
-            --accent-light: color-mix(in srgb, {{ setting('theme_accent', '#EFB702') }} 15%, transparent);
+            --accent: {{ auth()->check() && auth()->user()->accent_color ? auth()->user()->accent_color : setting('theme_accent', '#EFB702') }};
+            --accent-hover: color-mix(in srgb, var(--accent) 85%, black);
+            --accent-light: color-mix(in srgb, var(--accent) 15%, transparent);
             --text-primary: {{ setting('theme_text_color', '#e2e8f0') }};
             --text-muted: #9ca3af;
             --card-bg: {{ setting('theme_card_bg', '#212227') }};
