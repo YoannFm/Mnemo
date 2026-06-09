@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\SharedExam;
 
 /**
  * Modèle représentant un module de mémorisation.
@@ -65,5 +66,10 @@ class Module extends Model
     public function ratings()
     {
         return $this->hasMany(ModuleRating::class);
+    }
+
+    public function sharedExams()
+    {
+        return $this->hasMany(SharedExam::class);
     }
 }

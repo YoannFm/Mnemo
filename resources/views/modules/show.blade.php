@@ -216,6 +216,19 @@
                 <div style="font-weight:600;font-size:.9rem;">Mode Examen</div>
                 <div style="font-size:.75rem;color:var(--text-muted);">Tous les items</div>
             </a>
+            @if (Auth::id() === $module->owner_id)
+            <button type="button"
+                    class="btn btn-outline-info"
+                    style="height:auto;padding:1rem;border-width:2px;"
+                    data-bs-toggle="modal" data-bs-target="#shareExamModal">
+                <div style="font-size:1.5rem;margin-bottom:.25rem;">
+                    <i class="bi bi-share"></i>
+                </div>
+                <div style="font-weight:600;font-size:.9rem;">Partager</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">Lien invité</div>
+            </button>
+            @include('shared-exam.create-modal')
+            @endif
         </div>
     @if ($items->total() >= 4)
         @auth
@@ -244,6 +257,48 @@
                 Il faut au moins <strong>4 items</strong> pour s'entraîner.
                 Encore {{ 4 - $items->total() }} à ajouter !
             </span>
+        </div>
+    @endif
+
+    {{-- Liens d'examen partagé (propriétaire uniquement) --}}
+    @if (Auth::id() === $module->owner_id && isset($sharedExams) && $sharedExams->isNotEmpty())
+        <div class="card mb-4">
+            <div class="card-body p-0">
+                <div style="padding:.75rem 1.25rem;border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;">
+                    <h6 class="mb-0" style="font-size:.875rem;">
+                        <i class="bi bi-share me-1"></i>Examens partagés
+                    </h6>
+                </div>
+                <ul class="list-unstyled mb-0">
+                    @foreach ($sharedExams as $se)
+                        <li style="padding:.65rem 1.25rem;border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+                            <div style="font-size:.85rem;">
+                                <span style="font-weight:500;">{{ $se->label ?? 'Sans étiquette' }}</span>
+                                <span style="color:var(--text-muted);font-size:.8rem;margin-left:.5rem;">
+                                    &middot; {{ $se->attempts_count }} participant{{ $se->attempts_count > 1 ? 's' : '' }}
+                                </span>
+                                @if ($se->isExpired())
+                                    <span class="badge ms-1" style="background:rgba(239,68,68,.15);color:#ef4444;font-size:.72rem;">Expiré</span>
+                                @endif
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('shared-exam.results', $se) }}" class="btn btn-sm"
+                                   style="color:var(--text-muted);border:1px solid var(--card-border);font-size:.8rem;">
+                                    <i class="bi bi-bar-chart me-1"></i>Résultats
+                                </a>
+                                <form method="POST" action="{{ route('shared-exam.destroy', $se) }}"
+                                      onsubmit="return confirm('Supprimer ce lien partagé ?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm"
+                                            style="color:#ef4444;border:1px solid var(--card-border);font-size:.8rem;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
         </div>
     @endif
 

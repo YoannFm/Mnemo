@@ -8,6 +8,8 @@ use App\Http\Controllers\TestController;
 use App\Http\Controllers\AnkiController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\ModuleExportController;
+use App\Http\Controllers\SharedExamController;
+use App\Http\Controllers\GuestExamController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\ProgressController;
 use App\Http\Controllers\InstallController;
@@ -50,6 +52,13 @@ Route::get('/', function () {
 | Routes protégées par authentification
 |--------------------------------------------------------------------------
 */
+
+// ─── Examens partagés (accès invité, sans authentification) ───
+Route::get('/e/{uuid}', [GuestExamController::class, 'show'])->name('guest.exam.show');
+Route::post('/e/{uuid}/start', [GuestExamController::class, 'start'])->name('guest.exam.start');
+Route::get('/e/{uuid}/question', [GuestExamController::class, 'question'])->name('guest.exam.question');
+Route::post('/e/{uuid}/answer', [GuestExamController::class, 'answer'])->name('guest.exam.answer');
+Route::get('/e/{uuid}/finish', [GuestExamController::class, 'finish'])->name('guest.exam.finish');
 
 // ─── 2FA Challenge (après login) ───
 Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.show');
@@ -153,6 +162,11 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+
+    // ─── Examens partagés (côté créateur) ───
+    Route::post('/modules/{module}/share', [SharedExamController::class, 'create'])->name('shared-exam.create');
+    Route::get('/shared-exam/{sharedExam}/results', [SharedExamController::class, 'results'])->name('shared-exam.results');
+    Route::delete('/shared-exam/{sharedExam}', [SharedExamController::class, 'destroy'])->name('shared-exam.destroy');
 });
 
 // ─── Sitemap XML dynamique ───
