@@ -718,7 +718,7 @@
     <footer id="main-footer">
         <div class="footer-left">
             @if (setting('site_description'))
-                <div style="max-width:260px;">
+                <div style="max-width:420px;">
                     <div style="font-weight:600;margin-bottom:.2rem;">{{ setting('site_name', 'Mnémo') }}</div>
                     <div style="font-size:.75rem;line-height:1.5;">{{ strip_tags(setting('site_description')) }}</div>
                 </div>
