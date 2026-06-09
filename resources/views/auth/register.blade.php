@@ -70,29 +70,17 @@
 
         {{-- Conditions d'inscription --}}
         @if (setting('registration_conditions'))
+            @php
+                $terms = setting('registration_conditions');
+                $terms = strip_tags($terms);
+                $terms = html_entity_decode($terms, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $terms = preg_replace('/\[([^\]]+)\]\(([^)]+)\)/', '<a href="$2" target="_blank" style="color:var(--accent);">$1</a>', $terms);
+            @endphp
             <div class="form-check mb-3">
                 <input class="form-check-input" type="checkbox" id="accept_terms" required>
                 <label class="form-check-label" for="accept_terms" style="font-size:.85rem;">
-                    J'accepte les
-                    <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" style="color:var(--accent);">conditions d'inscription</a>
+                    {!! $terms !!}
                 </label>
-            </div>
-            <div class="modal fade" id="termsModal" tabindex="-1">
-                <div class="modal-dialog modal-dialog-scrollable">
-                    <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--card-border);">
-                        <div class="modal-header" style="border-bottom:1px solid var(--card-border);">
-                            <h5 class="modal-title" style="font-size:1rem;">Conditions d'inscription</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body" style="font-size:.875rem;color:var(--text-muted);">
-                            @php
-                                $terms = setting('registration_conditions');
-                                $terms = preg_replace('/\[([^\]]+)\]\(([^)]+)\)/', '<a href="$2" target="_blank" style="color:var(--accent);">$1</a>', $terms);
-                            @endphp
-                            {!! $terms !!}
-                        </div>
-                    </div>
-                </div>
             </div>
         @endif
 
