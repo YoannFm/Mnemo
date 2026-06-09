@@ -87,10 +87,20 @@
                     </button>
                 </div>
                 <div style="text-align:center;">
-                    @php $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?data=' . urlencode(route('guest.exam.show', $sharedExam->uuid)) . '&size=300x300&margin=8'; @endphp
+                    @php $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?data=' . urlencode(route('guest.exam.show', $sharedExam->uuid)) . '&size=400x400&margin=8'; @endphp
                     <img src="{{ $qrUrl }}"
                          alt="QR Code"
-                         style="border-radius:6px;display:block;width:150px;height:150px;border:1px solid var(--card-border);">
+                         onclick="document.getElementById('qr-modal').style.display='flex'"
+                         style="border-radius:6px;display:block;width:150px;height:150px;border:1px solid var(--card-border);cursor:zoom-in;">
+                </div>
+
+                {{-- Modal QR plein écran --}}
+                <div id="qr-modal"
+                     onclick="this.style.display='none'"
+                     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;">
+                    <img src="{{ $qrUrl }}"
+                         alt="QR Code"
+                         style="width:min(90vw,400px);height:min(90vw,400px);border-radius:10px;display:block;">
                 </div>
             </div>
         </div>
