@@ -59,7 +59,7 @@ class QuizGenerator
         'Q7' => [
             'field_question' => 'name_en',
             'field_answer'   => 'name_fr',
-            'question_text'  => 'Version française',
+            'question_text'  => 'Traduction',
         ],
         'Q8' => [
             'field_question' => 'photo_path',
