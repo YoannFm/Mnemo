@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="pageTitle">Résultats — {{ $sharedExam->label ?? 'Examen partagé' }}</x-slot>
+    <x-slot name="pageTitle">Résultats - {{ $sharedExam->label ?? 'Examen partagé' }}</x-slot>
 
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb" style="font-size:.85rem;">

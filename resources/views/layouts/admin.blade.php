@@ -312,7 +312,7 @@
             <footer class="footer">
                 <div class="container-fluid">
                     <p class="mb-0 py-1 text-center text-muted" style="font-size:.78rem;">
-                        Licence MIT — Copyright (c) 2026 Yoann
+                        Licence MIT - Copyright (c) 2026 Yoann
                     </p>
                     <p class="mb-0 py-1 text-center text-muted" style="font-size:.78rem;">
                         Fait avec ❤️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a>

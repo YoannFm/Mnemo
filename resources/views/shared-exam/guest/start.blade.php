@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="pageTitle">Examen partagé — {{ $sharedExam->module->title }}</x-slot>
+    <x-slot name="pageTitle">Examen partagé - {{ $sharedExam->module->title }}</x-slot>
 
     <div class="row justify-content-center">
         <div class="col-12 col-lg-5">
