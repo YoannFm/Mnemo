@@ -81,6 +81,11 @@ class QuizGenerator
             'field_answer'   => 'function_text',
             'question_text'  => 'Signification',
         ],
+        'Q12' => [
+            'field_question' => 'function_text',
+            'field_answer'   => 'name_en',
+            'question_text'  => 'Anglais',
+        ],
     ];
 
     /**
