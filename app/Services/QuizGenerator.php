@@ -29,57 +29,57 @@ class QuizGenerator
         'Q1' => [
             'field_question' => 'photo_path',
             'field_answer'   => 'name_fr',
-            'question_text'  => 'Quel est le nom de cet élément ?',
+            'question_text'  => 'Identification',
         ],
         'Q2' => [
             'field_question' => 'photo_path',
             'field_answer'   => 'function_text',
-            'question_text'  => 'Quelle est la fonction de cet élément ?',
+            'question_text'  => 'Description',
         ],
         'Q3' => [
             'field_question' => 'function_text',
             'field_answer'   => 'photo_path',
-            'question_text'  => 'Quelle photo correspond à cette description ?',
+            'question_text'  => 'Reconnaissance',
         ],
         'Q4' => [
             'field_question' => 'name_fr',
             'field_answer'   => 'name_en',
-            'question_text'  => 'Quelle est la traduction ?',
+            'question_text'  => 'Traduction',
         ],
         'Q5' => [
             'field_question' => 'name_en',
             'field_answer'   => 'photo_path',
-            'question_text'  => 'Quelle photo correspond à ce nom anglais ?',
+            'question_text'  => 'Correspondance',
         ],
         'Q6' => [
             'field_question' => 'function_text',
             'field_answer'   => 'name_fr',
-            'question_text'  => 'Quel est le nom correspondant à cette description ?',
+            'question_text'  => 'Désignation',
         ],
         'Q7' => [
             'field_question' => 'name_en',
             'field_answer'   => 'name_fr',
-            'question_text'  => 'Quel est le nom de ce terme ?',
+            'question_text'  => 'Version française',
         ],
         'Q8' => [
             'field_question' => 'photo_path',
             'field_answer'   => 'name_en',
-            'question_text'  => 'Quelle est la traduction de cet élément ?',
+            'question_text'  => 'Anglais',
         ],
         'Q9' => [
             'field_question' => 'name_fr',
             'field_answer'   => 'photo_path',
-            'question_text'  => 'Quelle photo correspond à ce nom français ?',
+            'question_text'  => 'Visualisation',
         ],
         'Q10' => [
             'field_question' => 'name_fr',
             'field_answer'   => 'function_text',
-            'question_text'  => 'Quelle est la fonction correspondant à ce nom français ?',
+            'question_text'  => 'Définition',
         ],
         'Q11' => [
             'field_question' => 'name_en',
             'field_answer'   => 'function_text',
-            'question_text'  => 'Quelle est la description correspondant à cette traduction ?',
+            'question_text'  => 'Signification',
         ],
     ];
 
