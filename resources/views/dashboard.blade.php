@@ -6,11 +6,7 @@
             Bonjour, <span style="color:var(--accent);">{{ Auth::user()->name }}</span>
         </h3>
         <p style="color:var(--text-muted);font-size:.9rem;margin:0;">
-            @if (setting('home_message'))
-                {!! setting('home_message') !!}
-            @else
-                Prêt à mémoriser quelque chose aujourd'hui ?
-            @endif
+            {!! setting('home_message', 'Prêt à mémoriser quelque chose aujourd\'hui ?') !!}
         </p>
     </div>
 
