@@ -93,7 +93,7 @@ class UpdateManager
 
         $this->latestData = cache()->remember($this->cacheKey, now()->addMinutes(30), function () {
             $response = Http::withHeaders($this->headers())
-                ->get(config('mnemo.cloud_url') . '/api/v1/updates/latest');
+                ->get(config('mnemo.cloud_url') . '/api/v1/updates/check');
 
             if (!$response->successful()) return null;
             return $response->json();
