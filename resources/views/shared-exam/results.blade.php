@@ -86,6 +86,7 @@
                         <i class="bi bi-clipboard"></i> Copier
                     </button>
                 </div>
+                @if(\App\Models\Setting::get('feature_exam_qrcode', '1'))
                 <div style="text-align:center;">
                     @php $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?data=' . urlencode(route('guest.exam.show', $sharedExam->uuid)) . '&size=400x400&margin=8'; @endphp
                     <img src="{{ $qrUrl }}"
@@ -102,6 +103,7 @@
                          alt="QR Code"
                          style="width:min(90vw,400px);height:min(90vw,400px);border-radius:10px;display:block;">
                 </div>
+                @endif
             </div>
         </div>
     </div>

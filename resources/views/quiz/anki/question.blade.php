@@ -347,6 +347,7 @@
             window.location.href = "{{ route('anki.question', $module) }}";
         }
 
+        @if(\App\Models\Setting::get('feature_keyboard_shortcuts', '1'))
         document.addEventListener('keydown', function(e) {
             var feedback = document.getElementById('feedback');
             var isFeedbackVisible = feedback && feedback.style.display !== 'none';
@@ -366,8 +367,10 @@
                 if (btns[idx]) btns[idx].click();
             }
         });
+        @endif
     </script>
 
+    @if(\App\Models\Setting::get('feature_keyboard_shortcuts', '1'))
     <div style="text-align:center;margin-top:.5rem;">
         <small style="color:var(--text-muted);font-size:.75rem;">
             <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">1</kbd>
@@ -379,5 +382,6 @@
             <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">Espace</kbd> pour continuer
         </small>
     </div>
+    @endif
 
 </x-app-layout>

@@ -216,6 +216,7 @@
                 <div style="font-weight:600;font-size:.9rem;">Mode Examen</div>
                 <div style="font-size:.75rem;color:var(--text-muted);">Tous les items</div>
             </a>
+            @if(\App\Models\Setting::get('feature_quick_review', '1'))
             @auth
                 @if ($failedItemsCount > 0)
                     <form method="POST" action="{{ route('anki.review', $module) }}" style="display:contents;">
@@ -230,6 +231,7 @@
                     </form>
                 @endif
             @endauth
+            @endif
         </div>
     @if ($items->total() >= 4)
         @auth
@@ -299,6 +301,7 @@
                                     <div class="fw-semibold" style="font-size:.95rem;">{{ $item->name_fr }}</div>
                                     <div style="font-size:.8rem;color:var(--accent);"><span style="color:var(--text-muted);font-size:.75rem;">Traduction :</span> {{ $item->name_en }}</div>
                                 </div>
+                                @if(\App\Models\Setting::get('feature_item_badges', '1'))
                                 @auth
                                     @php $prog = $progressMap->get($item->id); @endphp
                                     @if ($prog)
@@ -317,6 +320,7 @@
                                         @endif
                                     @endif
                                 @endauth
+                                @endif
                             </div>
 
                             {{-- Fonction/Description --}}

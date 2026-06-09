@@ -9,6 +9,7 @@
     </div>
 
     {{-- ── Statistiques rapides ── --}}
+    @if(\App\Models\Setting::get('feature_profile_stats', '1'))
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-2">
             <div class="card p-3 text-center">
@@ -47,6 +48,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <div class="row g-4" style="max-width:700px;">
 

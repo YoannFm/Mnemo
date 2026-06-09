@@ -269,6 +269,7 @@
     </div>
 
     {{-- Graphiques --}}
+    @if(\App\Models\Setting::get('feature_admin_charts', '1'))
     <div class="row g-3 mt-1">
         <div class="col-12 col-xl-6">
             <div class="card shadow">
@@ -331,4 +332,5 @@
         makeChart('chartUsers', @json($chartUsers), 'Inscriptions', '#22c55e');
     })();
     </script>
+    @endif
 </x-admin-layout>

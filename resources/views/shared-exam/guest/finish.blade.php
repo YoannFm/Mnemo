@@ -22,6 +22,7 @@
                 </div>
 
                 {{-- Classement --}}
+                @if(\App\Models\Setting::get('feature_exam_ranking', '1'))
                 @if ($rank && $totalParticipants > 1)
                     <div class="card p-3 mb-3">
                         <div style="font-size:.85rem;color:var(--text-muted);">
@@ -30,6 +31,7 @@
                             sur {{ $totalParticipants }} participant{{ $totalParticipants > 1 ? 's' : '' }}
                         </div>
                     </div>
+                @endif
                 @endif
 
                 <div class="card p-3 mb-3">
