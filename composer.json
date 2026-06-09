@@ -35,7 +35,7 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
-            "Plugins\\QuizletImport\\": "plugins/quizlet-import/"
+            "Plugins\\QuizletImport\\": ["plugins/quizlet-import/", "plugins/quizlet-import/src/"]
         }
     },
     "autoload-dev": {
