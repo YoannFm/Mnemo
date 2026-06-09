@@ -59,14 +59,13 @@
         </div>
     </div>
 
-    @if ($hasUpdate)
     {{-- Sécurité avant mise à jour --}}
     <div class="card shadow mb-4">
         <div class="card-header">
             <h5 class="card-title mb-0"><i class="bi bi-shield-lock me-2"></i>Sauvegardes avant mise à jour</h5>
         </div>
         <div class="card-body">
-            <p class="text-muted small mb-3">Effectuez ces sauvegardes avant d'installer la mise à jour. En cas de problème, vous pourrez restaurer le site.</p>
+            <p class="text-muted small mb-3">Téléchargez une sauvegarde complète du site à tout moment. Indispensable avant une mise à jour.</p>
 
             <div class="row g-3 mb-4">
                 <div class="col-sm-6">
@@ -97,13 +96,10 @@
                 </div>
             </div>
 
-            <div id="backup-warning" class="alert alert-warning d-flex align-items-center gap-2 mb-0">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                Téléchargez les deux sauvegardes pour pouvoir installer la mise à jour.
-            </div>
         </div>
     </div>
 
+    @if ($hasUpdate)
     {{-- Installation --}}
     <div class="card shadow mb-4">
         <div class="card-header">
