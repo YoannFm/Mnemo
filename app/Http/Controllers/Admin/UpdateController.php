@@ -45,11 +45,12 @@ class UpdateController extends Controller
     {
         try {
             $path = $this->updates->backupFiles();
-            ActivityLogger::log('Sauvegarde fichiers téléchargée', 'update', null, [
-                'fichier'      => basename($path),
-                'download_url' => route('admin.update.backup-files'),
+            $filename = basename($path);
+            ActivityLogger::log('Sauvegarde fichiers créée', 'update', null, [
+                'fichier'      => $filename,
+                'download_url' => route('admin.update.backup-download', $filename),
             ]);
-            return response()->download($path)->deleteFileAfterSend(false);
+            return response()->download($path);
         } catch (Throwable $t) {
             ActivityLogger::log('Échec sauvegarde fichiers : ' . $t->getMessage(), 'update');
             return back()->with('error', $t->getMessage());
@@ -60,15 +61,27 @@ class UpdateController extends Controller
     {
         try {
             $path = $this->updates->backupDatabase();
-            ActivityLogger::log('Export base de données téléchargé', 'update', null, [
-                'fichier'      => basename($path),
-                'download_url' => route('admin.update.backup-database'),
+            $filename = basename($path);
+            ActivityLogger::log('Export base de données créé', 'update', null, [
+                'fichier'      => $filename,
+                'download_url' => route('admin.update.backup-download', $filename),
             ]);
-            return response()->download($path)->deleteFileAfterSend(false);
+            return response()->download($path);
         } catch (Throwable $t) {
             ActivityLogger::log('Échec export base de données : ' . $t->getMessage(), 'update');
             return back()->with('error', $t->getMessage());
         }
+    }
+
+    public function backupDownload(string $filename)
+    {
+        $path = storage_path('app/backups/' . $filename);
+
+        if (!file_exists($path) || str_contains($filename, '..')) {
+            abort(404);
+        }
+
+        return response()->download($path);
     }
 
     public function install()
