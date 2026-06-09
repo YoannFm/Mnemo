@@ -7,7 +7,7 @@
 
     <title>{{ isset($pageTitle) ? $pageTitle . ' - Mnémo' : 'Mnémo - Apprenez par la répétition espacée' }}</title>
 
-    <meta name="description" content="{{ isset($metaDescription) ? $metaDescription : 'Mnémo est une application de mémorisation par répétition espacée. Créez vos modules, apprenez avec le mode Anki ou testez vos connaissances.' }}">
+    <meta name="description" content="{{ isset($metaDescription) ? $metaDescription : setting('site_description', 'Mnémo est une application de mémorisation par répétition espacée.') }}">
     <meta name="keywords" content="mémorisation, répétition espacée, anki, flashcard, apprentissage, quiz, mnémo">
     <meta name="author" content="YoannFM">
     <meta name="robots" content="index, follow">

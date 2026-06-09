@@ -10,6 +10,12 @@
         </p>
     </div>
 
+    @if (setting('home_message'))
+        <div class="card mb-5 p-4" style="border-left:3px solid var(--accent);">
+            {!! setting('home_message') !!}
+        </div>
+    @endif
+
     {{-- Stats --}}
     <div class="row g-3 mb-5">
         <div class="col-6 col-lg-3">
