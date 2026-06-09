@@ -1,0 +1,8 @@
+{
+    "id": "social-share",
+    "name": "Partage Social",
+    "version": "1.0.0",
+    "description": "Ajoute des boutons de partage et des meta tags Open Graph sur les pages de modules.",
+    "author": "YoannFM",
+    "provider": "Plugins\\SocialShare\\SocialShareServiceProvider"
+}

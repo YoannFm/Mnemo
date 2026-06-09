@@ -102,6 +102,8 @@
         @endif
     </div>
 
+    @includeIf('social-share::buttons')
+
     {{-- Modal Signalement --}}
     @auth
         @if ($module->is_public && Auth::id() !== $module->owner_id)

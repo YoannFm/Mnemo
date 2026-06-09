@@ -22,6 +22,8 @@
     <meta name="twitter:title" content="{{ isset($pageTitle) ? $pageTitle . ' - Mnémo' : 'Mnémo' }}">
     <meta name="twitter:description" content="Application de mémorisation par répétition espacée.">
 
+    @includeIf('social-share::meta')
+
     <script>
         (function() {
             var t = localStorage.getItem('theme') || 'dark';
