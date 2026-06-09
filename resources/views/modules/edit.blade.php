@@ -112,6 +112,9 @@
                             @enderror
                         </div>
 
+                        {{-- Tags (plugin) --}}
+                        @includeIf('tags::field', ['module' => $module])
+
                         {{-- Boutons --}}
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">

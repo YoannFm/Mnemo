@@ -28,6 +28,9 @@
         </div>
     </form>
 
+    {{-- Filtres par tags (plugin) --}}
+    @includeIf('tags::filter')
+
     {{-- Résultats --}}
     @if ($modules->isEmpty())
         <div class="card text-center py-5">

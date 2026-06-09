@@ -1,0 +1,8 @@
+{
+    "id": "tags",
+    "name": "Tags & Recherche",
+    "version": "1.0.0",
+    "description": "Ajoute des tags (matière, niveau) aux modules et une recherche dans la bibliothèque publique.",
+    "author": "YoannFM",
+    "provider": "Plugins\\Tags\\TagsServiceProvider"
+}

@@ -79,6 +79,9 @@
                             </div>
                         </div>
 
+                        {{-- Tags (plugin) --}}
+                        @includeIf('tags::field', ['module' => null])
+
                         {{-- Boutons d'action du formulaire --}}
                         {{-- "Créer le module" envoie le formulaire --}}
                         {{-- "Annuler" redirection vers la liste des modules --}}
