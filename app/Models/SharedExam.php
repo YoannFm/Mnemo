@@ -15,6 +15,7 @@ class SharedExam extends Model
         'mode',
         'label',
         'expires_at',
+        'max_attempts',
     ];
 
     protected $casts = [

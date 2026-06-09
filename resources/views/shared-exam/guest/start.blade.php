@@ -30,12 +30,31 @@
                         @endif
                     </div>
 
-                    <form method="POST" action="{{ route('guest.exam.start', $sharedExam->uuid) }}">
-                        @csrf
-                        <button type="submit" class="btn btn-primary w-100">
+                    @if (session('error'))
+                    <div class="alert alert-warning" style="font-size:.875rem;">
+                        <i class="bi bi-exclamation-triangle me-1"></i>{{ session('error') }}
+                    </div>
+                @endif
+
+                    @php
+                        $attemptsDone = $sharedExam->attempts()->where('user_id', Auth::id())->count();
+                        $attemptsLeft = $sharedExam->max_attempts - $attemptsDone;
+                    @endphp
+
+                    @if ($attemptsLeft > 0)
+                    <p style="color:var(--text-muted);font-size:.85rem;text-align:center;">
+                        Tentative {{ $attemptsDone + 1 }} / {{ $sharedExam->max_attempts }}
+                    </p>
+                    <button type="submit" class="btn btn-primary w-100">
                             <i class="bi bi-play-fill me-1"></i>Commencer l'examen
                         </button>
                     </form>
+                    @else
+                    <div class="text-center" style="color:var(--text-muted);font-size:.875rem;">
+                        <i class="bi bi-check-circle me-1" style="color:var(--success-color);"></i>
+                        Vous avez utilisé toutes vos tentatives pour cet examen.
+                    </div>
+                    @endif
                 </div>
             @endif
 

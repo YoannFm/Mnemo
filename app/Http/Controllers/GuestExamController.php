@@ -44,6 +44,12 @@ class GuestExamController extends Controller
             abort(410, 'Ce lien d\'examen a expiré.');
         }
 
+        $attemptsDone = $sharedExam->attempts()->where('user_id', Auth::id())->count();
+        if ($attemptsDone >= $sharedExam->max_attempts) {
+            return redirect()->route('guest.exam.show', $uuid)
+                ->with('error', 'Vous avez atteint le nombre maximum de tentatives pour cet examen.');
+        }
+
         $module   = $sharedExam->module;
         $allItems = $module->items()->get();
         $mode     = $sharedExam->mode;
@@ -148,6 +154,7 @@ class GuestExamController extends Controller
 
         SharedExamAttempt::create([
             'shared_exam_id' => $sharedExam->id,
+            'user_id'        => Auth::id(),
             'guest_name'     => $guestName,
             'answers'        => $answers,
             'score'          => $score,

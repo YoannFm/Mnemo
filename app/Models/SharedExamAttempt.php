@@ -9,17 +9,25 @@ class SharedExamAttempt extends Model
 {
     protected $fillable = [
         'shared_exam_id',
+        'user_id',
         'guest_name',
         'answers',
         'score',
         'total',
         'finished_at',
+        'results_sent_at',
     ];
 
     protected $casts = [
-        'answers'     => 'array',
-        'finished_at' => 'datetime',
+        'answers'          => 'array',
+        'finished_at'      => 'datetime',
+        'results_sent_at'  => 'datetime',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function sharedExam(): BelongsTo
     {

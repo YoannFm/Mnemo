@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Module;
 use App\Models\SharedExam;
+use App\Models\SharedExamAttempt;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -58,5 +60,78 @@ class SharedExamController extends Controller
         $sharedExam->delete();
 
         return redirect()->back()->with('success', 'Lien d\'examen supprimé.');
+    }
+
+    public function addAttempt(Request $request, SharedExam $sharedExam)
+    {
+        if ($sharedExam->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate(['extra' => 'required|integer|min:1|max:10']);
+        $sharedExam->increment('max_attempts', $validated['extra']);
+
+        return redirect()->back()->with('success', 'Tentatives supplémentaires accordées.');
+    }
+
+    public function resetAttempt(SharedExam $sharedExam, SharedExamAttempt $attempt)
+    {
+        if ($sharedExam->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $attempt->delete();
+
+        return redirect()->back()->with('success', 'Tentative supprimée, l\'utilisateur peut repasser l\'examen.');
+    }
+
+    public function sendResults(SharedExam $sharedExam, SharedExamAttempt $attempt)
+    {
+        if ($sharedExam->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        if (!$attempt->user_id) {
+            return redirect()->back()->with('error', 'Impossible d\'envoyer les résultats : utilisateur introuvable.');
+        }
+
+        $pct   = $attempt->percentage;
+        $label = $sharedExam->label ?? 'Examen partagé';
+
+        UserNotification::create([
+            'user_id' => $attempt->user_id,
+            'title'   => 'Résultats de votre examen',
+            'message' => "Votre score pour « {$label} » (module : {$sharedExam->module->title}) : {$attempt->score}/{$attempt->total} ({$pct}%).",
+            'type'    => 'info',
+        ]);
+
+        $attempt->update(['results_sent_at' => now()]);
+
+        return redirect()->back()->with('success', 'Résultats envoyés à ' . $attempt->guest_name . '.');
+    }
+
+    public function sendAllResults(SharedExam $sharedExam)
+    {
+        if ($sharedExam->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $sharedExam->load('module');
+        $label   = $sharedExam->label ?? 'Examen partagé';
+        $sent    = 0;
+
+        foreach ($sharedExam->attempts()->whereNotNull('user_id')->whereNull('results_sent_at')->get() as $attempt) {
+            $pct = $attempt->percentage;
+            UserNotification::create([
+                'user_id' => $attempt->user_id,
+                'title'   => 'Résultats de votre examen',
+                'message' => "Votre score pour « {$label} » (module : {$sharedExam->module->title}) : {$attempt->score}/{$attempt->total} ({$pct}%).",
+                'type'    => 'info',
+            ]);
+            $attempt->update(['results_sent_at' => now()]);
+            $sent++;
+        }
+
+        return redirect()->back()->with('success', $sent > 0 ? "{$sent} résultat(s) envoyé(s)." : 'Tous les résultats ont déjà été envoyés.');
     }
 }
