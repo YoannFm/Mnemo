@@ -68,6 +68,21 @@
                    placeholder="Répétez le mot de passe">
         </div>
 
+        {{-- Conditions d'inscription --}}
+        @if (setting('registration_conditions'))
+            <div class="mb-3">
+                <div style="max-height:140px;overflow-y:auto;font-size:.8rem;color:var(--text-muted);background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:.75rem 1rem;">
+                    {!! setting('registration_conditions') !!}
+                </div>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="accept_terms" required>
+                    <label class="form-check-label" for="accept_terms" style="font-size:.85rem;">
+                        J'accepte les conditions d'inscription
+                    </label>
+                </div>
+            </div>
+        @endif
+
         {{-- Bouton d'inscription --}}
         <button type="submit" class="btn btn-primary w-100 mb-3">
             Créer mon compte
