@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-06-09 (suite 2)
+
+### Ajouts
+
+- **Feature flags** : page admin `/admin/settings/features` pour activer/désactiver chaque fonctionnalité avec description détaillée
+- **Raccourcis AZERTY** : touches `&` `é` `"` `'` en plus de `1` `2` `3` `4` dans tous les modes (Test, Anki, Examen)
+- **Q12** : 12ème type de question ajouté (Description → Traduction), couvrant toutes les combinaisons possibles
+- **Libellés de questions** : labels courts (1 mot) pour les 12 types — Identification, Traduction, Reconnaissance, Correspondance, Définition, etc.
+
+### Modifications
+
+- **Champ `name_en` renommé en `name_alt`** : le champ accepte désormais n'importe quelle langue (latin, chinois, etc.), migration incluse
+- **Plugins** : vérification insensible à la casse + test du dossier physique pour empêcher la réinstallation d'un plugin déjà présent
+
+---
+
 ## 2026-06-09 (suite)
 
 ### Ajouts
