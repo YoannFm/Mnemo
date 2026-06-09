@@ -115,7 +115,7 @@
                                 <div class="fw-semibold">{{ $plugin->name }}</div>
                                 <div class="text-muted small">{{ $plugin->description ?? '' }}</div>
                                 <div class="mt-1">
-                                    <span class="badge bg-secondary">v{{ $plugin->latest_version ?? '—' }}</span>
+                                    <span class="badge bg-secondary">v{{ $plugin->latest_version ?? '-' }}</span>
                                     @if ($plugin->is_installed)
                                         <span class="badge bg-success">Installé</span>
                                     @endif

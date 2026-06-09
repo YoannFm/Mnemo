@@ -38,7 +38,7 @@
                                     <span class="badge bg-success ms-1">À jour</span>
                                 @endif
                             @else
-                                <span class="text-muted">—</span>
+                                <span class="text-muted">-</span>
                             @endif
                         </div>
                     </div>

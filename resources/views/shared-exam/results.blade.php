@@ -120,7 +120,7 @@
                                         @endif
                                     </td>
                                     <td style="color:var(--text-muted);">
-                                        {{ $attempt->finished_at ? $attempt->finished_at->format('d/m/Y H:i') : '—' }}
+                                        {{ $attempt->finished_at ? $attempt->finished_at->format('d/m/Y H:i') : '-' }}
                                     </td>
                                     <td>
                                         @if ($attempt->results_sent_at)
@@ -136,7 +136,7 @@
                                                 </button>
                                             </form>
                                         @else
-                                            <span style="font-size:.78rem;color:var(--text-muted);">—</span>
+                                            <span style="font-size:.78rem;color:var(--text-muted);">-</span>
                                         @endif
                                     </td>
                                     <td>
@@ -174,10 +174,10 @@
                                                             @endif
                                                         </span>
                                                         <div style="font-size:.82rem;flex:1;">
-                                                            <div style="color:var(--text-muted);margin-bottom:.2rem;">{{ $ans['question_text'] ?? '—' }}</div>
-                                                            <div>Réponse : <strong style="color:{{ $ans['is_correct'] ? '#22c55e' : '#ef4444' }}">{{ $ans['user_answer'] ?? '—' }}</strong></div>
+                                                            <div style="color:var(--text-muted);margin-bottom:.2rem;">{{ $ans['question_text'] ?? '-' }}</div>
+                                                            <div>Réponse : <strong style="color:{{ $ans['is_correct'] ? '#22c55e' : '#ef4444' }}">{{ $ans['user_answer'] ?? '-' }}</strong></div>
                                                             @if (!$ans['is_correct'])
-                                                                <div style="color:var(--text-muted);">Bonne réponse : <strong style="color:#22c55e;">{{ $ans['correct_answer'] ?? '—' }}</strong></div>
+                                                                <div style="color:var(--text-muted);">Bonne réponse : <strong style="color:#22c55e;">{{ $ans['correct_answer'] ?? '-' }}</strong></div>
                                                             @endif
                                                         </div>
                                                     </div>

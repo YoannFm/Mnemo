@@ -68,16 +68,16 @@
                                                 @endif
                                             </span>
                                             <div style="font-size:.82rem;flex:1;">
-                                                <div style="color:var(--text-muted);margin-bottom:.2rem;">{{ $ans['question_text'] ?? '—' }}</div>
+                                                <div style="color:var(--text-muted);margin-bottom:.2rem;">{{ $ans['question_text'] ?? '-' }}</div>
                                                 <div>
                                                     Votre réponse :
                                                     <strong style="color:{{ $ans['is_correct'] ? '#22c55e' : '#ef4444' }}">
-                                                        {{ $ans['user_answer'] ?? '—' }}
+                                                        {{ $ans['user_answer'] ?? '-' }}
                                                     </strong>
                                                 </div>
                                                 @if (!$ans['is_correct'])
                                                     <div style="color:var(--text-muted);">
-                                                        Bonne réponse : <strong style="color:#22c55e;">{{ $ans['correct_answer'] ?? '—' }}</strong>
+                                                        Bonne réponse : <strong style="color:#22c55e;">{{ $ans['correct_answer'] ?? '-' }}</strong>
                                                     </div>
                                                 @endif
                                             </div>
