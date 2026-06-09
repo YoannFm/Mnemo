@@ -10,6 +10,7 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\ModuleExportController;
 use App\Http\Controllers\SharedExamController;
 use App\Http\Controllers\SharedExamIndexController;
+use App\Http\Controllers\MyExamResultsController;
 use App\Http\Controllers\GuestExamController;
 use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\ProgressController;
@@ -168,6 +169,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
 
     // ─── Examens partagés (côté créateur) ───
     Route::get('/mes-examens', [SharedExamIndexController::class, 'index'])->name('shared-exam.index');
+    Route::get('/mes-resultats', [MyExamResultsController::class, 'index'])->name('my-exam-results');
     Route::post('/modules/{module}/share', [SharedExamController::class, 'create'])->name('shared-exam.create');
     Route::get('/shared-exam/{sharedExam}/results', [SharedExamController::class, 'results'])->name('shared-exam.results');
     Route::delete('/shared-exam/{sharedExam}', [SharedExamController::class, 'destroy'])->name('shared-exam.destroy');

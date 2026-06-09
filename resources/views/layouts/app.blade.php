@@ -660,6 +660,7 @@
                             </a>
                         </li>
                         <li><a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="bi bi-person"></i> Mon profil</a></li>
+                        <li><a class="dropdown-item" href="{{ route('my-exam-results') }}"><i class="bi bi-clipboard-check"></i> Mes résultats</a></li>
                         @if(Auth::user()->isAdmin())
                         <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}" style="color:var(--accent);"><i class="bi bi-shield-check"></i> Administration</a></li>
                         @endif
