@@ -706,6 +706,9 @@
     </div>
 
     <footer id="main-footer">
+        @if (setting('site_description'))
+            <div style="margin-bottom:.5rem;color:var(--text-muted);font-size:.8rem;">{{ setting('site_description') }}</div>
+        @endif
         <div>© Copyright - Tout droit réservé</div>
         <div>Fait avec ♥️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
     </footer>
