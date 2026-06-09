@@ -446,15 +446,21 @@
         /* ── Footer ── */
         #main-footer {
             border-top: 1px solid var(--card-border);
-            padding: 1.25rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: .5rem;
+            padding: 1.5rem 1.5rem 1.25rem;
             font-size: .78rem;
             color: var(--text-muted);
             background: var(--header-bg);
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: end;
+            gap: .75rem;
+        }
+        #main-footer .footer-left { grid-column: 1; }
+        #main-footer .footer-center { grid-column: 2; text-align: center; }
+        @media (max-width: 768px) {
+            #main-footer { grid-template-columns: 1fr; }
+            #main-footer .footer-left { grid-column: 1; order: 2; }
+            #main-footer .footer-center { grid-column: 1; order: 1; }
         }
 
         #main-footer a {
@@ -710,11 +716,16 @@
     </div>
 
     <footer id="main-footer">
-        <div>© Copyright - Tout droit réservé</div>
-        @if (setting('site_description'))
-            <div>{{ strip_tags(setting('site_description')) }}</div>
-        @endif
-        <div>Fait avec ♥️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
+        <div class="footer-left">
+            @if (setting('site_description'))
+                <div style="font-weight:600;margin-bottom:.2rem;">{{ setting('site_name', 'Mnémo') }}</div>
+                <div style="font-size:.75rem;">{{ strip_tags(setting('site_description')) }}</div>
+            @endif
+        </div>
+        <div class="footer-center">
+            <div>© Copyright - Tout droit réservé</div>
+            <div style="margin-top:.2rem;">Fait avec ♥️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
+        </div>
     </footer>
 
 </div>
