@@ -45,7 +45,10 @@ class UpdateController extends Controller
     {
         try {
             $path = $this->updates->backupFiles();
-            ActivityLogger::log('Sauvegarde fichiers téléchargée : ' . basename($path), 'update');
+            ActivityLogger::log('Sauvegarde fichiers téléchargée', 'update', null, [
+                'fichier'      => basename($path),
+                'download_url' => route('admin.update.backup-files'),
+            ]);
             return response()->download($path)->deleteFileAfterSend(false);
         } catch (Throwable $t) {
             ActivityLogger::log('Échec sauvegarde fichiers : ' . $t->getMessage(), 'update');
@@ -57,7 +60,10 @@ class UpdateController extends Controller
     {
         try {
             $path = $this->updates->backupDatabase();
-            ActivityLogger::log('Export base de données téléchargé : ' . basename($path), 'update');
+            ActivityLogger::log('Export base de données téléchargé', 'update', null, [
+                'fichier'      => basename($path),
+                'download_url' => route('admin.update.backup-database'),
+            ]);
             return response()->download($path)->deleteFileAfterSend(false);
         } catch (Throwable $t) {
             ActivityLogger::log('Échec export base de données : ' . $t->getMessage(), 'update');

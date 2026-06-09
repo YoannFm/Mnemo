@@ -83,7 +83,14 @@
                                 </td>
                                 <td>
                                     @if($log->data)
-                                        {{ Str::limit(json_encode($log->data), 80) }}
+                                        @if(!empty($log->data['download_url']))
+                                            <span class="small">{{ $log->data['fichier'] ?? '' }}</span>
+                                            <a href="{{ $log->data['download_url'] }}" class="btn btn-sm btn-outline-secondary ms-1" title="Retélécharger">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        @else
+                                            <span class="small text-muted">{{ Str::limit(json_encode($log->data), 80) }}</span>
+                                        @endif
                                     @else
                                         <span class="text-muted">-</span>
                                     @endif
