@@ -715,15 +715,17 @@
         {{ $slot }}
     </div>
 
-    <footer id="main-footer">
-        <div class="footer-left">
-            @if (setting('site_description'))
-                <div style="max-width:420px;">
-                    <div style="font-weight:600;margin-bottom:.2rem;">{{ setting('site_name', 'Mnémo') }}</div>
-                    <div style="font-size:.75rem;line-height:1.5;">{{ strip_tags(setting('site_description')) }}</div>
-                </div>
-            @endif
+    @if (setting('site_description'))
+        <div style="padding:2rem 1.5rem 1rem;border-top:1px solid var(--card-border);">
+            <div style="max-width:420px;">
+                <div style="font-weight:600;margin-bottom:.25rem;font-size:.85rem;">{{ setting('site_name', 'Mnémo') }}</div>
+                <div style="font-size:.78rem;color:var(--text-muted);line-height:1.6;">{{ strip_tags(setting('site_description')) }}</div>
+            </div>
         </div>
+    @endif
+
+    <footer id="main-footer">
+        <div class="footer-left"></div>
         <div class="footer-center">
             <div>© Copyright - Tout droit réservé</div>
             <div style="margin-top:.2rem;">Fait avec ♥️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
