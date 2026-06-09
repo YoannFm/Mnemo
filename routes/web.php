@@ -86,6 +86,7 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/accent', [ProfileController::class, 'updateAccent'])->name('profile.accent');
     Route::get('/profile/accent/reset', [ProfileController::class, 'resetAccent'])->name('profile.accent.reset');
+    Route::patch('/profile/email-notifications', [ProfileController::class, 'updateEmailNotifications'])->name('profile.email-notifications');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     // Prévisualisation rapide d'un module (JSON pour le modal bibliothèque)

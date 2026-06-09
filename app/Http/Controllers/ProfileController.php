@@ -71,6 +71,12 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'accent-updated');
     }
 
+    public function updateEmailNotifications(Request $request): RedirectResponse
+    {
+        $request->user()->update(['email_notifications' => $request->boolean('email_notifications')]);
+        return Redirect::route('profile.edit')->with('status', 'email-notifications-updated');
+    }
+
     /**
      * Supprime complètement le compte utilisateur.
      * Valide le mot de passe avant suppression, déconnecte l'utilisateur et invalidate la session.

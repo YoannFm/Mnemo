@@ -175,6 +175,43 @@
             </div>
         </div>
 
+        {{-- ── Notifications par e-mail ── --}}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="bi bi-envelope-fill" style="color:var(--accent);"></i>
+                    <span class="fw-semibold">Notifications par e-mail</span>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ route('profile.email-notifications') }}">
+                        @csrf
+                        @method('PATCH')
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <div style="font-weight:500;margin-bottom:.25rem;">Recevoir les notifications par e-mail</div>
+                                <div style="font-size:.85rem;color:var(--text-muted);">Résultats d'examens, sanctions, messages d'administration, etc.</div>
+                            </div>
+                            <div class="form-check form-switch mb-0 ms-3">
+                                <input class="form-check-input" type="checkbox"
+                                       id="email_notifications"
+                                       name="email_notifications"
+                                       value="1"
+                                       style="width:2.5rem;height:1.25rem;cursor:pointer;"
+                                       {{ auth()->user()->email_notifications ? 'checked' : '' }}
+                                       onchange="this.form.submit()">
+                                <label class="form-check-label visually-hidden" for="email_notifications">Notifications e-mail</label>
+                            </div>
+                        </div>
+                        @if (session('status') === 'email-notifications-updated')
+                            <p style="color:var(--success-color);font-size:.875rem;margin-top:.75rem;margin-bottom:0;">
+                                <i class="bi bi-check-circle me-1"></i>Préférence sauvegardée.
+                            </p>
+                        @endif
+                    </form>
+                </div>
+            </div>
+        </div>
+
         {{-- ── Changer le mot de passe ── --}}
         <div class="col-12">
             <div class="card">
