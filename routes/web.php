@@ -241,9 +241,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::post('/emojis', [\App\Http\Controllers\Admin\EmojiController::class, 'store'])->name('emojis.store');
     Route::post('/emojis/import-pack', [\App\Http\Controllers\Admin\EmojiController::class, 'importPack'])->name('emojis.import-pack');
     Route::delete('/emojis/{emoji}', [\App\Http\Controllers\Admin\EmojiController::class, 'destroy'])->name('emojis.destroy');
-    // Plugins placeholder
-    Route::get('/plugins', fn() => view('admin.plugins.index'))->name('plugins.index');
-    // Themes
+    // Plugins
+    Route::get('/plugins', [\App\Http\Controllers\Admin\PluginController::class, 'index'])->name('plugins.index');
+    Route::post('/plugins/reload', [\App\Http\Controllers\Admin\PluginController::class, 'reload'])->name('plugins.reload');
+    Route::post('/plugins/{plugin}/enable', [\App\Http\Controllers\Admin\PluginController::class, 'enable'])->name('plugins.enable');
+    Route::post('/plugins/{plugin}/disable', [\App\Http\Controllers\Admin\PluginController::class, 'disable'])->name('plugins.disable');
+    Route::post('/plugins/{slug}/install', [\App\Http\Controllers\Admin\PluginController::class, 'install'])->name('plugins.install');
+    Route::post('/plugins/{plugin}/update', [\App\Http\Controllers\Admin\PluginController::class, 'update'])->name('plugins.update');
+    Route::delete('/plugins/{plugin}', [\App\Http\Controllers\Admin\PluginController::class, 'delete'])->name('plugins.delete');
     Route::get('/themes', [\App\Http\Controllers\Admin\ThemeController::class, 'index'])->name('themes.index');
     Route::get('/themes/create', [\App\Http\Controllers\Admin\ThemeController::class, 'create'])->name('themes.create');
     Route::post('/themes', [\App\Http\Controllers\Admin\ThemeController::class, 'store'])->name('themes.store');
@@ -254,8 +259,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     // Private modules
     Route::get('/private-modules', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'index'])->name('private-modules.index');
     Route::delete('/private-modules/{module}', [\App\Http\Controllers\Admin\PrivateModuleController::class, 'destroy'])->name('private-modules.destroy');
-    // Update placeholder
-    Route::get('/update', fn() => view('admin.update.index'))->name('update.index');
+    // Updates
+    Route::get('/update', [\App\Http\Controllers\Admin\UpdateController::class, 'index'])->name('update.index');
+    Route::post('/update/fetch', [\App\Http\Controllers\Admin\UpdateController::class, 'fetch'])->name('update.fetch');
+    Route::post('/update/download', [\App\Http\Controllers\Admin\UpdateController::class, 'download'])->name('update.download');
+    Route::post('/update/install', [\App\Http\Controllers\Admin\UpdateController::class, 'install'])->name('update.install');
+    // Themes duplicate
+    Route::post('/themes/{theme}/duplicate', [\App\Http\Controllers\Admin\ThemeController::class, 'duplicate'])->name('themes.duplicate');
+    // License check
+    Route::post('/license/check', [\App\Http\Controllers\Admin\SettingsController::class, 'checkLicense'])->name('license.check');
     // Reports (commentaires)
     Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/{report}/sanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markSanctioned'])->name('reports.sanctioned');
