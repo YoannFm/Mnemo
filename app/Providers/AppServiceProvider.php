@@ -13,10 +13,18 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Extensions\UpdateManager::class, function ($app) {
             return new \App\Extensions\UpdateManager($app['files']);
         });
+
+        $this->app->singleton('plugins', function ($app) {
+            return new \App\Extensions\Plugin\PluginManager($app['files']);
+        });
+
+        $this->app->alias('plugins', \App\Extensions\Plugin\PluginManager::class);
     }
 
     public function boot(): void
     {
+        $this->app->make('plugins')->loadPlugins();
+
         Paginator::useBootstrapFive();
         Carbon::setLocale('fr');
 

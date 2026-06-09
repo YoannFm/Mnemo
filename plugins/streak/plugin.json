@@ -1,0 +1,8 @@
+{
+    "id": "streak",
+    "name": "Streak",
+    "version": "1.0.0",
+    "description": "Suivi des jours consécutifs d'apprentissage avec affichage sur le tableau de bord.",
+    "author": "YoannFM",
+    "provider": "Plugins\\Streak\\StreakServiceProvider"
+}
