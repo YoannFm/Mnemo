@@ -69,11 +69,11 @@
                 <div class="mb-4" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
                     @foreach ($question['options'] as $index => $option)
                         <label for="option_{{ $index }}"
+                               class="quiz-option"
                                style="cursor:pointer;background:var(--card-bg);border:2px solid var(--card-border);
                                       border-radius:12px;padding:.5rem;display:flex;flex-direction:column;
                                       align-items:center;justify-content:center;gap:.5rem;min-height:80px;
-                                      transition:.2s;position:relative;"
-                               onclick="this.style.borderColor='var(--accent)'">
+                                      transition:.2s;position:relative;">
 
                             <input type="radio"
                                    id="option_{{ $index }}"
@@ -124,5 +124,19 @@ function setZoomImage(src) {
     document.getElementById('zoom-img').src = src;
     document.getElementById('zoom-modal').style.display = 'flex';
 }
+
+var keyMap = {'1':0,'&':0,'2':1,'é':1,'"':2,'3':2,"'":3,'4':3};
+document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var idx = keyMap[e.key];
+    if (idx !== undefined) {
+        var labels = document.querySelectorAll('.quiz-option');
+        if (labels[idx]) {
+            document.querySelectorAll('.quiz-option').forEach(function(l) { l.style.borderColor = 'var(--card-border)'; });
+            labels[idx].style.borderColor = 'var(--accent)';
+            labels[idx].querySelector('input[type=radio]').checked = true;
+        }
+    }
+});
 </script>
 </x-app-layout>
