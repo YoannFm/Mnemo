@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Module;
 use App\Models\Score;
+use App\Models\SharedExam;
 use App\Services\QuizGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,12 @@ class ExamController extends Controller
         if ($itemCount < 4) {
             return redirect()->route('modules.show', $module)->with('error', 'Il faut au moins 4 items pour passer un examen.');
         }
-        return view('quiz.exam.start', compact('module', 'itemCount'));
+
+        $sharedExams = Auth::id() === $module->owner_id
+            ? SharedExam::where('module_id', $module->id)->withCount('attempts')->latest()->get()
+            : collect();
+
+        return view('quiz.exam.start', compact('module', 'itemCount', 'sharedExams'));
     }
 
     public function start(Request $request, Module $module)
