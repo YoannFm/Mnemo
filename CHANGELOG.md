@@ -45,3 +45,43 @@
 - **Migration** : `nav_items` seed compatible avec le schéma initial (colonne `value` optionnelle)
 - **Migration** : `SHOW INDEX` remplacé par `Schema::hasIndex()` pour compatibilité SQLite/CI
 - **Tirets longs** : remplacement de `—` par `-` sur l'ensemble des vues
+
+---
+
+## v2026.06.04-1.0.0-1 - 2026-06-04
+
+Première version stable de Mnemo, application web de mémorisation par répétition espacée développée au Lycée Rascol (Albi).
+
+### Apprentissage
+- Création de modules avec items (question/réponse, image optionnelle)
+- Import en masse d'items via CSV
+- Mode Anki avec algorithme SM-2 (répétition espacée adaptative)
+- Mode Test avec score final et récapitulatif des erreurs
+- Bibliothèque publique - partage et duplication de modules entre utilisateurs
+- Suivi de progression et historique des scores
+
+### Communauté
+- Réactions emoji sur les articles (grille de 80 emojis)
+- Commentaires avec réponses imbriquées
+- Modification et suppression de ses propres commentaires (historique conservé)
+- Signalement de commentaires et modules
+
+### Panel d'administration
+- Gestion des utilisateurs - CRUD, rôles, bannissements, import/export CSV
+- Gestion des articles avec éditeur TinyMCE 6
+- Thèmes dark/light entièrement personnalisables
+- Signalements avec workflow - en attente / sanctionné / non sanctionné
+- Historique des commentaires modifiés et supprimés
+- Mutes temporaires ou définitifs avec notifications automatiques
+- Logs d'activité avec purge des entrées de plus de 30 jours
+- Pages statiques, redirections, navbar configurable
+
+### Sécurité
+- Authentification Laravel Breeze
+- Double authentification (2FA) TOTP
+- Fuseau horaire configurable depuis les paramètres généraux
+
+### Stack technique
+- PHP 8.3+ / Laravel 11 / Bootstrap 5.3 / Vite 8
+- SQLite (dev) / MySQL (prod)
+- TinyMCE 6 et Bootstrap Icons hébergés localement
