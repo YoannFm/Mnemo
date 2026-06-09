@@ -155,6 +155,8 @@
         </div>
     @endif
 
-    @stack('dashboard_widgets')
+    @foreach($pluginWidgets ?? [] as $widget)
+        {!! $widget !!}
+    @endforeach
 
 </x-app-layout>

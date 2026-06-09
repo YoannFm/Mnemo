@@ -17,13 +17,17 @@ class StreakServiceProvider extends BasePluginServiceProvider
         $this->app['events']->listen(UserActivity::class, RecordStreak::class);
 
         $this->app['view']->composer('dashboard', function ($view) {
-            if (auth()->check()) {
-                $streak = UserStreak::firstOrCreate(
-                    ['user_id' => auth()->id()],
-                    ['current_streak' => 0, 'longest_streak' => 0]
-                );
-                $view->with('userStreak', $streak);
-            }
+            if (!auth()->check()) return;
+
+            $streak = UserStreak::firstOrCreate(
+                ['user_id' => auth()->id()],
+                ['current_streak' => 0, 'longest_streak' => 0]
+            );
+
+            $html = view('streak::widget', ['userStreak' => $streak])->render();
+
+            $widgets = $view->getData()['pluginWidgets'] ?? [];
+            $view->with('pluginWidgets', array_merge($widgets, [$html]));
         });
     }
 }

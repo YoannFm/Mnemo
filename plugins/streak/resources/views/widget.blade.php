@@ -1,4 +1,3 @@
-@push('dashboard_widgets')
 <div class="mt-4">
     <div class="row g-3">
         <div class="col-6 col-lg-3">
@@ -25,4 +24,3 @@
         </div>
     </div>
 </div>
-@endpush
