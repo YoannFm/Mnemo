@@ -8,6 +8,7 @@
         <div class="alert alert-danger alert-dismissible fade show">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
     @endif
 
+    {{-- Versions --}}
     <div class="card shadow mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0"><i class="bi bi-arrow-up-circle me-2"></i>Mise à jour de l'application</h5>
@@ -45,42 +46,135 @@
                 </div>
             </div>
 
-            @if ($hasUpdate)
-                <div class="alert alert-warning d-flex align-items-center gap-2">
-                    <i class="bi bi-exclamation-triangle-fill"></i>
-                    Une nouvelle version est disponible : <strong>v{{ $latest }}</strong>.
+            @if (!$latest)
+                <div class="text-muted small">
+                    <i class="bi bi-wifi-off me-1"></i>Impossible de contacter le serveur de mises à jour. Cliquez sur "Vérifier" pour réessayer.
                 </div>
-
-                @if (!$isDownloaded)
-                    <form method="POST" action="{{ route('admin.update.download') }}">
-                        @csrf
-                        <button class="btn btn-primary">
-                            <i class="bi bi-cloud-download me-1"></i>Télécharger la mise à jour
-                        </button>
-                    </form>
-                @else
-                    <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
-                        <i class="bi bi-check-circle-fill"></i>
-                        Mise à jour téléchargée et prête à installer.
-                    </div>
-                    <form method="POST" action="{{ route('admin.update.install') }}"
-                          onsubmit="return confirm('Installer la mise à jour v{{ $latest }} ? L\'application sera brièvement indisponible.')">
-                        @csrf
-                        <button class="btn btn-success">
-                            <i class="bi bi-arrow-up-circle me-1"></i>Installer v{{ $latest }}
-                        </button>
-                    </form>
-                @endif
-            @elseif ($latest)
+            @elseif (!$hasUpdate)
                 <div class="alert alert-success d-flex align-items-center gap-2">
                     <i class="bi bi-check-circle-fill"></i>
                     Mnémo est à jour (v{{ $currentVersion }}).
                 </div>
-            @else
-                <div class="text-muted small">
-                    <i class="bi bi-wifi-off me-1"></i>Impossible de contacter le serveur de mises à jour. Cliquez sur "Vérifier" pour réessayer.
-                </div>
             @endif
         </div>
     </div>
+
+    @if ($hasUpdate)
+    {{-- Sécurité avant mise à jour --}}
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0"><i class="bi bi-shield-lock me-2"></i>Sauvegardes avant mise à jour</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted small mb-3">Effectuez ces sauvegardes avant d'installer la mise à jour. En cas de problème, vous pourrez restaurer le site.</p>
+
+            <div class="row g-3 mb-4">
+                <div class="col-sm-6">
+                    <div class="p-3 border rounded text-center" id="backup-files-card">
+                        <i class="bi bi-folder-fill fs-3 text-primary mb-2 d-block"></i>
+                        <div class="fw-semibold mb-1">Archive des fichiers</div>
+                        <div class="text-muted small mb-3">ZIP de tous les fichiers du site (hors vendor et node_modules)</div>
+                        <a href="{{ route('admin.update.backup-files') }}"
+                           class="btn btn-outline-primary btn-sm"
+                           id="btn-backup-files"
+                           onclick="markDone('files')">
+                            <i class="bi bi-download me-1"></i>Télécharger l'archive
+                        </a>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="p-3 border rounded text-center" id="backup-db-card">
+                        <i class="bi bi-database-fill fs-3 text-warning mb-2 d-block"></i>
+                        <div class="fw-semibold mb-1">Export base de données</div>
+                        <div class="text-muted small mb-3">Fichier SQL contenant toutes les données du site</div>
+                        <a href="{{ route('admin.update.backup-database') }}"
+                           class="btn btn-outline-warning btn-sm"
+                           id="btn-backup-db"
+                           onclick="markDone('db')">
+                            <i class="bi bi-download me-1"></i>Télécharger le SQL
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="backup-warning" class="alert alert-warning d-flex align-items-center gap-2 mb-0">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                Téléchargez les deux sauvegardes pour pouvoir installer la mise à jour.
+            </div>
+        </div>
+    </div>
+
+    {{-- Installation --}}
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0"><i class="bi bi-cloud-download me-2"></i>Installation de v{{ $latest }}</h5>
+        </div>
+        <div class="card-body">
+            @if (!$isDownloaded)
+                <form method="POST" action="{{ route('admin.update.download') }}">
+                    @csrf
+                    <button class="btn btn-primary">
+                        <i class="bi bi-cloud-download me-1"></i>Télécharger la mise à jour
+                    </button>
+                </form>
+            @else
+                <div class="alert alert-info d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Mise à jour téléchargée et prête à installer.
+                </div>
+                <form method="POST" action="{{ route('admin.update.install') }}"
+                      onsubmit="return confirmInstall(event)">
+                    @csrf
+                    <button class="btn btn-success" id="btn-install" disabled>
+                        <i class="bi bi-arrow-up-circle me-1"></i>Installer v{{ $latest }}
+                    </button>
+                    <div class="text-muted small mt-2" id="install-hint">
+                        <i class="bi bi-lock me-1"></i>Effectuez les deux sauvegardes pour déverrouiller l'installation.
+                    </div>
+                </form>
+            @endif
+        </div>
+    </div>
+
+    <script>
+    var backupsDone = { files: false, db: false };
+
+    function markDone(type) {
+        setTimeout(function() {
+            backupsDone[type] = true;
+            var card = document.getElementById('backup-' + type + '-card');
+            if (card) {
+                card.style.borderColor = '#198754';
+                card.querySelector('i.fs-3').classList.add('text-success');
+                card.querySelector('i.fs-3').classList.remove('text-primary', 'text-warning');
+            }
+            checkBackups();
+        }, 500);
+    }
+
+    function checkBackups() {
+        if (backupsDone.files && backupsDone.db) {
+            var btn = document.getElementById('btn-install');
+            var hint = document.getElementById('install-hint');
+            var warning = document.getElementById('backup-warning');
+            if (btn) btn.disabled = false;
+            if (hint) hint.innerHTML = '';
+            if (warning) {
+                warning.classList.remove('alert-warning');
+                warning.classList.add('alert-success');
+                warning.innerHTML = '<i class="bi bi-check-circle-fill"></i> Sauvegardes effectuées. Vous pouvez installer la mise à jour.';
+            }
+        }
+    }
+
+    function confirmInstall(e) {
+        if (!backupsDone.files || !backupsDone.db) {
+            e.preventDefault();
+            return false;
+        }
+        return confirm('Installer la mise à jour v{{ $latest }} ? L\'application sera brièvement indisponible.');
+    }
+    </script>
+    @endif
+
 </x-admin-layout>

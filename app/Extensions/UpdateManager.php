@@ -62,6 +62,83 @@ class UpdateManager
         $this->files->put($this->zipPath($version), $response->body());
     }
 
+    public function backupFiles(): string
+    {
+        $dir = storage_path('app/backups');
+        if (!$this->files->isDirectory($dir)) {
+            $this->files->makeDirectory($dir, 0755, true);
+        }
+
+        $filename = 'backup-files-' . now()->format('Y-m-d-His') . '.zip';
+        $path     = $dir . '/' . $filename;
+
+        $archive = new \ZipArchive();
+        if ($archive->open($path, \ZipArchive::CREATE) !== true) {
+            throw new \RuntimeException('Impossible de créer l\'archive.');
+        }
+
+        $base    = base_path();
+        $exclude = ['vendor', 'node_modules', '.git', 'storage/app/backups', 'storage/app/updates', 'storage/logs'];
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($base, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            $relative = ltrim(str_replace($base, '', $file->getPathname()), DIRECTORY_SEPARATOR);
+
+            foreach ($exclude as $ex) {
+                if (str_starts_with($relative, $ex)) continue 2;
+            }
+
+            if ($file->isDir()) {
+                $archive->addEmptyDir($relative);
+            } else {
+                $archive->addFile($file->getPathname(), $relative);
+            }
+        }
+
+        $archive->close();
+        return $path;
+    }
+
+    public function backupDatabase(): string
+    {
+        $dir = storage_path('app/backups');
+        if (!$this->files->isDirectory($dir)) {
+            $this->files->makeDirectory($dir, 0755, true);
+        }
+
+        $filename = 'backup-db-' . now()->format('Y-m-d-His') . '.sql';
+        $path     = $dir . '/' . $filename;
+
+        $db       = config('database.connections.' . config('database.default'));
+        $host     = $db['host'];
+        $port     = $db['port'] ?? 3306;
+        $database = $db['database'];
+        $username = $db['username'];
+        $password = $db['password'];
+
+        $cmd = sprintf(
+            'mysqldump --host=%s --port=%s --user=%s --password=%s %s > %s 2>&1',
+            escapeshellarg($host),
+            escapeshellarg((string) $port),
+            escapeshellarg($username),
+            escapeshellarg($password),
+            escapeshellarg($database),
+            escapeshellarg($path)
+        );
+
+        exec($cmd, $output, $code);
+
+        if ($code !== 0 || !$this->files->exists($path) || $this->files->size($path) === 0) {
+            throw new \RuntimeException('Échec de l\'export de la base de données.');
+        }
+
+        return $path;
+    }
+
     public function install(): void
     {
         $latest = $this->getLatestVersion();

@@ -290,6 +290,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::get('/update', [\App\Http\Controllers\Admin\UpdateController::class, 'index'])->name('update.index');
     Route::post('/update/fetch', [\App\Http\Controllers\Admin\UpdateController::class, 'fetch'])->name('update.fetch');
     Route::post('/update/download', [\App\Http\Controllers\Admin\UpdateController::class, 'download'])->name('update.download');
+    Route::get('/update/backup-files', [\App\Http\Controllers\Admin\UpdateController::class, 'backupFiles'])->name('update.backup-files');
+    Route::get('/update/backup-database', [\App\Http\Controllers\Admin\UpdateController::class, 'backupDatabase'])->name('update.backup-database');
     Route::post('/update/install', [\App\Http\Controllers\Admin\UpdateController::class, 'install'])->name('update.install');
     // Themes duplicate
     Route::post('/themes/{theme}/duplicate', [\App\Http\Controllers\Admin\ThemeController::class, 'duplicate'])->name('themes.duplicate');

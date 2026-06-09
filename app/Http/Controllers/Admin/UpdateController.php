@@ -37,10 +37,29 @@ class UpdateController extends Controller
         }
     }
 
+    public function backupFiles()
+    {
+        try {
+            $path = $this->updates->backupFiles();
+            return response()->download($path)->deleteFileAfterSend(false);
+        } catch (Throwable $t) {
+            return back()->with('error', $t->getMessage());
+        }
+    }
+
+    public function backupDatabase()
+    {
+        try {
+            $path = $this->updates->backupDatabase();
+            return response()->download($path)->deleteFileAfterSend(false);
+        } catch (Throwable $t) {
+            return back()->with('error', $t->getMessage());
+        }
+    }
+
     public function install()
     {
         try {
-            $latest = $this->updates->getLatestVersion();
             $this->updates->install();
             return back()->with('success', 'Mise à jour installée avec succès.');
         } catch (Throwable $t) {
