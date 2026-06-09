@@ -100,6 +100,9 @@
                             <li class="sidebar-item {{ request()->routeIs('admin.settings.maintenance') ? 'active' : '' }}">
                                 <a class="sidebar-link" href="{{ route('admin.settings.maintenance') }}">Maintenance</a>
                             </li>
+                            <li class="sidebar-item {{ request()->routeIs('admin.settings.features') ? 'active' : '' }}">
+                                <a class="sidebar-link" href="{{ route('admin.settings.features') }}">Fonctionnalités</a>
+                            </li>
                         </ul>
                     </li>
 

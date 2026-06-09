@@ -262,6 +262,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::post('/settings/mail/send', [SettingsController::class, 'sendTestMail'])->name('settings.mail.send');
     Route::get('/settings/maintenance', [SettingsController::class, 'maintenance'])->name('settings.maintenance');
     Route::post('/settings/maintenance', [SettingsController::class, 'updateMaintenance'])->name('settings.maintenance.update');
+    Route::get('/settings/features', [SettingsController::class, 'features'])->name('settings.features');
+    Route::post('/settings/features', [SettingsController::class, 'updateFeatures'])->name('settings.features.update');
     // Pages
     Route::resource('pages', \App\Http\Controllers\Admin\PageController::class);
     // Posts

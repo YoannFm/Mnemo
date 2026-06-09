@@ -232,4 +232,45 @@ class SettingsController extends Controller
 
         return back()->with('success', 'Paramètres de maintenance sauvegardés.');
     }
+
+    // ─────────────────────────────────────────────
+    // Fonctionnalités
+    // ─────────────────────────────────────────────
+
+    public function features()
+    {
+        $features = [
+            'feature_keyboard_shortcuts' => ['label' => 'Raccourcis clavier (1/2/3/4 + AZERTY)', 'default' => '1'],
+            'feature_quick_review'       => ['label' => 'Révision rapide (après un test raté)', 'default' => '1'],
+            'feature_exam_ranking'       => ['label' => 'Classement dans les examens partagés', 'default' => '1'],
+            'feature_exam_qrcode'        => ['label' => 'QR Code sur les résultats d\'examens', 'default' => '1'],
+            'feature_profile_stats'      => ['label' => 'Statistiques sur le profil', 'default' => '1'],
+            'feature_admin_charts'       => ['label' => 'Graphiques sur le tableau de bord admin', 'default' => '1'],
+            'feature_groups'             => ['label' => 'Groupes / Classes', 'default' => '1'],
+            'feature_item_badges'        => ['label' => 'Badges de progression sur les items', 'default' => '1'],
+        ];
+        $values = [];
+        foreach ($features as $key => $meta) {
+            $values[$key] = Setting::get($key, $meta['default']);
+        }
+        return view('admin.settings.features', compact('features', 'values'));
+    }
+
+    public function updateFeatures(Request $request)
+    {
+        $keys = [
+            'feature_keyboard_shortcuts',
+            'feature_quick_review',
+            'feature_exam_ranking',
+            'feature_exam_qrcode',
+            'feature_profile_stats',
+            'feature_admin_charts',
+            'feature_groups',
+            'feature_item_badges',
+        ];
+        foreach ($keys as $key) {
+            Setting::set($key, $request->boolean($key) ? '1' : '0');
+        }
+        return redirect()->back()->with('success', 'Fonctionnalités mises à jour.');
+    }
 }
