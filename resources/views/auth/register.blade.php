@@ -70,15 +70,24 @@
 
         {{-- Conditions d'inscription --}}
         @if (setting('registration_conditions'))
-            <div class="mb-3">
-                <div style="max-height:140px;overflow-y:auto;font-size:.8rem;color:var(--text-muted);background:var(--card-bg);border:1px solid var(--card-border);border-radius:8px;padding:.75rem 1rem;">
-                    {!! setting('registration_conditions') !!}
-                </div>
-                <div class="form-check mt-2">
-                    <input class="form-check-input" type="checkbox" id="accept_terms" required>
-                    <label class="form-check-label" for="accept_terms" style="font-size:.85rem;">
-                        J'accepte les conditions d'inscription
-                    </label>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="accept_terms" required>
+                <label class="form-check-label" for="accept_terms" style="font-size:.85rem;">
+                    J'accepte les
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" style="color:var(--accent);">conditions d'inscription</a>
+                </label>
+            </div>
+            <div class="modal fade" id="termsModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content" style="background:var(--card-bg);border:1px solid var(--card-border);">
+                        <div class="modal-header" style="border-bottom:1px solid var(--card-border);">
+                            <h5 class="modal-title" style="font-size:1rem;">Conditions d'inscription</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" style="font-size:.875rem;color:var(--text-muted);">
+                            {!! setting('registration_conditions') !!}
+                        </div>
+                    </div>
                 </div>
             </div>
         @endif

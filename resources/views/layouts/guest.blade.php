@@ -128,9 +128,15 @@
             <a href="/" class="brand-logo text-decoration-none">
                 Mn<span>émo</span>
             </a>
-            <p style="font-size:.8rem;color:var(--text-muted);margin-top:.25rem;">
-                Application de mémorisation
-            </p>
+            @if (setting('site_description'))
+                <p style="font-size:.8rem;color:var(--text-muted);margin-top:.25rem;">
+                    {{ setting('site_description') }}
+                </p>
+            @else
+                <p style="font-size:.8rem;color:var(--text-muted);margin-top:.25rem;">
+                    Application de mémorisation
+                </p>
+            @endif
         </div>
 
         {{-- Contenu de la page (formulaire login/register/etc.) --}}
