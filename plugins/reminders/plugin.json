@@ -1,0 +1,8 @@
+{
+    "id": "reminders",
+    "name": "Rappels de révision",
+    "version": "1.0.0",
+    "description": "Envoie des rappels par e-mail aux utilisateurs qui n'ont pas révisé depuis 3 jours.",
+    "author": "YoannFM",
+    "provider": "Plugins\\Reminders\\RemindersServiceProvider"
+}
