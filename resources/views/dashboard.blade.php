@@ -6,15 +6,13 @@
             Bonjour, <span style="color:var(--accent);">{{ Auth::user()->name }}</span>
         </h3>
         <p style="color:var(--text-muted);font-size:.9rem;margin:0;">
-            Prêt à mémoriser quelque chose aujourd'hui ?
+            @if (setting('home_message'))
+                {!! setting('home_message') !!}
+            @else
+                Prêt à mémoriser quelque chose aujourd'hui ?
+            @endif
         </p>
     </div>
-
-    @if (setting('home_message'))
-        <div class="card mb-5 p-4" style="border-left:3px solid var(--accent);">
-            {!! setting('home_message') !!}
-        </div>
-    @endif
 
     {{-- Stats --}}
     <div class="row g-3 mb-5">
