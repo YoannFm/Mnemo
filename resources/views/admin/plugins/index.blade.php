@@ -122,7 +122,11 @@
                                 </div>
                             </div>
                             <div>
-                                @php $alreadyInstalled = $plugin->is_installed || $installed->contains('id', $plugin->slug); @endphp
+                                @php
+    $alreadyInstalled = $plugin->is_installed
+        || $installed->contains('id', $plugin->slug)
+        || $installed->contains(fn($p) => strtolower($p->id) === strtolower($plugin->slug));
+@endphp
                                 @if (!$alreadyInstalled)
                                     <form method="POST" action="{{ route('admin.plugins.install', $plugin->slug) }}">
                                         @csrf

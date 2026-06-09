@@ -55,8 +55,8 @@ class PluginController extends Controller
 
     public function install(string $slug)
     {
-        $installed = $this->plugins->discoverPlugins()->pluck('id')->toArray();
-        if (in_array($slug, $installed)) {
+        $installed = $this->plugins->discoverPlugins()->pluck('id')->map('strtolower')->toArray();
+        if (in_array(strtolower($slug), $installed) || is_dir(base_path("plugins/{$slug}"))) {
             return back()->with('error', 'Ce plugin est déjà installé.');
         }
 
