@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-06-09 (suite 3)
+
+### Plugins
+
+- **Plugin Webhook** v1.0.0 : envoi automatique des résultats d'examen vers une URL externe (Zapier, Make, Google Sheets...) à la fin de chaque passage
+- **Plugin Import Quizlet** v1.0.0 : import d'un set Quizlet par copier-coller (terme/définition) pour créer un module Mnemo en un clic
+
+---
+
 ## 2026-06-09 (suite 2)
 
 ### Ajouts
