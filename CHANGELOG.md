@@ -48,6 +48,69 @@
 
 ---
 
+## v2026.06.08 - 2026-06-05 au 2026-06-08
+
+### Interface & Responsivité
+- Menu mobile plein écran avec animation hamburger vers croix
+- Sidebar admin en panneau glissant sur mobile/tablette
+- Sous-menu utilisateur repliable dans le menu mobile
+- Responsivité complète mobile/tablette sur toutes les pages
+
+### Modules
+- Système de notes 5 étoiles avec commentaires sur les modules
+- Réponses imbriquées aux avis (replies)
+- Signalement des avis et réponses avec modération admin
+- Bouton loupe sur les images de question (zoom sans valider)
+- Images carrées dans les réponses (grille 2x2)
+- Export et import de modules au format ZIP
+- Description et photo optionnelles à la création d'item
+- Raccourci réinitialisation de progression sur les cartes de module
+- Transfert de propriété d'un module entre utilisateurs
+
+### Emojis & Articles
+- Système d'emojis custom : upload admin + picker avec recherche et catégories
+- Import de packs d'emojis via ZIP + manifest
+- Section "récemment utilisés" dans le picker
+- Articles avec réactions emoji et commentaires activables par article
+- Signalement de commentaires avec motif et modération admin
+- Modification et suppression de commentaires (historique conservé)
+
+### Admin
+- Actions complètes sur les modules depuis l'admin (voir, exporter, dupliquer, supprimer)
+- Contournement admin pour les restrictions de propriété et confidentialité
+- Export des données utilisateur (CSV individuel et ZIP complet)
+- Import d'utilisateurs en masse via CSV
+- Fusion des signalements modules et commentaires dans une seule page filtrée
+- Statuts des signalements avec workflow (en attente / sanctionné / non sanctionné)
+- Transcription des commentaires signalés dans le panel
+- Historique des modifications et suppressions de commentaires
+- Stats du tableau de bord et filtres avancés dans les logs
+- Purge des logs de plus de 30 jours
+
+### Sécurité & Authentification
+- Correction de la boucle de redirection 2FA
+- Confirmation du mot de passe requis pour désactiver le 2FA
+
+### Navigation & Thèmes
+- Thèmes dark/light avec génération automatique des variantes
+- Correction des liens navbar (colonne `url` remplacée par `value`)
+- Liens de navigation entre login, register et mot de passe oublié
+- Couleurs du thème appliquées aux pages d'authentification (guest layout)
+
+### Éditeur
+- Remplacement du CDN TinyMCE par hébergement local (sans clé API)
+- Support du mode sombre/clair dans l'éditeur TinyMCE
+- Pages statiques : éditeur TinyMCE, description, restriction par rôle, route publique
+
+### Corrections
+- Fix Anki : stats de session globales, fix stats toujours à 0
+- Fix questions avec champs vides
+- Fix permission duplication modules
+- Fix compteur commentaires (exclut les supprimés)
+- Fix emoji trop court dans la base de données (10 -> 100 chars)
+
+---
+
 ## v2026.06.04-1.0.0-1 - 2026-06-04
 
 Première version stable de Mnemo, application web de mémorisation par répétition espacée développée au Lycée Rascol (Albi).
