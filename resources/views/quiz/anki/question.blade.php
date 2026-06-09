@@ -359,8 +359,9 @@
                 return;
             }
 
-            if (['1','2','3','4'].includes(e.key)) {
-                var idx = parseInt(e.key) - 1;
+            var keyMap = {'1':0,'&':0,'2':1,'é':1,'"':2,'3':2,"'":3,'4':3};
+            var idx = keyMap[e.key];
+            if (idx !== undefined) {
                 var btns = document.querySelectorAll('.anki-option:not([disabled])');
                 if (btns[idx]) btns[idx].click();
             }
@@ -373,6 +374,7 @@
             <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">2</kbd>
             <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">3</kbd>
             <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">4</kbd>
+            <span style="opacity:.6;">/ &amp; é " '</span>
             pour répondre &nbsp;·&nbsp;
             <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">Espace</kbd> pour continuer
         </small>

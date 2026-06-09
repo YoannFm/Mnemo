@@ -153,6 +153,20 @@ document.querySelectorAll('.test-option').forEach(label => {
         this.style.borderColor = 'var(--accent)';
     });
 });
+
+var keyMap = {'1':0,'&':0,'2':1,'é':1,'"':2,'3':2,"'":3,'4':3};
+document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    var idx = keyMap[e.key];
+    if (idx !== undefined) {
+        var labels = document.querySelectorAll('.test-option');
+        if (labels[idx]) {
+            document.querySelectorAll('.test-option').forEach(l => { l.style.borderColor = 'var(--card-border)'; });
+            labels[idx].style.borderColor = 'var(--accent)';
+            labels[idx].querySelector('input[type=radio]').checked = true;
+        }
+    }
+});
 </script>
 
 </x-app-layout>
