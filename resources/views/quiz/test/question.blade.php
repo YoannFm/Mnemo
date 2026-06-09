@@ -65,11 +65,11 @@
                     @foreach ($question['options'] as $index => $option)
                         {{-- Chaque option est un bouton radio stylisé en carte cliquable --}}
                         <label for="option_{{ $index }}"
+                               class="test-option"
                                style="cursor:pointer;background:var(--card-bg);border:2px solid var(--card-border);
                                       border-radius:12px;padding:.5rem;display:flex;flex-direction:column;
                                       align-items:center;justify-content:center;gap:.5rem;min-height:80px;
-                                      transition:.2s;position:relative;"
-                               onclick="this.style.borderColor='var(--accent)'">
+                                      transition:.2s;position:relative;">
 
                             <input type="radio"
                                    id="option_{{ $index }}"
@@ -143,6 +143,16 @@ const timer = setInterval(() => {
 
 // Arrête le timer quand le formulaire est soumis
 document.querySelector('form').addEventListener('submit', () => clearInterval(timer));
+
+// Sélection exclusive des options (reset visuel des autres labels)
+document.querySelectorAll('.test-option').forEach(label => {
+    label.addEventListener('click', function() {
+        document.querySelectorAll('.test-option').forEach(l => {
+            l.style.borderColor = 'var(--card-border)';
+        });
+        this.style.borderColor = 'var(--accent)';
+    });
+});
 </script>
 
 </x-app-layout>
