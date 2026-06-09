@@ -232,19 +232,33 @@
     @push('styles')
     <style>
     @media print {
-        nav, .breadcrumb, .d-flex.gap-2.flex-wrap { display: none !important; }
-        #qr-backdrop { display: none !important; }
-        body { background: white !important; color: #111 !important; }
-        .card { background: white !important; border: 1px solid #ccc !important; box-shadow: none !important; }
-        .card-body { background: white !important; }
-        code { color: #0055cc !important; background: #f0f4ff !important; padding: 1px 4px; border-radius: 3px; }
-        .table { color: #111 !important; }
-        .table th, .table td { border-color: #ccc !important; }
-        thead tr { background: #f3f4f6 !important; }
-        .badge { border: 1px solid currentColor; }
-        [style*="color:var(--text-muted)"] { color: #555 !important; }
-        [style*="color:var(--accent)"] { color: #0055cc !important; }
-        .collapse { display: table-row !important; }
+        /* Redéfinit toutes les variables CSS en valeurs print-friendly */
+        :root {
+            --text-primary: #111 !important;
+            --text-muted: #444 !important;
+            --card-bg: #fff !important;
+            --card-border: #bbb !important;
+            --accent: #0055cc !important;
+            --accent-light: #e8f0fe !important;
+            --body-bg: #fff !important;
+            --header-bg: #fff !important;
+        }
+        /* Cache les éléments inutiles à l'impression */
+        header, nav, footer, .breadcrumb,
+        .d-flex.gap-2.flex-wrap,
+        #qr-modal,
+        button[onclick*="print"] { display: none !important; }
+        /* Force fond blanc partout */
+        body, .card, .card-body, .table-responsive { background: #fff !important; color: #111 !important; }
+        .card { border: 1px solid #bbb !important; box-shadow: none !important; page-break-inside: avoid; }
+        /* Tableau */
+        .table { color: #111 !important; font-size: .8rem !important; }
+        .table th, .table td { border: 1px solid #ccc !important; color: #111 !important; background: #fff !important; }
+        thead tr, thead th { background: #f0f0f0 !important; color: #111 !important; }
+        /* Badges de pourcentage */
+        .badge { border: 1px solid currentColor !important; background: transparent !important; }
+        /* QR Code reste visible */
+        img[alt="QR Code"] { display: block !important; }
     }
     </style>
     @endpush
