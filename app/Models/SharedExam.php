@@ -16,6 +16,7 @@ class SharedExam extends Model
         'label',
         'expires_at',
         'max_attempts',
+        'webhook_url',
     ];
 
     protected $casts = [

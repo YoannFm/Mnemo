@@ -22,18 +22,20 @@ class SharedExamController extends Controller
         }
 
         $validated = $request->validate([
-            'mode'       => 'required|string',
-            'label'      => 'nullable|string|max:255',
-            'expires_at' => 'nullable|date|after:now',
+            'mode'        => 'required|string',
+            'label'       => 'nullable|string|max:255',
+            'expires_at'  => 'nullable|date|after:now',
+            'webhook_url' => 'nullable|url',
         ]);
 
         $sharedExam = SharedExam::create([
-            'uuid'       => (string) Str::uuid(),
-            'user_id'    => Auth::id(),
-            'module_id'  => $module->id,
-            'mode'       => $validated['mode'],
-            'label'      => $validated['label'] ?? null,
-            'expires_at' => $validated['expires_at'] ?? null,
+            'uuid'        => (string) Str::uuid(),
+            'user_id'     => Auth::id(),
+            'module_id'   => $module->id,
+            'mode'        => $validated['mode'],
+            'label'       => $validated['label'] ?? null,
+            'expires_at'  => $validated['expires_at'] ?? null,
+            'webhook_url' => $validated['webhook_url'] ?? null,
         ]);
 
         $link = route('guest.exam.show', $sharedExam->uuid);

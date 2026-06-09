@@ -56,6 +56,7 @@
                                name="expires_at"
                                value="{{ $defaultExpiry }}">
                     </div>
+                    @includeIf('webhook::field', ['sharedExam' => null])
                 </div>
                 <div class="modal-footer" style="border-top:1px solid var(--card-border);">
                     <button type="button" class="btn btn-sm" data-bs-dismiss="modal"
