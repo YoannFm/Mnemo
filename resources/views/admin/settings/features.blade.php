@@ -18,16 +18,21 @@
                 @csrf
 
                 @foreach($features as $key => $meta)
-                    <div class="mb-3">
-                        <div class="form-check form-switch">
+                    <div class="d-flex justify-content-between align-items-start py-3 {{ !$loop->last ? 'border-bottom' : '' }}">
+                        <div style="flex:1;padding-right:2rem;">
+                            <div style="font-weight:500;color:var(--text-primary);margin-bottom:.2rem;">{{ $meta['label'] }}</div>
+                            @if(!empty($meta['description']))
+                                <div style="font-size:.8rem;color:var(--text-muted);line-height:1.5;">{{ $meta['description'] }}</div>
+                            @endif
+                        </div>
+                        <div class="form-check form-switch mb-0" style="flex-shrink:0;padding-top:.15rem;">
                             <input class="form-check-input" type="checkbox"
                                    id="{{ $key }}"
                                    name="{{ $key }}"
                                    value="1"
-                                   {{ ($values[$key] ?? $meta['default']) == '1' ? 'checked' : '' }}>
-                            <label class="form-check-label" for="{{ $key }}">
-                                {{ $meta['label'] }}
-                            </label>
+                                   {{ ($values[$key] ?? $meta['default']) == '1' ? 'checked' : '' }}
+                                   style="width:2.5rem;height:1.25rem;cursor:pointer;">
+                            <label class="form-check-label visually-hidden" for="{{ $key }}">{{ $meta['label'] }}</label>
                         </div>
                     </div>
                 @endforeach
