@@ -4,9 +4,15 @@
     {{-- Header --}}
     <div class="d-flex justify-content-between align-items-center mb-3">
         <span style="font-weight:700;font-size:1rem;">{{ $sharedExam->module->title }}</span>
-        <span style="font-size:.85rem;color:var(--text-muted);font-weight:500;">
-            {{ $question['current'] }} / {{ $question['total'] }}
-        </span>
+        <div class="d-flex align-items-center gap-3">
+            <span style="font-size:.85rem;color:var(--text-muted);font-weight:500;">{{ $question['current'] }} / {{ $question['total'] }}</span>
+            <a href="{{ route('guest.exam.show', $sharedExam->uuid) }}"
+               class="btn btn-sm"
+               style="color:var(--text-muted);border:1px solid var(--card-border);"
+               onclick="return confirm('Quitter l\'examen ? Ta progression sera perdue.')">
+                <i class="bi bi-x-lg me-1"></i>Quitter
+            </a>
+        </div>
     </div>
 
     {{-- Progress --}}
