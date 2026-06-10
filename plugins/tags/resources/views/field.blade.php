@@ -28,18 +28,18 @@
         {{-- Add an existing tag --}}
         @php $availableTags = $allTags->whereNotIn('id', $moduleTags->pluck('id')); @endphp
         @if ($availableTags->isNotEmpty())
-            <form method="POST" action="{{ route('modules.tags.attach', $module) }}" class="d-flex gap-2 align-items-center mb-2">
-                @csrf
-                <select name="tag_id" class="form-select form-select-sm" style="max-width:220px;">
+            <div class="d-flex gap-2 align-items-center mb-2">
+                <select id="tag-attach-select-{{ $module->id }}" class="form-select form-select-sm" style="max-width:220px;">
                     <option value="">— Ajouter un tag existant —</option>
                     @foreach ($availableTags as $tag)
-                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                        <option value="{{ $tag->id }}" data-color="{{ $tag->color ?? '#6b7280' }}" data-name="{{ $tag->name }}">{{ $tag->name }}</option>
                     @endforeach
                 </select>
-                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                <button type="button" class="btn btn-sm btn-outline-secondary"
+                        onclick="tagsAttach({{ $module->id }}, '{{ route('modules.tags.attach', $module) }}')">
                     <i class="bi bi-plus-lg me-1"></i>Ajouter
                 </button>
-            </form>
+            </div>
         @endif
 
         {{-- Create a new tag --}}
@@ -112,6 +112,42 @@
 </div>
 
 <script>
+window.tagsAttach = function(moduleId, attachUrl) {
+    var sel = document.getElementById('tag-attach-select-' + moduleId);
+    var tagId = sel ? sel.value : '';
+    if (!tagId) return;
+    var opt = sel.options[sel.selectedIndex];
+    var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch(attachUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': token},
+        body: '_token=' + encodeURIComponent(token) + '&tag_id=' + encodeURIComponent(tagId)
+    }).then(function(r) {
+        if (r.ok) {
+            // Add badge in existing tags area
+            var color = opt.dataset.color || '#6b7280';
+            var name = opt.dataset.name || opt.text;
+            var detachUrl = attachUrl.replace('/tags', '/tags/' + tagId).replace('POST', '');
+            var container = document.querySelector('#tags-attached-' + moduleId);
+            if (container) {
+                var badge = document.createElement('span');
+                badge.className = 'badge d-inline-flex align-items-center gap-1';
+                badge.style.cssText = 'background-color:' + color + ';color:#fff;font-size:.8rem;padding:.35em .65em;';
+                badge.innerHTML = name + ' ';
+                container.appendChild(badge);
+            }
+            // Remove from select
+            opt.remove();
+            sel.value = '';
+            if (sel.options.length <= 1) sel.closest('.d-flex').style.display = 'none';
+            // Reload to reflect changes properly
+            window.location.reload();
+        } else {
+            alert('Erreur lors de l\'ajout du tag.');
+        }
+    }).catch(function() { alert('Erreur réseau.'); });
+};
+
 window.tagsDetach = function(url, btn) {
     var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     fetch(url, {
