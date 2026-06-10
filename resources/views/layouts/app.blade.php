@@ -416,7 +416,7 @@
             --bs-table-striped-bg: rgba(239,183,2,.05);
             --bs-table-hover-bg: rgba(239,183,2,.08);
             color: var(--text-primary);
-            background: var(--accent);
+            background: transparent;
             border-radius: 0;
         }
 
@@ -435,7 +435,7 @@
             padding: 14px 16px;
         }
 
-        .table tbody { background: #212227; }
+        .table tbody { background: var(--card-bg); }
 
         .table tbody td {
             background: #212227;
