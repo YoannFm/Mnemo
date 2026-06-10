@@ -12,8 +12,16 @@ class TagController extends Controller
 {
     public function store(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:50|unique:tags,name']);
-        $tag = Tag::create(['name' => $request->name, 'color' => $request->color ?? '#6b7280']);
+        $data = $request->json()->all() ?: $request->all();
+        $name = trim($data['name'] ?? '');
+        $color = $data['color'] ?? '#6b7280';
+        if (!$name || strlen($name) > 50) {
+            return response()->json(['error' => 'Nom invalide'], 422);
+        }
+        if (Tag::where('name', $name)->exists()) {
+            return response()->json(['error' => 'Tag déjà existant'], 422);
+        }
+        $tag = Tag::create(['name' => $name, 'color' => $color]);
         return response()->json($tag);
     }
 

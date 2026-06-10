@@ -23,12 +23,7 @@
             <div class="card mb-4">
                 <div class="card-body p-4">
 
-                    {{-- Type de question (Q1-Q4) - aide l'utilisateur à comprendre la difficulté --}}
-                    <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;">
-                        <i class="bi bi-tag me-1"></i>{{ $question['question_type'] }}
-                    </div>
-
-                    {{-- Énoncé de la question - explique ce qu'il faut faire --}}
+                    {{-- Énoncé de la question --}}
                     <h6 class="mb-3" style="font-size:1.1rem;">{{ $question['question_text'] }}</h6>
 
                     {{-- Affichage du contenu de la question selon le type (photo ou texte) --}}

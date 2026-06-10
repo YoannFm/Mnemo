@@ -74,12 +74,7 @@
             <div class="card mb-4">
                 <div class="card-body p-4">
 
-                    {{-- Type de question aléatoire (Q1-Q4) - varie à chaque nouvelle question --}}
-                    <div style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;">
-                        <i class="bi bi-tag me-1"></i>{{ $question['question_type'] }}
-                    </div>
-
-                    {{-- Énoncé de la question - explique ce qu'il faut faire --}}
+                    {{-- Énoncé de la question --}}
                     <h6 class="mb-3" style="font-size:1.1rem;">{{ $question['question_text'] }}</h6>
 
                     {{-- Contenu de la question selon le type - photo ou texte --}}
@@ -313,11 +308,7 @@
                         </div>
                     ` : ''}
 
-                    {{-- Afficher le streak actuel et le statut "Maîtrisé" si applicable --}}
-                    <div style="margin-top:.75rem;font-size:.8rem;color:var(--text-muted);">
-                        Série : <strong>${data.streak}</strong>
-                        ${data.is_mastered ? ' - <span style="color:var(--success-color);">✓ Maîtrisé !</span>' : ''}
-                    </div>
+                    ${data.is_mastered ? '<div style="margin-top:.75rem;font-size:.8rem;color:var(--success-color);">✓ Maîtrisé !</div>' : ''}
                 </div>
             `;
 
