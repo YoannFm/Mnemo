@@ -24,21 +24,26 @@ class LibraryController extends Controller
             abort(403, 'Vous n\'avez pas acces a la bibliotheque publique.');
         }
 
-        $search = $request->input('q');
+        $search  = $request->input('q');
+        $tagIds  = array_filter((array) $request->input('tags', []));
 
         $modules = Module::where('is_public', true)
-            ->with('owner')                // Chargement du propriétaire pour afficher son nom
+            ->with('owner')
             ->withCount('items')
             ->when($search, function ($query) use ($search) {
-                // Recherche dans le titre et la description
                 $query->where(function ($q) use ($search) {
                     $q->where('title', 'like', "%{$search}%")
                       ->orWhere('description', 'like', "%{$search}%");
                 });
             })
+            ->when(!empty($tagIds), function ($query) use ($tagIds) {
+                foreach ($tagIds as $tagId) {
+                    $query->whereHas('tags', fn($q) => $q->where('tags.id', $tagId));
+                }
+            })
             ->latest()
             ->paginate(12)
-            ->withQueryString(); // Conserver le paramètre de recherche dans la pagination
+            ->withQueryString();
 
         return view('library.index', compact('modules', 'search'));
     }
