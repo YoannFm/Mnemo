@@ -443,7 +443,7 @@
             padding: 10px 16px;
         }
 
-        .breadcrumb { background-color: #212227; }
+        .breadcrumb { background-color: var(--card-border); }
 
         /* ── Footer ── */
         #main-footer {
