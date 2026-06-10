@@ -15,16 +15,11 @@
                     <span class="badge d-inline-flex align-items-center gap-1"
                           style="background-color:{{ $tag->color ?? '#6b7280' }};color:#fff;font-size:.8rem;padding:.35em .65em;">
                         {{ $tag->name }}
-                        <form method="POST"
-                              action="{{ route('modules.tags.detach', [$module, $tag]) }}"
-                              style="display:inline;margin:0;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="btn-close btn-close-white"
-                                    style="font-size:.6rem;"
-                                    title="Retirer ce tag"></button>
-                        </form>
+                        <button type="button"
+                                class="btn-close btn-close-white"
+                                style="font-size:.6rem;"
+                                title="Retirer ce tag"
+                                onclick="tagsDetach('{{ route('modules.tags.detach', [$module, $tag]) }}', this)"></button>
                     </span>
                 @endforeach
             </div>
@@ -117,6 +112,22 @@
 </div>
 
 <script>
+window.tagsDetach = function(url, btn) {
+    var token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': token},
+        body: '_method=DELETE&_token=' + encodeURIComponent(token)
+    }).then(function(r) {
+        if (r.ok) {
+            var badge = btn.closest('.badge');
+            if (badge) badge.remove();
+        } else {
+            alert('Erreur lors de la suppression du tag.');
+        }
+    }).catch(function() { alert('Erreur réseau.'); });
+};
+
 window.tagsCreateNew = function(moduleId, storeUrl, attachUrl) {
     var nameInput = document.getElementById('new-tag-name-' + moduleId);
     var colorInput = document.getElementById('new-tag-color-' + moduleId);
