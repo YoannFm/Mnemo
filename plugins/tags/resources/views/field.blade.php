@@ -134,8 +134,11 @@
             method: 'POST',
             headers: {'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'Accept': 'application/json'},
             body: JSON.stringify({name: name, color: colorInput.value})
-        }).then(function(r) { return r.json(); }).then(function(tag) {
-            // Attach tag to module
+        }).then(function(r) {
+            return r.json().then(function(data) { return {ok: r.ok, data: data}; });
+        }).then(function(res) {
+            if (!res.ok) { alert(res.data.error || 'Erreur lors de la création du tag.'); return; }
+            var tag = res.data;
             var form = document.createElement('form');
             form.method = 'POST';
             form.action = attachUrl;
@@ -144,7 +147,7 @@
             form.appendChild(t); form.appendChild(id);
             document.body.appendChild(form);
             form.submit();
-        }).catch(function() { alert('Ce tag existe peut-être déjà.'); });
+        }).catch(function() { alert('Erreur réseau. Réessayez.'); });
     };
     </script>
     @endif
