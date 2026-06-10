@@ -31,7 +31,7 @@
                     </div>
                 </div>
             @else
-                <div class="card" style="background:#0f1117;border:1px solid var(--card-border);">
+                <div class="card" style="background:var(--body-bg);border:1px solid var(--card-border);">
                     <div class="card-body p-3">
                         <p style="margin:0;font-size:.95rem;">{{ $question['question_content'] }}</p>
                     </div>
