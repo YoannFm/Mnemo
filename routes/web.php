@@ -96,6 +96,11 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::get('/modules/import', [ModuleExportController::class, 'showImportForm'])->name('modules.import.form');
     Route::post('/modules/import', [ModuleExportController::class, 'import'])->name('modules.import');
 
+    // ─── Corbeille & restauration des modules (avant resource pour éviter conflit) ───
+    Route::get('/modules/trash', [ModuleController::class, 'trash'])->name('modules.trash');
+    Route::post('/modules/{id}/restore', [ModuleController::class, 'restore'])->name('modules.restore');
+    Route::delete('/modules/{id}/force-delete', [ModuleController::class, 'forceDelete'])->name('modules.force-delete');
+
     // ─── CRUD Modules ───
     // Génère : modules.index, modules.create, modules.store,
     //          modules.show, modules.edit, modules.update, modules.destroy

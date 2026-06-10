@@ -9,7 +9,14 @@
                 {{ $modules->total() }} module{{ $modules->total() > 1 ? 's' : '' }} au total
             </p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            @if (!empty($trashedCount) && $trashedCount > 0)
+                <a href="{{ route('modules.trash') }}"
+                   class="btn btn-sm"
+                   style="color:var(--text-muted);border:1px solid var(--card-border);">
+                    <i class="bi bi-trash me-1"></i>Corbeille ({{ $trashedCount }})
+                </a>
+            @endif
             <a href="{{ route('modules.import.form') }}"
                class="btn"
                style="color:var(--accent);border:1px solid var(--accent);">

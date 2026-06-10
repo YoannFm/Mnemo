@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\SharedExam;
 
 /**
@@ -12,7 +13,7 @@ use App\Models\SharedExam;
  */
 class Module extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Champs que l'on peut assigner en masse (create/fill).

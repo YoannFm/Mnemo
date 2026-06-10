@@ -43,7 +43,9 @@ class ModuleController extends Controller
 
         $modules = $query->paginate(12)->withQueryString();
 
-        return view('modules.index', compact('modules', 'search'));
+        $trashedCount = Module::onlyTrashed()->where('owner_id', Auth::id())->count();
+
+        return view('modules.index', compact('modules', 'search', 'trashedCount'));
     }
 
     /**
@@ -225,6 +227,50 @@ class ModuleController extends Controller
 
         return redirect()->route('modules.index')
             ->with('success', 'Module supprimé.');
+    }
+
+    /**
+     * Affiche la corbeille des modules supprimés de l'utilisateur connecté.
+     */
+    public function trash()
+    {
+        $modules = Module::onlyTrashed()
+            ->where('owner_id', Auth::id())
+            ->withCount('items')
+            ->latest('deleted_at')
+            ->get();
+
+        return view('modules.trash', compact('modules'));
+    }
+
+    /**
+     * Restaure un module supprimé (soft delete).
+     */
+    public function restore(int $id)
+    {
+        Module::onlyTrashed()
+            ->where('id', $id)
+            ->where('owner_id', Auth::id())
+            ->firstOrFail()
+            ->restore();
+
+        return redirect()->route('modules.trash')
+            ->with('success', 'Module restauré avec succès.');
+    }
+
+    /**
+     * Supprime définitivement un module de la corbeille.
+     */
+    public function forceDelete(int $id)
+    {
+        Module::onlyTrashed()
+            ->where('id', $id)
+            ->where('owner_id', Auth::id())
+            ->firstOrFail()
+            ->forceDelete();
+
+        return redirect()->route('modules.trash')
+            ->with('success', 'Module supprimé définitivement.');
     }
 
     /**
