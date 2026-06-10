@@ -120,8 +120,8 @@
             document.getElementById('feedback-content').innerHTML = `
                 <div class="card-body p-3" style="border-left:4px solid ${color};background:${bg};">
                     <div style="font-weight:600;color:${color};margin-bottom:.5rem;">${data.is_correct ? '✓ Correct !' : '✕ Incorrect'}</div>
-                    <div style="font-size:.85rem;color:var(--text-muted);"><strong>Bonne réponse :</strong> ${data.correct_answer}</div>
-                    ${!data.is_correct ? `<div style="font-size:.85rem;color:var(--text-muted);"><strong>Vous avez répondu :</strong> ${data.user_answer}</div>` : ''}
+                    <div style="font-size:.85rem;color:var(--text-muted);"><strong>Bonne réponse :</strong> ${data.correct_answer && !data.correct_answer.startsWith('http') ? data.correct_answer : 'Bonne réponse !'}</div>
+                    ${!data.is_correct ? `<div style="font-size:.85rem;color:var(--text-muted);"><strong>Vous avez répondu :</strong> ${data.user_answer && !data.user_answer.startsWith('http') ? data.user_answer : 'Mauvaise réponse'}</div>` : ''}
                     ${data.is_mastered ? '<div style="margin-top:.5rem;font-size:.8rem;color:var(--success-color);">✓ Maîtrisé !</div>' : ''}
                 </div>`;
             document.getElementById('feedback').style.display = 'block';
