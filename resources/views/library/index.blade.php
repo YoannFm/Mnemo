@@ -80,6 +80,16 @@
                                 {{ $module->owner->name }}
                             </div>
 
+                            {{-- Tags --}}
+                            @if (!empty($module->tags) && $module->tags->isNotEmpty())
+                                <div class="d-flex flex-wrap gap-1" style="font-size:.75rem;">
+                                    <i class="bi bi-tags me-1" style="color:var(--text-muted);"></i>
+                                    @foreach ($module->tags as $tag)
+                                        <span class="badge" style="background-color:{{ $tag->color ?? '#6b7280' }};color:#fff;">{{ $tag->name }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
+
                             {{-- Boutons --}}
                             <div class="d-flex gap-2 mt-auto flex-wrap">
                                 <a href="{{ route('modules.show', $module) }}"

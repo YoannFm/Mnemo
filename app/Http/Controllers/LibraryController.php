@@ -28,7 +28,7 @@ class LibraryController extends Controller
         $tagIds  = array_filter((array) $request->input('tags', []));
 
         $modules = Module::where('is_public', true)
-            ->with('owner')
+            ->with(['owner', 'tags'])
             ->withCount('items')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {

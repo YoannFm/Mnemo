@@ -31,7 +31,7 @@ class ModuleController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Auth::user()->modules()->withCount('items')->latest();
+        $query = Auth::user()->modules()->with('tags')->withCount('items')->latest();
 
         $search = $request->input('search');
         if ($search) {
