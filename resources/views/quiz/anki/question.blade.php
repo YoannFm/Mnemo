@@ -74,8 +74,6 @@
             <div class="card mb-4">
                 <div class="card-body p-4">
 
-                    {{-- Énoncé de la question --}}
-                    <h6 class="mb-3" style="font-size:1.1rem;">{{ $question['question_text'] }}</h6>
 
                     {{-- Contenu de la question selon le type - photo ou texte --}}
                     @if ($question['field_question'] === 'photo_path')
@@ -361,18 +359,5 @@
         @endif
     </script>
 
-    @if(\App\Models\Setting::get('feature_keyboard_shortcuts', '1'))
-    <div style="text-align:center;margin-top:.5rem;">
-        <small style="color:var(--text-muted);font-size:.75rem;">
-            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">1</kbd>
-            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">2</kbd>
-            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">3</kbd>
-            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">4</kbd>
-            <span style="opacity:.6;">/ &amp; é " '</span>
-            pour répondre &nbsp;·&nbsp;
-            <kbd style="background:var(--card-border);border-radius:4px;padding:1px 5px;">Espace</kbd> pour continuer
-        </small>
-    </div>
-    @endif
 
 </x-app-layout>
