@@ -438,7 +438,7 @@
         .table tbody { background: var(--card-bg); }
 
         .table tbody td {
-            background: #212227;
+            background: var(--card-bg);
             color: var(--text-primary);
             padding: 10px 16px;
         }
