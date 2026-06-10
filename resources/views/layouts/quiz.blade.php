@@ -58,7 +58,7 @@
     @stack('styles')
 </head>
 <body>
-    <div style="max-width:680px;margin:0 auto;padding:1.5rem 1rem 2rem;">
+    <div style="max-width:900px;width:100%;margin:0 auto;padding:1.5rem 1rem 2rem;">
         {{ $slot }}
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
