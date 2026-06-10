@@ -14,7 +14,7 @@ class TagsServiceProvider extends BasePluginServiceProvider
 
         // Register routes
         $this->router->middleware(['web', 'auth'])->group(function () {
-            $this->router->get('/tags', fn() => redirect()->route('library'))->name('tags.index');
+            $this->router->get('/tags', fn() => redirect('/modules'))->name('tags.index');
             $this->router->post('/tags', [TagController::class, 'store'])->name('tags.store');
             $this->router->post('/modules/{module}/tags', [TagController::class, 'attach'])->name('modules.tags.attach');
             $this->router->delete('/modules/{module}/tags/{tag}', [TagController::class, 'detach'])->name('modules.tags.detach');
