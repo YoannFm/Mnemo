@@ -121,7 +121,7 @@ class ModuleExportController extends Controller
         $count = 0;
         foreach ($data['items'] ?? [] as $row) {
             $nameFr   = trim($row['name_fr']   ?? '');
-            $nameEn   = trim($row['name_alt']   ?? '');
+            $nameEn   = trim($row['name_alt'] ?? $row['name_en'] ?? '');
 
             if (empty($nameFr) || empty($nameEn)) {
                 continue;
