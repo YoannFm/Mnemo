@@ -155,6 +155,12 @@ class GuestExamController extends Controller
 
         $answers   = session('guest_exam_answers', []);
         $total     = count($answers);
+
+        if ($total === 0) {
+            return redirect()->route('guest.exam.show', $uuid)
+                ->with('error', 'L\'examen n\'a pas été complété.');
+        }
+
         $score     = collect($answers)->where('is_correct', true)->count();
         $guestName = session('guest_exam_name', 'Invité');
 

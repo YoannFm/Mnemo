@@ -143,7 +143,11 @@ class PostController extends Controller
 
         $data = $request->validate([
             'content'   => 'required|string|max:1000',
-            'parent_id' => 'required|exists:post_comments,id',
+            'parent_id' => ['required', 'exists:post_comments,id', function ($attr, $value, $fail) use ($post) {
+                if (!\App\Models\PostComment::where('id', $value)->where('post_id', $post->id)->exists()) {
+                    $fail('Ce commentaire n\'appartient pas à cet article.');
+                }
+            }],
         ]);
         $reply = PostComment::create([
             'post_id'   => $post->id,

@@ -92,6 +92,10 @@ class SharedExamController extends Controller
             abort(403);
         }
 
+        if ($attempt->shared_exam_id !== $sharedExam->id) {
+            abort(404);
+        }
+
         $attempt->delete();
 
         return redirect()->back()->with('success', 'Tentative supprimée, l\'utilisateur peut repasser l\'examen.');

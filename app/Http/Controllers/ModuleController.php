@@ -17,6 +17,8 @@ use App\Models\Progress;
 use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Contrôleur CRUD des modules.
@@ -329,13 +331,17 @@ class ModuleController extends Controller
             'is_public'   => false,
         ]);
 
-        // Copier tous les items (sans photo car les fichiers ne sont pas dupliqués)
         foreach ($module->items as $item) {
+            $newPhotoPath = null;
+            if ($item->photo_path && Storage::disk('public')->exists($item->photo_path)) {
+                $newPhotoPath = 'items/' . Str::uuid() . '.jpg';
+                Storage::disk('public')->copy($item->photo_path, $newPhotoPath);
+            }
             $copy->items()->create([
                 'name_fr'       => $item->name_fr,
-                'name_alt'       => $item->name_alt,
+                'name_alt'      => $item->name_alt,
                 'function_text' => $item->function_text,
-                'photo_path'    => $item->photo_path, // Partager le même chemin de photo
+                'photo_path'    => $newPhotoPath,
             ]);
         }
 
