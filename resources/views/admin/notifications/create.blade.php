@@ -77,12 +77,26 @@
                             @enderror
                         </div>
 
-                        {{-- Contenu --}}
+                        {{-- Titre --}}
                         <div class="mb-3">
-                            <label class="form-label" for="contentInput">Contenu *</label>
-                            <input type="text" class="form-control @error('content') is-invalid @enderror"
-                                   id="contentInput" name="content"
-                                   value="{{ old('content') }}" required maxlength="200">
+                            <label class="form-label" for="titleInput">Titre *</label>
+                            <input type="text" class="form-control @error('title') is-invalid @enderror"
+                                   id="titleInput" name="title"
+                                   value="{{ old('title') }}" required maxlength="255">
+                            @error('title')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        {{-- Message --}}
+                        <div class="mb-3">
+                            <label class="form-label" for="contentInput">
+                                Message
+                                <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(facultatif, texte long accepte)</span>
+                            </label>
+                            <textarea class="form-control @error('content') is-invalid @enderror"
+                                      id="contentInput" name="content"
+                                      rows="6" style="resize:vertical;">{{ old('content') }}</textarea>
                             @error('content')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
