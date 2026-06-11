@@ -123,7 +123,7 @@ class ItemController extends Controller
         $item->update([
             'name_fr'       => $validated['name_fr'],
             'name_alt'      => $validated['name_alt'],
-            'function_text' => $validated['function_text'],
+            'function_text' => $validated['function_text'] ?? $item->function_text,
             'photo_path'    => $photoPath,
             'audio_path'    => $audioPath,
         ]);
