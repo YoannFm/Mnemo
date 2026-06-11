@@ -71,9 +71,25 @@ class SettingsController extends Controller
             Setting::set($field, $request->input($field, ''));
         }
 
+        $this->updateEnvTimezone($request->input('timezone', 'UTC'));
+
         LogHelper::log('updated_settings', 'settings', null, ['section' => 'general'], 'info');
 
         return back()->with('success', 'Paramètres sauvegardés.');
+    }
+
+    private function updateEnvTimezone(string $tz): void
+    {
+        if (!in_array($tz, timezone_identifiers_list())) return;
+        $envPath = base_path('.env');
+        if (!file_exists($envPath)) return;
+        $content = file_get_contents($envPath);
+        if (str_contains($content, 'APP_TIMEZONE=')) {
+            $content = preg_replace('/^APP_TIMEZONE=.*/m', 'APP_TIMEZONE=' . $tz, $content);
+        } else {
+            $content .= "\nAPP_TIMEZONE=" . $tz;
+        }
+        file_put_contents($envPath, $content);
     }
 
     // ─────────────────────────────────────────────
