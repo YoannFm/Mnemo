@@ -4,6 +4,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    @php $faviconLogo = AppModelsSetting::get("site_logo") ? AppModelsImage::where("file", AppModelsSetting::get("site_logo"))->first() : null; $faviconUrl = $faviconLogo ? $faviconLogo->url() : asset("favicon.ico"); @endphp
+    <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         @fonts

@@ -241,4 +241,44 @@ class SettingsController extends Controller
 
         return back()->with('success', 'Paramètres de maintenance sauvegardés.');
     }
+
+    // ─────────────────────────────────────────────
+    // Fonctionnalités
+    // ─────────────────────────────────────────────
+
+    public function features()
+    {
+        $features = [
+            'feature_library'             => ['label' => 'Bibliothèque publique',        'description' => 'Permet aux utilisateurs de parcourir et partager des modules publics.', 'default' => '1'],
+            'feature_anki'                => ['label' => 'Mode Anki',                    'description' => 'Mode de révision par répétition espacée.', 'default' => '1'],
+            'feature_test'                => ['label' => 'Mode Test',                    'description' => 'Mode test chronométré.', 'default' => '1'],
+            'feature_exam'                => ['label' => 'Mode Examen',                  'description' => 'Mode examen séquentiel.', 'default' => '1'],
+            'feature_shared_exam'         => ['label' => 'Examens partagés',             'description' => 'Permettre de créer et partager des examens avec un lien public.', 'default' => '1'],
+            'feature_progression'         => ['label' => 'Page Progression',             'description' => 'Statistiques et historique des sessions.', 'default' => '1'],
+            'feature_keyboard_shortcuts'  => ['label' => 'Raccourcis clavier',           'description' => 'Permettre de répondre aux quiz avec les touches 1-2-3-4.', 'default' => '1'],
+        ];
+
+        $values = [];
+        foreach ($features as $key => $meta) {
+            $values[$key] = Setting::get($key, $meta['default']);
+        }
+
+        return view('admin.settings.features', compact('features', 'values'));
+    }
+
+    public function updateFeatures(Request $request)
+    {
+        $keys = [
+            'feature_library', 'feature_anki', 'feature_test', 'feature_exam',
+            'feature_shared_exam', 'feature_progression', 'feature_keyboard_shortcuts',
+        ];
+
+        foreach ($keys as $key) {
+            Setting::set($key, $request->has($key) ? '1' : '0');
+        }
+
+        LogHelper::log('updated_settings', 'settings', null, ['section' => 'features'], 'info');
+
+        return back()->with('success', 'Fonctionnalités mises à jour.');
+    }
 }

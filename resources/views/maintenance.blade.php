@@ -3,6 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    @php $faviconLogo = AppModelsSetting::get("site_logo") ? AppModelsImage::where("file", AppModelsSetting::get("site_logo"))->first() : null; $faviconUrl = $faviconLogo ? $faviconLogo->url() : asset("favicon.ico"); @endphp
+    <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
     <title>Maintenance - {{ \App\Models\Setting::get('site_name', 'Mnémo') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
