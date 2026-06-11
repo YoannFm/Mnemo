@@ -53,7 +53,9 @@ class ItemController extends Controller
             'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $photoPath = $request->hasFile('photo') ? $this->storePhoto($request->file('photo')) : null;
+        $photoPath = $request->hasFile('photo')
+            ? $this->storePhoto($request->file('photo'))
+            : null;
 
         $module->items()->create([
             'name_fr'       => $validated['name_fr'],
@@ -93,9 +95,8 @@ class ItemController extends Controller
             'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        $photoPath = $item->photo_path; // On garde l'ancienne photo par défaut
+        $photoPath = $item->photo_path;
 
-        // Si une nouvelle photo est envoyée, on supprime l'ancienne et on stocke la nouvelle
         if ($request->hasFile('photo')) {
             if ($item->photo_path) {
                 Storage::disk('public')->delete($item->photo_path);
@@ -106,7 +107,7 @@ class ItemController extends Controller
         $item->update([
             'name_fr'       => $validated['name_fr'],
             'name_alt'      => $validated['name_alt'],
-            'function_text' => $validated['function_text'],
+            'function_text' => $validated['function_text'] ?? '',
             'photo_path'    => $photoPath,
         ]);
 
@@ -122,7 +123,6 @@ class ItemController extends Controller
         $this->authorizeOwner($module);
         $this->ensureBelongsToModule($item, $module);
 
-        // Suppression physique de la photo du disque si elle existe
         if ($item->photo_path) {
             Storage::disk('public')->delete($item->photo_path);
         }
@@ -133,23 +133,19 @@ class ItemController extends Controller
             ->with('success', 'Item supprimé.');
     }
 
-    // ─────────────────────────────────────────────
-    // Méthodes privées utilitaires
-    // ─────────────────────────────────────────────
-
     /**
      * Affiche le formulaire d'import CSV.
      */
     public function showImportForm(Module $module)
     {
         $this->authorizeOwner($module);
+
         return view('items.import', compact('module'));
     }
 
     /**
      * Traite l'import CSV.
      * Format attendu : name_fr,name_alt,function_text (sans en-tête ou avec)
-     * La colonne photo est ignorée (import texte uniquement).
      */
     public function importCsv(Request $request, Module $module)
     {
@@ -161,6 +157,7 @@ class ItemController extends Controller
 
         $file    = $request->file('csv_file');
         $handle  = fopen($file->getRealPath(), 'r');
+
         $count   = 0;
         $errors  = [];
         $lineNum = 0;
@@ -168,39 +165,41 @@ class ItemController extends Controller
         while (($row = fgetcsv($handle, 1000, ',')) !== false) {
             $lineNum++;
 
-            // Ignorer la ligne d'en-tête si elle commence par "name_fr" ou "nom"
+            // Ignorer l'entete
             if ($lineNum === 1 && in_array(strtolower(trim($row[0] ?? '')), ['name_fr', 'nom', 'nom_fr'])) {
                 continue;
             }
 
-            // Nettoyer les valeurs
             $nameFr   = trim($row[0] ?? '');
-            $nameEn   = trim($row[1] ?? '');
+            $nameAlt  = trim($row[1] ?? '');
             $function = trim($row[2] ?? '');
 
-            if (empty($nameFr) || empty($nameEn) || empty($function)) {
+            if (empty($nameFr) || empty($nameAlt) || empty($function)) {
                 $errors[] = "Ligne {$lineNum} ignorée : champs incomplets.";
                 continue;
             }
 
             $module->items()->create([
                 'name_fr'       => mb_substr($nameFr, 0, 255),
-                'name_alt'      => mb_substr($nameEn, 0, 255),
+                'name_alt'      => mb_substr($nameAlt, 0, 255),
                 'function_text' => mb_substr($function, 0, 2000),
                 'photo_path'    => null,
             ]);
+
             $count++;
         }
 
         fclose($handle);
 
         $message = "{$count} item(s) importé(s) avec succès.";
+
         if (!empty($errors)) {
             $message .= ' ' . count($errors) . ' ligne(s) ignorée(s).';
             session(['import_errors' => $errors]);
         }
 
-        return redirect()->route('modules.show', $module)->with('success', $message);
+        return redirect()->route('modules.show', $module)
+            ->with('success', $message);
     }
 
     // ─────────────────────────────────────────────
@@ -209,21 +208,16 @@ class ItemController extends Controller
 
     /**
      * Stocke une photo uploadée dans storage/public/items.
-     * Compresse et redimensionne l'image avec la librairie GD de PHP.
-     * Retourne le chemin relatif enregistré en base (ex : "items/uuid.jpg").
+     * Compresse et redimensionne l'image avec GD.
      */
     private function storePhoto($file): string
     {
-        // Dimensions cibles : carré 800×800
-        // - assez grand pour le zoom modal, assez petit pour le réseau
-        // - crop centré pour que toutes les options Anki soient uniformes
         $targetSize = 800;
         $quality    = 85;
 
         $mime    = $file->getMimeType();
         $tmpPath = $file->getRealPath();
 
-        // Créer l'image source selon le format
         $source = match ($mime) {
             'image/jpeg' => imagecreatefromjpeg($tmpPath),
             'image/png'  => imagecreatefrompng($tmpPath),
@@ -233,9 +227,7 @@ class ItemController extends Controller
 
         [$origW, $origH] = getimagesize($tmpPath);
 
-        // 1. Redimensionner pour que le plus petit côté fasse exactement $targetSize
-        //    (scale up uniquement si l'image est plus petite)
-        $scale = $targetSize / min($origW, $origH);
+        $scale   = $targetSize / min($origW, $origH);
         $scaledW = (int) round($origW * $scale);
         $scaledH = (int) round($origH * $scale);
 
@@ -249,20 +241,17 @@ class ItemController extends Controller
         imagecopyresampled($scaled, $source, 0, 0, 0, 0, $scaledW, $scaledH, $origW, $origH);
         imagedestroy($source);
 
-        // 2. Crop centré pour obtenir $targetSize × $targetSize
-        $cropX  = (int) round(($scaledW - $targetSize) / 2);
-        $cropY  = (int) round(($scaledH - $targetSize) / 2);
+        $cropX = (int) round(($scaledW - $targetSize) / 2);
+        $cropY = (int) round(($scaledH - $targetSize) / 2);
 
         $canvas = imagecreatetruecolor($targetSize, $targetSize);
         imagecopy($canvas, $scaled, 0, 0, $cropX, $cropY, $targetSize, $targetSize);
         imagedestroy($scaled);
 
-        // 3. Sauvegarder en JPEG
         $tmpOutput = tempnam(sys_get_temp_dir(), 'mnemo_') . '.jpg';
         imagejpeg($canvas, $tmpOutput, $quality);
         imagedestroy($canvas);
 
-        // 4. Stocker dans storage/public/items
         $filename = 'items/' . Str::uuid() . '.jpg';
         Storage::disk('public')->put($filename, file_get_contents($tmpOutput));
         unlink($tmpOutput);
@@ -271,8 +260,7 @@ class ItemController extends Controller
     }
 
     /**
-     * Vérifie que l'utilisateur connecté est bien le propriétaire du module.
-     * Retourne une 403 sinon.
+     * Vérifie que l'utilisateur est propriétaire du module.
      */
     private function authorizeOwner(Module $module): void
     {
@@ -282,8 +270,7 @@ class ItemController extends Controller
     }
 
     /**
-     * Vérifie que l'item appartient bien au module passé en paramètre.
-     * Protège contre les URL forgées (ex : /modules/1/items/99 où 99 appartient au module 2).
+     * Vérifie que l'item appartient bien au module.
      */
     private function ensureBelongsToModule(Item $item, Module $module): void
     {
