@@ -11,7 +11,10 @@
             document.documentElement.setAttribute('data-bs-theme', t);
         })();
     </script>
-    @php $faviconUrl = setting("site_logo") ? asset("storage/images/" . setting("site_logo")) : asset("favicon.ico"); @endphp
+    @php
+        $faviconLogo = setting("site_logo") ? \App\Models\Image::where("file", setting("site_logo"))->first() : null;
+        $faviconUrl  = $faviconLogo ? $faviconLogo->url() : asset("favicon.ico");
+    @endphp
     <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
     <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
