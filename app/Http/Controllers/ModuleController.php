@@ -70,21 +70,38 @@ class ModuleController extends Controller
     {
         // Validation des champs du formulaire
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'is_public'   => 'nullable|boolean',
+            'title'         => 'required|string|max:255',
+            'description'   => 'nullable|string|max:1000',
+            'is_public'     => 'nullable|boolean',
+            'field_name_fr' => 'nullable|boolean',
+            'field_name_alt'=> 'nullable|boolean',
+            'field_photo'   => 'nullable|boolean',
+            'field_function'=> 'nullable|boolean',
         ]);
+
+        $fieldNameFr  = $request->boolean('field_name_fr', true);
+        $fieldNameAlt = $request->boolean('field_name_alt');
+        $fieldPhoto   = $request->boolean('field_photo');
+        $fieldFunction= $request->boolean('field_function');
+
+        $enabledCount = (int)$fieldNameFr + (int)$fieldNameAlt + (int)$fieldPhoto + (int)$fieldFunction;
+        if ($enabledCount < 2) {
+            return back()->withErrors(['fields' => 'Vous devez activer au moins 2 champs pour les items.'])->withInput();
+        }
 
         $user = Auth::user();
         if ($user->role && !$user->role->can_create_module && !$user->is_admin) {
             abort(403, 'Vous n\'avez pas la permission de creer des modules.');
         }
 
-        // Création du module lié à l'utilisateur connecté
         $module = $user->modules()->create([
-            'title'       => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'is_public'   => $request->boolean('is_public'),
+            'title'          => $validated['title'],
+            'description'    => $validated['description'] ?? null,
+            'is_public'      => $request->boolean('is_public'),
+            'field_name_fr'  => $fieldNameFr,
+            'field_name_alt' => $fieldNameAlt,
+            'field_photo'    => $fieldPhoto,
+            'field_function' => $fieldFunction,
         ]);
 
         LogHelper::log('created_module', 'module', $module->id, ['title' => $module->title]);
@@ -181,7 +198,20 @@ class ModuleController extends Controller
             'is_public'         => 'nullable|boolean',
             'allow_duplication' => 'nullable|boolean',
             'new_owner_email'   => 'nullable|email|exists:users,email',
+            'field_name_fr'     => 'nullable|boolean',
+            'field_name_alt'    => 'nullable|boolean',
+            'field_photo'       => 'nullable|boolean',
+            'field_function'    => 'nullable|boolean',
         ]);
+
+        $fieldNameFr   = $request->boolean('field_name_fr', true);
+        $fieldNameAlt  = $request->boolean('field_name_alt');
+        $fieldPhoto    = $request->boolean('field_photo');
+        $fieldFunction = $request->boolean('field_function');
+        $enabledCount  = (int)$fieldNameFr + (int)$fieldNameAlt + (int)$fieldPhoto + (int)$fieldFunction;
+        if ($enabledCount < 2) {
+            return back()->withErrors(['fields' => 'Vous devez activer au moins 2 champs pour les items.'])->withInput();
+        }
 
         $oldOwnerId = $module->owner_id;
         $newOwnerId = $module->owner_id;
@@ -200,6 +230,10 @@ class ModuleController extends Controller
             'is_public'         => $request->boolean('is_public'),
             'allow_duplication' => $request->boolean('allow_duplication'),
             'owner_id'          => $newOwnerId,
+            'field_name_fr'     => $fieldNameFr,
+            'field_name_alt'    => $fieldNameAlt,
+            'field_photo'       => $fieldPhoto,
+            'field_function'    => $fieldFunction,
         ]);
 
         if ($newOwnerId !== $oldOwnerId) {

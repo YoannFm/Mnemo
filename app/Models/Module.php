@@ -24,14 +24,19 @@ class Module extends Model
         'description',
         'is_public',
         'allow_duplication',
+        'field_name_fr',
+        'field_name_alt',
+        'field_photo',
+        'field_function',
     ];
 
-    /**
-     * Casts automatiques : is_public est traité comme un booléen PHP.
-     */
     protected $casts = [
         'is_public'         => 'boolean',
         'allow_duplication' => 'boolean',
+        'field_name_fr'     => 'boolean',
+        'field_name_alt'    => 'boolean',
+        'field_photo'       => 'boolean',
+        'field_function'    => 'boolean',
     ];
 
     // ─────────────────────────────────────────────
