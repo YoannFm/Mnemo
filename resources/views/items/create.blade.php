@@ -81,7 +81,7 @@
                                    accept="image/*" onchange="previewPhoto(this)">
                             @error('photo')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
-                                Formats acceptés : JPEG, PNG, WebP — La photo sera compressée automatiquement.
+                                Formats acceptés : JPEG, PNG, WebP - La photo sera compressée automatiquement.
                             </div>
                         </div>
                         @endif

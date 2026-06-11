@@ -41,7 +41,7 @@
                                 <div class="text-muted small">{{ $plugin->description }}</div>
                             @endif
                         </td>
-                        <td class="text-muted small">{{ $plugin->author ?? '—' }}</td>
+                        <td class="text-muted small">{{ $plugin->author ?? '-' }}</td>
                         <td>
                             <span class="badge bg-secondary">v{{ $plugin->version }}</span>
                             @if (!empty($plugin->has_update))
@@ -133,7 +133,7 @@
                     <tr>
                         <td class="fw-semibold">{{ $plugin->name }}</td>
                         <td class="text-muted small">{{ $plugin->description ?? '' }}</td>
-                        <td class="text-muted small">{{ $plugin->author ?? '—' }}</td>
+                        <td class="text-muted small">{{ $plugin->author ?? '-' }}</td>
                         <td><span class="badge bg-secondary">v{{ $plugin->latest_version ?? '-' }}</span></td>
                         <td class="text-end">
                             @if ($alreadyInstalled)

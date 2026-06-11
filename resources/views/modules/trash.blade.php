@@ -6,7 +6,7 @@
         <div>
             <h4 class="mb-0"><i class="bi bi-trash me-2"></i>Corbeille</h4>
             <p style="color:var(--text-muted);font-size:.85rem;margin:0;">
-                Modules supprimés — restaurez-les ou supprimez-les définitivement.
+                Modules supprimés - restaurez-les ou supprimez-les définitivement.
             </p>
         </div>
         <a href="{{ route('modules.index') }}" class="btn"
