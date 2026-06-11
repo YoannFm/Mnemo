@@ -47,10 +47,13 @@ class TestController extends Controller
     {
         $this->authorize($module);
 
-        // Valider le nombre de questions
-        $questionCount = $request->validate([
+        // Valider le nombre de questions et le mode
+        $validated = $request->validate([
             'question_count' => 'required|integer|min:1|max:100',
-        ])['question_count'];
+            'mode'           => 'nullable|string',
+        ]);
+        $questionCount = $validated['question_count'];
+        $mode = $validated['mode'] ?? 'random';
 
         // Limiter au nombre d'items du module
         $itemCount = $module->items()->count();
@@ -59,11 +62,12 @@ class TestController extends Controller
         // Initialiser la session du test
         session([
             'test_module_id'      => $module->id,
+            'test_mode'           => $mode,
             'test_question_count' => $questionCount,
-            'test_current'        => 0,         // Question actuelle (0-indexed)
-            'test_score'          => 0,         // Score cumulé
-            'test_answers'        => [],        // [question_index => {item_id, question_type, user_answer, correct}]
-            'test_questions'      => [],        // Cache des questions générées
+            'test_current'        => 0,
+            'test_score'          => 0,
+            'test_answers'        => [],
+            'test_questions'      => [],
         ]);
 
         return redirect()->route('test.question', $module);
@@ -93,8 +97,28 @@ class TestController extends Controller
         $questions = session('test_questions', []);
 
         if (!isset($questions[$currentIndex])) {
-            // Tirer aléatoirement un type de question (Q1-Q4)
-            $types = QuizGenerator::getQuestionTypes();
+            $mode = session('test_mode', 'random');
+            $modeMap = [
+                'photo_to_name_fr'    => ['Q1'],
+                'photo_to_name_alt'   => ['Q8'],
+                'photo_to_function'   => ['Q2'],
+                'function_to_photo'   => ['Q3'],
+                'function_to_name_fr' => ['Q6'],
+                'function_to_name_alt'=> ['Q11'],
+                'name_fr_to_name_alt' => ['Q4'],
+                'name_fr_to_photo'    => ['Q9'],
+                'name_fr_to_function' => ['Q10'],
+                'name_alt_to_photo'   => ['Q5'],
+                'name_alt_to_function'=> ['Q11'],
+                'name_alt_to_name_fr' => ['Q7'],
+                'audio_to_name_fr'    => ['Q13'],
+                'audio_to_name_alt'   => ['Q14'],
+                'name_fr_to_audio'    => ['Q15'],
+                'name_alt_to_audio'   => ['Q16'],
+            ];
+            $types = ($mode !== 'random' && isset($modeMap[$mode]))
+                ? $modeMap[$mode]
+                : QuizGenerator::getQuestionTypes();
             $questionType = $types[array_rand($types)];
 
             $question = QuizGenerator::generateQuestion($module, $questionType);
@@ -212,7 +236,7 @@ class TestController extends Controller
         ]);
 
         // Nettoyer la session du test
-        session()->forget(['test_module_id', 'test_question_count', 'test_current', 'test_score', 'test_answers', 'test_questions']);
+        session()->forget(['test_module_id', 'test_mode', 'test_question_count', 'test_current', 'test_score', 'test_answers', 'test_questions']);
 
         $percentage = $total > 0 ? (int) round(($score / $total) * 100) : 0;
 
