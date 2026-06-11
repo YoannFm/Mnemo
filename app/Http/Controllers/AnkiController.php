@@ -154,7 +154,7 @@ class AnkiController extends Controller
             $targetItem = $weightedPool[array_rand($weightedPool)];
         }
 
-        $question = QuizGenerator::generateQuestion($module, $questionType, $targetItem);
+        $question = QuizGenerator::generateQuestion($module, $questionType, $targetItem, $types);
 
         if (isset($question['error'])) {
             return redirect()->route('modules.show', $module)->with('error', $question['error']);

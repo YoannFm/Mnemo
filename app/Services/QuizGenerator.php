@@ -116,7 +116,7 @@ class QuizGenerator
      * @param Item|null $targetItem Item cible pré-sélectionné. Si null, tirage aléatoire.
      * @return array La question complète : énoncé, options mélangées, réponse correcte
      */
-    public static function generateQuestion(Module $module, string $questionType = 'Q1', ?Item $targetItem = null): array
+    public static function generateQuestion(Module $module, string $questionType = 'Q1', ?Item $targetItem = null, array $allowedTypes = []): array
     {
         $allItems = $module->items()->get();
 
@@ -134,7 +134,13 @@ class QuizGenerator
         }
 
         if (!in_array($questionType, $eligibleTypes)) {
-            $questionType = $eligibleTypes[array_rand($eligibleTypes)];
+            $candidates = empty($allowedTypes)
+                ? $eligibleTypes
+                : array_values(array_intersect($eligibleTypes, $allowedTypes));
+            if (empty($candidates)) {
+                $candidates = $eligibleTypes;
+            }
+            $questionType = $candidates[array_rand($candidates)];
         }
 
         $type = self::$questionTypes[$questionType];
