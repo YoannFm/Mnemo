@@ -47,5 +47,13 @@
                 <i class="bi bi-card-text me-1"></i> Description / Fonction
             </label>
         </div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox"
+                   id="field_audio" name="field_audio" value="1"
+                   {{ old('field_audio', $module->field_audio ?? false) ? 'checked' : '' }}>
+            <label class="form-check-label" for="field_audio" style="font-size:.875rem;">
+                <i class="bi bi-music-note me-1"></i> Son / Audio
+            </label>
+        </div>
     </div>
 </div>

@@ -28,6 +28,7 @@ class Module extends Model
         'field_name_alt',
         'field_photo',
         'field_function',
+        'field_audio',
     ];
 
     protected $casts = [
@@ -37,6 +38,7 @@ class Module extends Model
         'field_name_alt'    => 'boolean',
         'field_photo'       => 'boolean',
         'field_function'    => 'boolean',
+        'field_audio'       => 'boolean',
     ];
 
     // ─────────────────────────────────────────────

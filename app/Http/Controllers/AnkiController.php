@@ -97,6 +97,10 @@ class AnkiController extends Controller
             'name_alt_to_photo'    => ['Q5'],
             'name_alt_to_function' => ['Q11'],
             'name_alt_to_name_fr'  => ['Q7'],
+            'audio_to_name_fr'    => ['Q13'],
+            'audio_to_name_alt'   => ['Q14'],
+            'name_fr_to_audio'    => ['Q15'],
+            'name_alt_to_audio'   => ['Q16'],
         ];
 
         if ($mode === 'random' || !isset($modeMap[$mode])) {

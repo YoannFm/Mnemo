@@ -86,9 +86,23 @@
                         </div>
                         @endif
 
-                        {{-- Boutons d'action du formulaire --}}
-                        {{-- "Ajouter l'item" envoie le formulaire et enregistre l'item --}}
-                        {{-- "Annuler" redirection vers la page du module --}}
+                        @if($module->field_audio)
+                        <div class="mb-4">
+                            <label for="audio" class="form-label">
+                                Son / Audio <span style="color:#ef4444;">*</span>
+                                <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(max 10 Mo - MP3, OGG, WAV, M4A)</span>
+                            </label>
+                            <div id="audio-preview" style="display:none;margin-bottom:.75rem;">
+                                <audio id="preview-audio" controls style="width:100%;border-radius:8px;"></audio>
+                            </div>
+                            <input type="file" id="audio" name="audio"
+                                   class="form-control @error('audio') is-invalid @enderror"
+                                   accept="audio/*" onchange="previewAudio(this)">
+                            @error('audio')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        @endif
+
+                        {{-- Boutons --}}
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-plus-lg me-1"></i> Ajouter l'item
@@ -114,6 +128,17 @@
          *
          * @param {HTMLInputElement} input - L'input file déclenché
          */
+        function previewAudio(input) {
+            const preview = document.getElementById('audio-preview');
+            const audio   = document.getElementById('preview-audio');
+            if (input.files && input.files[0]) {
+                audio.src = URL.createObjectURL(input.files[0]);
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
         function previewPhoto(input) {
             const preview = document.getElementById('photo-preview');
             const img     = document.getElementById('preview-img');

@@ -90,6 +90,29 @@
                         </div>
                         @endif
 
+                        @if($module->field_audio)
+                        <div class="mb-4">
+                            <label class="form-label">Son / Audio <span style="color:#ef4444;">*</span></label>
+                            @if($item->audio_path)
+                                <div class="mb-2">
+                                    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:.4rem;">Son actuel :</p>
+                                    <audio id="preview-audio" controls src="{{ $item->audio_url }}" style="width:100%;border-radius:8px;"></audio>
+                                </div>
+                            @else
+                                <div id="audio-preview" style="display:none;margin-bottom:.75rem;">
+                                    <audio id="preview-audio" controls style="width:100%;border-radius:8px;"></audio>
+                                </div>
+                            @endif
+                            <input type="file" id="audio" name="audio"
+                                   class="form-control @error('audio') is-invalid @enderror"
+                                   accept="audio/*" onchange="previewAudio(this)">
+                            @error('audio')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
+                                Laisser vide pour conserver le son actuel.
+                            </div>
+                        </div>
+                        @endif
+
                         {{-- Boutons --}}
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
@@ -116,6 +139,17 @@
          *
          * @param {HTMLInputElement} input - L'input file déclenché
          */
+        function previewAudio(input) {
+            if (input.files && input.files[0]) {
+                const audio = document.getElementById('preview-audio');
+                if (audio) {
+                    audio.src = URL.createObjectURL(input.files[0]);
+                    const wrap = document.getElementById('audio-preview');
+                    if (wrap) wrap.style.display = 'block';
+                }
+            }
+        }
+
         function previewPhoto(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();

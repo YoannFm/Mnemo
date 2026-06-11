@@ -22,6 +22,7 @@ class Item extends Model
         'name_alt',
         'function_text',
         'photo_path',
+        'audio_path',
     ];
 
     // ─────────────────────────────────────────────
@@ -57,8 +58,11 @@ class Item extends Model
         if ($this->photo_path) {
             return asset('storage/' . $this->photo_path);
         }
-
-        // Image de remplacement générique si aucune photo n'a été uploadée
         return asset('images/no-photo.svg');
+    }
+
+    public function getAudioUrlAttribute(): ?string
+    {
+        return $this->audio_path ? asset('storage/' . $this->audio_path) : null;
     }
 }

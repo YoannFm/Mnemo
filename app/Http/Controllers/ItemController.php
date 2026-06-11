@@ -52,16 +52,19 @@ class ItemController extends Controller
             'function_text'   => $module->field_function ? 'required|string|max:2000' : 'nullable|string|max:2000',
             'photo'           => $module->field_photo    ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'photo_crop_data' => 'nullable|string',
+            'audio'           => $module->field_audio    ? 'required|file|mimes:mp3,ogg,wav,m4a|max:10240' : 'nullable|file|mimes:mp3,ogg,wav,m4a|max:10240',
         ];
         $validated = $request->validate($rules);
 
         $photoPath = $request->hasFile('photo') ? $this->storePhoto($request->file('photo')) : null;
+        $audioPath = $request->hasFile('audio') ? $this->storeAudio($request->file('audio')) : null;
 
         $item = $module->items()->create([
             'name_fr'       => $validated['name_fr'],
             'name_alt'      => $validated['name_alt'],
             'function_text' => $validated['function_text'] ?? '',
             'photo_path'    => $photoPath,
+            'audio_path'    => $audioPath,
         ]);
 
         LogHelper::log('created_item', 'module', $module->id, ['item_id' => $item->id]);
@@ -96,10 +99,12 @@ class ItemController extends Controller
             'function_text'   => $module->field_function ? 'required|string|max:2000' : 'nullable|string|max:2000',
             'photo'           => $module->field_photo    ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'photo_crop_data' => 'nullable|string',
+            'audio'           => $module->field_audio    ? 'required|file|mimes:mp3,ogg,wav,m4a|max:10240' : 'nullable|file|mimes:mp3,ogg,wav,m4a|max:10240',
         ];
         $validated = $request->validate($rules);
 
         $photoPath = $item->photo_path;
+        $audioPath = $item->audio_path;
 
         if ($request->hasFile('photo')) {
             if ($item->photo_path) {
@@ -108,11 +113,19 @@ class ItemController extends Controller
             $photoPath = $this->storePhoto($request->file('photo'));
         }
 
+        if ($request->hasFile('audio')) {
+            if ($item->audio_path) {
+                Storage::disk('public')->delete($item->audio_path);
+            }
+            $audioPath = $this->storeAudio($request->file('audio'));
+        }
+
         $item->update([
             'name_fr'       => $validated['name_fr'],
             'name_alt'      => $validated['name_alt'],
             'function_text' => $validated['function_text'],
             'photo_path'    => $photoPath,
+            'audio_path'    => $audioPath,
         ]);
 
         LogHelper::log('updated_item', 'module', $module->id, ['item_id' => $item->id]);
@@ -132,6 +145,9 @@ class ItemController extends Controller
         // Suppression physique de la photo du disque si elle existe
         if ($item->photo_path) {
             Storage::disk('public')->delete($item->photo_path);
+        }
+        if ($item->audio_path) {
+            Storage::disk('public')->delete($item->audio_path);
         }
 
         LogHelper::log('deleted_item', 'module', $module->id, ['item_id' => $item->id], 'warning');
@@ -285,6 +301,14 @@ class ItemController extends Controller
         Storage::disk('public')->put($filename, file_get_contents($tmpOutput));
         unlink($tmpOutput);
 
+        return $filename;
+    }
+
+    private function storeAudio($file): string
+    {
+        $ext      = $file->getClientOriginalExtension() ?: 'mp3';
+        $filename = 'items/audio/' . Str::uuid() . '.' . $ext;
+        Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
         return $filename;
     }
 
