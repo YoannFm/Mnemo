@@ -99,6 +99,7 @@ class RoleController extends Controller
             if (!in_array((int) $id, $validIds, true)) continue;
             Role::where('id', (int) $id)->update(['power' => count($order) - $index]);
         }
+        LogHelper::log('updated_roles_order', 'role', null);
         return response()->json(['success' => true]);
     }
 }

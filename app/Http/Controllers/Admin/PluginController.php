@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Extensions\Plugin\PluginManager;
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use Throwable;
 
@@ -38,18 +39,21 @@ class PluginController extends Controller
 
     public function reload()
     {
+        LogHelper::log('reloaded_plugins', 'plugin', null);
         return back()->with('success', 'Plugins rechargés.');
     }
 
     public function enable(string $plugin)
     {
         $this->plugins->enable($plugin);
+        LogHelper::log('enabled_plugin', 'plugin', null, ['plugin' => $plugin]);
         return back()->with('success', 'Plugin activé.');
     }
 
     public function disable(string $plugin)
     {
         $this->plugins->disable($plugin);
+        LogHelper::log('disabled_plugin', 'plugin', null, ['plugin' => $plugin], 'warning');
         return back()->with('success', 'Plugin désactivé.');
     }
 
@@ -62,6 +66,7 @@ class PluginController extends Controller
 
         try {
             $this->plugins->install($slug);
+            LogHelper::log('installed_plugin', 'plugin', null, ['plugin' => $slug]);
             return back()->with('success', 'Plugin installé. Vous pouvez maintenant l\'activer.');
         } catch (Throwable $t) {
             return back()->with('error', $t->getMessage());
@@ -72,6 +77,7 @@ class PluginController extends Controller
     {
         try {
             $this->plugins->install($plugin);
+            LogHelper::log('updated_plugin', 'plugin', null, ['plugin' => $plugin]);
             return back()->with('success', 'Plugin mis à jour.');
         } catch (Throwable $t) {
             return back()->with('error', $t->getMessage());
@@ -81,6 +87,7 @@ class PluginController extends Controller
     public function delete(string $plugin)
     {
         $this->plugins->delete($plugin);
+        LogHelper::log('deleted_plugin', 'plugin', null, ['plugin' => $plugin], 'warning');
         return back()->with('success', 'Plugin supprimé.');
     }
 }

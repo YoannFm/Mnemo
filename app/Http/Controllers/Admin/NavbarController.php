@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\NavItem;
 use Illuminate\Http\Request;
@@ -41,7 +42,9 @@ class NavbarController extends Controller
         $data['is_active'] = $request->boolean('is_active', true);
         $data['position']  = NavItem::whereNull('parent_id')->max('position') + 1;
 
-        NavItem::create($data);
+        $navItem = NavItem::create($data);
+
+        LogHelper::log('created_nav_item', 'navbar', $navItem->id, ['label' => $navItem->label]);
 
         return redirect()->route('admin.navbar.index')->with('success', 'Element ajoute.');
     }
@@ -72,11 +75,15 @@ class NavbarController extends Controller
 
         $navItem->update($data);
 
+        LogHelper::log('updated_nav_item', 'navbar', $navItem->id, ['label' => $navItem->label]);
+
         return redirect()->route('admin.navbar.index')->with('success', 'Element modifie.');
     }
 
     public function destroy(NavItem $navItem)
     {
+        LogHelper::log('deleted_nav_item', 'navbar', $navItem->id, ['label' => $navItem->label], 'warning');
+
         $navItem->children()->delete();
         $navItem->delete();
 
@@ -88,6 +95,8 @@ class NavbarController extends Controller
         $order    = $request->input('order', []);
         $position = 0;
         $this->processOrder($order, null, $position);
+
+        LogHelper::log('updated_nav_order', 'navbar', null);
 
         return response()->json(['success' => true]);
     }

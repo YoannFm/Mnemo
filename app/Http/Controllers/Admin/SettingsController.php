@@ -223,6 +223,8 @@ class SettingsController extends Controller
 
         Artisan::call('config:clear');
 
+        LogHelper::log('updated_settings', 'settings', null, ['section' => 'mail']);
+
         return back()->with('success', 'Configuration e-mail sauvegardée.');
     }
 
@@ -235,6 +237,7 @@ class SettingsController extends Controller
                         ->subject('Test e-mail - Mnémo');
             });
 
+            LogHelper::log('sent_test_mail', 'settings', null, ['to' => $user->email]);
             return response()->json(['message' => 'E-mail de test envoyé à ' . $user->email]);
         } catch (\Throwable $e) {
             return response()->json(['message' => 'Erreur : ' . $e->getMessage()], 500);

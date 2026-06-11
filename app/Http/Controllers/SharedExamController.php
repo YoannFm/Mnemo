@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Module;
 use App\Models\SharedExam;
 use App\Models\SharedExamAttempt;
@@ -47,6 +48,8 @@ class SharedExamController extends Controller
 
         $link = route('guest.exam.show', $sharedExam->uuid);
 
+        LogHelper::log('created_shared_exam', 'shared_exam', $sharedExam->id, ['module_id' => $module->id, 'mode' => $validated['mode']]);
+
         return redirect()
             ->route('modules.show', $module)
             ->with('success', 'Lien d\'examen créé : ' . $link);
@@ -69,6 +72,8 @@ class SharedExamController extends Controller
             abort(403);
         }
 
+        LogHelper::log('deleted_shared_exam', 'shared_exam', $sharedExam->id, [], 'warning');
+
         $sharedExam->delete();
 
         return redirect()->back()->with('success', 'Lien d\'examen supprimé.');
@@ -83,6 +88,8 @@ class SharedExamController extends Controller
         $validated = $request->validate(['extra' => 'required|integer|min:1|max:10']);
         $sharedExam->increment('max_attempts', $validated['extra']);
 
+        LogHelper::log('added_attempts', 'shared_exam', $sharedExam->id, ['extra' => $validated['extra']]);
+
         return redirect()->back()->with('success', 'Tentatives supplémentaires accordées.');
     }
 
@@ -95,6 +102,8 @@ class SharedExamController extends Controller
         if ($attempt->shared_exam_id !== $sharedExam->id) {
             abort(404);
         }
+
+        LogHelper::log('reset_attempt', 'shared_exam', $sharedExam->id, ['attempt_id' => $attempt->id], 'warning');
 
         $attempt->delete();
 
@@ -122,6 +131,8 @@ class SharedExamController extends Controller
         ]);
 
         $attempt->update(['results_sent_at' => now()]);
+
+        LogHelper::log('sent_results', 'shared_exam', $sharedExam->id, ['attempt_id' => $attempt->id]);
 
         return redirect()->back()->with('success', 'Résultats envoyés à ' . $attempt->guest_name . '.');
     }
@@ -285,6 +296,8 @@ class SharedExamController extends Controller
             $attempt->update(['results_sent_at' => now()]);
             $sent++;
         }
+
+        LogHelper::log('sent_all_results', 'shared_exam', $sharedExam->id, ['count' => $sent]);
 
         return redirect()->back()->with('success', $sent > 0 ? "{$sent} résultat(s) envoyé(s)." : 'Tous les résultats ont déjà été envoyés.');
     }

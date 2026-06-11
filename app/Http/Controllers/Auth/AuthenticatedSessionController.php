@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
@@ -34,6 +35,7 @@ class AuthenticatedSessionController extends Controller
             $user->last_login_at = now();
             $user->last_login_ip = $request->ip();
             $user->save();
+            LogHelper::log('login', 'user', $user->id, ['ip' => $request->ip()]);
         }
 
         return redirect()->intended(route('dashboard', absolute: false));
@@ -44,11 +46,16 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $userId = Auth::id();
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
+
+        if ($userId) {
+            LogHelper::log('logout', 'user', $userId);
+        }
 
         return redirect('/');
     }

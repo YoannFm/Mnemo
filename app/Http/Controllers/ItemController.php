@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Item;
 use App\Models\Module;
 use Illuminate\Http\Request;
@@ -56,12 +57,14 @@ class ItemController extends Controller
 
         $photoPath = $request->hasFile('photo') ? $this->storePhoto($request->file('photo')) : null;
 
-        $module->items()->create([
+        $item = $module->items()->create([
             'name_fr'       => $validated['name_fr'],
             'name_alt'      => $validated['name_alt'],
             'function_text' => $validated['function_text'] ?? '',
             'photo_path'    => $photoPath,
         ]);
+
+        LogHelper::log('created_item', 'module', $module->id, ['item_id' => $item->id]);
 
         return redirect()->route('modules.show', $module)
             ->with('success', 'Item ajouté avec succès !');
@@ -112,6 +115,8 @@ class ItemController extends Controller
             'photo_path'    => $photoPath,
         ]);
 
+        LogHelper::log('updated_item', 'module', $module->id, ['item_id' => $item->id]);
+
         return redirect()->route('modules.show', $module)
             ->with('success', 'Item mis à jour !');
     }
@@ -128,6 +133,8 @@ class ItemController extends Controller
         if ($item->photo_path) {
             Storage::disk('public')->delete($item->photo_path);
         }
+
+        LogHelper::log('deleted_item', 'module', $module->id, ['item_id' => $item->id], 'warning');
 
         $item->delete();
 
@@ -205,6 +212,8 @@ class ItemController extends Controller
             $message .= ' ' . count($errors) . ' ligne(s) ignorée(s).';
             session(['import_errors' => $errors]);
         }
+
+        LogHelper::log('imported_items_csv', 'module', $module->id, ['count' => $count]);
 
         return redirect()->route('modules.show', $module)->with('success', $message);
     }

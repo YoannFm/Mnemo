@@ -81,11 +81,13 @@ class ModuleController extends Controller
         }
 
         // Création du module lié à l'utilisateur connecté
-        $user->modules()->create([
+        $module = $user->modules()->create([
             'title'       => $validated['title'],
             'description' => $validated['description'] ?? null,
             'is_public'   => $request->boolean('is_public'),
         ]);
+
+        LogHelper::log('created_module', 'module', $module->id, ['title' => $module->title]);
 
         return redirect()->route('modules.index')
             ->with('success', 'Module créé avec succès !');
@@ -213,6 +215,8 @@ class ModuleController extends Controller
                 'message' => 'Le module "' . $module->title . '" vous a ete transfere.',
                 'type'    => 'info',
             ]);
+        } else {
+            LogHelper::log('updated_module', 'module', $module->id, ['title' => $module->title]);
         }
 
         return redirect()->route('modules.show', $module)
@@ -226,6 +230,8 @@ class ModuleController extends Controller
     public function destroy(Module $module)
     {
         $this->authorizeOwner($module);
+
+        LogHelper::log('deleted_module', 'module', $module->id, ['title' => $module->title], 'warning');
 
         $module->delete();
 
@@ -252,11 +258,14 @@ class ModuleController extends Controller
      */
     public function restore(int $id)
     {
-        Module::onlyTrashed()
+        $module = Module::onlyTrashed()
             ->where('id', $id)
             ->where('owner_id', Auth::id())
-            ->firstOrFail()
-            ->restore();
+            ->firstOrFail();
+
+        $module->restore();
+
+        LogHelper::log('restored_module', 'module', $module->id, ['title' => $module->title]);
 
         return redirect()->route('modules.trash')
             ->with('success', 'Module restauré avec succès.');
@@ -267,11 +276,14 @@ class ModuleController extends Controller
      */
     public function forceDelete(int $id)
     {
-        Module::onlyTrashed()
+        $module = Module::onlyTrashed()
             ->where('id', $id)
             ->where('owner_id', Auth::id())
-            ->firstOrFail()
-            ->forceDelete();
+            ->firstOrFail();
+
+        LogHelper::log('permanently_deleted_module', 'module', $module->id, ['title' => $module->title], 'warning');
+
+        $module->forceDelete();
 
         return redirect()->route('modules.trash')
             ->with('success', 'Module supprimé définitivement.');
@@ -347,6 +359,8 @@ class ModuleController extends Controller
             ]);
         }
 
+        LogHelper::log('duplicated_module', 'module', $copy->id, ['source_id' => $module->id, 'title' => $copy->title]);
+
         return redirect()->route('modules.show', $copy)
             ->with('success', 'Module dupliqué dans votre espace ! Vous pouvez maintenant l\'enrichir.');
     }
@@ -411,6 +425,8 @@ class ModuleController extends Controller
             ['rating' => $validated['rating'], 'comment' => $validated['comment'] ?? null]
         );
 
+        LogHelper::log('rated_module', 'module', $module->id, ['rating' => $validated['rating']]);
+
         return response()->json(['status' => 'ok']);
     }
 
@@ -428,6 +444,8 @@ class ModuleController extends Controller
             'content'    => $rating->comment,
             'deleted_by' => 'user',
         ]);
+
+        LogHelper::log('deleted_own_rating', 'module', $rating->module_id, [], 'warning');
 
         $rating->delete();
 
@@ -495,6 +513,8 @@ class ModuleController extends Controller
 
         $reply->load('user');
 
+        LogHelper::log('replied_to_rating', 'rating', $rating->id);
+
         return response()->json([
             'status'  => 'ok',
             'id'      => $reply->id,
@@ -549,6 +569,8 @@ class ModuleController extends Controller
             'content'    => $reply->content,
             'deleted_by' => Auth::user()->is_admin && Auth::id() !== $reply->user_id ? 'admin' : 'user',
         ]);
+
+        LogHelper::log('deleted_rating_reply', 'rating_reply', $reply->id, [], 'warning');
 
         $reply->delete();
         return response()->json(['status' => 'ok']);
