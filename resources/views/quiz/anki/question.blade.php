@@ -104,7 +104,7 @@
     </div>
 
     {{-- Boutons Je sais / A revoir (cachés jusqu'au reveal) --}}
-    <div id="action-buttons" style="display:none;" class="d-flex gap-3 mb-4">
+    <div id="action-buttons" style="display:none;gap:.75rem;" class="mb-4">
         <button type="button" class="btn flex-fill py-3" onclick="submitAnswer(false)"
                 style="background:rgba(239,68,68,.12);border:2px solid #ef4444;color:#ef4444;font-weight:600;font-size:1rem;border-radius:12px;">
             <i class="bi bi-arrow-repeat me-1"></i> A revoir
@@ -138,6 +138,7 @@
             document.getElementById('flashcard').style.cursor      = 'default';
             document.getElementById('flashcard').style.borderColor = 'var(--accent)';
             document.getElementById('action-buttons').style.display = 'flex';
+            document.getElementById('action-buttons').style.gap = '.75rem';
         }
 
         function submitAnswer(knows) {
