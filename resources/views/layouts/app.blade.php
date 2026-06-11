@@ -30,6 +30,12 @@
             document.documentElement.setAttribute('data-bs-theme', t);
         })();
     </script>
+    @php $siteLogo = setting('site_logo', ''); @endphp
+    @if($siteLogo)
+        <link rel="icon" type="image/png" href="{{ $siteLogo }}">
+        <link rel="apple-touch-icon" href="{{ $siteLogo }}">
+    @endif
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -587,12 +593,7 @@
 
         {{-- Logo --}}
         <a href="{{ route('dashboard') }}" class="navbar-brand me-4">
-            @php $siteLogo = setting('site_logo', ''); @endphp
-            @if($siteLogo)
-                <img src="{{ $siteLogo }}" alt="{{ setting('site_name', 'Mnémo') }}" style="height:32px;max-width:160px;object-fit:contain;">
-            @else
-                Mn<span>émo</span>
-            @endif
+            Mn<span>émo</span>
         </a>
 
         {{-- Bouton hamburger mobile --}}

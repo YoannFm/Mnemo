@@ -11,6 +11,11 @@
             document.documentElement.setAttribute('data-bs-theme', t);
         })();
     </script>
+    @php $siteLogo = setting('site_logo', ''); @endphp
+    @if($siteLogo)
+        <link rel="icon" type="image/png" href="{{ $siteLogo }}">
+        <link rel="apple-touch-icon" href="{{ $siteLogo }}">
+    @endif
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
