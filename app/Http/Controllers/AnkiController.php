@@ -188,17 +188,12 @@ class AnkiController extends Controller
         try {
             $data = $request->validate([
                 'item_id'  => 'required|integer',
-                'answer'   => 'required|integer|min:0|max:3',
+                'knows'    => 'required|boolean',
                 'question' => 'required|array',
             ]);
 
-            $question = $data['question'];
-
-            if (empty($question)) {
-                return response()->json(['error' => 'Erreur lors du traitement de la réponse.'], 422);
-            }
-
-            $isCorrect = QuizGenerator::validateAnswer($question, $data['answer']);
+            $question  = $data['question'];
+            $isCorrect = (bool) $data['knows'];
 
             $progress = Progress::firstOrCreate(
                 ['user_id' => Auth::id(), 'item_id' => $data['item_id']],
@@ -238,9 +233,6 @@ class AnkiController extends Controller
 
             return response()->json([
                 'is_correct'      => $isCorrect,
-                'correct_answer'  => $question['correct_answer'],
-                'user_answer'     => $question['options'][$data['answer']],
-                'field_answer'    => $question['field_answer'],
                 'session_correct' => session('anki_session_correct'),
                 'session_wrong'   => session('anki_session_wrong'),
                 'session_streak'  => session('anki_session_streak'),

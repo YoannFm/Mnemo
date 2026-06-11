@@ -1,7 +1,7 @@
 <x-quiz-layout>
     <x-slot name="pageTitle">Anki - {{ $module->title }}</x-slot>
 
-    {{-- En-tête minimal : titre module + bouton quitter --}}
+    {{-- En-tête --}}
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
         <span style="font-weight:700;font-size:1.1rem;">{{ $module->title }}</span>
         <form method="POST" action="{{ route('anki.quit', $module) }}" style="margin:0;">
@@ -31,71 +31,87 @@
             <div class="row g-3 text-center">
                 <div class="col">
                     <div id="stat-success" style="font-weight:600;color:var(--accent);">{{ $question['session']['correct'] }}</div>
-                    <div style="color:var(--text-muted);">Bonnes réponses</div>
+                    <div style="color:var(--text-muted);">Je sais</div>
                 </div>
                 <div class="col">
                     <div id="stat-fail" style="font-weight:600;color:#ef4444;">{{ $question['session']['wrong'] }}</div>
-                    <div style="color:var(--text-muted);">Mauvaises réponses</div>
+                    <div style="color:var(--text-muted);">A revoir</div>
                 </div>
                 <div class="col">
                     <div id="stat-streak" style="font-weight:600;color:#fbbf24;">{{ $question['session']['streak'] }}</div>
-                    <div style="color:var(--text-muted);">Série actuelle</div>
+                    <div style="color:var(--text-muted);">Série</div>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Question --}}
-    <div class="card mb-4">
-        <div class="card-body p-4">
-            @if ($question['field_question'] === 'photo_path')
-                <div style="text-align:center;">
-                    <div style="display:inline-block;position:relative;max-width:300px;width:100%;">
-                        <img src="{{ $question['question_content'] }}" alt="Question" style="width:100%;aspect-ratio:1/1;border-radius:12px;object-fit:cover;display:block;">
-                        <button type="button" onclick="setZoomImage('{{ $question['question_content'] }}')" style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);border:none;border-radius:8px;padding:5px 10px;color:#fff;cursor:pointer;font-size:.85rem;"><i class="bi bi-zoom-in"></i></button>
+    {{-- Carte flashcard --}}
+    <div id="flashcard" class="card mb-4" style="cursor:pointer;min-height:220px;transition:.2s;border:2px solid var(--card-border);" onclick="revealAnswer()">
+        <div class="card-body p-4 d-flex flex-column align-items:center justify-content-center" style="align-items:center;">
+
+            {{-- Recto : question --}}
+            <div id="side-question" style="width:100%;text-align:center;">
+                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:1rem;">
+                    <i class="bi bi-question-circle me-1"></i>{{ $question['question_text'] }}
+                </div>
+                @if ($question['field_question'] === 'photo_path')
+                    <div style="display:inline-block;position:relative;max-width:280px;width:100%;">
+                        <img src="{{ $question['question_content'] }}" alt="Question"
+                             style="width:100%;aspect-ratio:1/1;border-radius:12px;object-fit:cover;display:block;">
+                        <button type="button" onclick="event.stopPropagation();setZoomImage('{{ $question['question_content'] }}')"
+                                style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);border:none;border-radius:8px;padding:5px 10px;color:#fff;cursor:pointer;font-size:.85rem;">
+                            <i class="bi bi-zoom-in"></i>
+                        </button>
                     </div>
-                </div>
-            @elseif ($question['field_question'] === 'audio_path')
-                <div style="text-align:center;">
-                    <audio controls autoplay src="{{ $question['question_content'] }}" style="width:100%;max-width:400px;border-radius:8px;"></audio>
-                </div>
-            @else
-                <div class="card" style="background:var(--body-bg);border:1px solid var(--card-border);">
-                    <div class="card-body p-3">
-                        <p style="margin:0;font-size:.95rem;">{{ $question['question_content'] }}</p>
+                @elseif ($question['field_question'] === 'audio_path')
+                    <audio controls autoplay src="{{ $question['question_content'] }}"
+                           style="width:100%;max-width:400px;border-radius:8px;" onclick="event.stopPropagation()"></audio>
+                @else
+                    <div style="font-size:1.4rem;font-weight:600;color:var(--text-primary);padding:.5rem 0;">
+                        {{ $question['question_content'] }}
                     </div>
+                @endif
+                <div style="margin-top:1.5rem;font-size:.78rem;color:var(--text-muted);">
+                    <i class="bi bi-hand-index me-1"></i>Cliquez pour révéler la réponse
                 </div>
-            @endif
+            </div>
+
+            {{-- Verso : réponse (caché au départ) --}}
+            <div id="side-answer" style="display:none;width:100%;text-align:center;">
+                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:1rem;">
+                    <i class="bi bi-lightbulb me-1"></i>Réponse
+                </div>
+                @if ($question['field_answer'] === 'photo_path')
+                    <div style="display:inline-block;position:relative;max-width:280px;width:100%;">
+                        <img src="{{ $question['correct_answer'] }}" alt="Réponse"
+                             style="width:100%;aspect-ratio:1/1;border-radius:12px;object-fit:cover;display:block;">
+                        <button type="button" onclick="event.stopPropagation();setZoomImage('{{ $question['correct_answer'] }}')"
+                                style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.65);border:none;border-radius:8px;padding:5px 10px;color:#fff;cursor:pointer;font-size:.85rem;">
+                            <i class="bi bi-zoom-in"></i>
+                        </button>
+                    </div>
+                @elseif ($question['field_answer'] === 'audio_path')
+                    <audio controls autoplay src="{{ $question['correct_answer'] }}"
+                           style="width:100%;max-width:400px;border-radius:8px;" onclick="event.stopPropagation()"></audio>
+                @else
+                    <div style="font-size:1.4rem;font-weight:600;color:var(--accent);padding:.5rem 0;">
+                        {{ $question['correct_answer'] }}
+                    </div>
+                @endif
+            </div>
+
         </div>
     </div>
 
-    {{-- Options --}}
-    <div id="options-container" class="mb-4" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
-        @foreach ($question['options'] as $index => $option)
-            <button type="button" class="btn anki-option" data-index="{{ $index }}" onclick="submitAnswer({{ $index }}, event)"
-                    style="padding:.5rem;background:var(--card-bg);border:2px solid var(--card-border);color:var(--text-primary);transition:.2s;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;min-height:80px;position:relative;">
-                @if ($question['field_answer'] === 'photo_path')
-                    <img src="{{ $option }}" alt="Option {{ $index + 1 }}" style="width:100%;aspect-ratio:1/1;border-radius:6px;object-fit:cover;display:block;">
-                    <span onclick="event.stopPropagation();setZoomImage('{{ $option }}')" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border-radius:6px;padding:4px 8px;cursor:pointer;color:#fff;font-size:.8rem;z-index:10;line-height:1;"><i class="bi bi-zoom-in"></i></span>
-                @elseif ($question['field_answer'] === 'audio_path')
-                    <i class="bi bi-music-note-beamed" style="font-size:1.5rem;pointer-events:none;"></i>
-                    <button type="button" onclick="event.stopPropagation();this.nextElementSibling.play();"
-                            style="background:var(--accent);border:none;border-radius:8px;padding:4px 12px;color:#111;font-size:.8rem;cursor:pointer;">
-                        <i class="bi bi-play-fill"></i> Écouter
-                    </button>
-                    <audio src="{{ $option }}" style="display:none;"></audio>
-                @else
-                    <span style="font-size:.9rem;text-align:center;word-break:break-word;">{{ $option }}</span>
-                @endif
-            </button>
-        @endforeach
-    </div>
-
-    {{-- Feedback --}}
-    <div id="feedback" style="display:none;margin-bottom:1.5rem;">
-        <div id="feedback-content" class="card"></div>
-        <button type="button" class="btn btn-primary w-100 mt-3" onclick="nextQuestion()" id="next-btn">
-            <i class="bi bi-arrow-right me-1"></i> Question suivante
+    {{-- Boutons Je sais / A revoir (cachés jusqu'au reveal) --}}
+    <div id="action-buttons" style="display:none;" class="d-flex gap-3 mb-4">
+        <button type="button" class="btn flex-fill py-3" onclick="submitAnswer(false)"
+                style="background:rgba(239,68,68,.12);border:2px solid #ef4444;color:#ef4444;font-weight:600;font-size:1rem;border-radius:12px;">
+            <i class="bi bi-arrow-repeat me-1"></i> A revoir
+        </button>
+        <button type="button" class="btn flex-fill py-3" onclick="submitAnswer(true)"
+                style="background:rgba(34,197,94,.12);border:2px solid #22c55e;color:#22c55e;font-weight:600;font-size:1rem;border-radius:12px;">
+            <i class="bi bi-check-lg me-1"></i> Je sais
         </button>
     </div>
 
@@ -112,51 +128,44 @@
     <script>function setZoomImage(src){document.getElementById('zoom-img').src=src;document.getElementById('zoom-modal').style.display='flex';}</script>
 
     <script>
-        function submitAnswer(optionIndex, event) {
-            event.preventDefault();
-            document.querySelectorAll('.anki-option').forEach(btn => btn.disabled = true);
+        var revealed = false;
+
+        function revealAnswer() {
+            if (revealed) return;
+            revealed = true;
+            document.getElementById('side-question').style.display = 'none';
+            document.getElementById('side-answer').style.display   = 'block';
+            document.getElementById('flashcard').style.cursor      = 'default';
+            document.getElementById('flashcard').style.borderColor = 'var(--accent)';
+            document.getElementById('action-buttons').style.display = 'flex';
+        }
+
+        function submitAnswer(knows) {
+            document.getElementById('action-buttons').querySelectorAll('button').forEach(b => b.disabled = true);
+            document.getElementById('loading').style.display = 'block';
             fetch("{{ route('anki.submit', $module) }}", {
                 method: 'POST',
                 headers: {'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},
-                body: JSON.stringify({item_id:{{ $question['item_id'] }},answer:optionIndex,question:@json($question)}),
+                body: JSON.stringify({item_id:{{ $question['item_id'] }}, knows: knows, question:@json($question)}),
             })
             .then(r => r.ok ? r.json() : r.text().then(t => { throw new Error(t); }))
-            .then(data => displayFeedback(data, optionIndex))
-            .catch(() => { alert('Erreur. Réessayez.'); document.querySelectorAll('.anki-option').forEach(btn => btn.disabled = false); });
-        }
-
-        function displayFeedback(data, optionIndex) {
-            const bg = data.is_correct ? 'rgba(34,197,94,.1)' : 'rgba(239,68,68,.1)';
-            const color = data.is_correct ? '#22c55e' : '#ef4444';
-            document.getElementById('feedback-content').innerHTML = `
-                <div class="card-body p-3" style="border-left:4px solid ${color};background:${bg};">
-                    <div style="font-weight:600;color:${color};margin-bottom:.5rem;">${data.is_correct ? '✓ Correct !' : '✕ Incorrect'}</div>
-                    <div style="font-size:.85rem;color:var(--text-muted);"><strong>Bonne réponse :</strong> ${data.field_answer === 'audio_path' ? `<audio controls src="${data.correct_answer}" style="height:32px;vertical-align:middle;"></audio>` : (data.correct_answer || '')}</div>
-                    ${!data.is_correct ? `<div style="font-size:.85rem;color:var(--text-muted);margin-top:.25rem;"><strong>Vous avez répondu :</strong> ${data.field_answer === 'audio_path' ? `<audio controls src="${data.user_answer}" style="height:32px;vertical-align:middle;"></audio>` : (data.user_answer || '-')}</div>` : ''}
-                    ${data.is_mastered ? '<div style="margin-top:.5rem;font-size:.8rem;color:var(--success-color);">✓ Maîtrisé !</div>' : ''}
-                </div>`;
-            document.getElementById('feedback').style.display = 'block';
-            if (data.session_correct !== undefined) document.getElementById('stat-success').textContent = data.session_correct;
-            if (data.session_wrong   !== undefined) document.getElementById('stat-fail').textContent    = data.session_wrong;
-            if (data.session_streak  !== undefined) document.getElementById('stat-streak').textContent  = data.session_streak;
-        }
-
-        function nextQuestion() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('feedback').style.display = 'none';
-            window.location.href = "{{ route('anki.question', $module) }}";
+            .then(data => {
+                if (data.session_correct !== undefined) document.getElementById('stat-success').textContent = data.session_correct;
+                if (data.session_wrong   !== undefined) document.getElementById('stat-fail').textContent    = data.session_wrong;
+                if (data.session_streak  !== undefined) document.getElementById('stat-streak').textContent  = data.session_streak;
+                window.location.href = "{{ route('anki.question', $module) }}";
+            })
+            .catch(() => { alert('Erreur. Réessayez.'); document.getElementById('loading').style.display = 'none'; document.getElementById('action-buttons').querySelectorAll('button').forEach(b => b.disabled = false); });
         }
 
         @if(\App\Models\Setting::get('feature_keyboard_shortcuts', '1'))
         document.addEventListener('keydown', function(e) {
-            var feedback = document.getElementById('feedback');
-            if (feedback && feedback.style.display !== 'none') {
-                if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); nextQuestion(); }
-                return;
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (!revealed && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); revealAnswer(); return; }
+            if (revealed) {
+                if (e.key === '1' || e.key === '&') { e.preventDefault(); submitAnswer(false); }
+                if (e.key === '2' || e.key === 'é') { e.preventDefault(); submitAnswer(true); }
             }
-            var keyMap = {'1':0,'&':0,'2':1,'é':1,'"':2,'3':2,"'":3,'4':3};
-            var idx = keyMap[e.key];
-            if (idx !== undefined) { var btns = document.querySelectorAll('.anki-option:not([disabled])'); if (btns[idx]) btns[idx].click(); }
         });
         @endif
     </script>
