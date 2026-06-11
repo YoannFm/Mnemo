@@ -77,14 +77,16 @@ class ModuleController extends Controller
             'field_name_alt'=> 'nullable|boolean',
             'field_photo'   => 'nullable|boolean',
             'field_function'=> 'nullable|boolean',
+            'field_audio'   => 'nullable|boolean',
         ]);
 
         $fieldNameFr  = $request->boolean('field_name_fr', true);
         $fieldNameAlt = $request->boolean('field_name_alt');
         $fieldPhoto   = $request->boolean('field_photo');
         $fieldFunction= $request->boolean('field_function');
+        $fieldAudio   = $request->boolean('field_audio');
 
-        $enabledCount = (int)$fieldNameFr + (int)$fieldNameAlt + (int)$fieldPhoto + (int)$fieldFunction;
+        $enabledCount = (int)$fieldNameFr + (int)$fieldNameAlt + (int)$fieldPhoto + (int)$fieldFunction + (int)$fieldAudio;
         if ($enabledCount < 2) {
             return back()->withErrors(['fields' => 'Vous devez activer au moins 2 champs pour les items.'])->withInput();
         }
@@ -102,6 +104,7 @@ class ModuleController extends Controller
             'field_name_alt' => $fieldNameAlt,
             'field_photo'    => $fieldPhoto,
             'field_function' => $fieldFunction,
+            'field_audio'    => $fieldAudio,
         ]);
 
         LogHelper::log('created_module', 'module', $module->id, ['title' => $module->title]);
@@ -202,13 +205,15 @@ class ModuleController extends Controller
             'field_name_alt'    => 'nullable|boolean',
             'field_photo'       => 'nullable|boolean',
             'field_function'    => 'nullable|boolean',
+            'field_audio'       => 'nullable|boolean',
         ]);
 
         $fieldNameFr   = $request->boolean('field_name_fr', true);
         $fieldNameAlt  = $request->boolean('field_name_alt');
         $fieldPhoto    = $request->boolean('field_photo');
         $fieldFunction = $request->boolean('field_function');
-        $enabledCount  = (int)$fieldNameFr + (int)$fieldNameAlt + (int)$fieldPhoto + (int)$fieldFunction;
+        $fieldAudio    = $request->boolean('field_audio');
+        $enabledCount  = (int)$fieldNameFr + (int)$fieldNameAlt + (int)$fieldPhoto + (int)$fieldFunction + (int)$fieldAudio;
         if ($enabledCount < 2) {
             return back()->withErrors(['fields' => 'Vous devez activer au moins 2 champs pour les items.'])->withInput();
         }
@@ -234,6 +239,7 @@ class ModuleController extends Controller
             'field_name_alt'    => $fieldNameAlt,
             'field_photo'       => $fieldPhoto,
             'field_function'    => $fieldFunction,
+            'field_audio'       => $fieldAudio,
         ]);
 
         if ($newOwnerId !== $oldOwnerId) {
