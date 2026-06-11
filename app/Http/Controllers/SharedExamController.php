@@ -32,7 +32,7 @@ class SharedExamController extends Controller
             'mode'        => ['required', 'string', 'in:' . implode(',', $validModes)],
             'label'       => 'nullable|string|max:255',
             'expires_at'  => 'nullable|date|after:now',
-            'webhook_url' => 'nullable|url',
+            'webhook_url' => ['nullable', 'url', 'regex:/^https:\/\//i'],
         ]);
 
         $sharedExam = SharedExam::create([

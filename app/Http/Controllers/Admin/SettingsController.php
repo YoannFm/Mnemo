@@ -52,7 +52,7 @@ class SettingsController extends Controller
             'timezone'         => 'nullable|string|max:100',
             'locale'           => 'nullable|in:fr,en',
             'site_key'         => 'nullable|string|max:255',
-            'posts_webhook'            => 'nullable|url|max:500',
+            'posts_webhook'            => ['nullable', 'url', 'max:500', 'regex:/^https:\/\//i'],
             'exam_default_expires_days' => 'nullable|integer|min:1|max:365',
         ]);
 

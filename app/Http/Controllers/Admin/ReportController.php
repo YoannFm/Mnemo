@@ -328,7 +328,7 @@ class ReportController extends Controller
             UserNotification::create([
                 'user_id' => $comment->user_id,
                 'title'   => 'Votre commentaire a été supprimé',
-                'message' => 'Votre commentaire "' . \Illuminate\Support\Str::limit($commentContent, 100) . '" posté sur l\'article <a href="' . $postUrl . '">' . e($postTitle) . '</a> a été supprimé par un administrateur.',
+                'message' => 'Votre commentaire "' . e(\Illuminate\Support\Str::limit($commentContent, 100)) . '" posté sur l\'article <a href="' . e($postUrl) . '">' . e($postTitle) . '</a> a été supprimé par un administrateur.',
                 'type'    => 'warning',
             ]);
         }

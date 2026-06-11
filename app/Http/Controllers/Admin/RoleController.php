@@ -91,8 +91,13 @@ class RoleController extends Controller
     public function updateOrder(Request $request)
     {
         $order = $request->input('order', []);
+        if (!is_array($order)) {
+            return response()->json(['success' => false], 422);
+        }
+        $validIds = Role::pluck('id')->all();
         foreach ($order as $index => $id) {
-            Role::where('id', $id)->update(['power' => count($order) - $index]);
+            if (!in_array((int) $id, $validIds, true)) continue;
+            Role::where('id', (int) $id)->update(['power' => count($order) - $index]);
         }
         return response()->json(['success' => true]);
     }
