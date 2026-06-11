@@ -104,7 +104,8 @@ class AnkiController extends Controller
         ];
 
         if ($mode === 'random' || !isset($modeMap[$mode])) {
-            $types = QuizGenerator::getQuestionTypes();
+            $mediaAnswerTypes = ['Q3', 'Q5', 'Q9', 'Q15', 'Q16'];
+            $types = array_values(array_diff(QuizGenerator::getQuestionTypes(), $mediaAnswerTypes));
         } else {
             $types = $modeMap[$mode];
         }
