@@ -31,6 +31,11 @@ class SettingsController extends Controller
             'locale'           => Setting::get('locale', 'fr'),
             'site_key'         => Setting::get('site_key', ''),
             'posts_webhook'    => Setting::get('posts_webhook', ''),
+            'exam_default_expires_days' => Setting::get('exam_default_expires_days', ''),
+            'item_required_name_fr'    => Setting::get('item_required_name_fr', '1'),
+            'item_required_name_alt'   => Setting::get('item_required_name_alt', '1'),
+            'item_required_photo'      => Setting::get('item_required_photo', '0'),
+            'item_required_function'   => Setting::get('item_required_function', '0'),
         ];
 
         return view('admin.settings.index', compact('settings', 'images', 'timezones'));
@@ -47,15 +52,20 @@ class SettingsController extends Controller
             'timezone'         => 'nullable|string|max:100',
             'locale'           => 'nullable|in:fr,en',
             'site_key'         => 'nullable|string|max:255',
-            'posts_webhook'       => 'nullable|url|max:500',
-            'item_required_field' => 'nullable|in:name_alt,photo_path,function_text,none',
+            'posts_webhook'            => 'nullable|url|max:500',
+            'exam_default_expires_days' => 'nullable|integer|min:1|max:365',
         ]);
 
         $fields = [
             'site_name', 'site_url', 'site_description', 'site_keywords',
             'site_logo', 'timezone', 'locale', 'site_key', 'posts_webhook',
-            'item_required_field',
+            'exam_default_expires_days',
         ];
+
+        // Checkboxes champs items (non cochée = absent de la requête = '0')
+        foreach (['item_required_name_fr', 'item_required_name_alt', 'item_required_photo', 'item_required_function'] as $cb) {
+            Setting::set($cb, $request->has($cb) ? '1' : '0');
+        }
 
         foreach ($fields as $field) {
             Setting::set($field, $request->input($field, ''));

@@ -70,17 +70,28 @@
                     @error('site_logo')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                 </div>
 
-                {{-- Champ requis pour les items --}}
+                {{-- Champs obligatoires pour les items --}}
                 <div class="mb-3">
-                    <label class="form-label" for="item_required_field">Deuxième champ requis pour les items</label>
-                    <select id="item_required_field" name="item_required_field"
-                            class="form-select @error('item_required_field') is-invalid @enderror">
-                        <option value="name_alt" {{ old('item_required_field', setting('item_required_field', 'name_alt')) === 'name_alt' ? 'selected' : '' }}>Nom alternatif (name_alt)</option>
-                        <option value="photo_path" {{ old('item_required_field', setting('item_required_field', 'name_alt')) === 'photo_path' ? 'selected' : '' }}>Photo</option>
-                        <option value="function_text" {{ old('item_required_field', setting('item_required_field', 'name_alt')) === 'function_text' ? 'selected' : '' }}>Description / Fonction</option>
-                        <option value="none" {{ old('item_required_field', setting('item_required_field', 'name_alt')) === 'none' ? 'selected' : '' }}>Aucun (nom seulement)</option>
-                    </select>
-                    @error('item_required_field')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                    <label class="form-label fw-semibold">Champs obligatoires pour les items</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        @php
+                            $cbFields = [
+                                'item_required_name_fr'  => ['label' => 'Nom principal', 'default' => '1'],
+                                'item_required_name_alt' => ['label' => 'Nom alternatif', 'default' => '1'],
+                                'item_required_photo'    => ['label' => 'Photo', 'default' => '0'],
+                                'item_required_function' => ['label' => 'Description / Fonction', 'default' => '0'],
+                            ];
+                        @endphp
+                        @foreach ($cbFields as $key => $cfg)
+                            @php $checked = old($key, $settings[$key] ?? $cfg['default']) === '1'; @endphp
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="{{ $key }}" id="{{ $key }}" value="1"
+                                       {{ $checked ? 'checked' : '' }}>
+                                <label class="form-check-label" for="{{ $key }}">{{ $cfg['label'] }}</label>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="form-text">Cochez les champs qui doivent être remplis lors de la création ou modification d'un item.</div>
                 </div>
 
                 {{-- Fuseau horaire + Langue --}}

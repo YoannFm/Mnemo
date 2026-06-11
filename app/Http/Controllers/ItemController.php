@@ -45,14 +45,11 @@ class ItemController extends Controller
     {
         $this->authorizeOwner($module);
 
-        // Validation des champs du formulaire
-        $requiredField = \App\Models\Setting::get('item_required_field', 'name_alt');
-
         $rules = [
-            'name_fr'        => 'required|string|max:255',
-            'name_en'        => $requiredField === 'name_alt' ? 'required|string|max:255' : 'nullable|string|max:255',
-            'function_text'  => $requiredField === 'function_text' ? 'required|string|max:2000' : 'nullable|string|max:2000',
-            'photo'          => $requiredField === 'photo_path' ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'name_fr'        => \App\Models\Setting::get('item_required_name_fr', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
+            'name_en'        => \App\Models\Setting::get('item_required_name_alt', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
+            'function_text'  => \App\Models\Setting::get('item_required_function', '0') === '1' ? 'required|string|max:2000' : 'nullable|string|max:2000',
+            'photo'          => \App\Models\Setting::get('item_required_photo', '0') === '1' ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'photo_crop_data' => 'nullable|string',
         ];
         $validated = $request->validate($rules);
@@ -90,13 +87,11 @@ class ItemController extends Controller
         $this->authorizeOwner($module);
         $this->ensureBelongsToModule($item, $module);
 
-        $requiredField = \App\Models\Setting::get('item_required_field', 'name_alt');
-
         $rules = [
-            'name_fr'        => 'required|string|max:255',
-            'name_en'        => $requiredField === 'name_alt' ? 'required|string|max:255' : 'nullable|string|max:255',
-            'function_text'  => $requiredField === 'function_text' ? 'required|string|max:2000' : 'nullable|string|max:2000',
-            'photo'          => $requiredField === 'photo_path' ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'name_fr'        => \App\Models\Setting::get('item_required_name_fr', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
+            'name_en'        => \App\Models\Setting::get('item_required_name_alt', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
+            'function_text'  => \App\Models\Setting::get('item_required_function', '0') === '1' ? 'required|string|max:2000' : 'nullable|string|max:2000',
+            'photo'          => \App\Models\Setting::get('item_required_photo', '0') === '1' ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'photo_crop_data' => 'nullable|string',
         ];
         $validated = $request->validate($rules);
