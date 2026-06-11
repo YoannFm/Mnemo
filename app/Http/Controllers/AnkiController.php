@@ -240,6 +240,7 @@ class AnkiController extends Controller
                 'is_correct'      => $isCorrect,
                 'correct_answer'  => $question['correct_answer'],
                 'user_answer'     => $question['options'][$data['answer']],
+                'field_answer'    => $question['field_answer'],
                 'session_correct' => session('anki_session_correct'),
                 'session_wrong'   => session('anki_session_wrong'),
                 'session_streak'  => session('anki_session_streak'),

@@ -78,9 +78,12 @@
                     <img src="{{ $option }}" alt="Option {{ $index + 1 }}" style="width:100%;aspect-ratio:1/1;border-radius:6px;object-fit:cover;display:block;">
                     <span onclick="event.stopPropagation();setZoomImage('{{ $option }}')" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.7);border-radius:6px;padding:4px 8px;cursor:pointer;color:#fff;font-size:.8rem;z-index:10;line-height:1;"><i class="bi bi-zoom-in"></i></span>
                 @elseif ($question['field_answer'] === 'audio_path')
-                    <i class="bi bi-music-note-beamed" style="font-size:1.5rem;"></i>
-                    <span style="font-size:.8rem;">Écouter</span>
-                    <audio src="{{ $option }}" style="display:none;" class="option-audio"></audio>
+                    <i class="bi bi-music-note-beamed" style="font-size:1.5rem;pointer-events:none;"></i>
+                    <button type="button" onclick="event.stopPropagation();this.nextElementSibling.play();"
+                            style="background:var(--accent);border:none;border-radius:8px;padding:4px 12px;color:#111;font-size:.8rem;cursor:pointer;">
+                        <i class="bi bi-play-fill"></i> Écouter
+                    </button>
+                    <audio src="{{ $option }}" style="display:none;"></audio>
                 @else
                     <span style="font-size:.9rem;text-align:center;word-break:break-word;">{{ $option }}</span>
                 @endif
@@ -128,8 +131,8 @@
             document.getElementById('feedback-content').innerHTML = `
                 <div class="card-body p-3" style="border-left:4px solid ${color};background:${bg};">
                     <div style="font-weight:600;color:${color};margin-bottom:.5rem;">${data.is_correct ? '✓ Correct !' : '✕ Incorrect'}</div>
-                    <div style="font-size:.85rem;color:var(--text-muted);"><strong>Bonne réponse :</strong> ${data.correct_answer && !data.correct_answer.startsWith('http') ? data.correct_answer : 'Bonne réponse !'}</div>
-                    ${!data.is_correct ? `<div style="font-size:.85rem;color:var(--text-muted);"><strong>Vous avez répondu :</strong> ${data.user_answer && !data.user_answer.startsWith('http') ? data.user_answer : 'Mauvaise réponse'}</div>` : ''}
+                    <div style="font-size:.85rem;color:var(--text-muted);"><strong>Bonne réponse :</strong> ${data.field_answer === 'audio_path' ? `<audio controls src="${data.correct_answer}" style="height:32px;vertical-align:middle;"></audio>` : (data.correct_answer || '')}</div>
+                    ${!data.is_correct ? `<div style="font-size:.85rem;color:var(--text-muted);margin-top:.25rem;"><strong>Vous avez répondu :</strong> ${data.field_answer === 'audio_path' ? `<audio controls src="${data.user_answer}" style="height:32px;vertical-align:middle;"></audio>` : (data.user_answer || '-')}</div>` : ''}
                     ${data.is_mastered ? '<div style="margin-top:.5rem;font-size:.8rem;color:var(--success-color);">✓ Maîtrisé !</div>' : ''}
                 </div>`;
             document.getElementById('feedback').style.display = 'block';
