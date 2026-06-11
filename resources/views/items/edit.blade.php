@@ -30,87 +30,88 @@
                         @csrf
                         @method('PUT')
 
-                        {{-- Nom français --}}
+                        @if($module->field_name_fr)
                         <div class="mb-3">
                             <label for="name_fr" class="form-label">
                                 Nom <span style="color:#ef4444;">*</span>
                             </label>
-                            <input type="text"
-                                   id="name_fr"
-                                   name="name_fr"
+                            <input type="text" id="name_fr" name="name_fr"
                                    class="form-control @error('name_fr') is-invalid @enderror"
-                                   value="{{ old('name_fr', $item->name_fr) }}"
-                                   autofocus>
-                            @error('name_fr')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                   value="{{ old('name_fr', $item->name_fr) }}" autofocus>
+                            @error('name_fr')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
+                        @endif
 
-                        {{-- Nom anglais --}}
+                        @if($module->field_name_alt)
                         <div class="mb-3">
                             <label for="name_alt" class="form-label">
-                                Traduction <span style="color:#ef4444;">*</span>
+                                Nom alternatif <span style="color:#ef4444;">*</span>
                             </label>
-                            <input type="text"
-                                   id="name_alt"
-                                   name="name_alt"
+                            <input type="text" id="name_alt" name="name_alt"
                                    class="form-control @error('name_alt') is-invalid @enderror"
                                    value="{{ old('name_alt', $item->name_alt) }}">
-                            @error('name_alt')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            @error('name_alt')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
+                        @endif
 
-                        {{-- Fonction / Description --}}
+                        @if($module->field_function)
                         <div class="mb-3">
                             <label for="function_text" class="form-label">
-                                Fonction / Description <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(optionnel)</span>
+                                Fonction / Description <span style="color:#ef4444;">*</span>
                             </label>
-                            <textarea id="function_text"
-                                      name="function_text"
+                            <textarea id="function_text" name="function_text"
                                       class="form-control @error('function_text') is-invalid @enderror"
                                       rows="4">{{ old('function_text', $item->function_text) }}</textarea>
-                            @error('function_text')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            @error('function_text')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
+                        @endif
 
-                        {{-- Photo actuelle + possibilité de remplacement --}}
+                        @if($module->field_photo)
                         <div class="mb-4">
-                            <label class="form-label">Photo</label>
-
-                            {{-- Aperçu de la photo actuelle --}}
+                            <label class="form-label">Photo <span style="color:#ef4444;">*</span></label>
                             @if ($item->photo_path)
                                 <div class="mb-2">
-                                    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:.4rem;">
-                                        Photo actuelle :
-                                    </p>
-                                    <img src="{{ $item->photo_url }}"
-                                         alt="{{ $item->name_fr }}"
-                                         id="preview-img"
-                                         style="width:100%;max-height:180px;object-fit:cover;
-                                                border-radius:10px;background:#0f1117;">
+                                    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:.4rem;">Photo actuelle :</p>
+                                    <img src="{{ $item->photo_url }}" alt="{{ $item->name_fr }}" id="preview-img"
+                                         style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;background:#0f1117;">
                                 </div>
                             @else
                                 <div id="photo-preview" style="display:none;margin-bottom:.75rem;">
-                                    <img id="preview-img" src=""
-                                         style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;">
+                                    <img id="preview-img" src="" style="width:100%;max-height:180px;object-fit:cover;border-radius:10px;">
                                 </div>
                             @endif
-
-                            <input type="file"
-                                   id="photo"
-                                   name="photo"
+                            <input type="file" id="photo" name="photo"
                                    class="form-control @error('photo') is-invalid @enderror"
-                                   accept="image/*"
-                                   onchange="previewPhoto(this)">
-                            @error('photo')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                   accept="image/*" onchange="previewPhoto(this)">
+                            @error('photo')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
                                 Laisser vide pour conserver la photo actuelle.
                             </div>
                         </div>
+                        @endif
+
+                        @if($module->field_audio)
+                        <div class="mb-4">
+                            <label class="form-label">Son / Audio <span style="color:#ef4444;">*</span></label>
+                            @if($item->audio_path)
+                                <div class="mb-2">
+                                    <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:.4rem;">Son actuel :</p>
+                                    <audio id="preview-audio" controls src="{{ $item->audio_url }}" style="width:100%;border-radius:8px;"></audio>
+                                </div>
+                            @else
+                                <div id="audio-preview" style="display:none;margin-bottom:.75rem;">
+                                    <audio id="preview-audio" controls style="width:100%;border-radius:8px;"></audio>
+                                </div>
+                            @endif
+                            <input type="file" id="audio" name="audio"
+                                   class="form-control @error('audio') is-invalid @enderror"
+                                   accept="audio/*" onchange="previewAudio(this)">
+                            @error('audio')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
+                                Laisser vide pour conserver le son actuel.
+                            </div>
+                        </div>
+                        @endif
 
                         {{-- Boutons --}}
                         <div class="d-flex gap-2">
@@ -138,6 +139,17 @@
          *
          * @param {HTMLInputElement} input - L'input file déclenché
          */
+        function previewAudio(input) {
+            if (input.files && input.files[0]) {
+                const audio = document.getElementById('preview-audio');
+                if (audio) {
+                    audio.src = URL.createObjectURL(input.files[0]);
+                    const wrap = document.getElementById('audio-preview');
+                    if (wrap) wrap.style.display = 'block';
+                }
+            }
+        }
+
         function previewPhoto(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();

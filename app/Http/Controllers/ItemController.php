@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Item;
 use App\Models\Module;
 use Illuminate\Http\Request;
@@ -45,24 +46,28 @@ class ItemController extends Controller
     {
         $this->authorizeOwner($module);
 
-        // Validation des champs du formulaire
-        $validated = $request->validate([
-            'name_fr'       => 'required|string|max:255',
-            'name_alt'      => 'required|string|max:255',
-            'function_text' => 'nullable|string|max:2000',
-            'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
+        $rules = [
+            'name_fr'         => $module->field_name_fr  ? 'required|string|max:255' : 'nullable|string|max:255',
+            'name_alt'        => $module->field_name_alt ? 'required|string|max:255' : 'nullable|string|max:255',
+            'function_text'   => $module->field_function ? 'required|string|max:2000' : 'nullable|string|max:2000',
+            'photo'           => $module->field_photo    ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo_crop_data' => 'nullable|string',
+            'audio'           => $module->field_audio    ? 'required|file|mimes:mp3,ogg,wav,m4a|max:10240' : 'nullable|file|mimes:mp3,ogg,wav,m4a|max:10240',
+        ];
+        $validated = $request->validate($rules);
 
-        $photoPath = $request->hasFile('photo')
-            ? $this->storePhoto($request->file('photo'))
-            : null;
+        $photoPath = $request->hasFile('photo') ? $this->storePhoto($request->file('photo')) : null;
+        $audioPath = $request->hasFile('audio') ? $this->storeAudio($request->file('audio')) : null;
 
-        $module->items()->create([
+        $item = $module->items()->create([
             'name_fr'       => $validated['name_fr'],
             'name_alt'      => $validated['name_alt'],
             'function_text' => $validated['function_text'] ?? '',
             'photo_path'    => $photoPath,
+            'audio_path'    => $audioPath,
         ]);
+
+        LogHelper::log('created_item', 'module', $module->id, ['item_id' => $item->id]);
 
         return redirect()->route('modules.show', $module)
             ->with('success', 'Item ajouté avec succès !');
@@ -88,14 +93,18 @@ class ItemController extends Controller
         $this->authorizeOwner($module);
         $this->ensureBelongsToModule($item, $module);
 
-        $validated = $request->validate([
-            'name_fr'       => 'required|string|max:255',
-            'name_alt'      => 'required|string|max:255',
-            'function_text' => 'nullable|string|max:2000',
-            'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
+        $rules = [
+            'name_fr'         => $module->field_name_fr  ? 'required|string|max:255' : 'nullable|string|max:255',
+            'name_alt'        => $module->field_name_alt ? 'required|string|max:255' : 'nullable|string|max:255',
+            'function_text'   => $module->field_function ? 'required|string|max:2000' : 'nullable|string|max:2000',
+            'photo'           => $module->field_photo    ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo_crop_data' => 'nullable|string',
+            'audio'           => $module->field_audio    ? 'required|file|mimes:mp3,ogg,wav,m4a|max:10240' : 'nullable|file|mimes:mp3,ogg,wav,m4a|max:10240',
+        ];
+        $validated = $request->validate($rules);
 
         $photoPath = $item->photo_path;
+        $audioPath = $item->audio_path;
 
         if ($request->hasFile('photo')) {
             if ($item->photo_path) {
@@ -104,12 +113,22 @@ class ItemController extends Controller
             $photoPath = $this->storePhoto($request->file('photo'));
         }
 
+        if ($request->hasFile('audio')) {
+            if ($item->audio_path) {
+                Storage::disk('public')->delete($item->audio_path);
+            }
+            $audioPath = $this->storeAudio($request->file('audio'));
+        }
+
         $item->update([
             'name_fr'       => $validated['name_fr'],
             'name_alt'      => $validated['name_alt'],
-            'function_text' => $validated['function_text'] ?? '',
+            'function_text' => $validated['function_text'] ?? $item->function_text,
             'photo_path'    => $photoPath,
+            'audio_path'    => $audioPath,
         ]);
+
+        LogHelper::log('updated_item', 'module', $module->id, ['item_id' => $item->id]);
 
         return redirect()->route('modules.show', $module)
             ->with('success', 'Item mis à jour !');
@@ -126,6 +145,11 @@ class ItemController extends Controller
         if ($item->photo_path) {
             Storage::disk('public')->delete($item->photo_path);
         }
+        if ($item->audio_path) {
+            Storage::disk('public')->delete($item->audio_path);
+        }
+
+        LogHelper::log('deleted_item', 'module', $module->id, ['item_id' => $item->id], 'warning');
 
         $item->delete();
 
@@ -139,13 +163,13 @@ class ItemController extends Controller
     public function showImportForm(Module $module)
     {
         $this->authorizeOwner($module);
-
         return view('items.import', compact('module'));
     }
 
     /**
      * Traite l'import CSV.
      * Format attendu : name_fr,name_alt,function_text (sans en-tête ou avec)
+     * La colonne photo est ignorée (import texte uniquement).
      */
     public function importCsv(Request $request, Module $module)
     {
@@ -156,16 +180,20 @@ class ItemController extends Controller
         ]);
 
         $file    = $request->file('csv_file');
+        $content = file_get_contents($file->getRealPath());
+        $sep     = substr_count($content, ';') >= substr_count($content, ',') ? ';' : ',';
         $handle  = fopen($file->getRealPath(), 'r');
-
         $count   = 0;
         $errors  = [];
         $lineNum = 0;
 
-        while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+        $reqNameFr  = \App\Models\Setting::get('item_required_name_fr', '1') === '1';
+        $reqNameAlt = \App\Models\Setting::get('item_required_name_alt', '1') === '1';
+        $reqFunc    = \App\Models\Setting::get('item_required_function', '0') === '1';
+
+        while (($row = fgetcsv($handle, 1000, $sep)) !== false) {
             $lineNum++;
 
-            // Ignorer l'entete
             if ($lineNum === 1 && in_array(strtolower(trim($row[0] ?? '')), ['name_fr', 'nom', 'nom_fr'])) {
                 continue;
             }
@@ -174,8 +202,8 @@ class ItemController extends Controller
             $nameAlt  = trim($row[1] ?? '');
             $function = trim($row[2] ?? '');
 
-            if (empty($nameFr) || empty($nameAlt) || empty($function)) {
-                $errors[] = "Ligne {$lineNum} ignorée : champs incomplets.";
+            if (($reqNameFr && empty($nameFr)) || ($reqNameAlt && empty($nameAlt)) || ($reqFunc && empty($function))) {
+                $errors[] = "Ligne {$lineNum} ignorée : champs obligatoires manquants.";
                 continue;
             }
 
@@ -185,21 +213,20 @@ class ItemController extends Controller
                 'function_text' => mb_substr($function, 0, 2000),
                 'photo_path'    => null,
             ]);
-
             $count++;
         }
 
         fclose($handle);
 
         $message = "{$count} item(s) importé(s) avec succès.";
-
         if (!empty($errors)) {
             $message .= ' ' . count($errors) . ' ligne(s) ignorée(s).';
             session(['import_errors' => $errors]);
         }
 
-        return redirect()->route('modules.show', $module)
-            ->with('success', $message);
+        LogHelper::log('imported_items_csv', 'module', $module->id, ['count' => $count]);
+
+        return redirect()->route('modules.show', $module)->with('success', $message);
     }
 
     // ─────────────────────────────────────────────
@@ -208,7 +235,8 @@ class ItemController extends Controller
 
     /**
      * Stocke une photo uploadée dans storage/public/items.
-     * Compresse et redimensionne l'image avec GD.
+     * Compresse et redimensionne l'image avec la librairie GD de PHP.
+     * Retourne le chemin relatif enregistré en base (ex : "items/uuid.jpg").
      */
     private function storePhoto($file): string
     {
@@ -219,15 +247,19 @@ class ItemController extends Controller
         $tmpPath = $file->getRealPath();
 
         $source = match ($mime) {
-            'image/jpeg' => imagecreatefromjpeg($tmpPath),
-            'image/png'  => imagecreatefrompng($tmpPath),
-            'image/webp' => imagecreatefromwebp($tmpPath),
-            default      => imagecreatefromjpeg($tmpPath),
+            'image/jpeg' => @imagecreatefromjpeg($tmpPath),
+            'image/png'  => @imagecreatefrompng($tmpPath),
+            'image/webp' => @imagecreatefromwebp($tmpPath),
+            default      => @imagecreatefromjpeg($tmpPath),
         };
+
+        if (!$source) {
+            throw new \RuntimeException('Impossible de lire l\'image uploadée.');
+        }
 
         [$origW, $origH] = getimagesize($tmpPath);
 
-        $scale   = $targetSize / min($origW, $origH);
+        $scale = $targetSize / min($origW, $origH);
         $scaledW = (int) round($origW * $scale);
         $scaledH = (int) round($origH * $scale);
 
@@ -241,8 +273,8 @@ class ItemController extends Controller
         imagecopyresampled($scaled, $source, 0, 0, 0, 0, $scaledW, $scaledH, $origW, $origH);
         imagedestroy($source);
 
-        $cropX = (int) round(($scaledW - $targetSize) / 2);
-        $cropY = (int) round(($scaledH - $targetSize) / 2);
+        $cropX  = (int) round(($scaledW - $targetSize) / 2);
+        $cropY  = (int) round(($scaledH - $targetSize) / 2);
 
         $canvas = imagecreatetruecolor($targetSize, $targetSize);
         imagecopy($canvas, $scaled, 0, 0, $cropX, $cropY, $targetSize, $targetSize);
@@ -259,8 +291,17 @@ class ItemController extends Controller
         return $filename;
     }
 
+    private function storeAudio($file): string
+    {
+        $ext      = $file->getClientOriginalExtension() ?: 'mp3';
+        $filename = 'items/audio/' . Str::uuid() . '.' . $ext;
+        Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
+        return $filename;
+    }
+
     /**
-     * Vérifie que l'utilisateur est propriétaire du module.
+     * Vérifie que l'utilisateur connecté est bien le propriétaire du module.
+     * Retourne une 403 sinon.
      */
     private function authorizeOwner(Module $module): void
     {
@@ -270,7 +311,8 @@ class ItemController extends Controller
     }
 
     /**
-     * Vérifie que l'item appartient bien au module.
+     * Vérifie que l'item appartient bien au module passé en paramètre.
+     * Protège contre les URL forgées (ex : /modules/1/items/99 où 99 appartient au module 2).
      */
     private function ensureBelongsToModule(Item $item, Module $module): void
     {

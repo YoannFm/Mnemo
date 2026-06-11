@@ -9,7 +9,14 @@
                 {{ $modules->total() }} module{{ $modules->total() > 1 ? 's' : '' }} au total
             </p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            @if (!empty($trashedCount) && $trashedCount > 0)
+                <a href="{{ route('modules.trash') }}"
+                   class="btn btn-sm"
+                   style="color:var(--text-muted);border:1px solid var(--card-border);">
+                    <i class="bi bi-trash me-1"></i>Corbeille ({{ $trashedCount }})
+                </a>
+            @endif
             <a href="{{ route('modules.import.form') }}"
                class="btn"
                style="color:var(--accent);border:1px solid var(--accent);">
@@ -92,6 +99,18 @@
                                 &nbsp;·&nbsp;
                                 <i class="bi bi-clock me-1"></i>
                                 {{ $module->created_at->diffForHumans() }}
+                            </div>
+
+                            {{-- Tags --}}
+                            <div class="d-flex flex-wrap gap-1" style="font-size:.75rem;">
+                                <i class="bi bi-tags me-1" style="color:var(--text-muted);"></i>
+                                @if (!empty($module->tags) && $module->tags->isNotEmpty())
+                                    @foreach ($module->tags as $tag)
+                                        <span class="badge" style="background-color:{{ $tag->color ?? '#6b7280' }};color:#fff;">{{ $tag->name }}</span>
+                                    @endforeach
+                                @else
+                                    <span style="color:var(--text-muted);">Aucun tag</span>
+                                @endif
                             </div>
 
                             {{-- Boutons d'action --}}

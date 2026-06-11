@@ -136,12 +136,12 @@ class ExamController extends Controller
         $answers = session('exam_answers', []);
         $total   = count($answers);
         $score   = collect($answers)->where('is_correct', true)->count();
+        $percentage = $total > 0 ? (int) round(($score / $total) * 100) : 0;
 
-        Score::create(['user_id' => Auth::id(), 'module_id' => $module->id, 'score' => $score, 'total' => $total]);
-
+        // Vider la session avant de créer le score pour éviter les doublons sur rechargement
         session()->forget(['exam_module_id', 'exam_questions', 'exam_current', 'exam_answers', 'exam_mode']);
 
-        $percentage = $total > 0 ? (int) round(($score / $total) * 100) : 0;
+        Score::create(['user_id' => Auth::id(), 'module_id' => $module->id, 'score' => $score, 'total' => $total]);
 
         return view('quiz.exam.result', compact('module', 'score', 'total', 'percentage', 'answers'));
     }

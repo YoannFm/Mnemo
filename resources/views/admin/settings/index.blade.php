@@ -70,6 +70,30 @@
                     @error('site_logo')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                 </div>
 
+                {{-- Champs obligatoires pour les items --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Champs obligatoires pour les items</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        @php
+                            $cbFields = [
+                                'item_required_name_fr'  => ['label' => 'Nom principal', 'default' => '1'],
+                                'item_required_name_alt' => ['label' => 'Nom alternatif', 'default' => '1'],
+                                'item_required_photo'    => ['label' => 'Photo', 'default' => '0'],
+                                'item_required_function' => ['label' => 'Description / Fonction', 'default' => '0'],
+                            ];
+                        @endphp
+                        @foreach ($cbFields as $key => $cfg)
+                            @php $checked = old($key, $settings[$key] ?? $cfg['default']) === '1'; @endphp
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="{{ $key }}" id="{{ $key }}" value="1"
+                                       {{ $checked ? 'checked' : '' }}>
+                                <label class="form-check-label" for="{{ $key }}">{{ $cfg['label'] }}</label>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="form-text">Cochez les champs qui doivent être remplis lors de la création ou modification d'un item.</div>
+                </div>
+
                 {{-- Fuseau horaire + Langue --}}
                 <div class="row gx-3">
                     <div class="mb-3 col-md-6">

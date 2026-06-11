@@ -63,6 +63,11 @@ return [
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
+            'formatter' => Monolog\Formatter\LineFormatter::class,
+            'formatter_with' => [
+                'dateFormat' => 'Y-m-d H:i:s',
+                'timezone'   => new \DateTimeZone(env('APP_TIMEZONE', 'UTC')),
+            ],
         ],
 
         'daily' => [
@@ -71,6 +76,11 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
+            'formatter' => Monolog\Formatter\LineFormatter::class,
+            'formatter_with' => [
+                'dateFormat' => 'Y-m-d H:i:s',
+                'timezone'   => new \DateTimeZone(env('APP_TIMEZONE', 'UTC')),
+            ],
         ],
 
         'slack' => [

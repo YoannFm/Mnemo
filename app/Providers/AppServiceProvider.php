@@ -10,6 +10,16 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // Appliquer le fuseau horaire le plus tôt possible (avant Monolog)
+        try {
+            $tz = \App\Models\Setting::get('timezone', config('app.timezone', 'UTC'));
+            if ($tz && in_array($tz, timezone_identifiers_list())) {
+                config(['app.timezone' => $tz]);
+                date_default_timezone_set($tz);
+                Carbon::setTimezone($tz);
+            }
+        } catch (\Throwable) {}
+
         $this->app->singleton(\App\Extensions\UpdateManager::class, function ($app) {
             return new \App\Extensions\UpdateManager($app['files']);
         });
@@ -23,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+
         $this->app->make('plugins')->loadPlugins();
 
         Paginator::useBootstrapFive();

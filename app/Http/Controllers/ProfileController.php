@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\Progress;
 use App\Models\Score;
@@ -55,6 +56,8 @@ class ProfileController extends Controller
         // Sauvegarder les changements
         $request->user()->save();
 
+        LogHelper::log('updated_profile', 'user', Auth::id());
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
@@ -89,12 +92,15 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        $userId = $user->id;
 
         // Déconnecter l'utilisateur avant suppression
         Auth::logout();
 
         // Supprimer le compte (cascade suppression des modules et items)
         $user->delete();
+
+        LogHelper::log('deleted_account', 'user', $userId, [], 'warning');
 
         // Invalider la session après suppression du compte
         $request->session()->invalidate();

@@ -17,7 +17,7 @@
                         {{ $attempt->grade }}
                     </div>
                     <div style="font-size:.9rem;color:var(--text-muted);">
-                        {{ $attempt->score }} / {{ $attempt->total }} — {{ $attempt->percentage }}%
+                        {{ $attempt->score }} / {{ $attempt->total }} - {{ $attempt->percentage }}%
                     </div>
                 </div>
 

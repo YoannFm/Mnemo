@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
@@ -60,7 +61,9 @@ class LogController extends Controller
 
     public function clear()
     {
+        $count = ActivityLog::count();
         ActivityLog::truncate();
+        LogHelper::log('cleared_all_logs', 'log', null, ['deleted_count' => $count], 'warning');
         return redirect()->route('admin.logs.index')->with('success', 'Logs effaces.');
     }
 
@@ -68,6 +71,7 @@ class LogController extends Controller
     {
         $count = ActivityLog::where('created_at', '<', now()->subDays(30))->count();
         ActivityLog::where('created_at', '<', now()->subDays(30))->delete();
+        LogHelper::log('purged_logs', 'log', null, ['deleted_count' => $count], 'warning');
         return redirect()->route('admin.logs.index')->with('success', "{$count} log(s) de plus de 30 jours supprimés.");
     }
 }

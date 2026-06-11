@@ -75,9 +75,10 @@ class UpdateController extends Controller
 
     public function backupDownload(string $filename)
     {
-        $path = storage_path('app/backups/' . $filename);
+        $backupDir = realpath(storage_path('app/backups'));
+        $path      = realpath($backupDir . DIRECTORY_SEPARATOR . basename($filename));
 
-        if (!file_exists($path) || str_contains($filename, '..')) {
+        if (!$path || !str_starts_with($path, $backupDir . DIRECTORY_SEPARATOR) || !file_exists($path)) {
             abort(404);
         }
 

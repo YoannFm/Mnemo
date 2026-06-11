@@ -17,6 +17,8 @@ use App\Models\Progress;
 use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Contrôleur CRUD des modules.
@@ -31,7 +33,7 @@ class ModuleController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Auth::user()->modules()->withCount('items')->latest();
+        $query = Auth::user()->modules()->with('tags')->withCount('items')->latest();
 
         $search = $request->input('search');
         if ($search) {
@@ -43,7 +45,9 @@ class ModuleController extends Controller
 
         $modules = $query->paginate(12)->withQueryString();
 
-        return view('modules.index', compact('modules', 'search'));
+        $trashedCount = Module::onlyTrashed()->where('owner_id', Auth::id())->count();
+
+        return view('modules.index', compact('modules', 'search', 'trashedCount'));
     }
 
     /**
@@ -66,22 +70,44 @@ class ModuleController extends Controller
     {
         // Validation des champs du formulaire
         $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'is_public'   => 'nullable|boolean',
+            'title'         => 'required|string|max:255',
+            'description'   => 'nullable|string|max:1000',
+            'is_public'     => 'nullable|boolean',
+            'field_name_fr' => 'nullable|boolean',
+            'field_name_alt'=> 'nullable|boolean',
+            'field_photo'   => 'nullable|boolean',
+            'field_function'=> 'nullable|boolean',
+            'field_audio'   => 'nullable|boolean',
         ]);
+
+        $fieldNameFr  = $request->boolean('field_name_fr', true);
+        $fieldNameAlt = $request->boolean('field_name_alt');
+        $fieldPhoto   = $request->boolean('field_photo');
+        $fieldFunction= $request->boolean('field_function');
+        $fieldAudio   = $request->boolean('field_audio');
+
+        $enabledCount = (int)$fieldNameFr + (int)$fieldNameAlt + (int)$fieldPhoto + (int)$fieldFunction + (int)$fieldAudio;
+        if ($enabledCount < 2) {
+            return back()->withErrors(['fields' => 'Vous devez activer au moins 2 champs pour les items.'])->withInput();
+        }
 
         $user = Auth::user();
         if ($user->role && !$user->role->can_create_module && !$user->is_admin) {
             abort(403, 'Vous n\'avez pas la permission de creer des modules.');
         }
 
-        // Création du module lié à l'utilisateur connecté
-        $user->modules()->create([
-            'title'       => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'is_public'   => $request->boolean('is_public'),
+        $module = $user->modules()->create([
+            'title'          => $validated['title'],
+            'description'    => $validated['description'] ?? null,
+            'is_public'      => $request->boolean('is_public'),
+            'field_name_fr'  => $fieldNameFr,
+            'field_name_alt' => $fieldNameAlt,
+            'field_photo'    => $fieldPhoto,
+            'field_function' => $fieldFunction,
+            'field_audio'    => $fieldAudio,
         ]);
+
+        LogHelper::log('created_module', 'module', $module->id, ['title' => $module->title]);
 
         return redirect()->route('modules.index')
             ->with('success', 'Module créé avec succès !');
@@ -96,11 +122,13 @@ class ModuleController extends Controller
         // Un utilisateur non connecté ou tiers ne peut voir qu'un module public
         $this->authorizeView($module);
 
-        $items = $module->items()->paginate(20);
+        $allItemIds = $module->items()->pluck('id');
+        $items      = $module->items()->paginate(20);
 
-        $avgRating   = $module->ratings()->avg('rating');
-        $ratingCount = $module->ratings()->count();
-        $userRating  = Auth::check()
+        $ratingSummary = $module->ratings()->selectRaw('AVG(rating) as avg_rating, COUNT(*) as total')->first();
+        $avgRating     = $ratingSummary->avg_rating;
+        $ratingCount   = (int) $ratingSummary->total;
+        $userRating    = Auth::check()
             ? $module->ratings()->where('user_id', Auth::id())->first()
             : null;
 
@@ -135,7 +163,7 @@ class ModuleController extends Controller
         // Progression par item pour l'utilisateur connecté
         $progressMap = Auth::check()
             ? Progress::where('user_id', Auth::id())
-                      ->whereIn('item_id', $module->items()->pluck('id'))
+                      ->whereIn('item_id', $allItemIds)
                       ->get()
                       ->keyBy('item_id')
             : collect();
@@ -173,7 +201,22 @@ class ModuleController extends Controller
             'is_public'         => 'nullable|boolean',
             'allow_duplication' => 'nullable|boolean',
             'new_owner_email'   => 'nullable|email|exists:users,email',
+            'field_name_fr'     => 'nullable|boolean',
+            'field_name_alt'    => 'nullable|boolean',
+            'field_photo'       => 'nullable|boolean',
+            'field_function'    => 'nullable|boolean',
+            'field_audio'       => 'nullable|boolean',
         ]);
+
+        $fieldNameFr   = $request->boolean('field_name_fr', true);
+        $fieldNameAlt  = $request->boolean('field_name_alt');
+        $fieldPhoto    = $request->boolean('field_photo');
+        $fieldFunction = $request->boolean('field_function');
+        $fieldAudio    = $request->boolean('field_audio');
+        $enabledCount  = (int)$fieldNameFr + (int)$fieldNameAlt + (int)$fieldPhoto + (int)$fieldFunction + (int)$fieldAudio;
+        if ($enabledCount < 2) {
+            return back()->withErrors(['fields' => 'Vous devez activer au moins 2 champs pour les items.'])->withInput();
+        }
 
         $oldOwnerId = $module->owner_id;
         $newOwnerId = $module->owner_id;
@@ -192,6 +235,11 @@ class ModuleController extends Controller
             'is_public'         => $request->boolean('is_public'),
             'allow_duplication' => $request->boolean('allow_duplication'),
             'owner_id'          => $newOwnerId,
+            'field_name_fr'     => $fieldNameFr,
+            'field_name_alt'    => $fieldNameAlt,
+            'field_photo'       => $fieldPhoto,
+            'field_function'    => $fieldFunction,
+            'field_audio'       => $fieldAudio,
         ]);
 
         if ($newOwnerId !== $oldOwnerId) {
@@ -207,6 +255,8 @@ class ModuleController extends Controller
                 'message' => 'Le module "' . $module->title . '" vous a ete transfere.',
                 'type'    => 'info',
             ]);
+        } else {
+            LogHelper::log('updated_module', 'module', $module->id, ['title' => $module->title]);
         }
 
         return redirect()->route('modules.show', $module)
@@ -221,10 +271,62 @@ class ModuleController extends Controller
     {
         $this->authorizeOwner($module);
 
+        LogHelper::log('deleted_module', 'module', $module->id, ['title' => $module->title], 'warning');
+
         $module->delete();
 
         return redirect()->route('modules.index')
             ->with('success', 'Module supprimé.');
+    }
+
+    /**
+     * Affiche la corbeille des modules supprimés de l'utilisateur connecté.
+     */
+    public function trash()
+    {
+        $modules = Module::onlyTrashed()
+            ->where('owner_id', Auth::id())
+            ->withCount('items')
+            ->latest('deleted_at')
+            ->get();
+
+        return view('modules.trash', compact('modules'));
+    }
+
+    /**
+     * Restaure un module supprimé (soft delete).
+     */
+    public function restore(int $id)
+    {
+        $module = Module::onlyTrashed()
+            ->where('id', $id)
+            ->where('owner_id', Auth::id())
+            ->firstOrFail();
+
+        $module->restore();
+
+        LogHelper::log('restored_module', 'module', $module->id, ['title' => $module->title]);
+
+        return redirect()->route('modules.trash')
+            ->with('success', 'Module restauré avec succès.');
+    }
+
+    /**
+     * Supprime définitivement un module de la corbeille.
+     */
+    public function forceDelete(int $id)
+    {
+        $module = Module::onlyTrashed()
+            ->where('id', $id)
+            ->where('owner_id', Auth::id())
+            ->firstOrFail();
+
+        LogHelper::log('permanently_deleted_module', 'module', $module->id, ['title' => $module->title], 'warning');
+
+        $module->forceDelete();
+
+        return redirect()->route('modules.trash')
+            ->with('success', 'Module supprimé définitivement.');
     }
 
     /**
@@ -283,15 +385,21 @@ class ModuleController extends Controller
             'is_public'   => false,
         ]);
 
-        // Copier tous les items (sans photo car les fichiers ne sont pas dupliqués)
         foreach ($module->items as $item) {
+            $newPhotoPath = null;
+            if ($item->photo_path && Storage::disk('public')->exists($item->photo_path)) {
+                $newPhotoPath = 'items/' . Str::uuid() . '.jpg';
+                Storage::disk('public')->copy($item->photo_path, $newPhotoPath);
+            }
             $copy->items()->create([
                 'name_fr'       => $item->name_fr,
-                'name_alt'       => $item->name_alt,
+                'name_alt'      => $item->name_alt,
                 'function_text' => $item->function_text,
-                'photo_path'    => $item->photo_path, // Partager le même chemin de photo
+                'photo_path'    => $newPhotoPath,
             ]);
         }
+
+        LogHelper::log('duplicated_module', 'module', $copy->id, ['source_id' => $module->id, 'title' => $copy->title]);
 
         return redirect()->route('modules.show', $copy)
             ->with('success', 'Module dupliqué dans votre espace ! Vous pouvez maintenant l\'enrichir.');
@@ -357,6 +465,8 @@ class ModuleController extends Controller
             ['rating' => $validated['rating'], 'comment' => $validated['comment'] ?? null]
         );
 
+        LogHelper::log('rated_module', 'module', $module->id, ['rating' => $validated['rating']]);
+
         return response()->json(['status' => 'ok']);
     }
 
@@ -374,6 +484,8 @@ class ModuleController extends Controller
             'content'    => $rating->comment,
             'deleted_by' => 'user',
         ]);
+
+        LogHelper::log('deleted_own_rating', 'module', $rating->module_id, [], 'warning');
 
         $rating->delete();
 
@@ -441,6 +553,8 @@ class ModuleController extends Controller
 
         $reply->load('user');
 
+        LogHelper::log('replied_to_rating', 'rating', $rating->id);
+
         return response()->json([
             'status'  => 'ok',
             'id'      => $reply->id,
@@ -495,6 +609,8 @@ class ModuleController extends Controller
             'content'    => $reply->content,
             'deleted_by' => Auth::user()->is_admin && Auth::id() !== $reply->user_id ? 'admin' : 'user',
         ]);
+
+        LogHelper::log('deleted_rating_reply', 'rating_reply', $reply->id, [], 'warning');
 
         $reply->delete();
         return response()->json(['status' => 'ok']);

@@ -79,6 +79,9 @@
                             </div>
                         </div>
 
+                        {{-- Configuration des champs --}}
+                        @include('modules._fields_config', ['module' => (object)['field_name_fr' => true, 'field_name_alt' => true, 'field_photo' => false, 'field_function' => false]])
+
                         {{-- Tags (plugin) --}}
                         @includeIf('tags::field', ['module' => null])
 

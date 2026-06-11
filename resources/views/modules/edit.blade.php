@@ -112,6 +112,9 @@
                             @enderror
                         </div>
 
+                        {{-- Configuration des champs --}}
+                        @include('modules._fields_config', ['module' => $module])
+
                         {{-- Tags (plugin) --}}
                         @includeIf('tags::field', ['module' => $module])
 

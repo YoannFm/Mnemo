@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\UserNotification;
@@ -25,7 +26,8 @@ class NotificationController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'content'   => 'required|string|max:200',
+            'title'     => 'required|string|max:255',
+            'content'   => 'nullable|string|max:5000',
             'level'     => 'required|in:info,success,warning,danger',
             'target'    => 'required|in:all,users,roles',
             'user_ids'  => 'required_if:target,users|array',
@@ -47,18 +49,23 @@ class NotificationController extends Controller
         foreach ($recipients as $user) {
             UserNotification::create([
                 'user_id' => $user->id,
-                'title'   => $data['content'],
+                'title'   => $data['title'],
+                'message' => $data['content'] ?? null,
                 'type'    => $data['level'],
             ]);
         }
 
         $count = $recipients->count();
+
+        LogHelper::log('sent_system_notification', 'notification', null, ['target' => $data['target'], 'count' => $count]);
+
         return redirect()->route('admin.notifications.index')
             ->with('success', "Notification envoyee a {$count} utilisateur(s).");
     }
 
     public function destroy(UserNotification $notification)
     {
+        LogHelper::log('deleted_system_notification', 'notification', $notification->id, [], 'warning');
         $notification->delete();
         return back()->with('success', 'Notification supprimee.');
     }

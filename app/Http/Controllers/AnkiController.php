@@ -97,6 +97,10 @@ class AnkiController extends Controller
             'name_alt_to_photo'    => ['Q5'],
             'name_alt_to_function' => ['Q11'],
             'name_alt_to_name_fr'  => ['Q7'],
+            'audio_to_name_fr'    => ['Q13'],
+            'audio_to_name_alt'   => ['Q14'],
+            'name_fr_to_audio'    => ['Q15'],
+            'name_alt_to_audio'   => ['Q16'],
         ];
 
         if ($mode === 'random' || !isset($modeMap[$mode])) {
@@ -184,17 +188,12 @@ class AnkiController extends Controller
         try {
             $data = $request->validate([
                 'item_id'  => 'required|integer',
-                'answer'   => 'required|integer|min:0|max:3',
+                'knows'    => 'required|boolean',
                 'question' => 'required|array',
             ]);
 
-            $question = $data['question'];
-
-            if (empty($question)) {
-                return response()->json(['error' => 'Erreur lors du traitement de la réponse.'], 422);
-            }
-
-            $isCorrect = QuizGenerator::validateAnswer($question, $data['answer']);
+            $question  = $data['question'];
+            $isCorrect = (bool) $data['knows'];
 
             $progress = Progress::firstOrCreate(
                 ['user_id' => Auth::id(), 'item_id' => $data['item_id']],
@@ -234,8 +233,6 @@ class AnkiController extends Controller
 
             return response()->json([
                 'is_correct'      => $isCorrect,
-                'correct_answer'  => $question['correct_answer'],
-                'user_answer'     => $question['options'][$data['answer']],
                 'session_correct' => session('anki_session_correct'),
                 'session_wrong'   => session('anki_session_wrong'),
                 'session_streak'  => session('anki_session_streak'),

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\SharedExam;
 
 /**
@@ -12,7 +13,7 @@ use App\Models\SharedExam;
  */
 class Module extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Champs que l'on peut assigner en masse (create/fill).
@@ -23,14 +24,21 @@ class Module extends Model
         'description',
         'is_public',
         'allow_duplication',
+        'field_name_fr',
+        'field_name_alt',
+        'field_photo',
+        'field_function',
+        'field_audio',
     ];
 
-    /**
-     * Casts automatiques : is_public est traité comme un booléen PHP.
-     */
     protected $casts = [
         'is_public'         => 'boolean',
         'allow_duplication' => 'boolean',
+        'field_name_fr'     => 'boolean',
+        'field_name_alt'    => 'boolean',
+        'field_photo'       => 'boolean',
+        'field_function'    => 'boolean',
+        'field_audio'       => 'boolean',
     ];
 
     // ─────────────────────────────────────────────
@@ -71,5 +79,10 @@ class Module extends Model
     public function sharedExams()
     {
         return $this->hasMany(SharedExam::class);
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(\Plugins\Tags\Models\Tag::class, 'module_tag');
     }
 }

@@ -14,6 +14,7 @@ class TagsServiceProvider extends BasePluginServiceProvider
 
         // Register routes
         $this->router->middleware(['web', 'auth'])->group(function () {
+            $this->router->get('/tags', fn() => redirect('/modules'))->name('tags.index');
             $this->router->post('/tags', [TagController::class, 'store'])->name('tags.store');
             $this->router->post('/modules/{module}/tags', [TagController::class, 'attach'])->name('modules.tags.attach');
             $this->router->delete('/modules/{module}/tags/{tag}', [TagController::class, 'detach'])->name('modules.tags.detach');
@@ -26,13 +27,21 @@ class TagsServiceProvider extends BasePluginServiceProvider
 
         // Inject tags into library view
         $this->app['view']->composer(['library', 'library.index', 'modules.library'], function ($view) {
-            $tags = \Plugins\Tags\Models\Tag::orderBy('name')->get();
+            try {
+                $tags = \Plugins\Tags\Models\Tag::orderBy('name')->get();
+            } catch (\Throwable) {
+                $tags = collect();
+            }
             $view->with('libraryTags', $tags);
         });
 
         // Inject tags into module create/edit views
         $this->app['view']->composer(['modules.create', 'modules.edit'], function ($view) {
-            $allTags = \Plugins\Tags\Models\Tag::orderBy('name')->get();
+            try {
+                $allTags = \Plugins\Tags\Models\Tag::orderBy('name')->get();
+            } catch (\Throwable) {
+                $allTags = collect();
+            }
             $view->with('allTags', $allTags);
         });
     }

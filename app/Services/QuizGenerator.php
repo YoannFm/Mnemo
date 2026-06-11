@@ -86,6 +86,26 @@ class QuizGenerator
             'field_answer'   => 'name_alt',
             'question_text'  => 'Traduction',
         ],
+        'Q13' => [
+            'field_question' => 'audio_path',
+            'field_answer'   => 'name_fr',
+            'question_text'  => 'Identification',
+        ],
+        'Q14' => [
+            'field_question' => 'audio_path',
+            'field_answer'   => 'name_alt',
+            'question_text'  => 'Traduction',
+        ],
+        'Q15' => [
+            'field_question' => 'name_fr',
+            'field_answer'   => 'audio_path',
+            'question_text'  => 'Prononciation',
+        ],
+        'Q16' => [
+            'field_question' => 'name_alt',
+            'field_answer'   => 'audio_path',
+            'question_text'  => 'Prononciation',
+        ],
     ];
 
     /**
@@ -127,9 +147,13 @@ class QuizGenerator
             ->take(3);
 
         // Affichage de la question
-        $questionContent = $type['field_question'] === 'photo_path'
-            ? $targetItem->photo_url
-            : $targetItem->{$type['field_question']};
+        if ($type['field_question'] === 'photo_path') {
+            $questionContent = $targetItem->photo_url;
+        } elseif ($type['field_question'] === 'audio_path') {
+            $questionContent = asset('storage/' . $targetItem->audio_path);
+        } else {
+            $questionContent = $targetItem->{$type['field_question']};
+        }
 
         // Réponse correcte + distracteurs
         $correctAnswer = $targetItem->{$type['field_answer']};
@@ -138,8 +162,11 @@ class QuizGenerator
         $allAnswers = array_merge([$correctAnswer], $wrongAnswers);
         shuffle($allAnswers);
 
-        // Convertir les chemins photo en URLs
+        // Convertir les chemins photo/audio en URLs
         if ($type['field_answer'] === 'photo_path') {
+            $allAnswers    = array_map(fn($p) => asset('storage/' . $p), $allAnswers);
+            $correctAnswer = asset('storage/' . $correctAnswer);
+        } elseif ($type['field_answer'] === 'audio_path') {
             $allAnswers    = array_map(fn($p) => asset('storage/' . $p), $allAnswers);
             $correctAnswer = asset('storage/' . $correctAnswer);
         }
@@ -170,8 +197,10 @@ class QuizGenerator
         $others = $allItems->reject(fn($i) => $i->id === $targetItem->id);
 
         return array_keys(array_filter(self::$questionTypes, function ($type) use ($targetItem, $others) {
-            $hasQuestion    = !empty($targetItem->{$type['field_question']});
-            $hasDistractors = $others->filter(fn($i) => !empty($i->{$type['field_answer']}))->count() >= 1;
+            $fq = $type['field_question'];
+            $fa = $type['field_answer'];
+            $hasQuestion    = !empty($targetItem->{$fq});
+            $hasDistractors = $others->filter(fn($i) => !empty($i->{$fa}))->count() >= 1;
             return $hasQuestion && $hasDistractors;
         }));
     }

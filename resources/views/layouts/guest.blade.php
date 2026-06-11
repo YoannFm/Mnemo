@@ -4,6 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @php
+        $faviconLogo = setting("site_logo") ? \App\Models\Image::where("file", setting("site_logo"))->first() : null;
+        $faviconUrl  = $faviconLogo ? $faviconLogo->url() : asset("favicon.ico");
+    @endphp
+    <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
 
     <title>{{ isset($title) ? $title . ' - Mnémo' : 'Mnémo' }}</title>
 

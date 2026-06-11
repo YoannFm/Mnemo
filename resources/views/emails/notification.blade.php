@@ -13,6 +13,9 @@
         .body h2 { font-size:1.1rem; color:#111; margin:0 0 1rem; }
         .body p { color:#444; font-size:.95rem; line-height:1.6; margin:0 0 1.5rem; }
         .btn { display:inline-block; background:#EFB702; color:#111; padding:.6rem 1.4rem; border-radius:8px; text-decoration:none; font-weight:600; font-size:.9rem; }
+        .body ul, .body ol { color:#444; font-size:.95rem; line-height:1.6; margin:0 0 1rem; padding-left:1.5rem; }
+        .body li { margin-bottom:.3rem; }
+        .body strong { color:#111; }
         .footer { padding:1rem 2rem; background:#f9f9f9; border-top:1px solid #eee; font-size:.78rem; color:#999; text-align:center; }
     </style>
 </head>
@@ -23,7 +26,7 @@
         </div>
         <div class="body">
             <h2>{{ $notification->title }}</h2>
-            <p>{{ $notification->message }}</p>
+            <p>{!! $notification->message !!}</p>
             <a href="{{ config('app.url') }}" class="btn">Accéder au site</a>
         </div>
         <div class="footer">

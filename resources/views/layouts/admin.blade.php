@@ -4,6 +4,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @php
+        $faviconLogo = setting("site_logo") ? \App\Models\Image::where("file", setting("site_logo"))->first() : null;
+        $faviconUrl  = $faviconLogo ? $faviconLogo->url() : asset("favicon.ico");
+    @endphp
+    <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
 
     <title>{{ isset($pageTitle) ? $pageTitle . ' - Admin' : 'Administration - Mnemo' }}</title>
 
@@ -318,7 +324,7 @@
                         © 2026 YoannFM · <a href="#" data-bs-toggle="modal" data-bs-target="#licenseModal">Licence MIT</a>
                     </p>
                     <p class="mb-0 py-1 text-center text-muted" style="font-size:.78rem;">
-                        Fait avec ❤️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a>
+                        Fait avec ❤️ par <a href="https://github.com/YoannFM/" target="_blank" rel="noopener noreferrer">YoannFM</a>
                     </p>
                 </div>
             </footer>

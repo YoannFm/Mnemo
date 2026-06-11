@@ -23,82 +23,51 @@
                 @endif
             </div>
             @if ($module->description)
-                <p style="color:var(--text-muted);font-size:.875rem;margin:0;">{{ $module->description }}</p>
+                <p style="color:var(--text-muted);font-size:.875rem;margin:.25rem 0 0;">{{ $module->description }}</p>
             @endif
-            <div class="mt-2" style="font-size:.78rem;color:var(--text-muted);">
-                <i class="bi bi-card-list me-1"></i>
+            <div class="mt-1" style="font-size:.78rem;color:var(--text-muted);">
                 {{ $items->total() }} item{{ $items->total() > 1 ? 's' : '' }}
                 &nbsp;·&nbsp;
-                <i class="bi bi-clock me-1"></i>
-                Créé {{ $module->created_at->diffForHumans() }}
+                {{ $module->created_at->diffForHumans() }}
             </div>
         </div>
 
-        {{-- Actions sur le module (uniquement pour le propriétaire) --}}
+        {{-- Actions propriétaire --}}
         @if (Auth::id() === $module->owner_id)
-            <div class="d-flex gap-2 flex-wrap">
-                {{-- Bouton d'ajout d'item --}}
-                <a href="{{ route('modules.items.create', $module) }}" class="btn btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i> Ajouter un item
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+                <a href="{{ route('modules.items.create', $module) }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i>Ajouter
                 </a>
-
-                <a href="{{ route('modules.export', $module) }}"
-                   class="btn"
-                   style="color:var(--text-muted);border:1px solid var(--card-border);">
-                    <i class="bi bi-file-earmark-zip me-1"></i> Exporter
+                <a href="{{ route('modules.edit', $module) }}" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);">
+                    <i class="bi bi-pencil me-1"></i>Modifier
                 </a>
-                <a href="{{ route('modules.edit', $module) }}"
-                   class="btn"
-                   style="color:var(--text-muted);border:1px solid var(--card-border);">
-                    <i class="bi bi-pencil me-1"></i> Modifier
+                <a href="{{ route('modules.export', $module) }}" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);">
+                    <i class="bi bi-download"></i>
                 </a>
-                <form method="POST" action="{{ route('modules.destroy', $module) }}"
-                      onsubmit="return confirm('Supprimer ce module et tous ses items ?')">
+                <form method="POST" action="{{ route('modules.destroy', $module) }}" onsubmit="return confirm('Supprimer ce module et tous ses items ?')">
                     @csrf @method('DELETE')
-                    <button type="submit"
-                            class="btn"
-                            style="color:#ef4444;border:1px solid var(--card-border);">
-                        <i class="bi bi-trash"></i>
-                    </button>
+                    <button type="submit" class="btn btn-sm" style="color:#ef4444;border:1px solid var(--card-border);"><i class="bi bi-trash"></i></button>
                 </form>
             </div>
         @elseif (Auth::user()?->is_admin)
             <div class="d-flex gap-2 flex-wrap align-items-center">
-                <span class="badge bg-danger me-1">Admin</span>
-                <a href="{{ route('modules.items.create', $module) }}" class="btn btn-sm btn-primary">
-                    <i class="bi bi-plus-lg me-1"></i> Ajouter un item
-                </a>
-                <a href="{{ route('modules.edit', $module) }}" class="btn btn-sm btn-outline-warning">
-                    <i class="bi bi-pencil me-1"></i> Modifier
-                </a>
-                <a href="{{ route('modules.export', $module) }}" class="btn btn-sm" style="color:#f97316;border:1px solid #f97316;">
-                    <i class="bi bi-download me-1"></i> Exporter
-                </a>
-                <form method="POST" action="{{ route('modules.duplicate', $module) }}" class="d-inline"
-                      onsubmit="return confirm('Dupliquer ce module dans votre espace ?')">
+                <span class="badge bg-danger">Admin</span>
+                <a href="{{ route('modules.items.create', $module) }}" class="btn btn-sm btn-primary"><i class="bi bi-plus-lg me-1"></i>Ajouter</a>
+                <a href="{{ route('modules.edit', $module) }}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                <a href="{{ route('modules.export', $module) }}" class="btn btn-sm" style="color:#f97316;border:1px solid #f97316;"><i class="bi bi-download"></i></a>
+                <form method="POST" action="{{ route('modules.duplicate', $module) }}" class="d-inline" onsubmit="return confirm('Dupliquer ce module ?')">
                     @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-copy me-1"></i> Dupliquer
-                    </button>
+                    <button type="submit" class="btn btn-sm btn-outline-secondary"><i class="bi bi-copy"></i></button>
                 </form>
-                <form method="POST" action="{{ route('modules.destroy', $module) }}" class="d-inline"
-                      onsubmit="return confirm('Supprimer ce module et tous ses items ?')">
+                <form method="POST" action="{{ route('modules.destroy', $module) }}" class="d-inline" onsubmit="return confirm('Supprimer ce module ?')">
                     @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i>
-                    </button>
+                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                 </form>
             </div>
         @elseif (Auth::check() && $module->is_public)
-            {{-- Bouton Signaler (visible uniquement pour les utilisateurs connectés non propriétaires) --}}
-            <div>
-                <button type="button"
-                        class="btn btn-outline-danger btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#reportModuleModal">
-                    <i class="bi bi-flag me-1"></i> Signaler
-                </button>
-            </div>
+            <button type="button" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);" data-bs-toggle="modal" data-bs-target="#reportModuleModal">
+                <i class="bi bi-flag me-1"></i>Signaler
+            </button>
         @endif
     </div>
 
@@ -194,74 +163,44 @@
         @endif
     @endauth
 
-    {{-- ── Boutons d'entraînement (Test / Anki) - nécessite au moins 4 items ── --}}
+    {{-- ── Boutons de mode ── --}}
     @if ($items->total() >= 4)
-        <div class="d-grid gap-2 mb-4" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
-            <a href="{{ route('test.show', $module) }}" class="btn btn-primary" style="height:auto;padding:1rem;">
-                <div style="font-size:1.5rem;margin-bottom:.25rem;">
-                    <i class="bi bi-lightning-charge"></i>
-                </div>
-                <div style="font-weight:600;font-size:.9rem;">Mode Test</div>
-                <div style="font-size:.75rem;color:rgba(255,255,255,.7);">Score final</div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            <a href="{{ route('test.show', $module) }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-lightning-charge me-1"></i>Test
             </a>
-            <a href="{{ route('anki.show', $module) }}" class="btn btn-outline-primary" style="height:auto;padding:1rem;border-width:2px;">
-                <div style="font-size:1.5rem;margin-bottom:.25rem;">
-                    <i class="bi bi-arrow-repeat"></i>
-                </div>
-                <div style="font-weight:600;font-size:.9rem;">Mode Anki</div>
-                <div style="font-size:.75rem;color:var(--text-muted);">Infini</div>
+            <a href="{{ route('anki.show', $module) }}" class="btn btn-sm" style="border:2px solid var(--accent);color:var(--accent);background:transparent;">
+                <i class="bi bi-arrow-repeat me-1"></i>Anki
             </a>
-            <a href="{{ route('exam.show', $module) }}" class="btn btn-outline-secondary" style="height:auto;padding:1rem;border-width:2px;">
-                <div style="font-size:1.5rem;margin-bottom:.25rem;">
-                    <i class="bi bi-pencil-square"></i>
-                </div>
-                <div style="font-weight:600;font-size:.9rem;">Mode Examen</div>
-                <div style="font-size:.75rem;color:var(--text-muted);">Tous les items</div>
+            <a href="{{ route('exam.show', $module) }}" class="btn btn-sm" style="border:1px solid var(--card-border);color:var(--text-muted);">
+                <i class="bi bi-pencil-square me-1"></i>Examen
             </a>
             @if(\App\Models\Setting::get('feature_quick_review', '1'))
             @auth
                 @if ($failedItemsCount > 0)
-                    <form method="POST" action="{{ route('anki.review', $module) }}" style="display:contents;">
+                    <form method="POST" action="{{ route('anki.review', $module) }}">
                         @csrf
-                        <button type="submit" class="btn" style="height:auto;padding:1rem;border-width:2px;border:2px solid #ef4444;color:#ef4444;background:transparent;border-radius:var(--bs-btn-border-radius);">
-                            <div style="font-size:1.5rem;margin-bottom:.25rem;">
-                                <i class="bi bi-exclamation-triangle"></i>
-                            </div>
-                            <div style="font-weight:600;font-size:.9rem;">Révision rapide</div>
-                            <div style="font-size:.75rem;">{{ $failedItemsCount }} à revoir</div>
+                        <button type="submit" class="btn btn-sm" style="border:1px solid #ef4444;color:#ef4444;background:transparent;">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Révision ({{ $failedItemsCount }})
                         </button>
                     </form>
                 @endif
             @endauth
             @endif
+            @auth
+            <form method="POST" action="{{ route('modules.progress.reset', $module) }}" class="ms-auto"
+                  onsubmit="return confirm('Réinitialiser ta progression ?')">
+                @csrf @method('DELETE')
+                <button type="submit" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+            </form>
+            @endauth
         </div>
-    @if ($items->total() >= 4)
-        @auth
-            <div class="d-flex justify-content-end gap-2 mb-3" style="margin-top:-.5rem;">
-                <form method="POST" action="{{ route('modules.progress.reset', $module) }}"
-                      onsubmit="return confirm('Réinitialiser toute ta progression sur ce module ? Cette action est irréversible.')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-sm"
-                            style="color:var(--text-muted);border:1px solid var(--accent);background:transparent;">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i>Réinitialiser ma progression
-                    </button>
-                </form>
-                <a href="#ratings-section" class="btn btn-sm"
-                   style="color:var(--text-muted);border:1px solid var(--accent);background:transparent;">
-                    <i class="bi bi-star me-1"></i>Voir les avis
-                </a>
-            </div>
-        @endauth
-    @endif
-
-    @elseif ($items->total() > 0 && $items->total() < 4)
-        <div class="alert d-flex align-items-center gap-2 mb-4"
-             style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);color:#fbbf24;border-radius:10px;">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span style="font-size:.875rem;">
-                Il faut au moins <strong>4 items</strong> pour s'entraîner.
-                Encore {{ 4 - $items->total() }} à ajouter !
-            </span>
+    @elseif ($items->total() > 0)
+        <div class="mb-3" style="font-size:.82rem;color:#fbbf24;">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            Il faut au moins 4 items pour s'entraîner. Encore {{ 4 - $items->total() }} à ajouter.
         </div>
     @endif
 
@@ -289,7 +228,7 @@
                     <div class="card h-100">
 
                         {{-- Photo de l'item --}}
-                        <div style="height:160px;overflow:hidden;border-radius:12px 12px 0 0;background:#0f1117;cursor:pointer;" onclick="openZoom('{{ $item->photo_url }}')">
+                        <div style="height:160px;overflow:hidden;border-radius:3px 3px 0 0;background:var(--body-bg);cursor:pointer;" onclick="openZoom('{{ $item->photo_url }}')">
                             <img src="{{ $item->photo_url }}"
                                  alt="{{ $item->name_fr }}"
                                  style="width:100%;height:100%;object-fit:cover;opacity:.9;">

@@ -22,16 +22,20 @@ class SettingsController extends Controller
         $images    = Image::orderBy('name')->get();
         $timezones = timezone_identifiers_list();
         $settings  = [
-            'site_name'                  => Setting::get('site_name', 'Mnémo'),
-            'site_url'                   => Setting::get('site_url', config('app.url')),
-            'site_description'           => Setting::get('site_description', ''),
-            'site_keywords'              => Setting::get('site_keywords', ''),
-            'site_logo'                  => Setting::get('site_logo', ''),
-            'timezone'                   => Setting::get('timezone', 'Europe/Paris'),
-            'locale'                     => Setting::get('locale', 'fr'),
-            'site_key'                   => Setting::get('site_key', ''),
-            'posts_webhook'              => Setting::get('posts_webhook', ''),
-            'exam_default_expires_days'  => Setting::get('exam_default_expires_days', ''),
+            'site_name'        => Setting::get('site_name', 'Mnémo'),
+            'site_url'         => Setting::get('site_url', config('app.url')),
+            'site_description' => Setting::get('site_description', ''),
+            'site_keywords'    => Setting::get('site_keywords', ''),
+            'site_logo'        => Setting::get('site_logo', ''),
+            'timezone'         => Setting::get('timezone', 'Europe/Paris'),
+            'locale'           => Setting::get('locale', 'fr'),
+            'site_key'         => Setting::get('site_key', ''),
+            'posts_webhook'    => Setting::get('posts_webhook', ''),
+            'exam_default_expires_days' => Setting::get('exam_default_expires_days', ''),
+            'item_required_name_fr'    => Setting::get('item_required_name_fr', '1'),
+            'item_required_name_alt'   => Setting::get('item_required_name_alt', '1'),
+            'item_required_photo'      => Setting::get('item_required_photo', '0'),
+            'item_required_function'   => Setting::get('item_required_function', '0'),
         ];
 
         return view('admin.settings.index', compact('settings', 'images', 'timezones'));
@@ -40,15 +44,15 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'site_name'                 => 'required|string|max:100',
-            'site_url'                  => 'nullable|url|max:255',
-            'site_description'          => 'nullable|string',
-            'site_keywords'             => 'nullable|string|max:500',
-            'site_logo'                 => 'nullable|string|max:255',
-            'timezone'                  => 'nullable|string|max:100',
-            'locale'                    => 'nullable|in:fr,en',
-            'site_key'                  => 'nullable|string|max:255',
-            'posts_webhook'             => 'nullable|url|max:500',
+            'site_name'        => 'required|string|max:100',
+            'site_url'         => 'nullable|url|max:255',
+            'site_description' => 'nullable|string',
+            'site_keywords'    => 'nullable|string|max:500',
+            'site_logo'        => 'nullable|string|max:255',
+            'timezone'         => 'nullable|string|max:100',
+            'locale'           => 'nullable|in:fr,en',
+            'site_key'         => 'nullable|string|max:255',
+            'posts_webhook'            => ['nullable', 'url', 'max:500', 'regex:/^https:\/\//i'],
             'exam_default_expires_days' => 'nullable|integer|min:1|max:365',
         ]);
 
@@ -58,13 +62,47 @@ class SettingsController extends Controller
             'exam_default_expires_days',
         ];
 
+        // Checkboxes champs items (non cochée = absent de la requête = '0')
+        foreach (['item_required_name_fr', 'item_required_name_alt', 'item_required_photo', 'item_required_function'] as $cb) {
+            Setting::set($cb, $request->has($cb) ? '1' : '0');
+        }
+
         foreach ($fields as $field) {
             Setting::set($field, $request->input($field, ''));
         }
 
+        $this->updateEnvTimezone($request->input('timezone', 'UTC'));
+
         LogHelper::log('updated_settings', 'settings', null, ['section' => 'general'], 'info');
 
         return back()->with('success', 'Paramètres sauvegardés.');
+    }
+
+    private function updateEnvTimezone(string $tz): void
+    {
+        if (!in_array($tz, timezone_identifiers_list())) return;
+        $this->writeEnv(function (string $content) use ($tz): string {
+            if (str_contains($content, 'APP_TIMEZONE=')) {
+                return preg_replace('/^APP_TIMEZONE=.*/m', 'APP_TIMEZONE=' . $tz, $content);
+            }
+            return $content . "\nAPP_TIMEZONE=" . $tz;
+        });
+    }
+
+    private function writeEnv(callable $mutate): void
+    {
+        $envPath = base_path('.env');
+        if (!file_exists($envPath)) return;
+        $fp = fopen($envPath, 'c+');
+        if (!$fp) return;
+        flock($fp, LOCK_EX);
+        $content = stream_get_contents($fp);
+        $content = $mutate($content);
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, $content);
+        flock($fp, LOCK_UN);
+        fclose($fp);
     }
 
     // ─────────────────────────────────────────────
@@ -157,33 +195,35 @@ class SettingsController extends Controller
             'smtp_password' => 'nullable|string|max:255',
         ]);
 
-        $env = file_get_contents(base_path('.env'));
+        $this->writeEnv(function (string $env) use ($data): string {
+            $replace = function (string $key, string $value) use (&$env) {
+                $value = strpos($value, ' ') !== false ? '"' . $value . '"' : $value;
+                if (preg_match("/^{$key}=/m", $env)) {
+                    $env = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env);
+                } else {
+                    $env .= "\n{$key}={$value}";
+                }
+            };
 
-        $replace = function (string $key, string $value) use (&$env) {
-            $value = strpos($value, ' ') !== false ? '"' . $value . '"' : $value;
-            if (preg_match("/^{$key}=/m", $env)) {
-                $env = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env);
-            } else {
-                $env .= "\n{$key}={$value}";
+            $replace('MAIL_MAILER',       $data['mailer']);
+            $replace('MAIL_FROM_ADDRESS', $data['from_address']);
+            $replace('MAIL_HOST',         $data['smtp_host'] ?? '');
+            $replace('MAIL_PORT',         (string) ($data['smtp_port'] ?? 587));
+            $replace('MAIL_USERNAME',     $data['smtp_username'] ?? '');
+            $replace('MAIL_SCHEME',       $data['smtp_scheme'] ?? '');
+
+            if (!empty($data['smtp_password'])) {
+                $replace('MAIL_PASSWORD', $data['smtp_password']);
             }
-        };
 
-        $replace('MAIL_MAILER',       $data['mailer']);
-        $replace('MAIL_FROM_ADDRESS', $data['from_address']);
-        $replace('MAIL_HOST',         $data['smtp_host'] ?? '');
-        $replace('MAIL_PORT',         (string) ($data['smtp_port'] ?? 587));
-        $replace('MAIL_USERNAME',     $data['smtp_username'] ?? '');
-        $replace('MAIL_SCHEME',       $data['smtp_scheme'] ?? '');
-
-        if (!empty($data['smtp_password'])) {
-            $replace('MAIL_PASSWORD', $data['smtp_password']);
-        }
-
-        file_put_contents(base_path('.env'), $env);
+            return $env;
+        });
 
         Setting::set('mail.users_email_verification', $request->boolean('users_email_verification') ? '1' : '0');
 
         Artisan::call('config:clear');
+
+        LogHelper::log('updated_settings', 'settings', null, ['section' => 'mail']);
 
         return back()->with('success', 'Configuration e-mail sauvegardée.');
     }
@@ -197,6 +237,7 @@ class SettingsController extends Controller
                         ->subject('Test e-mail - Mnémo');
             });
 
+            LogHelper::log('sent_test_mail', 'settings', null, ['to' => $user->email]);
             return response()->json(['message' => 'E-mail de test envoyé à ' . $user->email]);
         } catch (\Throwable $e) {
             return response()->json(['message' => 'Erreur : ' . $e->getMessage()], 500);
@@ -240,69 +281,36 @@ class SettingsController extends Controller
     public function features()
     {
         $features = [
-            'feature_keyboard_shortcuts' => [
-                'label'       => 'Raccourcis clavier',
-                'description' => 'Permet de répondre aux questions avec les touches 1/2/3/4 (et &/é/"/\' en AZERTY) dans les modes Test, Anki et Examen. Espace/Entrée pour passer à la question suivante en mode Anki.',
-                'default'     => '1',
-            ],
-            'feature_quick_review' => [
-                'label'       => 'Révision rapide',
-                'description' => 'Affiche un bouton "Révision rapide" sur la page d\'un module après qu\'un utilisateur a raté des questions en mode Test. Lance une session Anki uniquement sur les items non maîtrisés.',
-                'default'     => '1',
-            ],
-            'feature_exam_ranking' => [
-                'label'       => 'Classement dans les examens partagés',
-                'description' => 'Affiche le rang de l\'élève (ex : "Vous êtes 2ème sur 15 participants") sur la page de fin d\'un examen partagé, basé sur le score.',
-                'default'     => '1',
-            ],
-            'feature_exam_qrcode' => [
-                'label'       => 'QR Code sur les résultats d\'examens',
-                'description' => 'Affiche un QR Code du lien de l\'examen partagé sur la page résultats. Cliquable pour l\'agrandir en plein écran. Utile pour partager l\'examen en classe.',
-                'default'     => '1',
-            ],
-            'feature_profile_stats' => [
-                'label'       => 'Statistiques sur le profil',
-                'description' => 'Affiche 6 widgets de statistiques personnelles sur la page profil : items maîtrisés, items pratiqués, tests effectués, score moyen, meilleure série et modules utilisés.',
-                'default'     => '1',
-            ],
-            'feature_admin_charts' => [
-                'label'       => 'Graphiques sur le tableau de bord admin',
-                'description' => 'Affiche deux graphiques sur les 30 derniers jours dans le tableau de bord administrateur : nombre de tests passés par jour et nombre de nouvelles inscriptions par jour.',
-                'default'     => '1',
-            ],
-            'feature_groups' => [
-                'label'       => 'Groupes / Classes',
-                'description' => 'Permet aux utilisateurs de créer des groupes (classes), d\'y inviter des membres par e-mail et de les gérer. Accessible via le menu de navigation "/groupes".',
-                'default'     => '1',
-            ],
-            'feature_item_badges' => [
-                'label'       => 'Badges de progression sur les items',
-                'description' => 'Affiche des badges colorés sur chaque item d\'un module : "Maîtrisé" (vert, série ≥ 3), nombre d\'erreurs (rouge) ou "En cours" (jaune). Basé sur l\'historique Anki de l\'utilisateur.',
-                'default'     => '1',
-            ],
+            'feature_library'             => ['label' => 'Bibliothèque publique',        'description' => 'Permet aux utilisateurs de parcourir et partager des modules publics.', 'default' => '1'],
+            'feature_anki'                => ['label' => 'Mode Anki',                    'description' => 'Mode de révision par répétition espacée.', 'default' => '1'],
+            'feature_test'                => ['label' => 'Mode Test',                    'description' => 'Mode test chronométré.', 'default' => '1'],
+            'feature_exam'                => ['label' => 'Mode Examen',                  'description' => 'Mode examen séquentiel.', 'default' => '1'],
+            'feature_shared_exam'         => ['label' => 'Examens partagés',             'description' => 'Permettre de créer et partager des examens avec un lien public.', 'default' => '1'],
+            'feature_progression'         => ['label' => 'Page Progression',             'description' => 'Statistiques et historique des sessions.', 'default' => '1'],
+            'feature_keyboard_shortcuts'  => ['label' => 'Raccourcis clavier',           'description' => 'Permettre de répondre aux quiz avec les touches 1-2-3-4.', 'default' => '1'],
         ];
+
         $values = [];
         foreach ($features as $key => $meta) {
             $values[$key] = Setting::get($key, $meta['default']);
         }
+
         return view('admin.settings.features', compact('features', 'values'));
     }
 
     public function updateFeatures(Request $request)
     {
         $keys = [
-            'feature_keyboard_shortcuts',
-            'feature_quick_review',
-            'feature_exam_ranking',
-            'feature_exam_qrcode',
-            'feature_profile_stats',
-            'feature_admin_charts',
-            'feature_groups',
-            'feature_item_badges',
+            'feature_library', 'feature_anki', 'feature_test', 'feature_exam',
+            'feature_shared_exam', 'feature_progression', 'feature_keyboard_shortcuts',
         ];
+
         foreach ($keys as $key) {
-            Setting::set($key, $request->boolean($key) ? '1' : '0');
+            Setting::set($key, $request->has($key) ? '1' : '0');
         }
-        return redirect()->back()->with('success', 'Fonctionnalités mises à jour.');
+
+        LogHelper::log('updated_settings', 'settings', null, ['section' => 'features'], 'info');
+
+        return back()->with('success', 'Fonctionnalités mises à jour.');
     }
 }

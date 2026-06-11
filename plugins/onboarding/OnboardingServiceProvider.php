@@ -15,7 +15,7 @@ class OnboardingServiceProvider extends BasePluginServiceProvider
         $this->app['view']->composer('dashboard', function ($view) {
             if (!auth()->check()) return;
             $user = auth()->user();
-            if (!$user->onboarding_seen) {
+            if ($user->onboarding_seen === false || $user->onboarding_seen === 0) {
                 $view->with('showOnboarding', true);
             }
         });

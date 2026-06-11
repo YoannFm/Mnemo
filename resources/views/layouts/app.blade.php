@@ -30,6 +30,13 @@
             document.documentElement.setAttribute('data-bs-theme', t);
         })();
     </script>
+    @php
+        $faviconLogo = setting("site_logo") ? \App\Models\Image::where("file", setting("site_logo"))->first() : null;
+        $faviconUrl  = $faviconLogo ? $faviconLogo->url() : asset("favicon.ico");
+    @endphp
+    <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
+    <link rel="apple-touch-icon" href="{{ $faviconUrl }}">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -416,7 +423,7 @@
             --bs-table-striped-bg: rgba(239,183,2,.05);
             --bs-table-hover-bg: rgba(239,183,2,.08);
             color: var(--text-primary);
-            background: var(--accent);
+            background: transparent;
             border-radius: 0;
         }
 
@@ -435,15 +442,15 @@
             padding: 14px 16px;
         }
 
-        .table tbody { background: #212227; }
+        .table tbody { background: var(--card-bg); }
 
         .table tbody td {
-            background: #212227;
+            background: var(--card-bg);
             color: var(--text-primary);
             padding: 10px 16px;
         }
 
-        .breadcrumb { background-color: #212227; }
+        .breadcrumb { background-color: var(--card-border); }
 
         /* ── Footer ── */
         #main-footer {
@@ -733,7 +740,7 @@
         <div class="footer-left"></div>
         <div class="footer-center">
             <div>© 2026 YoannFM · <a href="#" data-bs-toggle="modal" data-bs-target="#licenseModal">Licence MIT</a></div>
-            <div style="margin-top:.2rem;">Fait avec ❤️ par <a href="https://github.com/YoannFM-rascol/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
+            <div style="margin-top:.2rem;">Fait avec ❤️ par <a href="https://github.com/YoannFM/" target="_blank" rel="noopener noreferrer">YoannFM</a></div>
         </div>
     </footer>
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Theme;
 use Illuminate\Http\Request;
@@ -41,7 +42,9 @@ class ThemeController extends Controller
         $data['slug'] = Str::slug($data['name']);
         $data['is_active'] = false;
 
-        Theme::create($data);
+        $theme = Theme::create($data);
+
+        LogHelper::log('created_theme', 'theme', $theme->id, ['name' => $theme->name]);
 
         return redirect()->route('admin.themes.index')->with('success', 'Theme cree.');
     }
@@ -72,6 +75,8 @@ class ThemeController extends Controller
 
         $theme->update($data);
 
+        LogHelper::log('updated_theme', 'theme', $theme->id, ['name' => $theme->name]);
+
         return redirect()->route('admin.themes.index')->with('success', 'Theme mis a jour.');
     }
 
@@ -80,6 +85,7 @@ class ThemeController extends Controller
         if ($theme->is_active) {
             return back()->with('error', 'Impossible de supprimer le theme actif.');
         }
+        LogHelper::log('deleted_theme', 'theme', $theme->id, ['name' => $theme->name], 'warning');
         $theme->delete();
         return back()->with('success', 'Theme supprime.');
     }
@@ -109,6 +115,8 @@ class ThemeController extends Controller
                 ['value' => $value, 'updated_at' => now()]
             );
         }
+
+        LogHelper::log('activated_theme', 'theme', $theme->id, ['name' => $theme->name]);
 
         return back()->with('success', 'Theme "' . $theme->name . '" active.');
     }

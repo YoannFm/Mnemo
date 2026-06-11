@@ -30,94 +30,79 @@
                           enctype="multipart/form-data">
                         @csrf
 
-                        {{-- Nom français de l'item (obligatoire) --}}
-                        {{-- Sera utilisé dans les questions Q1 et Q4 en français --}}
+                        @if($module->field_name_fr)
                         <div class="mb-3">
                             <label for="name_fr" class="form-label">
                                 Nom <span style="color:#ef4444;">*</span>
                             </label>
-                            <input type="text"
-                                   id="name_fr"
-                                   name="name_fr"
+                            <input type="text" id="name_fr" name="name_fr"
                                    class="form-control @error('name_fr') is-invalid @enderror"
-                                   value="{{ old('name_fr') }}"
-                                   placeholder="Ex : Marguerite"
-                                   autofocus>
-                            @error('name_fr')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                   value="{{ old('name_fr') }}" placeholder="Ex : Marguerite" autofocus>
+                            @error('name_fr')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
+                        @endif
 
-                        {{-- Nom anglais de l'item (obligatoire) --}}
-                        {{-- Sera utilisé dans la question Q4 (traduction anglaise) --}}
+                        @if($module->field_name_alt)
                         <div class="mb-3">
                             <label for="name_alt" class="form-label">
-                                Traduction <span style="color:#ef4444;">*</span>
+                                Nom alternatif <span style="color:#ef4444;">*</span>
                             </label>
-                            <input type="text"
-                                   id="name_alt"
-                                   name="name_alt"
+                            <input type="text" id="name_alt" name="name_alt"
                                    class="form-control @error('name_alt') is-invalid @enderror"
-                                   value="{{ old('name_alt') }}"
-                                   placeholder="Ex : Daisy">
-                            @error('name_alt')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                   value="{{ old('name_alt') }}" placeholder="Ex : Daisy">
+                            @error('name_alt')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
+                        @endif
 
-                        {{-- Fonction / Description de l'item (obligatoire) --}}
-                        {{-- Sera utilisé dans la question Q2 et Q3 (description textuelle) --}}
-                        {{-- Max 2000 caractères pour une description détaillée --}}
+                        @if($module->field_function)
                         <div class="mb-3">
                             <label for="function_text" class="form-label">
-                                Fonction / Description <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(optionnel)</span>
+                                Fonction / Description <span style="color:#ef4444;">*</span>
                             </label>
-                            <textarea id="function_text"
-                                      name="function_text"
+                            <textarea id="function_text" name="function_text"
                                       class="form-control @error('function_text') is-invalid @enderror"
                                       rows="4"
-                                      placeholder="Décrivez la fonction ou les caractéristiques de cet élément…">{{ old('function_text') }}</textarea>
-                            @error('function_text')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                      placeholder="Décrivez la fonction ou les caractéristiques…">{{ old('function_text') }}</textarea>
+                            @error('function_text')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
+                        @endif
 
-                        {{-- Upload de photo (obligatoire) --}}
-                        {{-- La photo sera utilisée dans les questions Q1, Q3, Q5, Q8 --}}
+                        @if($module->field_photo)
                         <div class="mb-4">
                             <label for="photo" class="form-label">
-                                Photo <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(optionnel, max 2 Mo)</span>
+                                Photo <span style="color:#ef4444;">*</span>
+                                <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(max 4 Mo)</span>
                             </label>
-
-                            {{-- Zone de prévisualisation de la photo avant upload --}}
-                            {{-- Masquée par défaut, s'affiche quand l'utilisateur sélectionne une photo --}}
-                            <div id="photo-preview"
-                                 style="display:none;width:100%;height:180px;border-radius:10px;overflow:hidden;
-                                        background:#0f1117;margin-bottom:.75rem;">
-                                <img id="preview-img" src=""
-                                     style="width:100%;height:100%;object-fit:cover;">
+                            <div id="photo-preview" style="display:none;width:100%;height:180px;border-radius:10px;overflow:hidden;background:#0f1117;margin-bottom:.75rem;">
+                                <img id="preview-img" src="" style="width:100%;height:100%;object-fit:cover;">
                             </div>
-
-                            {{-- Input file pour la sélection de la photo --}}
-                            {{-- required: la photo est obligatoire --}}
-                            {{-- onchange appelle previewPhoto() pour montrer l'aperçu --}}
-                            <input type="file"
-                                   id="photo"
-                                   name="photo"
+                            <input type="file" id="photo" name="photo"
                                    class="form-control @error('photo') is-invalid @enderror"
-                                   accept="image/*"
-                                   onchange="previewPhoto(this)">
-                            @error('photo')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                   accept="image/*" onchange="previewPhoto(this)">
+                            @error('photo')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
                                 Formats acceptés : JPEG, PNG, WebP - La photo sera compressée automatiquement.
                             </div>
                         </div>
+                        @endif
 
-                        {{-- Boutons d'action du formulaire --}}
-                        {{-- "Ajouter l'item" envoie le formulaire et enregistre l'item --}}
-                        {{-- "Annuler" redirection vers la page du module --}}
+                        @if($module->field_audio)
+                        <div class="mb-4">
+                            <label for="audio" class="form-label">
+                                Son / Audio <span style="color:#ef4444;">*</span>
+                                <span style="color:var(--text-muted);font-size:.8rem;font-weight:400;">(max 10 Mo - MP3, OGG, WAV, M4A)</span>
+                            </label>
+                            <div id="audio-preview" style="display:none;margin-bottom:.75rem;">
+                                <audio id="preview-audio" controls style="width:100%;border-radius:8px;"></audio>
+                            </div>
+                            <input type="file" id="audio" name="audio"
+                                   class="form-control @error('audio') is-invalid @enderror"
+                                   accept="audio/*" onchange="previewAudio(this)">
+                            @error('audio')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        @endif
+
+                        {{-- Boutons --}}
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-plus-lg me-1"></i> Ajouter l'item
@@ -143,6 +128,17 @@
          *
          * @param {HTMLInputElement} input - L'input file déclenché
          */
+        function previewAudio(input) {
+            const preview = document.getElementById('audio-preview');
+            const audio   = document.getElementById('preview-audio');
+            if (input.files && input.files[0]) {
+                audio.src = URL.createObjectURL(input.files[0]);
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
         function previewPhoto(input) {
             const preview = document.getElementById('photo-preview');
             const img     = document.getElementById('preview-img');

@@ -37,18 +37,26 @@ class ModuleExportController extends Controller
         foreach ($items as $item) {
             $entry = [
                 'name_fr'       => $item->name_fr,
-                'name_alt'       => $item->name_alt,
+                'name_alt'      => $item->name_alt,
                 'function_text' => $item->function_text ?? '',
                 'image'         => '',
+                'audio'         => '',
             ];
 
             if ($item->photo_path && Storage::disk('public')->exists($item->photo_path)) {
                 $ext      = pathinfo($item->photo_path, PATHINFO_EXTENSION);
-                $filename = Str::slug($item->name_fr) . '-' . $item->id . '.' . $ext;
+                $filename = Str::slug($item->name_fr ?: 'item') . '-' . $item->id . '.' . $ext;
                 $imgPath  = 'images/' . $filename;
-
                 $zip->addFromString($imgPath, Storage::disk('public')->get($item->photo_path));
                 $entry['image'] = $imgPath;
+            }
+
+            if ($item->audio_path && Storage::disk('public')->exists($item->audio_path)) {
+                $ext       = pathinfo($item->audio_path, PATHINFO_EXTENSION);
+                $filename  = Str::slug($item->name_fr ?: 'item') . '-' . $item->id . '.' . $ext;
+                $audioPath = 'audio/' . $filename;
+                $zip->addFromString($audioPath, Storage::disk('public')->get($item->audio_path));
+                $entry['audio'] = $audioPath;
             }
 
             $manifest['items'][] = $entry;
@@ -121,29 +129,41 @@ class ModuleExportController extends Controller
         $count = 0;
         foreach ($data['items'] ?? [] as $row) {
             $nameFr   = trim($row['name_fr']   ?? '');
-            $nameEn   = trim($row['name_alt']   ?? '');
+            $nameEn   = trim($row['name_alt'] ?? $row['name_en'] ?? '');
 
             if (empty($nameFr) || empty($nameEn)) {
                 continue;
             }
 
             $photoPath = null;
+            $audioPath = null;
 
             if (!empty($row['image'])) {
                 $localImg = $tmpDir . '/' . $row['image'];
                 if (file_exists($localImg)) {
-                    $ext       = pathinfo($localImg, PATHINFO_EXTENSION) ?: 'jpg';
-                    $destName  = 'items/' . Str::uuid() . '.' . $ext;
+                    $ext      = pathinfo($localImg, PATHINFO_EXTENSION) ?: 'jpg';
+                    $destName = 'items/' . Str::uuid() . '.' . $ext;
                     Storage::disk('public')->put($destName, file_get_contents($localImg));
                     $photoPath = $destName;
                 }
             }
 
+            if (!empty($row['audio'])) {
+                $localAudio = $tmpDir . '/' . $row['audio'];
+                if (file_exists($localAudio)) {
+                    $ext      = pathinfo($localAudio, PATHINFO_EXTENSION) ?: 'mp3';
+                    $destName = 'items/audio/' . Str::uuid() . '.' . $ext;
+                    Storage::disk('public')->put($destName, file_get_contents($localAudio));
+                    $audioPath = $destName;
+                }
+            }
+
             $module->items()->create([
                 'name_fr'       => mb_substr($nameFr, 0, 255),
-                'name_alt'       => mb_substr($nameEn, 0, 255),
+                'name_alt'      => mb_substr($nameEn, 0, 255),
                 'function_text' => mb_substr(trim($row['function_text'] ?? ''), 0, 2000),
                 'photo_path'    => $photoPath,
+                'audio_path'    => $audioPath,
             ]);
 
             $count++;

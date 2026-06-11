@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Module;
 use App\Models\SharedExam;
 use App\Models\SharedExamAttempt;
@@ -21,11 +22,18 @@ class SharedExamController extends Controller
             abort(403);
         }
 
+        $validModes = [
+            'random', 'photo_to_name_fr', 'photo_to_name_alt', 'photo_to_function',
+            'function_to_photo', 'function_to_name_fr', 'function_to_name_alt',
+            'name_fr_to_name_alt', 'name_fr_to_photo', 'name_fr_to_function',
+            'name_alt_to_photo', 'name_alt_to_function', 'name_alt_to_name_fr',
+        ];
+
         $validated = $request->validate([
-            'mode'        => 'required|string',
+            'mode'        => ['required', 'string', 'in:' . implode(',', $validModes)],
             'label'       => 'nullable|string|max:255',
             'expires_at'  => 'nullable|date|after:now',
-            'webhook_url' => 'nullable|url',
+            'webhook_url' => ['nullable', 'url', 'regex:/^https:\/\//i'],
         ]);
 
         $sharedExam = SharedExam::create([
@@ -39,6 +47,8 @@ class SharedExamController extends Controller
         ]);
 
         $link = route('guest.exam.show', $sharedExam->uuid);
+
+        LogHelper::log('created_shared_exam', 'shared_exam', $sharedExam->id, ['module_id' => $module->id, 'mode' => $validated['mode']]);
 
         return redirect()
             ->route('modules.show', $module)
@@ -62,6 +72,8 @@ class SharedExamController extends Controller
             abort(403);
         }
 
+        LogHelper::log('deleted_shared_exam', 'shared_exam', $sharedExam->id, [], 'warning');
+
         $sharedExam->delete();
 
         return redirect()->back()->with('success', 'Lien d\'examen supprimé.');
@@ -76,6 +88,8 @@ class SharedExamController extends Controller
         $validated = $request->validate(['extra' => 'required|integer|min:1|max:10']);
         $sharedExam->increment('max_attempts', $validated['extra']);
 
+        LogHelper::log('added_attempts', 'shared_exam', $sharedExam->id, ['extra' => $validated['extra']]);
+
         return redirect()->back()->with('success', 'Tentatives supplémentaires accordées.');
     }
 
@@ -84,6 +98,12 @@ class SharedExamController extends Controller
         if ($sharedExam->user_id !== Auth::id()) {
             abort(403);
         }
+
+        if ($attempt->shared_exam_id !== $sharedExam->id) {
+            abort(404);
+        }
+
+        LogHelper::log('reset_attempt', 'shared_exam', $sharedExam->id, ['attempt_id' => $attempt->id], 'warning');
 
         $attempt->delete();
 
@@ -111,6 +131,8 @@ class SharedExamController extends Controller
         ]);
 
         $attempt->update(['results_sent_at' => now()]);
+
+        LogHelper::log('sent_results', 'shared_exam', $sharedExam->id, ['attempt_id' => $attempt->id]);
 
         return redirect()->back()->with('success', 'Résultats envoyés à ' . $attempt->guest_name . '.');
     }
@@ -274,6 +296,8 @@ class SharedExamController extends Controller
             $attempt->update(['results_sent_at' => now()]);
             $sent++;
         }
+
+        LogHelper::log('sent_all_results', 'shared_exam', $sharedExam->id, ['count' => $sent]);
 
         return redirect()->back()->with('success', $sent > 0 ? "{$sent} résultat(s) envoyé(s)." : 'Tous les résultats ont déjà été envoyés.');
     }

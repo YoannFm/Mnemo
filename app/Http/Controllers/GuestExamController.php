@@ -52,8 +52,13 @@ class GuestExamController extends Controller
 
         $module   = $sharedExam->module;
         $allItems = $module->items()->get();
-        $mode     = $sharedExam->mode;
 
+        if ($allItems->isEmpty()) {
+            return redirect()->route('guest.exam.show', $uuid)
+                ->with('error', 'Ce module ne contient aucun item.');
+        }
+
+        $mode      = $sharedExam->mode;
         $items     = $allItems->shuffle();
         $questions = [];
 
@@ -150,6 +155,12 @@ class GuestExamController extends Controller
 
         $answers   = session('guest_exam_answers', []);
         $total     = count($answers);
+
+        if ($total === 0) {
+            return redirect()->route('guest.exam.show', $uuid)
+                ->with('error', 'L\'examen n\'a pas été complété.');
+        }
+
         $score     = collect($answers)->where('is_correct', true)->count();
         $guestName = session('guest_exam_name', 'Invité');
 

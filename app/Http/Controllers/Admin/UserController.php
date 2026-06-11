@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Role;
@@ -61,6 +62,8 @@ class UserController extends Controller
             'is_admin' => $role && $role->is_admin_role,
         ]);
 
+        LogHelper::log('admin_created_user', 'user', $user->id, ['email' => $user->email]);
+
         return redirect()->route('admin.users.edit', $user)
             ->with('success', 'Utilisateur ' . $user->name . ' cree.');
     }
@@ -97,6 +100,8 @@ class UserController extends Controller
 
         $user->save();
 
+        LogHelper::log('admin_updated_user', 'user', $user->id, ['name' => $user->name]);
+
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur ' . $user->name . ' mis a jour.');
     }
@@ -107,7 +112,12 @@ class UserController extends Controller
             return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
         }
 
+        $userId = $user->id;
+        $email  = $user->email;
+
         $user->delete();
+
+        LogHelper::log('admin_deleted_user', 'user', $userId, ['email' => $email], 'warning');
 
         return back()->with('success', 'Utilisateur supprime.');
     }
@@ -116,6 +126,8 @@ class UserController extends Controller
     {
         $user->force_password_change = true;
         $user->save();
+
+        LogHelper::log('admin_forced_password_change', 'user', $user->id);
 
         return back()->with('success', 'L\'utilisateur devra changer son mot de passe a la prochaine connexion.');
     }
@@ -309,6 +321,8 @@ class UserController extends Controller
         }
 
         fclose($handle);
+
+        LogHelper::log('admin_imported_users', 'user', null, ['imported' => $imported, 'skipped' => $skipped]);
 
         return back()->with('success', "{$imported} utilisateur(s) importe(s), {$skipped} ignore(s) (doublons).");
     }
