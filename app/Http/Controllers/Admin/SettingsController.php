@@ -81,15 +81,28 @@ class SettingsController extends Controller
     private function updateEnvTimezone(string $tz): void
     {
         if (!in_array($tz, timezone_identifiers_list())) return;
+        $this->writeEnv(function (string $content) use ($tz): string {
+            if (str_contains($content, 'APP_TIMEZONE=')) {
+                return preg_replace('/^APP_TIMEZONE=.*/m', 'APP_TIMEZONE=' . $tz, $content);
+            }
+            return $content . "\nAPP_TIMEZONE=" . $tz;
+        });
+    }
+
+    private function writeEnv(callable $mutate): void
+    {
         $envPath = base_path('.env');
         if (!file_exists($envPath)) return;
-        $content = file_get_contents($envPath);
-        if (str_contains($content, 'APP_TIMEZONE=')) {
-            $content = preg_replace('/^APP_TIMEZONE=.*/m', 'APP_TIMEZONE=' . $tz, $content);
-        } else {
-            $content .= "\nAPP_TIMEZONE=" . $tz;
-        }
-        file_put_contents($envPath, $content);
+        $fp = fopen($envPath, 'c+');
+        if (!$fp) return;
+        flock($fp, LOCK_EX);
+        $content = stream_get_contents($fp);
+        $content = $mutate($content);
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, $content);
+        flock($fp, LOCK_UN);
+        fclose($fp);
     }
 
     // ─────────────────────────────────────────────
@@ -182,29 +195,29 @@ class SettingsController extends Controller
             'smtp_password' => 'nullable|string|max:255',
         ]);
 
-        $env = file_get_contents(base_path('.env'));
+        $this->writeEnv(function (string $env) use ($data): string {
+            $replace = function (string $key, string $value) use (&$env) {
+                $value = strpos($value, ' ') !== false ? '"' . $value . '"' : $value;
+                if (preg_match("/^{$key}=/m", $env)) {
+                    $env = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env);
+                } else {
+                    $env .= "\n{$key}={$value}";
+                }
+            };
 
-        $replace = function (string $key, string $value) use (&$env) {
-            $value = strpos($value, ' ') !== false ? '"' . $value . '"' : $value;
-            if (preg_match("/^{$key}=/m", $env)) {
-                $env = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env);
-            } else {
-                $env .= "\n{$key}={$value}";
+            $replace('MAIL_MAILER',       $data['mailer']);
+            $replace('MAIL_FROM_ADDRESS', $data['from_address']);
+            $replace('MAIL_HOST',         $data['smtp_host'] ?? '');
+            $replace('MAIL_PORT',         (string) ($data['smtp_port'] ?? 587));
+            $replace('MAIL_USERNAME',     $data['smtp_username'] ?? '');
+            $replace('MAIL_SCHEME',       $data['smtp_scheme'] ?? '');
+
+            if (!empty($data['smtp_password'])) {
+                $replace('MAIL_PASSWORD', $data['smtp_password']);
             }
-        };
 
-        $replace('MAIL_MAILER',       $data['mailer']);
-        $replace('MAIL_FROM_ADDRESS', $data['from_address']);
-        $replace('MAIL_HOST',         $data['smtp_host'] ?? '');
-        $replace('MAIL_PORT',         (string) ($data['smtp_port'] ?? 587));
-        $replace('MAIL_USERNAME',     $data['smtp_username'] ?? '');
-        $replace('MAIL_SCHEME',       $data['smtp_scheme'] ?? '');
-
-        if (!empty($data['smtp_password'])) {
-            $replace('MAIL_PASSWORD', $data['smtp_password']);
-        }
-
-        file_put_contents(base_path('.env'), $env);
+            return $env;
+        });
 
         Setting::set('mail.users_email_verification', $request->boolean('users_email_verification') ? '1' : '0');
 

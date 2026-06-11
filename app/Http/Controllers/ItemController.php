@@ -47,7 +47,7 @@ class ItemController extends Controller
 
         $rules = [
             'name_fr'        => \App\Models\Setting::get('item_required_name_fr', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
-            'name_en'        => \App\Models\Setting::get('item_required_name_alt', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
+            'name_alt'       => \App\Models\Setting::get('item_required_name_alt', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
             'function_text'  => \App\Models\Setting::get('item_required_function', '0') === '1' ? 'required|string|max:2000' : 'nullable|string|max:2000',
             'photo'          => \App\Models\Setting::get('item_required_photo', '0') === '1' ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'photo_crop_data' => 'nullable|string',
@@ -58,7 +58,7 @@ class ItemController extends Controller
 
         $module->items()->create([
             'name_fr'       => $validated['name_fr'],
-            'name_en'       => $validated['name_en'],
+            'name_alt'      => $validated['name_alt'],
             'function_text' => $validated['function_text'] ?? '',
             'photo_path'    => $photoPath,
         ]);
@@ -89,16 +89,15 @@ class ItemController extends Controller
 
         $rules = [
             'name_fr'        => \App\Models\Setting::get('item_required_name_fr', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
-            'name_en'        => \App\Models\Setting::get('item_required_name_alt', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
+            'name_alt'       => \App\Models\Setting::get('item_required_name_alt', '1') === '1' ? 'required|string|max:255' : 'nullable|string|max:255',
             'function_text'  => \App\Models\Setting::get('item_required_function', '0') === '1' ? 'required|string|max:2000' : 'nullable|string|max:2000',
             'photo'          => \App\Models\Setting::get('item_required_photo', '0') === '1' ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'photo_crop_data' => 'nullable|string',
         ];
         $validated = $request->validate($rules);
 
-        $photoPath = $item->photo_path; // On garde l'ancienne photo par défaut
+        $photoPath = $item->photo_path;
 
-        // Si une nouvelle photo est envoyée, on supprime l'ancienne et on stocke la nouvelle
         if ($request->hasFile('photo')) {
             if ($item->photo_path) {
                 Storage::disk('public')->delete($item->photo_path);
@@ -108,7 +107,7 @@ class ItemController extends Controller
 
         $item->update([
             'name_fr'       => $validated['name_fr'],
-            'name_en'       => $validated['name_en'],
+            'name_alt'      => $validated['name_alt'],
             'function_text' => $validated['function_text'],
             'photo_path'    => $photoPath,
         ]);
@@ -163,32 +162,36 @@ class ItemController extends Controller
         ]);
 
         $file    = $request->file('csv_file');
+        $content = file_get_contents($file->getRealPath());
+        $sep     = substr_count($content, ';') >= substr_count($content, ',') ? ';' : ',';
         $handle  = fopen($file->getRealPath(), 'r');
         $count   = 0;
         $errors  = [];
         $lineNum = 0;
 
-        while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+        $reqNameFr  = \App\Models\Setting::get('item_required_name_fr', '1') === '1';
+        $reqNameAlt = \App\Models\Setting::get('item_required_name_alt', '1') === '1';
+        $reqFunc    = \App\Models\Setting::get('item_required_function', '0') === '1';
+
+        while (($row = fgetcsv($handle, 1000, $sep)) !== false) {
             $lineNum++;
 
-            // Ignorer la ligne d'en-tête si elle commence par "name_fr" ou "nom"
             if ($lineNum === 1 && in_array(strtolower(trim($row[0] ?? '')), ['name_fr', 'nom', 'nom_fr'])) {
                 continue;
             }
 
-            // Nettoyer les valeurs
             $nameFr   = trim($row[0] ?? '');
-            $nameEn   = trim($row[1] ?? '');
+            $nameAlt  = trim($row[1] ?? '');
             $function = trim($row[2] ?? '');
 
-            if (empty($nameFr) || empty($nameEn) || empty($function)) {
-                $errors[] = "Ligne {$lineNum} ignorée : champs incomplets.";
+            if (($reqNameFr && empty($nameFr)) || ($reqNameAlt && empty($nameAlt)) || ($reqFunc && empty($function))) {
+                $errors[] = "Ligne {$lineNum} ignorée : champs obligatoires manquants.";
                 continue;
             }
 
             $module->items()->create([
                 'name_fr'       => mb_substr($nameFr, 0, 255),
-                'name_en'       => mb_substr($nameEn, 0, 255),
+                'name_alt'      => mb_substr($nameAlt, 0, 255),
                 'function_text' => mb_substr($function, 0, 2000),
                 'photo_path'    => null,
             ]);
@@ -226,13 +229,16 @@ class ItemController extends Controller
         $mime    = $file->getMimeType();
         $tmpPath = $file->getRealPath();
 
-        // Créer l'image source selon le format
         $source = match ($mime) {
-            'image/jpeg' => imagecreatefromjpeg($tmpPath),
-            'image/png'  => imagecreatefrompng($tmpPath),
-            'image/webp' => imagecreatefromwebp($tmpPath),
-            default      => imagecreatefromjpeg($tmpPath),
+            'image/jpeg' => @imagecreatefromjpeg($tmpPath),
+            'image/png'  => @imagecreatefrompng($tmpPath),
+            'image/webp' => @imagecreatefromwebp($tmpPath),
+            default      => @imagecreatefromjpeg($tmpPath),
         };
+
+        if (!$source) {
+            throw new \RuntimeException('Impossible de lire l\'image uploadée.');
+        }
 
         [$origW, $origH] = getimagesize($tmpPath);
 

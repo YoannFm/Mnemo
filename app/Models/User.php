@@ -30,7 +30,6 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'is_banned' => 'boolean',
-            'is_banned' => 'boolean',
             'banned_at' => 'datetime',
             'last_login_at' => 'datetime',
             'force_password_change' => 'boolean',

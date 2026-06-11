@@ -64,9 +64,11 @@ Route::middleware(['auth', 'two-factor'])->group(function () {
     Route::get('/e/{uuid}/finish', [GuestExamController::class, 'finish'])->name('guest.exam.finish');
 });
 
-// ─── 2FA Challenge (après login) ───
-Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.show');
-Route::post('/two-factor-challenge', [TwoFactorController::class, 'store'])->name('two-factor.store');
+// ─── 2FA Challenge (après login, authentification requise) ───
+Route::middleware('auth')->group(function () {
+    Route::get('/two-factor-challenge', [TwoFactorController::class, 'show'])->name('two-factor.show');
+    Route::post('/two-factor-challenge', [TwoFactorController::class, 'store'])->name('two-factor.store');
+});
 
 Route::middleware(['auth', 'two-factor'])->group(function () {
 

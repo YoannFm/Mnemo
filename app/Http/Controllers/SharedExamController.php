@@ -21,8 +21,15 @@ class SharedExamController extends Controller
             abort(403);
         }
 
+        $validModes = [
+            'random', 'photo_to_name_fr', 'photo_to_name_alt', 'photo_to_function',
+            'function_to_photo', 'function_to_name_fr', 'function_to_name_alt',
+            'name_fr_to_name_alt', 'name_fr_to_photo', 'name_fr_to_function',
+            'name_alt_to_photo', 'name_alt_to_function', 'name_alt_to_name_fr',
+        ];
+
         $validated = $request->validate([
-            'mode'        => 'required|string',
+            'mode'        => ['required', 'string', 'in:' . implode(',', $validModes)],
             'label'       => 'nullable|string|max:255',
             'expires_at'  => 'nullable|date|after:now',
             'webhook_url' => 'nullable|url',

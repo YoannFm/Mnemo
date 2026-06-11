@@ -30,6 +30,10 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        if (\App\Models\Setting::get('registration_enabled', '1') !== '1') {
+            abort(403, 'Les inscriptions sont désactivées.');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],

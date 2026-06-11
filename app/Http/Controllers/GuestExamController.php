@@ -52,8 +52,13 @@ class GuestExamController extends Controller
 
         $module   = $sharedExam->module;
         $allItems = $module->items()->get();
-        $mode     = $sharedExam->mode;
 
+        if ($allItems->isEmpty()) {
+            return redirect()->route('guest.exam.show', $uuid)
+                ->with('error', 'Ce module ne contient aucun item.');
+        }
+
+        $mode      = $sharedExam->mode;
         $items     = $allItems->shuffle();
         $questions = [];
 

@@ -73,4 +73,9 @@ class Module extends Model
     {
         return $this->hasMany(SharedExam::class);
     }
+
+    public function tags()
+    {
+        return $this->belongsToMany(\Plugins\Tags\Models\Tag::class, 'module_tag');
+    }
 }
