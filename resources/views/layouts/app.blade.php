@@ -587,7 +587,12 @@
 
         {{-- Logo --}}
         <a href="{{ route('dashboard') }}" class="navbar-brand me-4">
-            Mn<span>émo</span>
+            @php $siteLogo = setting('site_logo', ''); @endphp
+            @if($siteLogo)
+                <img src="{{ $siteLogo }}" alt="{{ setting('site_name', 'Mnémo') }}" style="height:32px;max-width:160px;object-fit:contain;">
+            @else
+                Mn<span>émo</span>
+            @endif
         </a>
 
         {{-- Bouton hamburger mobile --}}

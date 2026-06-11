@@ -46,18 +46,22 @@ class ItemController extends Controller
         $this->authorizeOwner($module);
 
         // Validation des champs du formulaire
-        $validated = $request->validate([
-            'name_fr'       => 'required|string|max:255',
-            'name_alt'      => 'required|string|max:255',
-            'function_text' => 'nullable|string|max:2000',
-            'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
+        $requiredField = \App\Models\Setting::get('item_required_field', 'name_alt');
+
+        $rules = [
+            'name_fr'        => 'required|string|max:255',
+            'name_en'        => $requiredField === 'name_alt' ? 'required|string|max:255' : 'nullable|string|max:255',
+            'function_text'  => $requiredField === 'function_text' ? 'required|string|max:2000' : 'nullable|string|max:2000',
+            'photo'          => $requiredField === 'photo_path' ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo_crop_data' => 'nullable|string',
+        ];
+        $validated = $request->validate($rules);
 
         $photoPath = $request->hasFile('photo') ? $this->storePhoto($request->file('photo')) : null;
 
         $module->items()->create([
             'name_fr'       => $validated['name_fr'],
-            'name_alt'      => $validated['name_alt'],
+            'name_en'       => $validated['name_en'],
             'function_text' => $validated['function_text'] ?? '',
             'photo_path'    => $photoPath,
         ]);
@@ -86,12 +90,16 @@ class ItemController extends Controller
         $this->authorizeOwner($module);
         $this->ensureBelongsToModule($item, $module);
 
-        $validated = $request->validate([
-            'name_fr'       => 'required|string|max:255',
-            'name_alt'      => 'required|string|max:255',
-            'function_text' => 'nullable|string|max:2000',
-            'photo'         => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
+        $requiredField = \App\Models\Setting::get('item_required_field', 'name_alt');
+
+        $rules = [
+            'name_fr'        => 'required|string|max:255',
+            'name_en'        => $requiredField === 'name_alt' ? 'required|string|max:255' : 'nullable|string|max:255',
+            'function_text'  => $requiredField === 'function_text' ? 'required|string|max:2000' : 'nullable|string|max:2000',
+            'photo'          => $requiredField === 'photo_path' ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo_crop_data' => 'nullable|string',
+        ];
+        $validated = $request->validate($rules);
 
         $photoPath = $item->photo_path; // On garde l'ancienne photo par défaut
 
@@ -105,7 +113,7 @@ class ItemController extends Controller
 
         $item->update([
             'name_fr'       => $validated['name_fr'],
-            'name_alt'      => $validated['name_alt'],
+            'name_en'       => $validated['name_en'],
             'function_text' => $validated['function_text'],
             'photo_path'    => $photoPath,
         ]);
@@ -148,7 +156,7 @@ class ItemController extends Controller
 
     /**
      * Traite l'import CSV.
-     * Format attendu : name_fr,name_alt,function_text (sans en-tête ou avec)
+     * Format attendu : name_fr,name_en,function_text (sans en-tête ou avec)
      * La colonne photo est ignorée (import texte uniquement).
      */
     public function importCsv(Request $request, Module $module)
@@ -185,7 +193,7 @@ class ItemController extends Controller
 
             $module->items()->create([
                 'name_fr'       => mb_substr($nameFr, 0, 255),
-                'name_alt'      => mb_substr($nameEn, 0, 255),
+                'name_en'       => mb_substr($nameEn, 0, 255),
                 'function_text' => mb_substr($function, 0, 2000),
                 'photo_path'    => null,
             ]);

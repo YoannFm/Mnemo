@@ -70,6 +70,19 @@
                     @error('site_logo')<span class="invalid-feedback d-block">{{ $message }}</span>@enderror
                 </div>
 
+                {{-- Champ requis pour les items --}}
+                <div class="mb-3">
+                    <label class="form-label" for="item_required_field">Deuxième champ requis pour les items</label>
+                    <select id="item_required_field" name="item_required_field"
+                            class="form-select @error('item_required_field') is-invalid @enderror">
+                        <option value="name_alt" {{ old('item_required_field', setting('item_required_field', 'name_alt')) === 'name_alt' ? 'selected' : '' }}>Nom alternatif (name_alt)</option>
+                        <option value="photo_path" {{ old('item_required_field', setting('item_required_field', 'name_alt')) === 'photo_path' ? 'selected' : '' }}>Photo</option>
+                        <option value="function_text" {{ old('item_required_field', setting('item_required_field', 'name_alt')) === 'function_text' ? 'selected' : '' }}>Description / Fonction</option>
+                        <option value="none" {{ old('item_required_field', setting('item_required_field', 'name_alt')) === 'none' ? 'selected' : '' }}>Aucun (nom seulement)</option>
+                    </select>
+                    @error('item_required_field')<span class="invalid-feedback">{{ $message }}</span>@enderror
+                </div>
+
                 {{-- Fuseau horaire + Langue --}}
                 <div class="row gx-3">
                     <div class="mb-3 col-md-6">

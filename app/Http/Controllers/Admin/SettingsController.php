@@ -22,16 +22,15 @@ class SettingsController extends Controller
         $images    = Image::orderBy('name')->get();
         $timezones = timezone_identifiers_list();
         $settings  = [
-            'site_name'                  => Setting::get('site_name', 'Mnémo'),
-            'site_url'                   => Setting::get('site_url', config('app.url')),
-            'site_description'           => Setting::get('site_description', ''),
-            'site_keywords'              => Setting::get('site_keywords', ''),
-            'site_logo'                  => Setting::get('site_logo', ''),
-            'timezone'                   => Setting::get('timezone', 'Europe/Paris'),
-            'locale'                     => Setting::get('locale', 'fr'),
-            'site_key'                   => Setting::get('site_key', ''),
-            'posts_webhook'              => Setting::get('posts_webhook', ''),
-            'exam_default_expires_days'  => Setting::get('exam_default_expires_days', ''),
+            'site_name'        => Setting::get('site_name', 'Mnémo'),
+            'site_url'         => Setting::get('site_url', config('app.url')),
+            'site_description' => Setting::get('site_description', ''),
+            'site_keywords'    => Setting::get('site_keywords', ''),
+            'site_logo'        => Setting::get('site_logo', ''),
+            'timezone'         => Setting::get('timezone', 'Europe/Paris'),
+            'locale'           => Setting::get('locale', 'fr'),
+            'site_key'         => Setting::get('site_key', ''),
+            'posts_webhook'    => Setting::get('posts_webhook', ''),
         ];
 
         return view('admin.settings.index', compact('settings', 'images', 'timezones'));
@@ -40,22 +39,22 @@ class SettingsController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'site_name'                 => 'required|string|max:100',
-            'site_url'                  => 'nullable|url|max:255',
-            'site_description'          => 'nullable|string',
-            'site_keywords'             => 'nullable|string|max:500',
-            'site_logo'                 => 'nullable|string|max:255',
-            'timezone'                  => 'nullable|string|max:100',
-            'locale'                    => 'nullable|in:fr,en',
-            'site_key'                  => 'nullable|string|max:255',
-            'posts_webhook'             => 'nullable|url|max:500',
-            'exam_default_expires_days' => 'nullable|integer|min:1|max:365',
+            'site_name'        => 'required|string|max:100',
+            'site_url'         => 'nullable|url|max:255',
+            'site_description' => 'nullable|string',
+            'site_keywords'    => 'nullable|string|max:500',
+            'site_logo'        => 'nullable|string|max:255',
+            'timezone'         => 'nullable|string|max:100',
+            'locale'           => 'nullable|in:fr,en',
+            'site_key'         => 'nullable|string|max:255',
+            'posts_webhook'       => 'nullable|url|max:500',
+            'item_required_field' => 'nullable|in:name_alt,photo_path,function_text,none',
         ]);
 
         $fields = [
             'site_name', 'site_url', 'site_description', 'site_keywords',
             'site_logo', 'timezone', 'locale', 'site_key', 'posts_webhook',
-            'exam_default_expires_days',
+            'item_required_field',
         ];
 
         foreach ($fields as $field) {
@@ -231,78 +230,5 @@ class SettingsController extends Controller
         LogHelper::log('updated_settings', 'settings', null, ['section' => 'maintenance'], 'info');
 
         return back()->with('success', 'Paramètres de maintenance sauvegardés.');
-    }
-
-    // ─────────────────────────────────────────────
-    // Fonctionnalités
-    // ─────────────────────────────────────────────
-
-    public function features()
-    {
-        $features = [
-            'feature_keyboard_shortcuts' => [
-                'label'       => 'Raccourcis clavier',
-                'description' => 'Permet de répondre aux questions avec les touches 1/2/3/4 (et &/é/"/\' en AZERTY) dans les modes Test, Anki et Examen. Espace/Entrée pour passer à la question suivante en mode Anki.',
-                'default'     => '1',
-            ],
-            'feature_quick_review' => [
-                'label'       => 'Révision rapide',
-                'description' => 'Affiche un bouton "Révision rapide" sur la page d\'un module après qu\'un utilisateur a raté des questions en mode Test. Lance une session Anki uniquement sur les items non maîtrisés.',
-                'default'     => '1',
-            ],
-            'feature_exam_ranking' => [
-                'label'       => 'Classement dans les examens partagés',
-                'description' => 'Affiche le rang de l\'élève (ex : "Vous êtes 2ème sur 15 participants") sur la page de fin d\'un examen partagé, basé sur le score.',
-                'default'     => '1',
-            ],
-            'feature_exam_qrcode' => [
-                'label'       => 'QR Code sur les résultats d\'examens',
-                'description' => 'Affiche un QR Code du lien de l\'examen partagé sur la page résultats. Cliquable pour l\'agrandir en plein écran. Utile pour partager l\'examen en classe.',
-                'default'     => '1',
-            ],
-            'feature_profile_stats' => [
-                'label'       => 'Statistiques sur le profil',
-                'description' => 'Affiche 6 widgets de statistiques personnelles sur la page profil : items maîtrisés, items pratiqués, tests effectués, score moyen, meilleure série et modules utilisés.',
-                'default'     => '1',
-            ],
-            'feature_admin_charts' => [
-                'label'       => 'Graphiques sur le tableau de bord admin',
-                'description' => 'Affiche deux graphiques sur les 30 derniers jours dans le tableau de bord administrateur : nombre de tests passés par jour et nombre de nouvelles inscriptions par jour.',
-                'default'     => '1',
-            ],
-            'feature_groups' => [
-                'label'       => 'Groupes / Classes',
-                'description' => 'Permet aux utilisateurs de créer des groupes (classes), d\'y inviter des membres par e-mail et de les gérer. Accessible via le menu de navigation "/groupes".',
-                'default'     => '1',
-            ],
-            'feature_item_badges' => [
-                'label'       => 'Badges de progression sur les items',
-                'description' => 'Affiche des badges colorés sur chaque item d\'un module : "Maîtrisé" (vert, série ≥ 3), nombre d\'erreurs (rouge) ou "En cours" (jaune). Basé sur l\'historique Anki de l\'utilisateur.',
-                'default'     => '1',
-            ],
-        ];
-        $values = [];
-        foreach ($features as $key => $meta) {
-            $values[$key] = Setting::get($key, $meta['default']);
-        }
-        return view('admin.settings.features', compact('features', 'values'));
-    }
-
-    public function updateFeatures(Request $request)
-    {
-        $keys = [
-            'feature_keyboard_shortcuts',
-            'feature_quick_review',
-            'feature_exam_ranking',
-            'feature_exam_qrcode',
-            'feature_profile_stats',
-            'feature_admin_charts',
-            'feature_groups',
-            'feature_item_badges',
-        ];
-        foreach ($keys as $key) {
-            Setting::set($key, $request->boolean($key) ? '1' : '0');
-        }
-        return redirect()->back()->with('success', 'Fonctionnalités mises à jour.');
     }
 }
