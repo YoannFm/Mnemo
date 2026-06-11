@@ -25,7 +25,7 @@ class LogHelper
             'level'       => $level,
             'old_value'   => $oldValue,
             'new_value'   => $newValue,
-            'created_at'  => now(),
+            'created_at'  => now()->utc(),
         ]);
     }
 }
