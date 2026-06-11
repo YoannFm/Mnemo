@@ -130,6 +130,7 @@
         </div>
     </div>
 
+    <script src="{{ asset('vendor/tinymce/tinymce.min.js') }}"></script>
     <script>
     document.querySelectorAll('.create-target-radio').forEach(function (radio) {
         radio.addEventListener('change', function () {
@@ -137,5 +138,22 @@
             document.querySelector('.create-section-roles').style.display = this.value === 'roles' ? '' : 'none';
         });
     });
+
+    (function () {
+        var dark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        tinymce.init({
+            selector: '#contentInput',
+            base_url: '{{ asset('vendor/tinymce') }}',
+            license_key: 'gpl',
+            promotion: false,
+            height: 300,
+            plugins: 'autolink link lists',
+            toolbar: 'bold italic underline | link | bullist numlist | removeformat | undo redo',
+            menubar: false,
+            skin: dark ? 'oxide-dark' : 'oxide',
+            content_css: dark ? 'dark' : 'default',
+            content_style: 'body { font-family: system-ui, sans-serif; font-size: 14px; }',
+        });
+    })();
     </script>
 </x-admin-layout>
