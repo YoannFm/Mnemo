@@ -100,11 +100,13 @@ class ModuleController extends Controller
         // Un utilisateur non connecté ou tiers ne peut voir qu'un module public
         $this->authorizeView($module);
 
-        $items = $module->items()->paginate(20);
+        $allItemIds = $module->items()->pluck('id');
+        $items      = $module->items()->paginate(20);
 
-        $avgRating   = $module->ratings()->avg('rating');
-        $ratingCount = $module->ratings()->count();
-        $userRating  = Auth::check()
+        $ratingSummary = $module->ratings()->selectRaw('AVG(rating) as avg_rating, COUNT(*) as total')->first();
+        $avgRating     = $ratingSummary->avg_rating;
+        $ratingCount   = (int) $ratingSummary->total;
+        $userRating    = Auth::check()
             ? $module->ratings()->where('user_id', Auth::id())->first()
             : null;
 
@@ -139,7 +141,7 @@ class ModuleController extends Controller
         // Progression par item pour l'utilisateur connecté
         $progressMap = Auth::check()
             ? Progress::where('user_id', Auth::id())
-                      ->whereIn('item_id', $module->items()->pluck('id'))
+                      ->whereIn('item_id', $allItemIds)
                       ->get()
                       ->keyBy('item_id')
             : collect();
