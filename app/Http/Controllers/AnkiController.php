@@ -44,7 +44,15 @@ class AnkiController extends Controller
     {
         $this->authorize($module);
 
-        $mode = $request->input('mode', 'random');
+        $validModes = [
+            'random', 'photo_to_name_fr', 'photo_to_name_alt', 'photo_to_function',
+            'function_to_photo', 'function_to_name_fr', 'function_to_name_alt',
+            'name_fr_to_name_alt', 'name_fr_to_photo', 'name_fr_to_function',
+            'name_alt_to_photo', 'name_alt_to_function', 'name_alt_to_name_fr',
+            'audio_to_name_fr', 'audio_to_name_alt', 'name_fr_to_audio', 'name_alt_to_audio',
+        ];
+        $rawMode = $request->input('mode', 'random');
+        $mode = in_array($rawMode, $validModes, true) ? $rawMode : 'random';
 
         session([
             'anki_module_id'      => $module->id,
@@ -209,8 +217,10 @@ class AnkiController extends Controller
             $question  = $data['question'];
             $isCorrect = (bool) $data['knows'];
 
+            $item = $module->items()->findOrFail($data['item_id']);
+
             $progress = Progress::firstOrCreate(
-                ['user_id' => Auth::id(), 'item_id' => $data['item_id']],
+                ['user_id' => Auth::id(), 'item_id' => $item->id],
                 ['success_count' => 0, 'fail_count' => 0, 'streak' => 0, 'easiness_factor' => 2.5, 'interval_days' => 1]
             );
 
@@ -232,7 +242,7 @@ class AnkiController extends Controller
             // Mode apprentissage : retirer l'item du pool si réponse correcte
             if (session('anki_learn_mode') && $isCorrect) {
                 $remaining = session('anki_learn_remaining', []);
-                $remaining = array_values(array_filter($remaining, fn($id) => $id !== $data['item_id']));
+                $remaining = array_values(array_filter($remaining, fn($id) => $id !== $item->id));
                 session(['anki_learn_remaining' => $remaining]);
             }
 
