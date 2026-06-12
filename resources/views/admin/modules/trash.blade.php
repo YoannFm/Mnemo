@@ -11,10 +11,6 @@
         </a>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show mb-4">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-    @endif
-
     <div class="card mb-4">
         <div class="card-body p-3">
             <form method="GET" class="row g-2">
