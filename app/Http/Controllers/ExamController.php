@@ -62,7 +62,8 @@ class ExamController extends Controller
         $questions = [];
         foreach ($items as $item) {
             if ($mode === 'random' || !isset($modeMap[$mode])) {
-                $types = QuizGenerator::getQuestionTypes();
+                $mediaAnswerTypes = ['Q3', 'Q5', 'Q9', 'Q15', 'Q16'];
+                $types = array_values(array_diff(QuizGenerator::getQuestionTypes(), $mediaAnswerTypes));
             } else {
                 $types = $modeMap[$mode];
             }
@@ -117,6 +118,10 @@ class ExamController extends Controller
         $current = session('exam_current', 0);
         $questions = session('exam_questions', []);
         $question = $questions[$current];
+
+        if (!isset($question['options'][$validated['answer']])) {
+            return back()->with('error', 'Réponse invalide.');
+        }
 
         $isCorrect = QuizGenerator::validateAnswer($question, $validated['answer']);
         $answers = session('exam_answers', []);
