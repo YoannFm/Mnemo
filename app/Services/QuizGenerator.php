@@ -116,7 +116,7 @@ class QuizGenerator
      * @param Item|null $targetItem Item cible pré-sélectionné. Si null, tirage aléatoire.
      * @return array La question complète : énoncé, options mélangées, réponse correcte
      */
-    public static function generateQuestion(Module $module, string $questionType = 'Q1', ?Item $targetItem = null, array $allowedTypes = []): array
+    public static function generateQuestion(Module $module, string $questionType = 'Q1', ?Item $targetItem = null, array $allowedTypes = [], int $optionCount = 4): array
     {
         $allItems = $module->items()->get();
 
@@ -145,12 +145,23 @@ class QuizGenerator
 
         $type = self::$questionTypes[$questionType];
 
-        // 3 distracteurs ayant une valeur non-vide pour field_answer
-        $distractors = $allItems
+        $optionCount = max(2, min(8, $optionCount));
+        $needed = $optionCount - 1;
+
+        // Distracteurs ayant une valeur non-vide pour field_answer
+        $pool = $allItems
             ->reject(fn($item) => $item->id === $targetItem->id)
             ->filter(fn($item) => !empty($item->{$type['field_answer']}))
-            ->shuffle()
-            ->take(3);
+            ->shuffle();
+
+        $wrongAnswers = $pool->take($needed)->pluck($type['field_answer'])->toArray();
+
+        // Si pas assez de distracteurs, répéter des valeurs existantes
+        if (count($wrongAnswers) < $needed && count($wrongAnswers) > 0) {
+            while (count($wrongAnswers) < $needed) {
+                $wrongAnswers[] = $wrongAnswers[array_rand($wrongAnswers)];
+            }
+        }
 
         // Affichage de la question
         if ($type['field_question'] === 'photo_path') {
@@ -163,7 +174,6 @@ class QuizGenerator
 
         // Réponse correcte + distracteurs
         $correctAnswer = $targetItem->{$type['field_answer']};
-        $wrongAnswers  = $distractors->pluck($type['field_answer'])->toArray();
 
         $allAnswers = array_merge([$correctAnswer], $wrongAnswers);
         shuffle($allAnswers);

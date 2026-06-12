@@ -209,6 +209,12 @@
                         </a>
                     </li>
 
+                    <li class="sidebar-item {{ request()->routeIs('admin.modules.trash') ? 'active' : '' }}">
+                        <a class="sidebar-link" href="{{ route('admin.modules.trash') }}">
+                            <i class="bi bi-trash"></i> <span>Corbeille modules</span>
+                        </a>
+                    </li>
+
                     {{-- Extensions --}}
                     <li class="sidebar-header">Extensions</li>
 

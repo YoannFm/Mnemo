@@ -59,6 +59,28 @@
                     </div>
                 </div>
 
+                <div class="card mb-4">
+                    <div class="card-body p-3">
+                        <label class="form-label fw-semibold" style="font-size:.85rem;">
+                            <i class="bi bi-ui-checks me-1" style="color:var(--accent);"></i>Nombre de réponses proposées
+                        </label>
+                        <select name="option_count" class="form-select">
+                            @foreach([2,3,4,5,6,7,8] as $n)
+                                <option value="{{ $n }}" {{ $n === 4 ? 'selected' : '' }}>{{ $n }} réponses</option>
+                            @endforeach
+                        </select>
+                        <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
+                            Si le module n'a pas assez d'items, certaines réponses seront répétées.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mb-4">
+                    <a href="{{ route('modules.show', $module) }}" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);">Annuler</a>
+                    <button type="submit" class="btn btn-primary flex-grow-1" id="start-btn">
+                        <i class="bi bi-play-fill me-1"></i>Commencer l'examen
+                    </button>
+                </div>
             </form>
 
             @if (Auth::id() === $module->owner_id)

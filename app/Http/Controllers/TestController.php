@@ -51,9 +51,11 @@ class TestController extends Controller
         $validated = $request->validate([
             'question_count' => 'required|integer|min:1|max:100',
             'mode'           => 'nullable|string',
+            'option_count'   => 'nullable|integer|min:2|max:8',
         ]);
         $questionCount = $validated['question_count'];
         $mode = $validated['mode'] ?? 'random';
+        $optionCount = (int) ($validated['option_count'] ?? 4);
 
         // Limiter au nombre d'items du module
         $itemCount = $module->items()->count();
@@ -63,6 +65,7 @@ class TestController extends Controller
         session([
             'test_module_id'      => $module->id,
             'test_mode'           => $mode,
+            'test_option_count'   => $optionCount,
             'test_question_count' => $questionCount,
             'test_current'        => 0,
             'test_score'          => 0,
@@ -124,7 +127,7 @@ class TestController extends Controller
             // Pré-filtrer les items qui ont le champ d'entrée requis par le type choisi
             $targetItem = QuizGenerator::pickTargetItem($module, $questionType);
 
-            $question = QuizGenerator::generateQuestion($module, $questionType, $targetItem, $types);
+            $question = QuizGenerator::generateQuestion($module, $questionType, $targetItem, $types, session('test_option_count', 4));
 
             if (isset($question['error'])) {
                 return redirect()
@@ -239,7 +242,7 @@ class TestController extends Controller
         ]);
 
         // Nettoyer la session du test
-        session()->forget(['test_module_id', 'test_mode', 'test_question_count', 'test_current', 'test_score', 'test_answers', 'test_questions']);
+        session()->forget(['test_module_id', 'test_mode', 'test_option_count', 'test_question_count', 'test_current', 'test_score', 'test_answers', 'test_questions']);
 
         $percentage = $total > 0 ? (int) round(($score / $total) * 100) : 0;
 

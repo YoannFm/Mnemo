@@ -29,8 +29,12 @@ class ExamController extends Controller
     public function start(Request $request, Module $module)
     {
         $this->authorize($module);
-        $data = $request->validate(['mode' => 'required|string']);
+        $data = $request->validate([
+            'mode'         => 'required|string',
+            'option_count' => 'nullable|integer|min:2|max:8',
+        ]);
         $mode = $data['mode'];
+        $optionCount = (int) ($data['option_count'] ?? 4);
 
         $allItems = $module->items()->get();
         $modeMap = [
@@ -58,7 +62,7 @@ class ExamController extends Controller
                 $types = $modeMap[$mode];
             }
             $questionType = $types[array_rand($types)];
-            $q = QuizGenerator::generateQuestion($module, $questionType, $item);
+            $q = QuizGenerator::generateQuestion($module, $questionType, $item, [], $optionCount);
             if (!isset($q['error'])) {
                 $questions[] = $q;
             }

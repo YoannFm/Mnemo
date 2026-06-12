@@ -47,6 +47,18 @@
                         <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
                             {{ $module->items()->count() }} items disponibles - entre 1 et {{ $module->items()->count() }} questions.
                         </div>
+
+                        <label class="form-label fw-semibold mt-3" style="font-size:.85rem;">
+                            <i class="bi bi-ui-checks me-1" style="color:var(--accent);"></i>Nombre de réponses proposées
+                        </label>
+                        <select name="option_count" class="form-select">
+                            @foreach([2,3,4,5,6,7,8] as $n)
+                                <option value="{{ $n }}" {{ $n === 4 ? 'selected' : '' }}>{{ $n }} réponses</option>
+                            @endforeach
+                        </select>
+                        <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
+                            Si le module n'a pas assez d'items, certaines réponses seront répétées.
+                        </div>
                     </div>
                 </div>
 
