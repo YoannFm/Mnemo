@@ -37,15 +37,15 @@
                                id="question_count"
                                name="question_count"
                                class="form-control @error('question_count') is-invalid @enderror"
-                               value="{{ old('question_count', min(10, $module->items()->count())) }}"
+                               value="{{ old('question_count', min(10, $itemCount)) }}"
                                min="1"
-                               max="{{ $module->items()->count() }}"
+                               max="{{ $itemCount }}"
                                required>
                         @error('question_count')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
-                            {{ $module->items()->count() }} items disponibles - entre 1 et {{ $module->items()->count() }} questions.
+                            {{ $itemCount }} items disponibles - entre 1 et {{ $itemCount }} questions.
                         </div>
 
                         <label class="form-label fw-semibold mt-3" style="font-size:.85rem;">
