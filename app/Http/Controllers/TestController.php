@@ -120,9 +120,12 @@ class TestController extends Controller
                 'name_fr_to_audio'    => ['Q15'],
                 'name_alt_to_audio'   => ['Q16'],
             ];
-            $types = ($mode !== 'random' && isset($modeMap[$mode]))
-                ? $modeMap[$mode]
-                : QuizGenerator::getQuestionTypes();
+            if ($mode === 'random' || !isset($modeMap[$mode])) {
+                $mediaAnswerTypes = ['Q3', 'Q5', 'Q9', 'Q15', 'Q16'];
+                $types = array_values(array_diff(QuizGenerator::getQuestionTypes(), $mediaAnswerTypes));
+            } else {
+                $types = $modeMap[$mode];
+            }
             $questionType = $types[array_rand($types)];
 
             // Pré-filtrer les items qui ont le champ d'entrée requis par le type choisi
@@ -235,14 +238,16 @@ class TestController extends Controller
         $answers = session('test_answers', []);
 
         // Enregistrer le score en base
-        Score::create([
-            'user_id'   => Auth::id(),
-            'module_id' => $module->id,
-            'score'     => $score,
-            'total'     => $total,
-        ]);
-
-        LogHelper::log('completed_test', 'module', $module->id, ['score' => $score, 'total' => $total, 'percentage' => $total > 0 ? (int) round(($score / $total) * 100) : 0]);
+        if (Auth::check()) {
+            Score::create([
+                'user_id'   => Auth::id(),
+                'module_id' => $module->id,
+                'score'     => $score,
+                'total'     => $total,
+                'mode'      => 'test',
+            ]);
+            LogHelper::log('completed_test', 'module', $module->id, ['score' => $score, 'total' => $total, 'percentage' => $total > 0 ? (int) round(($score / $total) * 100) : 0]);
+        }
 
         // Nettoyer la session du test
         session()->forget(['test_module_id', 'test_mode', 'test_option_count', 'test_question_count', 'test_current', 'test_score', 'test_answers', 'test_questions']);
