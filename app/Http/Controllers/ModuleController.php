@@ -412,6 +412,13 @@ class ModuleController extends Controller
             ]);
         }
 
+        // Copier les tags si la relation existe
+        if ($module->relationLoaded('tags') || method_exists($module, 'tags')) {
+            try {
+                $copy->tags()->sync($module->tags()->pluck('tags.id'));
+            } catch (\Throwable) {}
+        }
+
         LogHelper::log('duplicated_module', 'module', $copy->id, ['source_id' => $module->id, 'title' => $copy->title]);
 
         return redirect()->route('modules.show', $copy)
