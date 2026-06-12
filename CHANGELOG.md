@@ -1,5 +1,59 @@
 # Changelog
 
+## 2026-06-12 (suite)
+
+### Audit du code - second passage
+
+Réalisation d'un second audit. Découverte des problèmes suivants :
+
+- 11 vues affichaient les notifications flash en double (le layout les affiche déjà)
+- Nombreuses actions non loggées : Anki, Test, Exam, Group, 2FA, export/import module, reset progression, reset mdp, vérification email, toutes les actions admin Update
+- La vue de détail d'un log (oeil) n'avait pas d'état avant/après sur les modifications de modules, items et utilisateurs
+- Mode examen : l'option sélectionnée ne montrait pas de contour visible au clic
+- Mode examen : demander 8 réponses avec moins de 8 items provoquait un comportement incorrect
+- Sécurité : `item_id` dans Anki non vérifié contre le module courant
+- Sécurité : valeurs `.env` non échappées avant écriture (risque d'injection)
+- Diverses actions non sécurisées ou mal ordonnées (log après logout, index option non vérifié, etc.)
+- Pas de moyen d'exporter les logs
+
+### Corrections et améliorations
+
+**Interface admin**
+- Header horizontal : espace ajouté entre icône et texte sur Support/Documentation
+- Header horizontal : bouton retour au site supprimé
+- Header horizontal : bouton soleil/lune déplacé juste avant le menu utilisateur, sans encadré
+- Ordre des boutons de mode inversé sur la page module : Anki en premier, puis Test
+
+**Logs d'activité - actions ajoutées**
+- Anki : `started_anki`, `completed_anki`, `started_anki_review`
+- Test : `started_test`
+- Examen : `started_exam`
+- Groupes : `created_group`, `deleted_group`, `added_group_member`, `removed_group_member`
+- Modules : `reset_progress`, `reported_module`, `exported_module`, `imported_module`
+- Profil : `2fa_enabled`, `2fa_disabled`
+- Auth : `password_reset`, `email_verified`
+- Admin Update : `downloaded_update`, `installed_update`, `backup_database`, `backup_files`
+
+**Logs d'activité - état avant/après**
+- `updated_module` : capture l'état du module avant et après modification
+- `updated_item` : capture l'état de l'item avant et après modification
+- `admin_updated_user` : capture l'état de l'utilisateur avant et après modification
+
+**Export des logs**
+- Bouton "Exporter (ZIP)" sur la page admin des logs
+- Modal avec sélecteur de format (CSV ou JSON) et champ mot de passe admin
+- Vérification du mot de passe côté serveur avant tout export
+- Téléchargement en archive `.zip`, pas de fichier temporaire laissé sur le serveur
+- L'export lui-même est loggé (`exported_logs`)
+
+**Corrections bugs**
+- Examen : contour de sélection désormais visible au clic (JS manquant)
+- Examen : nombre d'options plafonné automatiquement au nombre d'items disponibles
+- Examen/Test : information affichée dans le formulaire sur le nombre d'items requis
+- Double notifications flash supprimées dans 11 vues
+
+---
+
 ## 2026-06-12
 
 ### Audit du code
