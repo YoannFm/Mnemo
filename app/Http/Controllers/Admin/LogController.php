@@ -5,6 +5,8 @@ use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LogController extends Controller
 {
@@ -73,5 +75,78 @@ class LogController extends Controller
         ActivityLog::where('created_at', '<', now()->subDays(30))->delete();
         LogHelper::log('purged_logs', 'log', null, ['deleted_count' => $count], 'warning');
         return redirect()->route('admin.logs.index')->with('success', "{$count} log(s) de plus de 30 jours supprimés.");
+    }
+
+    public function export(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+            'format'   => 'required|in:csv,json',
+        ]);
+
+        if (!Hash::check($request->password, Auth::user()->password)) {
+            return back()->withErrors(['password' => 'Mot de passe incorrect.'])->withInput();
+        }
+
+        $logs = ActivityLog::with('user')->orderBy('created_at', 'desc')->get();
+        $format = $request->format;
+        $filename = 'logs_' . now()->format('Y-m-d_H-i-s');
+
+        if ($format === 'csv') {
+            $content = $this->generateCsv($logs);
+            $dataFilename = $filename . '.csv';
+        } else {
+            $content = json_encode($logs->map(fn($l) => [
+                'id'          => $l->id,
+                'user'        => $l->user?->name,
+                'action'      => $l->action,
+                'target_type' => $l->target_type,
+                'target_id'   => $l->target_id,
+                'data'        => $l->data,
+                'level'       => $l->level,
+                'old_value'   => $l->old_value,
+                'new_value'   => $l->new_value,
+                'created_at'  => $l->created_at?->format('Y-m-d H:i:s'),
+            ])->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            $dataFilename = $filename . '.json';
+        }
+
+        $zipPath = storage_path('app/temp/' . $filename . '.zip');
+        if (!is_dir(storage_path('app/temp'))) {
+            mkdir(storage_path('app/temp'), 0755, true);
+        }
+
+        $zip = new \ZipArchive();
+        $zip->open($zipPath, \ZipArchive::CREATE);
+        $zip->addFromString($dataFilename, $content);
+        $zip->close();
+
+        LogHelper::log('exported_logs', 'log', null, ['format' => $format, 'count' => $logs->count()]);
+
+        return response()->download($zipPath, $filename . '.zip')->deleteFileAfterSend(true);
+    }
+
+    private function generateCsv($logs): string
+    {
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, ['ID', 'Utilisateur', 'Action', 'Cible', 'ID Cible', 'Données', 'Niveau', 'Valeur avant', 'Valeur après', 'Date']);
+        foreach ($logs as $log) {
+            fputcsv($handle, [
+                $log->id,
+                $log->user?->name ?? 'Système',
+                $log->action,
+                $log->target_type,
+                $log->target_id,
+                json_encode($log->data),
+                $log->level,
+                $log->old_value,
+                $log->new_value,
+                $log->created_at?->format('Y-m-d H:i:s'),
+            ]);
+        }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+        return $csv;
     }
 }
