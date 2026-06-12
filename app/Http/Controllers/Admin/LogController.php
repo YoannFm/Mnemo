@@ -94,7 +94,6 @@ class LogController extends Controller
 
         if ($format === 'csv') {
             $content = $this->generateCsv($logs);
-            $dataFilename = $filename . '.csv';
         } else {
             $content = json_encode($logs->map(fn($l) => [
                 'id'          => $l->id,
@@ -108,7 +107,6 @@ class LogController extends Controller
                 'new_value'   => $l->new_value,
                 'created_at'  => $l->created_at?->format('Y-m-d H:i:s'),
             ])->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-            $dataFilename = $filename . '.json';
         }
 
         $zipPath = storage_path('app/temp/' . $filename . '.zip');
@@ -118,7 +116,20 @@ class LogController extends Controller
 
         $zip = new \ZipArchive();
         $zip->open($zipPath, \ZipArchive::CREATE);
-        $zip->addFromString($dataFilename, $content);
+        $zip->addFromString('logs/latest.' . $format, $content);
+
+        // Include related files (update archives, backups)
+        foreach (['app/updates', 'app/backups'] as $dir) {
+            $fullDir = storage_path($dir);
+            if (is_dir($fullDir)) {
+                foreach (new \FilesystemIterator($fullDir, \FilesystemIterator::SKIP_DOTS) as $file) {
+                    if ($file->isFile()) {
+                        $zip->addFile($file->getPathname(), 'logs/files/' . $file->getFilename());
+                    }
+                }
+            }
+        }
+
         $zip->close();
 
         LogHelper::log('exported_logs', 'log', null, ['format' => $format, 'count' => $logs->count()]);
