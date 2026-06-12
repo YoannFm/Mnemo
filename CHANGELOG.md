@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-06-12 (suite 2)
+
+### Export des logs - structure ZIP améliorée
+
+- L'archive exportée contient désormais un dossier `logs/` structuré :
+  - `logs/latest.csv` ou `logs/latest.json` — données d'activité
+  - `logs/files/` — fichiers liés aux actions loggées (archives de mises à jour, sauvegardes)
+- Les fichiers présents dans `storage/app/updates/` et `storage/app/backups/` sont automatiquement inclus dans `logs/files/`
+
+---
+
 ## 2026-06-12 (suite)
 
 ### Audit du code - second passage
