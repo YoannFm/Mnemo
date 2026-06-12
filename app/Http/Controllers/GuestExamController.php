@@ -118,7 +118,7 @@ class GuestExamController extends Controller
             return redirect()->route('guest.exam.show', $uuid);
         }
 
-        $validated = $request->validate(['answer' => 'required|integer|min:0|max:3']);
+        $validated = $request->validate(['answer' => 'required|integer|min:0|max:7']);
         $current   = session('guest_exam_current', 0);
         $questions = session('guest_exam_questions', []);
         $question  = $questions[$current];
