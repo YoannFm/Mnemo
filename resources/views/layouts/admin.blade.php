@@ -270,7 +270,7 @@
 
                     <ul class="navbar-nav navbar-align">
                         <li class="nav-item">
-                            <button id="admin-theme-toggle" class="btn btn-sm border-0 bg-transparent mx-1" title="Changer le theme" aria-label="Basculer theme clair/sombre">
+                            <button id="admin-theme-toggle" class="nav-link border-0 bg-transparent px-2" title="Changer le theme" aria-label="Basculer theme clair/sombre">
                                 <i class="bi bi-moon-fill"></i>
                             </button>
                         </li>
