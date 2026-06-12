@@ -161,7 +161,7 @@ class TestController extends Controller
 
         // Valider la réponse
         $validated = $request->validate([
-            'answer'          => 'required|integer|min:0|max:3',
+            'answer'          => 'required|integer|min:0|max:7',
             'elapsed_seconds' => 'nullable|integer|min:0|max:3600',
         ]);
         $userAnswer = $validated['answer'];

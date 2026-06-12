@@ -108,7 +108,7 @@ class ExamController extends Controller
             return redirect()->route('modules.show', $module)->with('error', 'Aucun examen en cours.');
         }
 
-        $validated = $request->validate(['answer' => 'required|integer|min:0|max:3']);
+        $validated = $request->validate(['answer' => 'required|integer|min:0|max:7']);
         $current = session('exam_current', 0);
         $questions = session('exam_questions', []);
         $question = $questions[$current];

@@ -47,7 +47,8 @@
     {{-- Options --}}
     <form method="POST" action="{{ route('exam.submit', $module) }}">
         @csrf
-        <div class="mb-4" style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        @php $cols = count($question['options']) <= 2 ? 1 : (count($question['options']) <= 6 ? 2 : 3); @endphp
+        <div class="mb-4" style="display:grid;grid-template-columns:repeat({{ $cols }},1fr);gap:.75rem;">
             @foreach ($question['options'] as $index => $option)
                 <label for="option_{{ $index }}" class="quiz-option"
                        style="cursor:pointer;background:var(--card-bg);border:2px solid var(--card-border);border-radius:12px;padding:.5rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;min-height:80px;transition:.2s;position:relative;">
