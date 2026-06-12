@@ -220,6 +220,31 @@ class QuizGenerator
     }
 
     /**
+     * Retourne le champ d'entrée (field_question) pour un type donné.
+     */
+    public static function getFieldQuestion(string $questionType): ?string
+    {
+        return self::$questionTypes[$questionType]['field_question'] ?? null;
+    }
+
+    /**
+     * Sélectionne un item cible qui possède le champ d'entrée requis par le type donné.
+     * Garantit que le type de question sera éligible pour l'item sélectionné.
+     */
+    public static function pickTargetItem(Module $module, string $questionType): ?Item
+    {
+        if (!isset(self::$questionTypes[$questionType])) {
+            return null;
+        }
+        $fieldQuestion = self::$questionTypes[$questionType]['field_question'];
+        $eligible = $module->items()->get()->filter(fn($i) => !empty($i->{$fieldQuestion}));
+        if ($eligible->isEmpty()) {
+            return null;
+        }
+        return $eligible->random();
+    }
+
+    /**
      * Valide une réponse donnée pour une question.
      *
      * @param array $question La question générée

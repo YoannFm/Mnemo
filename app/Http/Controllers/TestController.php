@@ -121,7 +121,10 @@ class TestController extends Controller
                 : QuizGenerator::getQuestionTypes();
             $questionType = $types[array_rand($types)];
 
-            $question = QuizGenerator::generateQuestion($module, $questionType);
+            // Pré-filtrer les items qui ont le champ d'entrée requis par le type choisi
+            $targetItem = QuizGenerator::pickTargetItem($module, $questionType);
+
+            $question = QuizGenerator::generateQuestion($module, $questionType, $targetItem, $types);
 
             if (isset($question['error'])) {
                 return redirect()

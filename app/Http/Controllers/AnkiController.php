@@ -114,6 +114,15 @@ class AnkiController extends Controller
 
         $allItems = $module->items()->get();
 
+        // Filtrer les items qui possèdent le champ d'entrée requis par le type choisi
+        $fieldQuestion = \App\Services\QuizGenerator::getFieldQuestion($questionType);
+        $eligibleItems = $fieldQuestion
+            ? $allItems->filter(fn($i) => !empty($i->{$fieldQuestion}))
+            : $allItems;
+        if ($eligibleItems->isEmpty()) {
+            $eligibleItems = $allItems;
+        }
+
         if ($learnMode) {
             $remaining = session('anki_learn_remaining', []);
             $learnTotal = session('anki_learn_total', 0);
@@ -123,7 +132,11 @@ class AnkiController extends Controller
                 return redirect()->route('modules.show', $module)->with('success', 'Bravo ! Vous avez maitrisé tous les items de ce module.');
             }
 
-            $targetItemId = $remaining[array_rand($remaining)];
+            $eligibleRemaining = array_values(array_filter($remaining, fn($id) => $eligibleItems->contains('id', $id)));
+            if (empty($eligibleRemaining)) {
+                $eligibleRemaining = $remaining;
+            }
+            $targetItemId = $eligibleRemaining[array_rand($eligibleRemaining)];
             $targetItem = $allItems->firstWhere('id', $targetItemId);
         } else {
             // Weighted pool (SM-2)
@@ -133,7 +146,7 @@ class AnkiController extends Controller
                 ->keyBy('item_id');
 
             $weightedPool = [];
-            foreach ($allItems as $item) {
+            foreach ($eligibleItems as $item) {
                 $prog = $progressMap->get($item->id);
                 if (!$prog) {
                     $weight = 5;
