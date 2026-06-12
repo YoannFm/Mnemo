@@ -3,9 +3,6 @@
     <div class="card shadow mb-4">
         <div class="card-header"><h5 class="card-title mb-0">Signalements de modules</h5></div>
         <div class="card-body">
-            @if (session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>

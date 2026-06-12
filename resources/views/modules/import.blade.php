@@ -20,10 +20,6 @@
                 </div>
                 <div class="card-body p-4">
 
-                    @if (session('error'))
-                        <div class="alert alert-danger">{{ session('error') }}</div>
-                    @endif
-
                     <p style="color:var(--text-muted);font-size:.875rem;">
                         Sélectionnez un fichier <code>.zip</code> exporté depuis Mnemo.
                         Le module sera créé dans votre espace personnel (privé par défaut).

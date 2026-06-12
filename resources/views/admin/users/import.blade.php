@@ -1,10 +1,6 @@
 <x-admin-layout>
     <x-slot name="pageTitle">Importer des utilisateurs</x-slot>
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-
     <div class="card shadow mb-4">
         <div class="card-header">
             <h5 class="card-title mb-0">Importer depuis un fichier CSV</h5>
