@@ -18,6 +18,12 @@ class Score extends Model
         'module_id',
         'score',
         'total',
+        'mode',
+    ];
+
+    protected $casts = [
+        'score' => 'integer',
+        'total' => 'integer',
     ];
 
     // ─────────────────────────────────────────────
