@@ -1,4 +1,4 @@
-# Mnemo — Guide d'installation
+# Mnemo - Guide d'installation
 
 ## Prérequis
 
@@ -12,8 +12,6 @@ Avant d'installer Mnemo, assurez-vous que les composants suivants sont disponibl
 | npm | 9.x+ | Inclus avec Node.js |
 | MySQL / MariaDB | 8.0+ | En production (SQLite suffisant pour le développement) |
 | Git | 2.x | Pour cloner le dépôt |
-
----
 
 ## Étapes d'installation
 
@@ -38,17 +36,7 @@ composer install --no-dev --optimize-autoloader
 npm install
 ```
 
-### 4. Compiler les assets frontend
-
-```bash
-# En production
-npm run build
-
-# En développement (avec hot reload)
-npm run dev
-```
-
-### 5. Configurer le fichier d'environnement
+### 4. Configurer le fichier d'environnement
 
 ```bash
 cp .env.example .env
@@ -57,27 +45,37 @@ php artisan key:generate
 
 Ouvrez ensuite le fichier `.env` et renseignez toutes les variables nécessaires (voir section suivante).
 
-### 6. Créer le lien symbolique de stockage
+### 5. Créer le lien symbolique de stockage
 
 ```bash
 php artisan storage:link
 ```
 
-Cette commande crée le lien `public/storage → storage/app/public` nécessaire pour afficher les photos et fichiers audio uploadés.
+Cette commande crée le lien `public/storage -> storage/app/public` nécessaire pour afficher les photos et fichiers audio uploadés.
 
-### 7. Exécuter les migrations de base de données
+### 6. Exécuter les migrations de base de données
 
 ```bash
 php artisan migrate
 ```
 
-### 8. Peupler la base de données (données initiales)
+### 7. Peupler la base de données (données initiales)
 
 ```bash
 php artisan db:seed
 ```
 
 > Le seeder crée les rôles par défaut, les paramètres initiaux et les éléments de navigation.
+
+### 8. Compiler les assets frontend
+
+```bash
+# En production
+npm run build
+
+# En développement (avec hot reload)
+npm run dev
+```
 
 ### 9. Lancer le serveur (développement)
 
@@ -95,9 +93,7 @@ composer run dev
 
 Cette commande lance simultanément le serveur PHP, le listener de queue, le tail des logs et Vite.
 
----
-
-## Configuration — Variables d'environnement
+## Configuration - Variables d'environnement
 
 ### Application
 
@@ -185,13 +181,11 @@ MAIL_FROM_NAME="${APP_NAME}"
 TINYMCE_API_KEY=votre_cle_api_tinymce
 ```
 
-> Obtenez une clé gratuite sur [https://www.tiny.cloud/](https://www.tiny.cloud/). Sans clé, TinyMCE fonctionne mais affiche un avertissement.
+> Obtenez une clé gratuite sur https://www.tiny.cloud/. Sans clé, TinyMCE fonctionne mais affiche un avertissement.
 
 ### Authentification à deux facteurs (2FA)
 
 Le 2FA est intégré via `pragmarx/google2fa-laravel` et ne nécessite pas de configuration particulière dans `.env`. Il peut être activé / forcé depuis le panel d'administration.
-
----
 
 ## Installation via l'assistant web
 
@@ -204,8 +198,6 @@ Mnemo propose un assistant d'installation accessible à l'URL `/install` lors du
 
 > L'assistant est désactivé automatiquement après la première installation. Pour relancer l'assistant, supprimez la table `installation` de la base de données.
 
----
-
 ## Permissions des dossiers
 
 Les dossiers suivants doivent être accessibles en écriture par le serveur web :
@@ -215,8 +207,6 @@ chmod -R 775 storage
 chmod -R 775 bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 ```
-
----
 
 ## Configuration du serveur web (production)
 
@@ -262,11 +252,9 @@ Assurez-vous que `mod_rewrite` est activé et que le fichier `public/.htaccess` 
 </VirtualHost>
 ```
 
----
-
 ## Worker de queue (production)
 
-En production, il est recommandé de faire tourner le worker de queue en arrière-plan via un processus superviseur (Supervisor, systemd…) :
+En production, il est recommandé de faire tourner le worker de queue en arrière-plan via un processus superviseur (Supervisor, systemd...) :
 
 ```bash
 php artisan queue:work --sleep=3 --tries=3 --max-time=3600
@@ -288,8 +276,6 @@ redirect_stderr=true
 stdout_logfile=/var/www/mnemo/storage/logs/worker.log
 stopwaitsecs=3600
 ```
-
----
 
 ## Mise à jour rapide (après installation)
 

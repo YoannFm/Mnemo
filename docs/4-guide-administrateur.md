@@ -1,4 +1,4 @@
-# Mnemo — Guide administrateur
+# Mnemo - Guide administrateur
 
 ## Accès au panel d'administration
 
@@ -6,17 +6,13 @@ Le panel d'administration est accessible à l'URL `/admin`. L'accès est réserv
 
 > Lors de la première installation via l'assistant (`/install`), le compte créé reçoit automatiquement les droits d'administration.
 
----
-
 ## Tableau de bord
 
 Le tableau de bord (`/admin`) affiche une vue synthétique de l'activité de la plateforme :
 
 - Nombre total d'utilisateurs, de modules, d'items
 - Dernières activités enregistrées
-- Alertes (signalements en attente, mises à jour disponibles…)
-
----
+- Alertes (signalements en attente, mises à jour disponibles...)
 
 ## Gestion des utilisateurs
 
@@ -45,8 +41,8 @@ Permet de créer plusieurs comptes en une seule opération. Le fichier CSV doit 
 
 ```csv
 name,email,password,role
-Jean Dupont,jean.dupont@example.fr,MotDePasse123!,eleve
-Marie Martin,marie.martin@example.fr,MotDePasse456!,eleve
+Jean Dupont,jean.dupont@example.fr,MotDePasse123!,utilisateur
+Marie Martin,marie.martin@example.fr,MotDePasse456!,utilisateur
 ```
 
 - La colonne `role` doit correspondre au **slug** d'un rôle existant
@@ -58,11 +54,9 @@ Télécharge un fichier CSV listant tous les comptes (nom, e-mail, rôle, date d
 
 ### Gestion des bannissements
 
-- **Bannir** un utilisateur : `/admin/users/{user}/bans` — l'utilisateur ne peut plus se connecter
+- **Bannir** un utilisateur : `/admin/users/{user}/bans` - l'utilisateur ne peut plus se connecter
 - **Lever un bannissement** : `/admin/users/{user}/bans/{ban}`
 - **Liste des bannissements actifs** : `/admin/bans`
-
----
 
 ## Gestion des rôles et permissions
 
@@ -89,8 +83,6 @@ Chaque rôle dispose des permissions suivantes, activables individuellement :
 
 Les rôles peuvent être réordonnés par glisser-déposer depuis la liste (`/admin/roles`). L'ordre détermine l'affichage dans les menus déroulants.
 
----
-
 ## Gestion des modules
 
 ### Liste des modules publics (`/admin/modules`)
@@ -100,8 +92,6 @@ L'administrateur peut consulter tous les modules publics de la plateforme et les
 ### Modules privés (`/admin/private-modules`)
 
 Liste des modules privés (non publics) de tous les utilisateurs, avec possibilité de suppression.
-
----
 
 ## Signalements et modération
 
@@ -118,6 +108,16 @@ Les avis (notes) et leurs réponses peuvent également être signalés. Actions 
 - **Supprimer** l'avis ou la réponse incriminée
 - **Sanctionner l'auteur** (mise en sourdine)
 
+### Workflow de modération
+
+Chaque signalement suit un cycle de statut :
+
+| Statut | Description |
+|---|---|
+| En attente | Signalement reçu, non encore traité |
+| Traité | Signalement examiné et résolu |
+| Sanctionné | L'auteur du contenu a été sanctionné |
+
 ### Sanctions (`/admin/sanctions`)
 
 Liste toutes les sanctions actives (mises en sourdine). Possibilité de lever une sanction individuellement.
@@ -126,40 +126,32 @@ Liste toutes les sanctions actives (mises en sourdine). Possibilité de lever un
 
 Consulte l'historique des commentaires postés sur les articles, avec possibilité de suppression.
 
----
-
 ## Notifications administrateur
 
 ### Envoyer une notification à tous les utilisateurs
 
-1. Accédez à **Admin → Notifications → Créer**
+1. Accédez à **Admin - Notifications - Créer**
 2. Rédigez le titre et le contenu de la notification
-3. Cliquez sur **Envoyer** — tous les utilisateurs verront la notification dans leur cloche de notification
+3. Cliquez sur **Envoyer** - tous les utilisateurs verront la notification dans leur cloche de notification
 
 ### Gérer les notifications existantes
 
 - **Supprimer** une notification envoyée
 
----
-
 ## Articles (actualités)
 
 Le module **Posts** permet de publier des articles visibles sur la plateforme :
 
-1. **Admin → Articles → Créer** : rédigez l'article avec TinyMCE
+1. **Admin - Articles - Créer** : rédigez l'article avec TinyMCE
 2. Les articles publiés sont accessibles à l'URL `/news/{slug}`
 3. Les utilisateurs connectés peuvent réagir (emojis) et commenter les articles
-
----
 
 ## Pages statiques
 
 Le module **Pages** gère les pages d'information :
 
-1. **Admin → Pages → Créer** : créez une page statique (mentions légales, FAQ, etc.)
+1. **Admin - Pages - Créer** : créez une page statique (mentions légales, FAQ, etc.)
 2. Les pages sont accessibles à l'URL `/p/{slug}`
-
----
 
 ## Navigation
 
@@ -168,8 +160,6 @@ Le module **Pages** gère les pages d'information :
 - **Créer** un lien de navigation (titre, URL ou route, icône, ordre)
 - **Réordonner** les liens par glisser-déposer
 - **Modifier** ou **Supprimer** un lien existant
-
----
 
 ## Paramètres généraux
 
@@ -216,8 +206,6 @@ Activer ou désactiver des fonctionnalités de la plateforme :
 - Examens partagés
 - Groupes
 
----
-
 ## Plugins
 
 ### Liste des plugins (`/admin/plugins`)
@@ -238,8 +226,6 @@ Affiche tous les plugins disponibles (installés et non installés) avec leur é
 - **Supprimer** un plugin (irréversible)
 - **Recharger** la liste des plugins disponibles
 
----
-
 ## Thèmes
 
 ### Gérer les thèmes (`/admin/themes`)
@@ -252,23 +238,17 @@ Un thème définit l'apparence globale de la plateforme (couleurs, polices, styl
 - **Activer** un thème pour l'appliquer à toute la plateforme
 - **Supprimer** un thème (sauf le thème actif)
 
----
-
 ## Gestion des images (`/admin/images`)
 
 Bibliothèque centralisée d'images pour les articles et pages :
 - Upload de nouvelles images
 - Suppression des images inutilisées
 
----
-
 ## Redirections (`/admin/redirects`)
 
 Gestion des redirections HTTP (301/302) :
-- Créer une redirection (source → destination)
+- Créer une redirection (source - destination)
 - Modifier ou supprimer une redirection existante
-
----
 
 ## Emojis (`/admin/emojis`)
 
@@ -277,13 +257,11 @@ Gestion de la bibliothèque d'emojis personnalisés utilisables dans les réacti
 - Importer un pack d'emojis (fichier ZIP)
 - Supprimer un emoji
 
----
-
 ## Logs d'activité
 
 ### Consulter les logs (`/admin/logs`)
 
-L'historique de toutes les actions effectuées sur la plateforme (connexions, créations, suppressions, modifications) est disponible depuis **Admin → Logs**.
+L'historique de toutes les actions effectuées sur la plateforme (connexions, créations, suppressions, modifications) est disponible depuis **Admin - Logs**.
 
 Chaque entrée contient :
 - L'utilisateur concerné
@@ -296,8 +274,6 @@ Chaque entrée contient :
 - **Consulter** le détail d'un log
 - **Vider** les logs récents
 - **Purger** les logs de plus de 30 jours (nettoyage automatique recommandé)
-
----
 
 ## Mises à jour
 

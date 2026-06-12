@@ -1,4 +1,4 @@
-# Mnemo — Maintenance
+# Mnemo - Maintenance
 
 ## Sauvegardes
 
@@ -65,19 +65,17 @@ echo "Sauvegarde terminée : $DATE"
 
 ### Sauvegarde via le panel d'administration
 
-Le panel d'administration propose également des outils de sauvegarde intégrés (voir section **Mises à jour** dans le guide administrateur) :
+Le panel d'administration propose également des outils de sauvegarde intégrés :
 
-- **Admin → Mise à jour → Sauvegarder les fichiers**
-- **Admin → Mise à jour → Sauvegarder la base de données**
-
----
+- **Admin - Mise à jour - Sauvegarder les fichiers**
+- **Admin - Mise à jour - Sauvegarder la base de données**
 
 ## Mises à jour de l'application
 
 ### Via le panel d'administration (recommandé)
 
 1. Connectez-vous en tant qu'administrateur
-2. Accédez à **Admin → Mise à jour**
+2. Accédez à **Admin - Mise à jour**
 3. Cliquez sur **Vérifier les mises à jour**
 4. Si une mise à jour est disponible, cliquez sur **Télécharger**
 5. **Sauvegardez** les fichiers et la base de données (boutons dédiés)
@@ -117,8 +115,6 @@ php artisan queue:restart
 php artisan up
 ```
 
----
-
 ## Commandes Artisan utiles
 
 ### Gestion de la base de données
@@ -133,7 +129,7 @@ php artisan migrate:status
 # Annuler la dernière migration (développement uniquement)
 php artisan migrate:rollback
 
-# Réinitialiser complètement la base de données (DANGER — développement uniquement)
+# Réinitialiser complètement la base de données (DANGER - développement uniquement)
 php artisan migrate:fresh --seed
 ```
 
@@ -193,7 +189,7 @@ php artisan queue:restart
 ### Gestion du stockage
 
 ```bash
-# Créer le lien symbolique public/storage → storage/app/public
+# Créer le lien symbolique public/storage -> storage/app/public
 php artisan storage:link
 
 # Lister les fichiers de stockage (tinker)
@@ -234,15 +230,13 @@ php artisan key:generate
 php artisan pail
 ```
 
----
-
 ## Purge des logs d'activité
 
 Les logs d'activité peuvent s'accumuler rapidement. Il est recommandé de les purger régulièrement.
 
 ### Via le panel d'administration
 
-**Admin → Logs → Purger** : supprime toutes les entrées de logs de plus de 30 jours.
+**Admin - Logs - Purger** : supprime toutes les entrées de logs de plus de 30 jours.
 
 ### Via la ligne de commande
 
@@ -270,8 +264,6 @@ crontab -e
 # Planificateur de tâches Laravel (obligatoire si le scheduler est utilisé)
 * * * * * cd /var/www/mnemo && php artisan schedule:run >> /dev/null 2>&1
 ```
-
----
 
 ## Gestion du stockage des médias
 
@@ -312,8 +304,6 @@ foreach ($orphans as $orphan) {
     echo "Supprimé : $orphan\n";
 }
 ```
-
----
 
 ## Surveillance de l'application (monitoring)
 

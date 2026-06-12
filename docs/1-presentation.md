@@ -1,10 +1,8 @@
-# Mnemo — Présentation des fonctionnalités
+# Mnemo - Présentation des fonctionnalités
 
 ## Vue d'ensemble
 
 Mnemo est organisé autour de trois entités principales : les **modules** (ensembles de connaissances), les **items** (unités individuelles à mémoriser) et la **progression** (suivi par utilisateur et par item). Ces trois entités alimentent les différents modes d'entraînement et les outils de partage.
-
----
 
 ## Modules
 
@@ -19,7 +17,7 @@ Un module est un ensemble thématique d'items à mémoriser. Il appartient à un
 | `is_public` | Booléen | Si activé, le module apparaît dans la bibliothèque publique |
 | `allow_duplication` | Booléen | Autorise les autres utilisateurs à dupliquer le module |
 | `field_name_fr` | Booléen | Active le champ "Nom (français)" pour les items |
-| `field_name_alt` | Booléen | Active le champ "Nom alternatif" (ex. anglais, latin…) |
+| `field_name_alt` | Booléen | Active le champ "Nom alternatif" (ex. anglais, latin...) |
 | `field_photo` | Booléen | Active le champ photo pour les items |
 | `field_function` | Booléen | Active le champ description/fonction pour les items |
 | `field_audio` | Booléen | Active le champ fichier audio pour les items |
@@ -35,8 +33,6 @@ Un module est un ensemble thématique d'items à mémoriser. Il appartient à un
 - **Réinitialiser** sa progression sur un module
 - **Signaler** un module public inapproprié
 - **Noter** un module (système d'avis avec réactions et réponses)
-
----
 
 ## Items
 
@@ -72,13 +68,11 @@ name_fr,name_alt,function_text,photo_path,audio_path
 - L'encodage attendu est **UTF-8**
 - Le séparateur est la **virgule** (`,`)
 
----
-
 ## Les 3 modes de quiz
 
 ### Mode Anki (répétition espacée)
 
-Le mode Anki est le cœur de l'application. Il propose des questions en continu avec un feedback immédiat après chaque réponse, et adapte la fréquence de révision de chaque item en fonction des performances de l'utilisateur (algorithme SM-2).
+Le mode Anki est le coeur de l'application. Il propose des questions en continu avec un feedback immédiat après chaque réponse, et adapte la fréquence de révision de chaque item en fonction des performances de l'utilisateur (algorithme SM-2).
 
 **Caractéristiques :**
 - Questions infinies, pas de limite de temps ni de nombre
@@ -113,8 +107,6 @@ Le mode Anki est le cœur de l'application. Il propose des questions en continu 
 
 **Mode révision :** révise uniquement les items qui ont été ratés au moins une fois et qui ne sont pas encore maîtrisés (`fail_count > 0` et `streak < 3`).
 
----
-
 ### Mode Test (QCM à questions fixes)
 
 Le mode Test propose un questionnaire à choix multiples (4 options) avec un nombre de questions fixé par l'utilisateur avant le début de la session. Le score est affiché à la fin.
@@ -122,7 +114,7 @@ Le mode Test propose un questionnaire à choix multiples (4 options) avec un nom
 **Caractéristiques :**
 - Nombre de questions paramétrable (de 1 à 100, limité au nombre d'items du module)
 - 4 options de réponse (1 correcte + 3 distracteurs issus du même module)
-- Pas de feedback immédiat — la correction complète est affichée à la fin
+- Pas de feedback immédiat - la correction complète est affichée à la fin
 - Le score est enregistré en base de données (`scores`)
 - La progression par item est également mise à jour (comme en mode Anki)
 
@@ -130,8 +122,6 @@ Le mode Test propose un questionnaire à choix multiples (4 options) avec un nom
 1. Choisir le nombre de questions et le mode de sélection
 2. Répondre à chaque question (QCM)
 3. Consulter la correction complète et le score final (X/N, pourcentage)
-
----
 
 ### Mode Examen (QCM exhaustif)
 
@@ -142,13 +132,11 @@ Le mode Examen est similaire au mode Test mais porte sur **tous les items du mod
 - Score final avec pourcentage
 - Peut être partagé via la fonctionnalité "Examens partagés"
 
----
-
 ## Examens partagés
 
-La fonctionnalité "Examens partagés" permet à un enseignant de créer une session d'examen basée sur un de ses modules et de la partager avec des participants via un lien unique ou un QR code.
+La fonctionnalité "Examens partagés" permet à un utilisateur de créer une session d'examen basée sur un de ses modules et de la partager avec des participants via un lien unique ou un QR code.
 
-### Côté créateur (enseignant)
+### Côté créateur
 
 - **Créer un examen partagé** depuis la page d'un module
 - Définir le nombre de tentatives autorisées par participant
@@ -159,14 +147,12 @@ La fonctionnalité "Examens partagés" permet à un enseignant de créer une ses
 - **Réinitialiser** les tentatives d'un participant
 - **Supprimer** un examen partagé
 
-### Côté participant (élève)
+### Côté participant
 
 - Accéder à l'examen via le lien ou le QR code
 - Passer l'examen (QCM, même moteur que le mode Examen)
 - Consulter son score à la fin
-- Recommencer si l'enseignant a autorisé plusieurs tentatives
-
----
+- Recommencer si le créateur a autorisé plusieurs tentatives
 
 ## Bibliothèque publique
 
@@ -178,8 +164,6 @@ La bibliothèque (`/bibliotheque`) liste tous les modules marqués comme publics
 - **Noter** et commenter un module (système d'avis avec notes)
 - **Signaler** un module ou un avis inapproprié
 
----
-
 ## Suivi de la progression
 
 La page de progression (`/progression`) offre une vue consolidée des statistiques d'apprentissage de l'utilisateur :
@@ -187,8 +171,6 @@ La page de progression (`/progression`) offre une vue consolidée des statistiqu
 - Taux de maîtrise par module (nombre d'items maîtrisés / total)
 - Historique des scores (mode Test)
 - Items dus pour révision (dont `next_review` est dépassée)
-
----
 
 ## Système de rôles et permissions
 
@@ -205,18 +187,6 @@ Les rôles permettent de définir finement les droits de chaque utilisateur. Cha
 
 Les administrateurs (`is_admin = true`) contournent toutes les restrictions de rôle.
 
----
-
-## Groupes / Classes
-
-La fonctionnalité Groupes permet d'organiser les utilisateurs en classes ou groupes de travail :
-
-- Créer un groupe
-- Ajouter / retirer des membres
-- Consulter la liste des membres d'un groupe
-
----
-
 ## Notifications
 
 Le système de notifications informe les utilisateurs des événements importants :
@@ -224,18 +194,15 @@ Le système de notifications informe les utilisateurs des événements important
 - Notifications envoyées par les administrateurs (broadcast)
 - Marquage comme lu (individuel ou en masse)
 
----
-
 ## Plugins
 
-L'architecture plugin permet d'étendre les fonctionnalités sans modifier le cœur de l'application :
+L'architecture plugin permet d'étendre les fonctionnalités sans modifier le coeur de l'application :
 
 - **Import Quizlet** : importer des sets depuis Quizlet
-- **Tags** : étiqueter les modules pour faciliter la recherche
+- **Streak** : suivi de la régularité des sessions d'entraînement
+- **Webhook** : déclencher des actions externes lors d'événements de la plateforme
 
 Les plugins peuvent être activés, désactivés ou mis à jour depuis le panel d'administration.
-
----
 
 ## Personnalisation de l'interface
 
@@ -244,3 +211,11 @@ Chaque utilisateur peut personnaliser son expérience :
 - **Couleur d'accentuation** : teinte principale de l'interface (couleur Bootstrap personnalisée)
 - **Réinitialisation** de la couleur d'accentuation aux valeurs par défaut
 - **Notifications e-mail** : activer ou désactiver les notifications par e-mail
+
+## Communauté
+
+Les modules publics disposent d'un espace d'échange :
+
+- **Réactions emoji** sur les modules et les articles
+- **Commentaires** et réponses aux avis
+- **Signalements** pour signaler un contenu inapproprié aux administrateurs

@@ -1,10 +1,8 @@
-# Mnemo — Dépannage
+# Mnemo - Dépannage
 
 ## Erreurs fréquentes et solutions
 
----
-
-### Erreur 500 — "Internal Server Error"
+### Erreur 500 - "Internal Server Error"
 
 **Symptôme :** Page blanche ou message "500 | Server Error".
 
@@ -37,8 +35,6 @@
    tail -n 50 /var/www/mnemo/storage/logs/laravel.log
    ```
 
----
-
 ### Erreur "No application encryption key has been specified"
 
 **Cause :** La clé d'application `APP_KEY` est absente ou vide dans le fichier `.env`.
@@ -47,8 +43,6 @@
 ```bash
 php artisan key:generate
 ```
-
----
 
 ### Migration échouée
 
@@ -70,18 +64,16 @@ DB::connection()->getPdo();
 php artisan migrate:status
 
 # Si une migration est marquée comme non exécutée alors que la table/colonne existe
-# → Marquer la migration comme exécutée sans la rejouer
+# Marquer la migration comme exécutée sans la rejouer
 php artisan migrate --pretend
 ```
 
-**Cause 3 : SQLite — dossier `database/` absent ou non accessible**
+**Cause 3 : SQLite - dossier `database/` absent ou non accessible**
 ```bash
 mkdir -p /var/www/mnemo/database
 touch /var/www/mnemo/database/database.sqlite
 chmod 664 /var/www/mnemo/database/database.sqlite
 ```
-
----
 
 ### Upload de photo ou d'audio ne fonctionne pas
 
@@ -124,8 +116,6 @@ apt-get install php8.3-gd
 systemctl reload php8.3-fpm
 ```
 
----
-
 ### Les photos ne s'affichent pas (images cassées)
 
 **Symptôme :** Les images s'affichent comme des icônes brisées dans les modules ou les questions.
@@ -139,7 +129,7 @@ php artisan storage:link
 
 L'URL dans `.env` doit correspondre exactement à l'URL de l'application (avec ou sans `https`, avec ou sans `www`).
 ```ini
-APP_URL=https://mnemo.lycee-rascol.fr
+APP_URL=https://mnemo.votre-domaine.fr
 ```
 
 Puis vider le cache de configuration :
@@ -156,8 +146,6 @@ La base de données référence un fichier qui a été supprimé manuellement.
 ls /var/www/mnemo/storage/app/public/chemin/vers/le/fichier.jpg
 ```
 
----
-
 ### Cache des vues corrompu ("Blade compilation error")
 
 **Symptôme :** Erreur de compilation Blade sur une page qui fonctionnait avant une mise à jour.
@@ -172,8 +160,6 @@ Si le problème persiste :
 rm -rf /var/www/mnemo/storage/framework/views/*
 php artisan view:cache
 ```
-
----
 
 ### Session expirée en cours de quiz
 
@@ -196,8 +182,6 @@ php artisan migrate
 php artisan config:cache
 ```
 
----
-
 ### Erreur "CSRF token mismatch"
 
 **Symptôme :** Message "419 | Page Expired" lors de la soumission d'un formulaire.
@@ -212,9 +196,7 @@ php artisan config:cache
 2. Vérifier et corriger `APP_URL` dans `.env`
 3. Vider le cache de configuration : `php artisan config:cache`
 
----
-
-### Mode 2FA — "Code invalide"
+### Mode 2FA - "Code invalide"
 
 **Symptôme :** Le code TOTP est refusé malgré une saisie correcte.
 
@@ -231,8 +213,6 @@ systemctl restart systemd-timesyncd
 # Vérifier l'heure actuelle
 date
 ```
-
----
 
 ### Erreur "Queue job failed" (jobs de la file d'attente échoués)
 
@@ -267,9 +247,7 @@ php artisan queue:failed --id={id}
    php artisan queue:flush
    ```
 
----
-
-### Problème d'envoi d'e-mails
+### Problème d'envoi d'e-mails (SMTP non configuré)
 
 **Symptôme :** Les e-mails de vérification, de résultats d'examen ou de notification ne sont pas reçus.
 
@@ -281,7 +259,7 @@ Mail::raw('Test email depuis Mnemo', fn($m) => $m->to('test@example.fr')->subjec
 ```
 
 **Solutions :**
-1. Vérifier la configuration SMTP dans `.env` (ou via **Admin → Paramètres → Email**)
+1. Vérifier la configuration SMTP dans `.env` (ou via **Admin - Paramètres - Email**)
 2. Utiliser le bouton **Envoyer un e-mail de test** dans le panel d'administration
 3. Vérifier les logs Laravel pour les erreurs SMTP :
    ```bash
@@ -291,8 +269,6 @@ Mail::raw('Test email depuis Mnemo', fn($m) => $m->to('test@example.fr')->subjec
    ```bash
    telnet smtp.votre-fournisseur.fr 587
    ```
-
----
 
 ### Erreur "Class not found" après une mise à jour
 
@@ -305,8 +281,6 @@ Mail::raw('Test email depuis Mnemo', fn($m) => $m->to('test@example.fr')->subjec
 composer dump-autoload --optimize
 ```
 
----
-
 ### La bibliothèque publique est vide ou ne se met pas à jour
 
 **Symptôme :** Des modules publics n'apparaissent pas dans la bibliothèque.
@@ -317,8 +291,6 @@ composer dump-autoload --optimize
 ```bash
 php artisan cache:clear
 ```
-
----
 
 ## Commandes de diagnostic
 
