@@ -221,6 +221,12 @@ class ModuleController extends Controller
         $oldOwnerId = $module->owner_id;
         $newOwnerId = $module->owner_id;
 
+        $old = [
+            'title'       => $module->title,
+            'description' => $module->description,
+            'is_public'   => $module->is_public,
+        ];
+
         if (!empty($validated['new_owner_email'])) {
             $newOwner = \App\Models\User::where('email', $validated['new_owner_email'])->first();
             if ($newOwner->id === $module->owner_id) {
@@ -242,6 +248,12 @@ class ModuleController extends Controller
             'field_audio'       => $fieldAudio,
         ]);
 
+        $new = [
+            'title'       => $module->title,
+            'description' => $module->description,
+            'is_public'   => $module->is_public,
+        ];
+
         if ($newOwnerId !== $oldOwnerId) {
             LogHelper::log('transferred_module', 'module', $module->id, [
                 'from_user_id'  => $oldOwnerId,
@@ -256,7 +268,7 @@ class ModuleController extends Controller
                 'type'    => 'info',
             ]);
         } else {
-            LogHelper::log('updated_module', 'module', $module->id, ['title' => $module->title]);
+            LogHelper::log('updated_module', 'module', $module->id, [], 'info', json_encode($old), json_encode($new));
         }
 
         return redirect()->route('modules.show', $module)
@@ -363,6 +375,8 @@ class ModuleController extends Controller
             ->whereIn('item_id', $itemIds)
             ->delete();
 
+        LogHelper::log('reset_progress', 'module', $module->id, ['module_title' => $module->title], 'warning');
+
         return redirect()->route('modules.show', $module)
             ->with('success', 'Progression réinitialisée.');
     }
@@ -457,6 +471,8 @@ class ModuleController extends Controller
             'note'      => $validated['note'] ?? null,
             'status'    => 'pending',
         ]);
+
+        LogHelper::log('reported_module', 'module', $module->id);
 
         return response()->json(['status' => 'ok']);
     }

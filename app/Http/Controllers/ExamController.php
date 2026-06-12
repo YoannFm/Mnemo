@@ -82,6 +82,8 @@ class ExamController extends Controller
             'exam_mode'      => $mode,
         ]);
 
+        LogHelper::log('started_exam', 'module', $module->id, ['mode' => $mode]);
+
         return redirect()->route('exam.question', $module);
     }
 

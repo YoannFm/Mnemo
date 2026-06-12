@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Module;
 use App\Models\Progress;
 use App\Services\QuizGenerator;
@@ -74,6 +75,8 @@ class AnkiController extends Controller
         } else {
             session()->forget(['anki_learn_mode', 'anki_learn_remaining', 'anki_learn_total']);
         }
+
+        LogHelper::log('started_anki', 'module', $module->id, ['mode' => $mode]);
 
         return redirect()->route('anki.question', $module);
     }
@@ -255,13 +258,24 @@ class AnkiController extends Controller
                 session(['anki_session_streak' => 0]);
             }
 
+            $learnRemaining = session('anki_learn_remaining');
+            $learnRemainingCount = $learnRemaining !== null ? count($learnRemaining) : null;
+
+            // Log fin de session en mode apprentissage
+            if (session('anki_learn_mode') && $learnRemainingCount === 0) {
+                LogHelper::log('completed_anki', 'module', $module->id, [
+                    'correct' => session('anki_session_correct'),
+                    'wrong'   => session('anki_session_wrong'),
+                ]);
+            }
+
             return response()->json([
                 'is_correct'      => $isCorrect,
                 'session_correct' => session('anki_session_correct'),
                 'session_wrong'   => session('anki_session_wrong'),
                 'session_streak'  => session('anki_session_streak'),
                 'is_mastered'     => $progress->isMastered(),
-                'learn_remaining' => session('anki_learn_remaining') ? count(session('anki_learn_remaining')) : null,
+                'learn_remaining' => $learnRemainingCount,
             ]);
         } catch (\Throwable $e) {
             \Log::error('Anki submit error', ['message' => $e->getMessage(), 'user_id' => Auth::id()]);
@@ -302,6 +316,8 @@ class AnkiController extends Controller
             'anki_session_wrong'   => 0,
             'anki_session_streak'  => 0,
         ]);
+
+        LogHelper::log('started_anki_review', 'module', $module->id);
 
         return redirect()->route('anki.question', $module);
     }

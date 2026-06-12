@@ -75,6 +75,8 @@ class TestController extends Controller
             'test_questions'      => [],
         ]);
 
+        LogHelper::log('started_test', 'module', $module->id, ['question_count' => $questionCount, 'mode' => $mode]);
+
         return redirect()->route('test.question', $module);
     }
 
