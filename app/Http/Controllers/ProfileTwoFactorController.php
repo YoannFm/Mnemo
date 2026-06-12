@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use PragmaRX\Google2FA\Google2FA;
 
@@ -78,6 +80,8 @@ class ProfileTwoFactorController extends Controller
         $request->session()->forget('two_factor_secret');
         $request->session()->put('two_factor_verified', true);
 
+        LogHelper::log('2fa_enabled', 'user', Auth::id());
+
         return view('profile.two-factor', [
             'user'          => $request->user(),
             'recoveryCodes' => $recoveryCodes,
@@ -101,6 +105,8 @@ class ProfileTwoFactorController extends Controller
         ])->save();
 
         $request->session()->forget('two_factor_verified');
+
+        LogHelper::log('2fa_disabled', 'user', Auth::id(), [], 'warning');
 
         return redirect()->route('profile.2fa.show')
             ->with('status', '2fa-disabled');
