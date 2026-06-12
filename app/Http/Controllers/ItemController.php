@@ -73,9 +73,9 @@ class ItemController extends Controller
             'name_fr'         => $module->field_name_fr  ? 'required|string|max:255' : 'nullable|string|max:255',
             'name_alt'        => $module->field_name_alt ? 'required|string|max:255' : 'nullable|string|max:255',
             'function_text'   => $module->field_function ? 'required|string|max:2000' : 'nullable|string|max:2000',
-            'photo'           => $module->field_photo    ? 'required|image|mimes:jpeg,png,jpg,webp|max:4096' : 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'photo'           => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'photo_crop_data' => 'nullable|string',
-            'audio'           => $module->field_audio    ? 'required|file|mimes:mp3,ogg,wav,m4a|max:10240' : 'nullable|file|mimes:mp3,ogg,wav,m4a|max:10240',
+            'audio'           => 'nullable|mimes:mp3,wav,ogg,m4a|max:20480',
         ];
 
         $validated = $request->validate($rules);
