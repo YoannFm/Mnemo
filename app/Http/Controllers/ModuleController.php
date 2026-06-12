@@ -412,11 +412,9 @@ class ModuleController extends Controller
             ]);
         }
 
-        // Copier les tags si la relation existe
-        if ($module->relationLoaded('tags') || method_exists($module, 'tags')) {
-            try {
-                $copy->tags()->sync($module->tags()->pluck('tags.id'));
-            } catch (\Throwable) {}
+        // Copier les tags uniquement si le plugin Tags est actif
+        if (app(\App\Extensions\Plugin\PluginManager::class)->isEnabled('tags')) {
+            $copy->tags()->sync($module->tags()->pluck('tags.id'));
         }
 
         LogHelper::log('duplicated_module', 'module', $copy->id, ['source_id' => $module->id, 'title' => $copy->title]);
