@@ -180,11 +180,11 @@
     {{-- ── Boutons de mode ── --}}
     @if ($items->total() >= 4)
         <div class="d-flex flex-wrap gap-2 mb-3">
-            <a href="{{ route('test.show', $module) }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-lightning-charge me-1"></i>Test
-            </a>
-            <a href="{{ route('anki.show', $module) }}" class="btn btn-sm" style="border:2px solid var(--accent);color:var(--accent);background:transparent;">
+            <a href="{{ route('anki.show', $module) }}" class="btn btn-primary btn-sm">
                 <i class="bi bi-arrow-repeat me-1"></i>Anki
+            </a>
+            <a href="{{ route('test.show', $module) }}" class="btn btn-sm" style="border:2px solid var(--accent);color:var(--accent);background:transparent;">
+                <i class="bi bi-lightning-charge me-1"></i>Test
             </a>
             <a href="{{ route('exam.show', $module) }}" class="btn btn-sm" style="border:1px solid var(--card-border);color:var(--text-muted);">
                 <i class="bi bi-pencil-square me-1"></i>Examen
