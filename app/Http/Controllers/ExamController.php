@@ -51,6 +51,10 @@ class ExamController extends Controller
             'name_alt_to_photo'    => ['Q5'],
             'name_alt_to_function' => ['Q11'],
             'name_alt_to_name_fr'  => ['Q7'],
+            'audio_to_name_fr'    => ['Q13'],
+            'audio_to_name_alt'   => ['Q14'],
+            'name_fr_to_audio'    => ['Q15'],
+            'name_alt_to_audio'   => ['Q16'],
         ];
 
         // Generate one question per item (shuffle items)
@@ -63,7 +67,7 @@ class ExamController extends Controller
                 $types = $modeMap[$mode];
             }
             $questionType = $types[array_rand($types)];
-            $q = QuizGenerator::generateQuestion($module, $questionType, $item, [], $optionCount);
+            $q = QuizGenerator::generateQuestion($module, $questionType, $item, $types, $optionCount);
             if (!isset($q['error'])) {
                 $questions[] = $q;
             }
@@ -139,15 +143,19 @@ class ExamController extends Controller
         }
 
         $answers = session('exam_answers', []);
+        if (empty($answers)) {
+            return redirect()->route('modules.show', $module);
+        }
         $total   = count($answers);
         $score   = collect($answers)->where('is_correct', true)->count();
         $percentage = $total > 0 ? (int) round(($score / $total) * 100) : 0;
 
-        // Vider la session avant de créer le score pour éviter les doublons sur rechargement
         session()->forget(['exam_module_id', 'exam_questions', 'exam_current', 'exam_answers', 'exam_mode']);
 
-        Score::create(['user_id' => Auth::id(), 'module_id' => $module->id, 'score' => $score, 'total' => $total]);
-        LogHelper::log('completed_exam', 'module', $module->id, ['score' => $score, 'total' => $total, 'percentage' => $percentage]);
+        if (Auth::check()) {
+            Score::create(['user_id' => Auth::id(), 'module_id' => $module->id, 'score' => $score, 'total' => $total, 'mode' => 'exam']);
+            LogHelper::log('completed_exam', 'module', $module->id, ['score' => $score, 'total' => $total, 'percentage' => $percentage]);
+        }
 
         return view('quiz.exam.result', compact('module', 'score', 'total', 'percentage', 'answers'));
     }
