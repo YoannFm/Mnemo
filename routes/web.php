@@ -249,10 +249,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::post('/roles/order', [\App\Http\Controllers\Admin\RoleController::class, 'updateOrder'])->name('roles.order');
     // Modules
     Route::get('/modules', [AdminModuleController::class, 'index'])->name('modules.index');
-    Route::delete('/modules/{module}', [AdminModuleController::class, 'destroy'])->name('modules.destroy');
     Route::get('/modules/trash', [AdminModuleController::class, 'trash'])->name('modules.trash');
     Route::post('/modules/{id}/restore', [AdminModuleController::class, 'restore'])->name('modules.restore');
     Route::delete('/modules/{id}/force-delete', [AdminModuleController::class, 'forceDelete'])->name('modules.force-delete');
+    Route::delete('/modules/{module}', [AdminModuleController::class, 'destroy'])->name('modules.destroy');
 
     // Navbar
     Route::get('/navbar', [NavbarController::class, 'index'])->name('navbar.index');
