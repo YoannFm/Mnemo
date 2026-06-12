@@ -85,6 +85,8 @@ class UserController extends Controller
             'role_id'  => 'nullable|exists:roles,id',
         ]);
 
+        $old = ['name' => $user->name, 'email' => $user->email, 'role_id' => $user->role_id];
+
         $user->name  = $data['name'];
         $user->email = $data['email'];
 
@@ -100,7 +102,9 @@ class UserController extends Controller
 
         $user->save();
 
-        LogHelper::log('admin_updated_user', 'user', $user->id, ['name' => $user->name]);
+        $new = ['name' => $user->name, 'email' => $user->email, 'role_id' => $user->role_id];
+
+        LogHelper::log('admin_updated_user', 'user', $user->id, [], 'info', json_encode($old), json_encode($new));
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur ' . $user->name . ' mis a jour.');

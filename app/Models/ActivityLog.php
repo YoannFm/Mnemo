@@ -168,6 +168,42 @@ class ActivityLog extends Model
 
             // Admin mail settings
             'sent_test_mail' => 'Mail de test envoyé',
+
+            // Anki
+            'started_anki'        => 'Session Anki démarrée',
+            'completed_anki'      => 'Session Anki terminée',
+            'started_anki_review' => 'Révision Anki démarrée',
+
+            // Test & Exam start
+            'started_test' => 'Test démarré',
+            'started_exam' => 'Examen démarré',
+
+            // Groups
+            'created_group'        => 'Groupe créé',
+            'deleted_group'        => 'Groupe supprimé',
+            'added_group_member'   => 'Membre ajouté au groupe',
+            'removed_group_member' => 'Membre retiré du groupe',
+
+            // Module actions
+            'reset_progress'  => 'Progression réinitialisée',
+            'reported_module' => 'Module signalé',
+            'exported_module' => 'Module exporté',
+            'imported_module' => 'Module importé',
+
+            // Auth / Security
+            '2fa_enabled'    => '2FA activée',
+            '2fa_disabled'   => '2FA désactivée',
+            'password_reset' => 'Mot de passe réinitialisé',
+            'email_verified' => 'Email vérifié',
+
+            // Updates
+            'downloaded_update' => 'Mise à jour téléchargée',
+            'installed_update'  => 'Mise à jour installée',
+            'backup_database'   => 'Sauvegarde base de données',
+            'backup_files'      => 'Sauvegarde fichiers',
+
+            // Logs export
+            'exported_logs' => 'Logs exportés',
         ];
         return $labels[$this->action] ?? $this->action;
     }

@@ -80,6 +80,12 @@ class ItemController extends Controller
 
         $validated = $request->validate($rules);
 
+        $old = [
+            'name_fr'       => $item->name_fr,
+            'name_alt'      => $item->name_alt,
+            'function_text' => $item->function_text,
+        ];
+
         $photoPath = $item->photo_path;
         $audioPath = $item->audio_path;
 
@@ -105,7 +111,13 @@ class ItemController extends Controller
             'audio_path'    => $audioPath,
         ]);
 
-        LogHelper::log('updated_item', 'module', $module->id, ['item_id' => $item->id]);
+        $new = [
+            'name_fr'       => $item->name_fr,
+            'name_alt'      => $item->name_alt,
+            'function_text' => $item->function_text,
+        ];
+
+        LogHelper::log('updated_item', 'module', $module->id, ['item_id' => $item->id], 'info', json_encode($old), json_encode($new));
 
         return redirect()->route('modules.show', $module)
             ->with('success', 'Item mis a jour !');
