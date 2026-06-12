@@ -32,13 +32,14 @@ class TestController extends Controller
         $this->authorize($module);
 
         // Vérifier qu'il y a au moins des items
-        if ($module->items()->count() === 0) {
+        $itemCount = $module->items()->count();
+        if ($itemCount === 0) {
             return redirect()
                 ->route('modules.show', $module)
                 ->with('error', 'Vous devez d\'abord ajouter des items au module.');
         }
 
-        return view('quiz.test.start', compact('module'));
+        return view('quiz.test.start', compact('module', 'itemCount'));
     }
 
     /**
@@ -173,6 +174,10 @@ class TestController extends Controller
         $currentIndex = session('test_current');
         $questions = session('test_questions');
         $question = $questions[$currentIndex];
+
+        if (!isset($question['options'][$userAnswer])) {
+            return back()->with('error', 'Réponse invalide.');
+        }
 
         // Valider la réponse
         $isCorrect = QuizGenerator::validateAnswer($question, $userAnswer);
