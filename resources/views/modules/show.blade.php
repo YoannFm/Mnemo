@@ -44,6 +44,10 @@
                 <a href="{{ route('modules.export', $module) }}" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);">
                     <i class="bi bi-download"></i>
                 </a>
+                <form method="POST" action="{{ route('modules.duplicate', $module) }}" class="d-inline" onsubmit="return confirm('Dupliquer ce module ?')">
+                    @csrf
+                    <button type="submit" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);" title="Dupliquer"><i class="bi bi-copy"></i></button>
+                </form>
                 <form method="POST" action="{{ route('modules.destroy', $module) }}" onsubmit="return confirm('Supprimer ce module et tous ses items ?')">
                     @csrf @method('DELETE')
                     <button type="submit" class="btn btn-sm" style="color:#ef4444;border:1px solid var(--card-border);"><i class="bi bi-trash"></i></button>
@@ -65,9 +69,19 @@
                 </form>
             </div>
         @elseif (Auth::check() && $module->is_public)
-            <button type="button" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);" data-bs-toggle="modal" data-bs-target="#reportModuleModal">
-                <i class="bi bi-flag me-1"></i>Signaler
-            </button>
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+                @if ($module->allow_duplication)
+                    <form method="POST" action="{{ route('modules.duplicate', $module) }}" class="d-inline" onsubmit="return confirm('Dupliquer ce module ?')">
+                        @csrf
+                        <button type="submit" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);" title="Dupliquer">
+                            <i class="bi bi-copy me-1"></i>Dupliquer
+                        </button>
+                    </form>
+                @endif
+                <button type="button" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);" data-bs-toggle="modal" data-bs-target="#reportModuleModal">
+                    <i class="bi bi-flag me-1"></i>Signaler
+                </button>
+            </div>
         @endif
     </div>
 
