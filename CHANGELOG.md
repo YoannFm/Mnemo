@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-06-12
+
+### Audit du code
+
+Réalisation d'un audit complet du projet. Découverte des problèmes suivants :
+
+- Logs d'activité : `created_at` absent du `$fillable` - tous les logs s'inséraient sans date et disparaissaient de l'interface admin
+- `GuestExamController` : validation `max:3` bloquait les réponses 4-7 quand l'examen avait plus de 4 options
+- `ExamController` : `allowedTypes = []` transmis à `generateQuestion` - le mode sélectionné était ignoré, n'importe quelle question pouvait sortir
+- `ExamController` : rechargement de la page résultat créait un score `0/0` en base
+- `ExamController` : modeMap sans les 4 modes audio (Q13-Q16) - sélection silencieuse d'un mode aléatoire
+- `TestController` : mode aléatoire pouvait générer des questions avec photo/audio comme réponse, l'interface n'étant pas prévue pour ça
+- `TestController` / `ExamController` : `Score::create` exécuté sans vérifier l'authentification - insert avec `user_id = null` possible
+- `QuizGenerator` : flags `field_photo`, `field_audio`, `field_function` du module jamais vérifiés - types incompatibles toujours dans le pool
+- `Score` : pas de casts, impossible de distinguer un score de test d'un score d'examen
+- `Item` : pas de `SoftDeletes` contrairement à `Module` - progressions orphelines à la suppression d'un item
+- Vue `exam/start` : pas de filtrage par champs actifs du module, modes audio absents
+
+### Corrections apportées
+
+- **Logs d'activité** : ajout de `created_at` dans `$fillable` de `ActivityLog` - les logs s'enregistrent à nouveau correctement ; ajout des événements `completed_test` et `completed_exam`
+- **GuestExamController** : validation corrigée `max:3` - `max:7`
+- **ExamController** : `$types` correctement transmis à `generateQuestion` comme `allowedTypes`
+- **ExamController** : vérification que `$answers` n'est pas vide avant de purger la session et d'enregistrer le score
+- **ExamController** : modeMap complété avec `audio_to_name_fr`, `audio_to_name_alt`, `name_fr_to_audio`, `name_alt_to_audio`
+- **TestController** : exclusion de Q3/Q5/Q9/Q15/Q16 (photo/audio en réponse) du pool aléatoire
+- **TestController** / **ExamController** : `Score::create` et `LogHelper::log` protégés par `Auth::check()`
+- **QuizGenerator** : filtrage des types selon les flags `field_photo`, `field_audio`, `field_function` du module ; PHPDocs mis à jour (Q1-Q4 - Q1-Q16, index 0-2 - index 0-7)
+- **Score** : ajout des casts `integer`, ajout du champ `mode` (`test` / `exam`) + migration
+- **Item** : ajout de `SoftDeletes` + migration *(nécessite `php artisan migrate` sur le serveur)*
+- **Vue exam/start** : options de mode filtrées par champs actifs du module, modes audio ajoutés
+
+### Nouvelles fonctionnalités
+
+- **Bouton dupliquer sur la page module** : le propriétaire peut désormais dupliquer un module directement depuis sa page de détail, y compris les modules privés. Les autres utilisateurs connectés voient également le bouton si la duplication est autorisée sur ce module.
+
+---
+
 ## 2026-06-09 (suite 3)
 
 ### Plugins
