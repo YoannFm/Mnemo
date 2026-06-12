@@ -380,9 +380,15 @@ class ModuleController extends Controller
 
         // Créer une copie du module (privée par défaut)
         $copy = Auth::user()->modules()->create([
-            'title'       => $module->title . ' (copie)',
-            'description' => $module->description,
-            'is_public'   => false,
+            'title'            => $module->title . ' (copie)',
+            'description'      => $module->description,
+            'is_public'        => false,
+            'allow_duplication'=> $module->allow_duplication,
+            'field_name_fr'    => $module->field_name_fr,
+            'field_name_alt'   => $module->field_name_alt,
+            'field_photo'      => $module->field_photo,
+            'field_function'   => $module->field_function,
+            'field_audio'      => $module->field_audio,
         ]);
 
         foreach ($module->items as $item) {
@@ -391,11 +397,18 @@ class ModuleController extends Controller
                 $newPhotoPath = 'items/' . Str::uuid() . '.jpg';
                 Storage::disk('public')->copy($item->photo_path, $newPhotoPath);
             }
+            $newAudioPath = null;
+            if ($item->audio_path && Storage::disk('public')->exists($item->audio_path)) {
+                $ext = pathinfo($item->audio_path, PATHINFO_EXTENSION);
+                $newAudioPath = 'items/audio/' . Str::uuid() . '.' . $ext;
+                Storage::disk('public')->copy($item->audio_path, $newAudioPath);
+            }
             $copy->items()->create([
                 'name_fr'       => $item->name_fr,
                 'name_alt'      => $item->name_alt,
                 'function_text' => $item->function_text,
                 'photo_path'    => $newPhotoPath,
+                'audio_path'    => $newAudioPath,
             ]);
         }
 
