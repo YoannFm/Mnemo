@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Module;
 use App\Models\Progress;
 use App\Models\Score;
@@ -240,6 +241,8 @@ class TestController extends Controller
             'score'     => $score,
             'total'     => $total,
         ]);
+
+        LogHelper::log('completed_test', 'module', $module->id, ['score' => $score, 'total' => $total, 'percentage' => $total > 0 ? (int) round(($score / $total) * 100) : 0]);
 
         // Nettoyer la session du test
         session()->forget(['test_module_id', 'test_mode', 'test_option_count', 'test_question_count', 'test_current', 'test_score', 'test_answers', 'test_questions']);

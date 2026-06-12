@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 class ActivityLog extends Model
 {
     public $timestamps = false;
-    protected $fillable = ['user_id', 'action', 'target_type', 'target_id', 'data', 'level', 'old_value', 'new_value'];
+    protected $fillable = ['user_id', 'action', 'target_type', 'target_id', 'data', 'level', 'old_value', 'new_value', 'created_at'];
 
     protected function casts(): array
     {
@@ -97,6 +97,10 @@ class ActivityLog extends Model
             'deleted_own_rating'          => 'Évaluation supprimée',
             'replied_to_rating'           => 'Réponse à un avis',
             'deleted_rating_reply'        => 'Réponse à un avis supprimée',
+
+            // Tests & exams
+            'completed_test'      => 'Test terminé',
+            'completed_exam'      => 'Examen terminé',
 
             // Items
             'created_item'        => 'Item créé',

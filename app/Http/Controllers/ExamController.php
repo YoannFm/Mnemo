@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Module;
 use App\Models\Score;
 use App\Models\SharedExam;
@@ -146,6 +147,7 @@ class ExamController extends Controller
         session()->forget(['exam_module_id', 'exam_questions', 'exam_current', 'exam_answers', 'exam_mode']);
 
         Score::create(['user_id' => Auth::id(), 'module_id' => $module->id, 'score' => $score, 'total' => $total]);
+        LogHelper::log('completed_exam', 'module', $module->id, ['score' => $score, 'total' => $total, 'percentage' => $percentage]);
 
         return view('quiz.exam.result', compact('module', 'score', 'total', 'percentage', 'answers'));
     }
