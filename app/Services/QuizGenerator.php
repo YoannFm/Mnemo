@@ -7,7 +7,7 @@ use App\Models\Module;
 
 /**
  * Service de génération de questions pour le quiz.
- * Génère des QCM aléatoires selon différents types (Q1-Q4).
+ * Génère des QCM aléatoires selon différents types (Q1-Q16).
  *
  * Structure générique :
  * - field_question : champ affiché (ex : photo_path, function_text)
@@ -19,7 +19,7 @@ use App\Models\Module;
 class QuizGenerator
 {
     /**
-     * Types de questions supportés (Q1-Q8).
+     * Types de questions supportés (Q1-Q16).
      * Chaque type définit :
      *   - field_question : ce qui est affiché à l'utilisateur
      *   - field_answer : ce que l'utilisateur doit trouver
@@ -112,7 +112,7 @@ class QuizGenerator
      * Génère une question pour un module donné.
      *
      * @param Module $module Le module contenant les items
-     * @param string $questionType Code du type (Q1-Q11)
+     * @param string $questionType Code du type (Q1-Q16)
      * @param Item|null $targetItem Item cible pré-sélectionné. Si null, tirage aléatoire.
      * @return array La question complète : énoncé, options mélangées, réponse correcte
      */
@@ -131,6 +131,25 @@ class QuizGenerator
 
         if (empty($eligibleTypes)) {
             return ['error' => 'Cet item n\'a pas assez de données pour générer une question.'];
+        }
+
+        // Filtrer selon les champs actifs du module
+        $eligibleTypes = array_values(array_filter($eligibleTypes, function ($t) use ($module) {
+            $photoTypes    = ['Q1', 'Q2', 'Q8'];
+            $photoAnsTypes = ['Q3', 'Q9'];
+            $audioTypes    = ['Q13', 'Q14'];
+            $audioAnsTypes = ['Q15', 'Q16'];
+            $funcTypes     = ['Q2', 'Q6', 'Q10', 'Q11'];
+            if (in_array($t, $photoTypes) && !$module->field_photo) return false;
+            if (in_array($t, $photoAnsTypes) && !$module->field_photo) return false;
+            if (in_array($t, $audioTypes) && !$module->field_audio) return false;
+            if (in_array($t, $audioAnsTypes) && !$module->field_audio) return false;
+            if (in_array($t, $funcTypes) && !$module->field_function) return false;
+            return true;
+        }));
+
+        if (empty($eligibleTypes)) {
+            return ['error' => 'Aucun type de question compatible avec la configuration du module.'];
         }
 
         if (!in_array($questionType, $eligibleTypes)) {
@@ -258,7 +277,7 @@ class QuizGenerator
      * Valide une réponse donnée pour une question.
      *
      * @param array $question La question générée
-     * @param int|string $userAnswer L'indice de la réponse de l'utilisateur (0-2)
+     * @param int|string $userAnswer L'indice de la réponse de l'utilisateur (0-7)
      * @return bool True si la réponse est correcte
      */
     public static function validateAnswer(array $question, $userAnswer): bool
