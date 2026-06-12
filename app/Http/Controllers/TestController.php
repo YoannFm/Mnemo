@@ -57,11 +57,11 @@ class TestController extends Controller
         ]);
         $questionCount = $validated['question_count'];
         $mode = $validated['mode'] ?? 'random';
-        $optionCount = (int) ($validated['option_count'] ?? 4);
 
         // Limiter au nombre d'items du module
         $itemCount = $module->items()->count();
         $questionCount = min($questionCount, $itemCount);
+        $optionCount = min((int) ($validated['option_count'] ?? 4), $itemCount);
 
         // Initialiser la session du test
         session([

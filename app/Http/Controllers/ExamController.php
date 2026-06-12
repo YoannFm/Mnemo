@@ -35,9 +35,9 @@ class ExamController extends Controller
             'option_count' => 'nullable|integer|min:2|max:8',
         ]);
         $mode = $data['mode'];
-        $optionCount = (int) ($data['option_count'] ?? 4);
-
         $allItems = $module->items()->get();
+        $itemCount = $allItems->count();
+        $optionCount = min((int) ($data['option_count'] ?? 4), $itemCount);
         $modeMap = [
             'photo_to_name_fr'    => ['Q1'],
             'photo_to_name_alt'    => ['Q8'],

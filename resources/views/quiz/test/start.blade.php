@@ -53,11 +53,13 @@
                         </label>
                         <select name="option_count" class="form-select">
                             @foreach([2,3,4,5,6,7,8] as $n)
-                                <option value="{{ $n }}" {{ $n === 4 ? 'selected' : '' }}>{{ $n }} réponses</option>
+                                <option value="{{ $n }}" {{ $n === 4 ? 'selected' : '' }}>
+                                    {{ $n }} réponses{{ $n > $itemCount ? ' (max ' . $itemCount . ' items disponibles)' : '' }}
+                                </option>
                             @endforeach
                         </select>
                         <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
-                            Si le module n'a pas assez d'items, certaines réponses seront répétées.
+                            Il faut au moins autant d'items que de réponses proposées. Ce module a {{ $itemCount }} item{{ $itemCount > 1 ? 's' : '' }}.
                         </div>
                     </div>
                 </div>
