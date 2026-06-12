@@ -197,7 +197,7 @@
                         </a>
                     </li>
 
-                    <li class="sidebar-item {{ request()->routeIs('admin.modules.*') ? 'active' : '' }}">
+                    <li class="sidebar-item {{ request()->routeIs('admin.modules.index', 'admin.modules.destroy') ? 'active' : '' }}">
                         <a class="sidebar-link" href="{{ route('admin.modules.index') }}">
                             <i class="bi bi-collection"></i> <span>Modules publics</span>
                         </a>
