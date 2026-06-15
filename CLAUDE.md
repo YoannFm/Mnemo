@@ -14,9 +14,22 @@ Application web de flashcards pour apprendre et mémoriser du vocabulaire. Les u
 - `app/Models/Module.php` - SoftDeletes, propriétaire (`owner_id`), public/privé
 - `app/Models/Item.php` - SoftDeletes, appartient à un module
 - `app/Models/ActivityLog.php` - logs d'activité, `$timestamps = false`, `created_at` dans `$fillable`
+- `app/Models/Progress.php` - progression Anki par item/utilisateur, SM-2 (`easiness_factor`, `interval_days`, `next_review`), `isMastered()` = streak >= 3
+- `app/Models/AnkiSession.php` - session Anki persistée par utilisateur/module (`mode`, `learn_remaining` JSON, `learn_total`), unique sur `(user_id, module_id)`
 - `app/Services/QuizGenerator.php` - génère les questions Q1-Q16 (toutes combinaisons de champs)
 - `app/Helpers/LogHelper.php` - `LogHelper::log($action, $targetType, $targetId, $data, $level, $oldValue, $newValue)`
 - `app/Extensions/UpdateManager.php` - mises à jour de l'application, archives dans `storage/app/updates/`
+
+## Mode Anki - fonctionnement
+
+- **Progression** (`progress`) : persistée en DB par item/utilisateur (streak, SM-2, next_review). Jamais perdue.
+- **Session** (`anki_sessions`) : mode choisi + liste `learn_remaining` (mode apprentissage). Survivent à la fermeture du navigateur.
+- **Restauration** : si la session PHP est absente au chargement d'une question, `AnkiController::question()` restaure depuis `anki_sessions` en DB.
+- **Pool aléatoire** : les items maîtrisés (streak >= 3) ET non-dus (`next_review` dans le futur) sont exclus. Les autres sont pondérés selon l'historique.
+- **Mode apprentissage** : activé pour tout mode non-aléatoire. `learn_remaining` liste les items à maîtriser, synchro en DB à chaque bonne réponse.
+- **Fin de session** : `quit()` sauvegarde l'état en DB, redirige vers la page setup (bouton "Reprendre" visible). `clearSession()` supprime l'`AnkiSession` quand la session est terminée.
+- **Reset** : `ModuleController::resetProgress()` supprime les `Progress` ET l'`AnkiSession` du module.
+- **Piège à éviter** : `session('key', $default)` retourne `null` si la clé existe avec valeur `null` (le défaut n'est utilisé que si la clé est ABSENTE). Toujours utiliser `?? $fallback` en plus du défaut de session pour les valeurs nullable en DB.
 
 ## Fonctionnalités principales
 
