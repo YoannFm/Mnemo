@@ -25,6 +25,10 @@
 - Correction sélection de mode accidentelle : le formulaire pré-sélectionne désormais le mode de la session sauvegardée, évitant un basculement non voulu vers le mode aléatoire (sans barre de progression)
 - Correction barre de progression mode aléatoire bloquée à 0 : la barre affichait `mastered_count` (streak >= 3, nécessite 3 bonnes réponses consécutives) ; remplacée par `learned_count` (success_count > 0) qui progresse dès la première bonne réponse par item
 - Unification de la définition "maîtrisé" : un item est maîtrisé dès le premier "Je sais" (success_count > 0), appliqué à la fois sur la barre de progression en session et sur le compteur "Maîtrisés" de la page setup
+- Correction mapping question mode "Description -> Traduction" : pointait vers Q11 (name_alt -> function_text) au lieu de Q12 (function_text -> name_alt), la question affichait la traduction au lieu de la description
+- Correction sécurité resetProgress() : ajout vérification d'accès au module (seul le propriétaire ou un admin peut réinitialiser)
+- Correction session PHP résiduelle après reset : les clés de session Anki sont maintenant nettoyées lors du reset, évitant un état incohérent à la prochaine visite
+- Reset redirige désormais vers la page Anki (setup) au lieu de la page module
 
 ## 2026-06-12 (suite 2)
 

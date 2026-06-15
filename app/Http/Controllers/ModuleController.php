@@ -370,6 +370,10 @@ class ModuleController extends Controller
 
     public function resetProgress(Module $module)
     {
+        if (!$module->is_public && $module->owner_id !== Auth::id() && !Auth::user()?->is_admin) {
+            abort(403);
+        }
+
         $itemIds = $module->items()->pluck('id');
 
         Progress::where('user_id', Auth::id())
@@ -380,9 +384,18 @@ class ModuleController extends Controller
             ->where('module_id', $module->id)
             ->delete();
 
+        // Nettoyer la session PHP pour eviter un etat residuel
+        if (session('anki_module_id') === $module->id) {
+            session()->forget([
+                'anki_module_id', 'anki_mode', 'anki_learn_mode',
+                'anki_learn_remaining', 'anki_learn_total',
+                'anki_session_correct', 'anki_session_wrong', 'anki_session_streak',
+            ]);
+        }
+
         LogHelper::log('reset_progress', 'module', $module->id, ['module_title' => $module->title], 'warning');
 
-        return redirect()->route('modules.show', $module)
+        return redirect()->route('anki.show', $module)
             ->with('success', 'Progression réinitialisée.');
     }
 
