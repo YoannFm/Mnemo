@@ -29,6 +29,8 @@
 - Correction sécurité resetProgress() : ajout vérification d'accès au module (seul le propriétaire ou un admin peut réinitialiser)
 - Correction session PHP résiduelle après reset : les clés de session Anki sont maintenant nettoyées lors du reset, évitant un état incohérent à la prochaine visite
 - Reset redirige désormais vers la page Anki (setup) au lieu de la page module
+- Agrandissement du label de type de question sur la carte Anki (.7rem -> 1rem) pour tous les types (NOM, TRADUCTION, DÉFINITION, etc.)
+- Agrandissement de la réponse traduction (name_alt) : 2.2rem au lieu de 1.4rem
 
 ## 2026-06-12 (suite 2)
 
