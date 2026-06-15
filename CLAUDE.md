@@ -55,3 +55,20 @@ git fetch origin && git reset --hard origin/claude/lucid-maxwell-OTvnN
 ## Branche de développement
 
 Toujours développer sur la branche `claude/lucid-maxwell-OTvnN`.
+
+## Git & déploiement
+
+**Push vers GitHub :**
+```bash
+git remote set-url origin https://YoannFM-rascol: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@github.com/YoannFm/Mnemo.git && git push -u origin claude/lucid-maxwell-OTvnN 2>&1; git remote set-url origin http://local_proxy@127.0.0.1:37379/git/YoannFM-rascol/Mnemo
+```
+
+**Repo GitHub :** `YoannFm/Mnemo` (attention : le remote MCP est `YoannFM-rascol/Mnemo`, mais le vrai repo GitHub s'appelle `YoannFm/Mnemo`)
+
+**Remote serveur :** `http://local_proxy@127.0.0.1:37379/git/YoannFM-rascol/Mnemo`
+
+Le serveur pull depuis `YoannFm/Mnemo` — toujours pousser sur cette branche avant de demander un `git reset --hard` côté serveur.
+
+## Changelog
+
+Mettre à jour `CHANGELOG.md` à chaque commit, dans un commit séparé ou groupé. Format : section datée avec description des changements.
