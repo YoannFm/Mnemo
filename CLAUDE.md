@@ -46,19 +46,25 @@ Application web de flashcards pour apprendre et mémoriser du vocabulaire. Les u
 
 ## Déploiement
 
-Toujours terminer chaque réponse avec la commande de mise à jour du serveur la plus appropriée selon le contexte :
+L'utilisateur a accès SSH au serveur de production `mnemo.rascol.net` et peut exécuter des commandes directement.
 
-- Si du code a été modifié et pushé :
+Toujours terminer chaque réponse avec **la commande complète** de mise à jour adaptée au contexte. Ne jamais donner des commandes séparées à enchaîner manuellement - tout en un seul bloc.
+
+- Si du code a été modifié et pushé (sans migration, sans assets) :
 ```bash
 git fetch origin && git reset --hard origin/claude/lucid-maxwell-OTvnN
 ```
-- Si une migration a été ajoutée, ajouter après :
+- Si une migration a été ajoutée :
 ```bash
-php artisan migrate --force
+git fetch origin && git reset --hard origin/claude/lucid-maxwell-OTvnN && php artisan migrate --force
 ```
 - Si des assets ont changé :
 ```bash
-npm run build
+git fetch origin && git reset --hard origin/claude/lucid-maxwell-OTvnN && npm run build
+```
+- Si migration ET assets :
+```bash
+git fetch origin && git reset --hard origin/claude/lucid-maxwell-OTvnN && php artisan migrate --force && npm run build
 ```
 - Si seulement une discussion sans modification de code : ne pas donner de commande.
 
