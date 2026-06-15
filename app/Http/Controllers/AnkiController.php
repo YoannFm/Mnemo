@@ -235,6 +235,13 @@ class AnkiController extends Controller
         if ($learnMode) {
             $question['learn_remaining'] = count($remaining);
             $question['learn_total']     = $learnTotal;
+        } else {
+            // Mode aleatoire : progression globale de maitrise
+            $masteredCount = isset($progressMap)
+                ? $progressMap->filter(fn($p) => $p->isMastered())->count()
+                : 0;
+            $question['mastered_count'] = $masteredCount;
+            $question['total_count']    = $allItems->count();
         }
 
         return view('quiz.anki.question', compact('module', 'question'));
