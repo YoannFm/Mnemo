@@ -23,6 +23,7 @@
 - Correction condition du bouton reset : `$dueCount < $totalCount` incorrecte (masquait le bouton même avec de la progression), remplacée par `$newCount < $totalCount`
 - Correction barre de progression manquante après reprise : `session('learn_total', 0)` retourne `null` si la clé existe avec valeur `null` (le défaut PHP n'est pas utilisé dans ce cas), ajout d'un fallback `?? count($learn_remaining)`
 - Correction sélection de mode accidentelle : le formulaire pré-sélectionne désormais le mode de la session sauvegardée, évitant un basculement non voulu vers le mode aléatoire (sans barre de progression)
+- Correction barre de progression mode aléatoire bloquée à 0 : la barre affichait `mastered_count` (streak >= 3, nécessite 3 bonnes réponses consécutives) ; remplacée par `learned_count` (success_count > 0) qui progresse dès la première bonne réponse par item - le nombre de maîtrisés reste affiché en secondaire
 
 ## 2026-06-12 (suite 2)
 

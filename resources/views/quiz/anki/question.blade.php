@@ -24,14 +24,14 @@
             </div>
         </div>
     @elseif(isset($question['total_count']) && $question['total_count'] > 0)
-        @php $pct = round($question['mastered_count'] / $question['total_count'] * 100); @endphp
+        @php $pct = round($question['learned_count'] / $question['total_count'] * 100); @endphp
         <div class="mb-3">
             <div class="d-flex justify-content-between mb-1" style="font-size:.78rem;color:var(--text-muted);">
-                <span><i class="bi bi-check-circle me-1"></i>Maîtrisés</span>
-                <span>{{ $question['mastered_count'] }} / {{ $question['total_count'] }}</span>
+                <span><i class="bi bi-eye me-1"></i>Vus <span style="color:#22c55e;margin-left:.4em;">· {{ $question['mastered_count'] }} maîtrisés</span></span>
+                <span>{{ $question['learned_count'] }} / {{ $question['total_count'] }}</span>
             </div>
             <div class="progress" style="height:6px;">
-                <div class="progress-bar" style="width:{{ $pct }}%;background:#22c55e;"></div>
+                <div class="progress-bar" style="width:{{ $pct }}%;background:var(--accent);"></div>
             </div>
         </div>
     @endif
