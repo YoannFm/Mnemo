@@ -11,12 +11,12 @@ Application web de flashcards pour apprendre et mémoriser du vocabulaire. Les u
 
 ## Architecture clé
 
-- `app/Models/Module.php` — SoftDeletes, propriétaire (`owner_id`), public/privé
-- `app/Models/Item.php` — SoftDeletes, appartient à un module
-- `app/Models/ActivityLog.php` — logs d'activité, `$timestamps = false`, `created_at` dans `$fillable`
-- `app/Services/QuizGenerator.php` — génère les questions Q1–Q16 (toutes combinaisons de champs)
-- `app/Helpers/LogHelper.php` — `LogHelper::log($action, $targetType, $targetId, $data, $level, $oldValue, $newValue)`
-- `app/Extensions/UpdateManager.php` — mises à jour de l'application, archives dans `storage/app/updates/`
+- `app/Models/Module.php` - SoftDeletes, propriétaire (`owner_id`), public/privé
+- `app/Models/Item.php` - SoftDeletes, appartient à un module
+- `app/Models/ActivityLog.php` - logs d'activité, `$timestamps = false`, `created_at` dans `$fillable`
+- `app/Services/QuizGenerator.php` - génère les questions Q1-Q16 (toutes combinaisons de champs)
+- `app/Helpers/LogHelper.php` - `LogHelper::log($action, $targetType, $targetId, $data, $level, $oldValue, $newValue)`
+- `app/Extensions/UpdateManager.php` - mises à jour de l'application, archives dans `storage/app/updates/`
 
 ## Fonctionnalités principales
 
@@ -39,6 +39,11 @@ Application web de flashcards pour apprendre et mémoriser du vocabulaire. Les u
 
 # Instructions
 
+## Style
+
+- Interdiction d'utiliser le tiret long (—), utiliser uniquement le tiret court (-)
+- Interdiction d'inclure des liens claude.ai dans les fichiers du dépôt, les commits, les commentaires ou tout autre artefact
+
 ## Déploiement
 
 Toujours terminer chaque réponse avec la commande de mise à jour du serveur la plus appropriée selon le contexte :
@@ -60,7 +65,7 @@ npm run build
 ## Sécurité
 
 - Ne jamais mentionner Claude dans le dépôt (commits, code, commentaires, PR)
-- Ne jamais inclure de liens Claude dans les fichiers du dépôt
+- Ne jamais inclure de liens claude.ai dans les fichiers du dépôt
 
 ## Branche de développement
 
@@ -77,7 +82,7 @@ git remote set-url origin https://YoannFM-rascol:ghp_doj7uBxBcoRMyuCpmv35QnCy1kY
 
 **Remote serveur :** `http://local_proxy@127.0.0.1:37379/git/YoannFM-rascol/Mnemo`
 
-Le serveur pull depuis `YoannFm/Mnemo` — toujours pousser sur cette branche avant de demander un `git reset --hard` côté serveur.
+Le serveur pull depuis `YoannFm/Mnemo` - toujours pousser sur cette branche avant de demander un `git reset --hard` côté serveur.
 
 ## Changelog
 
