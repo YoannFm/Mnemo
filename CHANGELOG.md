@@ -1,12 +1,26 @@
 # Changelog
 
+## 2026-06-15
+
+### Mode Anki - persistance et reprise de session
+
+- Nouvelle table `anki_sessions` : persiste le mode choisi et la liste d'items restants en mode apprentissage (migration)
+- La session Anki survit à la fermeture du navigateur ou l'expiration de session PHP
+- Page setup : nouvelle section "Session en pause" avec bouton "Reprendre", affiche le mode, les items restants et la date de derniere activite
+- Page setup : statistiques de progression (items a reviser, maitrisés, total)
+- Page setup : bouton "Remettre à zéro" directement accessible (remet la progression ET efface la session sauvegardée)
+- Mode aleatoire : les items maitrisés ET non-dus sont désormais exclus du pool (au lieu de simplement pondérés faiblement)
+- Quand tous les items sont maitrisés et non-dus, redirection vers la page setup avec un message approprié
+- `quit()` sauvegarde l'état avant de vider la session PHP, redirige vers la page setup (et non la page module)
+- `ModuleController::resetProgress()` efface aussi l'AnkiSession associée
+
 ## 2026-06-12 (suite 2)
 
-### Export des logs - structure ZIP améliorée
+### Export des logs - structure ZIP ameliorée
 
 - L'archive exportée contient désormais un dossier `logs/` structuré :
-  - `logs/latest.csv` ou `logs/latest.json` — données d'activité
-  - `logs/files/` — fichiers liés aux actions loggées (archives de mises à jour, sauvegardes)
+  - `logs/latest.csv` ou `logs/latest.json` : données d'activité
+  - `logs/files/` : fichiers liés aux actions loggées (archives de mises à jour, sauvegardes)
 - Les fichiers présents dans `storage/app/updates/` et `storage/app/backups/` sont automatiquement inclus dans `logs/files/`
 
 ---
@@ -119,7 +133,7 @@ Réalisation d'un audit complet du projet. Découverte des problèmes suivants :
 - **Feature flags** : page admin `/admin/settings/features` pour activer/désactiver chaque fonctionnalité avec description détaillée
 - **Raccourcis AZERTY** : touches `&` `é` `"` `'` en plus de `1` `2` `3` `4` dans tous les modes (Test, Anki, Examen)
 - **Q12** : 12ème type de question ajouté (Description → Traduction), couvrant toutes les combinaisons possibles
-- **Libellés de questions** : labels courts (1 mot) pour les 12 types — Identification, Traduction, Reconnaissance, Correspondance, Définition, etc.
+- **Libellés de questions** : labels courts (1 mot) pour les 12 types : Identification, Traduction, Reconnaissance, Correspondance, Définition, etc.
 
 ### Modifications
 

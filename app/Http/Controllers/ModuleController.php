@@ -12,6 +12,7 @@ use App\Models\ModuleRatingReply;
 use App\Models\ModuleRatingReplyReport;
 use App\Models\ModuleRatingReport;
 use App\Models\ModuleReport;
+use App\Models\AnkiSession;
 use App\Models\Mute;
 use App\Models\Progress;
 use App\Models\UserNotification;
@@ -373,6 +374,10 @@ class ModuleController extends Controller
 
         Progress::where('user_id', Auth::id())
             ->whereIn('item_id', $itemIds)
+            ->delete();
+
+        AnkiSession::where('user_id', Auth::id())
+            ->where('module_id', $module->id)
             ->delete();
 
         LogHelper::log('reset_progress', 'module', $module->id, ['module_title' => $module->title], 'warning');
