@@ -97,7 +97,8 @@
                 </h6>
             </div>
 
-            <form method="POST" action="{{ route('anki.start', $module) }}" id="anki-form">
+            <form method="POST" action="{{ route('anki.start', $module) }}" id="anki-form"
+                  data-saved-mode="{{ $ankiSession?->mode ?? 'random' }}">
                 @csrf
                 <input type="hidden" name="mode" id="mode-value" value="random">
 
@@ -245,6 +246,18 @@
             invalidCombo.classList.add('d-none');
             startBtn.disabled = false;
             modeValue.value = modeMap[inp + '|' + out] || 'random';
+        }
+    }
+
+    // Pré-sélectionner le mode de la session sauvegardée
+    var savedMode = document.getElementById('anki-form').dataset.savedMode;
+    if (savedMode && savedMode !== 'random') {
+        var modeEntry = Object.entries(modeMap).find(function(e) { return e[1] === savedMode; });
+        if (modeEntry) {
+            var parts = modeEntry[0].split('|');
+            randomToggle.checked = false;
+            if (inputField.querySelector('option[value="' + parts[0] + '"]')) inputField.value = parts[0];
+            if (outputField.querySelector('option[value="' + parts[1] + '"]')) outputField.value = parts[1];
         }
     }
 

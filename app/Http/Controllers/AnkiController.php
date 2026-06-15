@@ -116,10 +116,12 @@ class AnkiController extends Controller
             ]);
 
             if ($saved->isLearnMode()) {
+                // Fallback si learn_total est null (ne pas laisser null dans session car session('key', 0) retourne null si null stocke)
+                $learnTotal = $saved->learn_total ?? count($saved->learn_remaining);
                 session([
                     'anki_learn_mode'      => true,
                     'anki_learn_remaining' => $saved->learn_remaining,
-                    'anki_learn_total'     => $saved->learn_total,
+                    'anki_learn_total'     => $learnTotal,
                 ]);
             } else {
                 session()->forget(['anki_learn_mode', 'anki_learn_remaining', 'anki_learn_total']);
