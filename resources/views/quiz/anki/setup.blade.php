@@ -34,7 +34,7 @@
                 <div class="col-4">
                     <div class="card h-100 py-3">
                         <div class="fs-4 fw-bold text-success">{{ $masteredCount }}</div>
-                        <div style="font-size:.75rem;color:var(--text-muted);">Maitrisés</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Maîtrisés</div>
                     </div>
                 </div>
                 <div class="col-4">
@@ -49,7 +49,7 @@
             @if($ankiSession)
             @php
                 $modeLabels = [
-                    'random'               => 'Aleatoire',
+                    'random'               => 'Aléatoire',
                     'photo_to_name_fr'     => 'Photo -> Nom',
                     'photo_to_name_alt'    => 'Photo -> Traduction',
                     'photo_to_function'    => 'Photo -> Description',
@@ -107,7 +107,7 @@
                         <div class="form-check form-switch d-flex align-items-center gap-2" style="padding-left:0;">
                             <input class="form-check-input" type="checkbox" id="random-toggle" checked style="width:2.5rem;height:1.25rem;cursor:pointer;margin:0;">
                             <label class="form-check-label fw-semibold" for="random-toggle" style="cursor:pointer;">
-                                <i class="bi bi-shuffle me-1" style="color:var(--accent);"></i> Aleatoire
+                                <i class="bi bi-shuffle me-1" style="color:var(--accent);"></i> Aléatoire
                             </label>
                         </div>
                         <p class="mb-0 mt-1" style="font-size:.8rem;color:var(--text-muted);">Tous les types de questions mélangés, répétition espacée SM-2.</p>
@@ -188,7 +188,7 @@
             </form>
 
             {{-- Reset progression (hors du formulaire principal pour eviter l'imbrication) --}}
-            @if($masteredCount > 0 || $dueCount < $totalCount)
+            @if($newCount < $totalCount)
             <form method="POST" action="{{ route('modules.progress.reset', $module) }}" class="mt-3"
                   onsubmit="return confirm('Réinitialiser toute votre progression sur ce module ? Cette action est irréversible.');">
                 @csrf
