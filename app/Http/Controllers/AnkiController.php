@@ -32,7 +32,7 @@ class AnkiController extends Controller
             ->whereIn('item_id', $itemIds)
             ->get();
 
-        $masteredCount = $progressAll->filter(fn($p) => $p->isMastered())->count();
+        $masteredCount = $progressAll->filter(fn($p) => $p->success_count > 0)->count();
         $dueCount      = $progressAll->filter(fn($p) => $p->isDueForReview())->count()
                          + ($totalCount - $progressAll->count()); // nouveaux = dus par defaut
         $newCount      = $totalCount - $progressAll->count();
