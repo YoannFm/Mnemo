@@ -104,8 +104,12 @@
                 @elseif ($question['field_answer'] === 'audio_path')
                     <audio controls autoplay src="{{ $question['correct_answer'] }}"
                            style="width:100%;max-width:400px;border-radius:8px;" onclick="event.stopPropagation()"></audio>
-                @else
+                @elseif ($question['field_answer'] === 'name_alt')
                     <div style="font-size:2.2rem;font-weight:700;color:var(--accent);padding:.5rem 0;line-height:1.2;">
+                        {{ $question['correct_answer'] }}
+                    </div>
+                @else
+                    <div style="font-size:1.4rem;font-weight:600;color:var(--accent);padding:.5rem 0;">
                         {{ $question['correct_answer'] }}
                     </div>
                 @endif
