@@ -184,20 +184,20 @@
                         <i class="bi bi-play-fill me-1"></i>
                         {{ $ankiSession ? 'Recommencer' : 'Commencer' }}
                     </button>
-
-                    {{-- Reset progression --}}
-                    @if($masteredCount > 0 || $dueCount < $totalCount)
-                    <form method="POST" action="{{ route('modules.progress.reset', $module) }}" class="ms-auto"
-                          onsubmit="return confirm('Réinitialiser toute votre progression sur ce module ? Cette action est irréversible.');">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-sm" style="color:var(--danger, #dc3545);border:1px solid var(--danger, #dc3545);">
-                            <i class="bi bi-arrow-counterclockwise me-1"></i>Remettre à zéro
-                        </button>
-                    </form>
-                    @endif
                 </div>
             </form>
+
+            {{-- Reset progression (hors du formulaire principal pour eviter l'imbrication) --}}
+            @if($masteredCount > 0 || $dueCount < $totalCount)
+            <form method="POST" action="{{ route('modules.progress.reset', $module) }}" class="mt-3"
+                  onsubmit="return confirm('Réinitialiser toute votre progression sur ce module ? Cette action est irréversible.');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-sm" style="color:var(--danger, #dc3545);border:1px solid var(--danger, #dc3545);">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Remettre à zéro
+                </button>
+            </form>
+            @endif
 
         </div>
     </div>
