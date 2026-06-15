@@ -89,7 +89,7 @@
 
             {{-- Verso : réponse (caché au départ) --}}
             <div id="side-answer" style="display:none;width:100%;text-align:center;">
-                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:1rem;">
+                <div style="font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:1rem;">
                     <i class="bi bi-lightbulb me-1"></i>Réponse
                 </div>
                 @if ($question['field_answer'] === 'photo_path')
