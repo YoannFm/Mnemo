@@ -41,8 +41,8 @@ Application web de flashcards pour apprendre et mémoriser du vocabulaire. Les u
 
 ## Style
 
-- Interdiction d'utiliser le tiret long (—), utiliser uniquement le tiret court (-)
-- Interdiction d'inclure des liens claude.ai dans les fichiers du dépôt, les commits, les commentaires ou tout autre artefact
+- Interdiction d'utiliser le tiret long (—), utiliser uniquement le tiret court (-). Si un tiret long est détecté dans un fichier du dépôt, le remplacer immédiatement.
+- Interdiction d'inclure des liens claude.ai dans les fichiers du dépôt, les commits, les commentaires ou tout autre artefact. Si un lien claude.ai est détecté dans un fichier du dépôt, le supprimer immédiatement.
 
 ## Déploiement
 
