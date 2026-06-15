@@ -30,6 +30,7 @@
 - Correction session PHP résiduelle après reset : les clés de session Anki sont maintenant nettoyées lors du reset, évitant un état incohérent à la prochaine visite
 - Reset redirige désormais vers la page Anki (setup) au lieu de la page module
 - Agrandissement du label de type de question sur la carte Anki (.7rem -> 1rem) pour tous les types (NOM, TRADUCTION, DÉFINITION, etc.)
+- Agrandissement du label "RÉPONSE" sur le verso de la carte (.7rem -> 1rem)
 - Agrandissement de la réponse traduction (name_alt) : 2.2rem au lieu de 1.4rem
 
 ## 2026-06-12 (suite 2)
