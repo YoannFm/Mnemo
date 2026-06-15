@@ -62,7 +62,7 @@
 
             {{-- Recto : question --}}
             <div id="side-question" style="width:100%;text-align:center;">
-                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:1rem;">
+                <div style="font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:1rem;">
                     <i class="bi bi-question-circle me-1"></i>{{ $question['question_text'] }}
                 </div>
                 @if ($question['field_question'] === 'photo_path')
