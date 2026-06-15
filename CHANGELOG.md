@@ -4,15 +4,25 @@
 
 ### Mode Anki - persistance et reprise de session
 
-- Nouvelle table `anki_sessions` : persiste le mode choisi et la liste d'items restants en mode apprentissage (migration)
-- La session Anki survit à la fermeture du navigateur ou l'expiration de session PHP
-- Page setup : nouvelle section "Session en pause" avec bouton "Reprendre", affiche le mode, les items restants et la date de derniere activite
-- Page setup : statistiques de progression (items a reviser, maitrisés, total)
-- Page setup : bouton "Remettre à zéro" directement accessible (remet la progression ET efface la session sauvegardée)
-- Mode aleatoire : les items maitrisés ET non-dus sont désormais exclus du pool (au lieu de simplement pondérés faiblement)
-- Quand tous les items sont maitrisés et non-dus, redirection vers la page setup avec un message approprié
-- `quit()` sauvegarde l'état avant de vider la session PHP, redirige vers la page setup (et non la page module)
-- `ModuleController::resetProgress()` efface aussi l'AnkiSession associée
+**Fonctionnalité principale**
+- Nouvelle table `anki_sessions` (migration) : persiste le mode choisi et la liste d'items restants en mode apprentissage
+- La session Anki survit à la fermeture du navigateur ou à l'expiration de session PHP
+- Restauration automatique depuis la DB quand la session PHP est absente ou expirée
+- Page setup : section "Session en pause" avec bouton "Reprendre", mode actif, avancement et date de dernière activité
+- Page setup : statistiques de progression (A réviser / Maîtrisés / Total)
+- Page setup : bouton "Remettre à zéro" directement accessible, connecté au reset existant (efface progression ET session sauvegardée)
+- Mode aléatoire : les items maîtrisés ET non-dus sont exclus du pool (au lieu d'un simple poids faible)
+- Quand tous les items sont maîtrisés et non-dus : redirection vers la page setup avec message approprié
+- `quit()` sauvegarde l'état courant avant de vider la session PHP, redirige vers la page setup
+- `ModuleController::resetProgress()` efface aussi l'`AnkiSession` associée
+- `submit()` synchronise `learn_remaining` en DB à chaque bonne réponse en mode apprentissage
+- Fin de mode apprentissage : suppression de l'`AnkiSession` DB pour repartir proprement
+
+**Corrections post-déploiement**
+- Correction 405 Method Not Allowed : formulaire de reset imbriqué dans le formulaire principal (HTML invalide), déplacé hors du formulaire
+- Correction condition du bouton reset : `$dueCount < $totalCount` incorrecte (masquait le bouton même avec de la progression), remplacée par `$newCount < $totalCount`
+- Correction barre de progression manquante après reprise : `session('learn_total', 0)` retourne `null` si la clé existe avec valeur `null` (le défaut PHP n'est pas utilisé dans ce cas), ajout d'un fallback `?? count($learn_remaining)`
+- Correction sélection de mode accidentelle : le formulaire pré-sélectionne désormais le mode de la session sauvegardée, évitant un basculement non voulu vers le mode aléatoire (sans barre de progression)
 
 ## 2026-06-12 (suite 2)
 
