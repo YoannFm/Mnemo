@@ -41,11 +41,21 @@ Application web de flashcards pour apprendre et mémoriser du vocabulaire. Les u
 
 ## Déploiement
 
-Toujours terminer chaque réponse avec la commande de mise à jour du serveur dans un bloc de code :
+Toujours terminer chaque réponse avec la commande de mise à jour du serveur la plus appropriée selon le contexte :
 
+- Si du code a été modifié et pushé :
 ```bash
 git fetch origin && git reset --hard origin/claude/lucid-maxwell-OTvnN
 ```
+- Si une migration a été ajoutée, ajouter après :
+```bash
+php artisan migrate --force
+```
+- Si des assets ont changé :
+```bash
+npm run build
+```
+- Si seulement une discussion sans modification de code : ne pas donner de commande.
 
 ## Sécurité
 
@@ -71,4 +81,4 @@ Le serveur pull depuis `YoannFm/Mnemo` — toujours pousser sur cette branche av
 
 ## Changelog
 
-Mettre à jour `CHANGELOG.md` à chaque commit, dans un commit séparé ou groupé. Format : section datée avec description des changements.
+Mettre à jour `CHANGELOG.md` après chaque modification de code, avant ou avec le commit. Format : section datée (`## YYYY-MM-DD`) avec description claire des changements. Ne pas créer une entrée pour les commits qui ne modifient que le CHANGELOG lui-même.
