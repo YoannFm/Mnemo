@@ -4,10 +4,11 @@
 
 ### Examen - choix du nombre de questions
 
-- Ajout d'un sélecteur "Nombre de questions" sur la page de démarrage de l'examen
-- Options prédéfinies : 5, 10, 20, 30, 50 (selon les items disponibles) + "Tout" (tous les items)
+- Sélecteur remplacé par un champ numérique libre (1 à N items)
+- Correction mise en page : card "Nombre de réponses" cassée après rebase, restaurée
+- Texte d'intro mis à jour pour refléter le choix du nombre de questions
 - Le contrôleur limite automatiquement au nombre d'items du module
-- Le log `started_exam` inclut désormais le nombre de questions réelles générées
+- Le log `started_exam` inclut le nombre de questions réelles générées
 
 ---
 
