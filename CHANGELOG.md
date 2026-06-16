@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-06-16
+
+### Examen - choix du nombre de questions
+
+- Ajout d'un sélecteur "Nombre de questions" sur la page de démarrage de l'examen
+- Options prédéfinies : 5, 10, 20, 30, 50 (selon les items disponibles) + "Tout" (tous les items)
+- Le contrôleur limite automatiquement au nombre d'items du module
+- Le log `started_exam` inclut désormais le nombre de questions réelles générées
+
+---
+
 ## 2026-06-15
 
 ### Mode Anki - persistance et reprise de session
@@ -23,15 +34,13 @@
 - Correction condition du bouton reset : `$dueCount < $totalCount` incorrecte (masquait le bouton même avec de la progression), remplacée par `$newCount < $totalCount`
 - Correction barre de progression manquante après reprise : `session('learn_total', 0)` retourne `null` si la clé existe avec valeur `null` (le défaut PHP n'est pas utilisé dans ce cas), ajout d'un fallback `?? count($learn_remaining)`
 - Correction sélection de mode accidentelle : le formulaire pré-sélectionne désormais le mode de la session sauvegardée, évitant un basculement non voulu vers le mode aléatoire (sans barre de progression)
-- Correction barre de progression mode aléatoire bloquée à 0 : la barre affichait `mastered_count` (streak >= 3, nécessite 3 bonnes réponses consécutives) ; remplacée par `learned_count` (success_count > 0) qui progresse dès la première bonne réponse par item
-- Unification de la définition "maîtrisé" : un item est maîtrisé dès le premier "Je sais" (success_count > 0), appliqué à la fois sur la barre de progression en session et sur le compteur "Maîtrisés" de la page setup
-- Correction mapping question mode "Description -> Traduction" : pointait vers Q11 (name_alt -> function_text) au lieu de Q12 (function_text -> name_alt), la question affichait la traduction au lieu de la description
-- Correction sécurité resetProgress() : ajout vérification d'accès au module (seul le propriétaire ou un admin peut réinitialiser)
-- Correction session PHP résiduelle après reset : les clés de session Anki sont maintenant nettoyées lors du reset, évitant un état incohérent à la prochaine visite
+- Correction barre de progression mode aléatoire bloquée à 0 : la barre affichait `mastered_count` (streak >= 3) ; remplacée par `learned_count` (success_count > 0) qui progresse dès la première bonne réponse
+- Unification de la définition "maîtrisé" : un item est maîtrisé dès le premier "Je sais" (success_count > 0)
+- Correction mapping question mode "Description -> Traduction" : pointait vers Q11 au lieu de Q12
+- Correction sécurité resetProgress() : seul le propriétaire ou un admin peut réinitialiser
+- Correction session PHP résiduelle après reset : clés de session Anki nettoyées lors du reset
 - Reset redirige désormais vers la page Anki (setup) au lieu de la page module
-- Agrandissement du label de type de question sur la carte Anki (.7rem -> 1rem) pour tous les types (NOM, TRADUCTION, DÉFINITION, etc.)
-- Agrandissement du label "RÉPONSE" sur le verso de la carte (.7rem -> 1rem)
-- Agrandissement de la réponse traduction (name_alt) : 2.2rem au lieu de 1.4rem
+- Agrandissement des labels sur la carte Anki (.7rem -> 1rem)
 
 ## 2026-06-12 (suite 2)
 

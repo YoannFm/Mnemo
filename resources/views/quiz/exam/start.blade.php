@@ -84,7 +84,25 @@
                 <div class="card mb-4">
                     <div class="card-body p-3">
                         <label class="form-label fw-semibold" style="font-size:.85rem;">
-                            <i class="bi bi-ui-checks me-1" style="color:var(--accent);"></i>Nombre de réponses proposées
+                            <i class="bi bi-list-ol me-1" style="color:var(--accent);"></i>Nombre de questions
+                        </label>
+                        <select name="question_count" class="form-select">
+                            @foreach([5, 10, 20, 30, 50] as $n)
+                                @if($n <= $itemCount)
+                                    <option value="{{ $n }}" {{ $n === min(20, $itemCount) ? 'selected' : '' }}>{{ $n }} questions</option>
+                                @endif
+                            @endforeach
+                            <option value="{{ $itemCount }}" {{ !in_array($itemCount, [5,10,20,30,50]) || $itemCount <= 5 ? 'selected' : '' }}>
+                                Tout ({{ $itemCount }} items)
+                            </option>
+                        </select>
+                        <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
+                            Ce module a {{ $itemCount }} item{{ $itemCount > 1 ? 's' : '' }}.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
                         </label>
                         <select name="option_count" class="form-select">
                             @foreach([2,3,4,5,6,7,8] as $n)

@@ -31,13 +31,15 @@ class ExamController extends Controller
     {
         $this->authorize($module);
         $data = $request->validate([
-            'mode'         => 'required|string',
-            'option_count' => 'nullable|integer|min:2|max:8',
+            'mode'           => 'required|string',
+            'option_count'   => 'nullable|integer|min:2|max:8',
+            'question_count' => 'nullable|integer|min:1',
         ]);
         $mode = $data['mode'];
         $allItems = $module->items()->get();
         $itemCount = $allItems->count();
         $optionCount = min((int) ($data['option_count'] ?? 4), $itemCount);
+        $questionCount = min((int) ($data['question_count'] ?? $itemCount), $itemCount);
         $modeMap = [
             'photo_to_name_fr'    => ['Q1'],
             'photo_to_name_alt'    => ['Q8'],
@@ -57,8 +59,8 @@ class ExamController extends Controller
             'name_alt_to_audio'   => ['Q16'],
         ];
 
-        // Generate one question per item (shuffle items)
-        $items = $allItems->shuffle();
+        // Generate questions from a shuffled subset of items
+        $items = $allItems->shuffle()->take($questionCount);
         $questions = [];
         foreach ($items as $item) {
             if ($mode === 'random' || !isset($modeMap[$mode])) {
@@ -82,7 +84,7 @@ class ExamController extends Controller
             'exam_mode'      => $mode,
         ]);
 
-        LogHelper::log('started_exam', 'module', $module->id, ['mode' => $mode]);
+        LogHelper::log('started_exam', 'module', $module->id, ['mode' => $mode, 'question_count' => count($questions)]);
 
         return redirect()->route('exam.question', $module);
     }
