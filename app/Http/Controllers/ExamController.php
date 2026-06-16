@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Module;
 use App\Models\Score;
 use App\Models\SharedExam;
@@ -34,9 +35,9 @@ class ExamController extends Controller
             'option_count' => 'nullable|integer|min:2|max:8',
         ]);
         $mode = $data['mode'];
-        $optionCount = (int) ($data['option_count'] ?? 4);
-
         $allItems = $module->items()->get();
+        $itemCount = $allItems->count();
+        $optionCount = min((int) ($data['option_count'] ?? 4), $itemCount);
         $modeMap = [
             'photo_to_name_fr'    => ['Q1'],
             'photo_to_name_alt'    => ['Q8'],
@@ -50,6 +51,10 @@ class ExamController extends Controller
             'name_alt_to_photo'    => ['Q5'],
             'name_alt_to_function' => ['Q11'],
             'name_alt_to_name_fr'  => ['Q7'],
+            'audio_to_name_fr'    => ['Q13'],
+            'audio_to_name_alt'   => ['Q14'],
+            'name_fr_to_audio'    => ['Q15'],
+            'name_alt_to_audio'   => ['Q16'],
         ];
 
         // Generate one question per item (shuffle items)
@@ -57,12 +62,13 @@ class ExamController extends Controller
         $questions = [];
         foreach ($items as $item) {
             if ($mode === 'random' || !isset($modeMap[$mode])) {
-                $types = QuizGenerator::getQuestionTypes();
+                $mediaAnswerTypes = ['Q3', 'Q5', 'Q9', 'Q15', 'Q16'];
+                $types = array_values(array_diff(QuizGenerator::getQuestionTypes(), $mediaAnswerTypes));
             } else {
                 $types = $modeMap[$mode];
             }
             $questionType = $types[array_rand($types)];
-            $q = QuizGenerator::generateQuestion($module, $questionType, $item, [], $optionCount);
+            $q = QuizGenerator::generateQuestion($module, $questionType, $item, $types, $optionCount);
             if (!isset($q['error'])) {
                 $questions[] = $q;
             }
@@ -75,6 +81,8 @@ class ExamController extends Controller
             'exam_answers'   => [],
             'exam_mode'      => $mode,
         ]);
+
+        LogHelper::log('started_exam', 'module', $module->id, ['mode' => $mode]);
 
         return redirect()->route('exam.question', $module);
     }
@@ -113,6 +121,10 @@ class ExamController extends Controller
         $questions = session('exam_questions', []);
         $question = $questions[$current];
 
+        if (!isset($question['options'][$validated['answer']])) {
+            return back()->with('error', 'Réponse invalide.');
+        }
+
         $isCorrect = QuizGenerator::validateAnswer($question, $validated['answer']);
         $answers = session('exam_answers', []);
         $answers[$current] = [
@@ -138,14 +150,19 @@ class ExamController extends Controller
         }
 
         $answers = session('exam_answers', []);
+        if (empty($answers)) {
+            return redirect()->route('modules.show', $module);
+        }
         $total   = count($answers);
         $score   = collect($answers)->where('is_correct', true)->count();
         $percentage = $total > 0 ? (int) round(($score / $total) * 100) : 0;
 
-        // Vider la session avant de créer le score pour éviter les doublons sur rechargement
         session()->forget(['exam_module_id', 'exam_questions', 'exam_current', 'exam_answers', 'exam_mode']);
 
-        Score::create(['user_id' => Auth::id(), 'module_id' => $module->id, 'score' => $score, 'total' => $total]);
+        if (Auth::check()) {
+            Score::create(['user_id' => Auth::id(), 'module_id' => $module->id, 'score' => $score, 'total' => $total, 'mode' => 'exam']);
+            LogHelper::log('completed_exam', 'module', $module->id, ['score' => $score, 'total' => $total, 'percentage' => $percentage]);
+        }
 
         return view('quiz.exam.result', compact('module', 'score', 'total', 'percentage', 'answers'));
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Module;
 use App\Models\Progress;
 use App\Models\Score;
@@ -31,13 +32,14 @@ class TestController extends Controller
         $this->authorize($module);
 
         // Vérifier qu'il y a au moins des items
-        if ($module->items()->count() === 0) {
+        $itemCount = $module->items()->count();
+        if ($itemCount === 0) {
             return redirect()
                 ->route('modules.show', $module)
                 ->with('error', 'Vous devez d\'abord ajouter des items au module.');
         }
 
-        return view('quiz.test.start', compact('module'));
+        return view('quiz.test.start', compact('module', 'itemCount'));
     }
 
     /**
@@ -55,11 +57,11 @@ class TestController extends Controller
         ]);
         $questionCount = $validated['question_count'];
         $mode = $validated['mode'] ?? 'random';
-        $optionCount = (int) ($validated['option_count'] ?? 4);
 
         // Limiter au nombre d'items du module
         $itemCount = $module->items()->count();
         $questionCount = min($questionCount, $itemCount);
+        $optionCount = min((int) ($validated['option_count'] ?? 4), $itemCount);
 
         // Initialiser la session du test
         session([
@@ -72,6 +74,8 @@ class TestController extends Controller
             'test_answers'        => [],
             'test_questions'      => [],
         ]);
+
+        LogHelper::log('started_test', 'module', $module->id, ['question_count' => $questionCount, 'mode' => $mode]);
 
         return redirect()->route('test.question', $module);
     }
@@ -119,9 +123,12 @@ class TestController extends Controller
                 'name_fr_to_audio'    => ['Q15'],
                 'name_alt_to_audio'   => ['Q16'],
             ];
-            $types = ($mode !== 'random' && isset($modeMap[$mode]))
-                ? $modeMap[$mode]
-                : QuizGenerator::getQuestionTypes();
+            if ($mode === 'random' || !isset($modeMap[$mode])) {
+                $mediaAnswerTypes = ['Q3', 'Q5', 'Q9', 'Q15', 'Q16'];
+                $types = array_values(array_diff(QuizGenerator::getQuestionTypes(), $mediaAnswerTypes));
+            } else {
+                $types = $modeMap[$mode];
+            }
             $questionType = $types[array_rand($types)];
 
             // Pré-filtrer les items qui ont le champ d'entrée requis par le type choisi
@@ -169,6 +176,10 @@ class TestController extends Controller
         $currentIndex = session('test_current');
         $questions = session('test_questions');
         $question = $questions[$currentIndex];
+
+        if (!isset($question['options'][$userAnswer])) {
+            return back()->with('error', 'Réponse invalide.');
+        }
 
         // Valider la réponse
         $isCorrect = QuizGenerator::validateAnswer($question, $userAnswer);
@@ -234,12 +245,16 @@ class TestController extends Controller
         $answers = session('test_answers', []);
 
         // Enregistrer le score en base
-        Score::create([
-            'user_id'   => Auth::id(),
-            'module_id' => $module->id,
-            'score'     => $score,
-            'total'     => $total,
-        ]);
+        if (Auth::check()) {
+            Score::create([
+                'user_id'   => Auth::id(),
+                'module_id' => $module->id,
+                'score'     => $score,
+                'total'     => $total,
+                'mode'      => 'test',
+            ]);
+            LogHelper::log('completed_test', 'module', $module->id, ['score' => $score, 'total' => $total, 'percentage' => $total > 0 ? (int) round(($score / $total) * 100) : 0]);
+        }
 
         // Nettoyer la session du test
         session()->forget(['test_module_id', 'test_mode', 'test_option_count', 'test_question_count', 'test_current', 'test_score', 'test_answers', 'test_questions']);

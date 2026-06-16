@@ -30,12 +30,6 @@
                         @endif
                     </div>
 
-                    @if (session('error'))
-                    <div class="alert alert-warning" style="font-size:.875rem;">
-                        <i class="bi bi-exclamation-triangle me-1"></i>{{ session('error') }}
-                    </div>
-                @endif
-
                     @php
                         $attemptsDone = $sharedExam->attempts()->where('user_id', Auth::id())->count();
                         $attemptsLeft = $sharedExam->max_attempts - $attemptsDone;

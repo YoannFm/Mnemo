@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -28,11 +29,13 @@ class GroupController extends Controller
             'description' => 'nullable|string|max:1000',
         ]);
 
-        Group::create([
+        $group = Group::create([
             'owner_id'    => Auth::id(),
             'name'        => $validated['name'],
             'description' => $validated['description'] ?? null,
         ]);
+
+        LogHelper::log('created_group', 'group', $group->id, ['name' => $group->name]);
 
         return redirect()->route('groups.index')->with('success', 'Groupe créé.');
     }
@@ -55,6 +58,8 @@ class GroupController extends Controller
             abort(403);
         }
 
+        LogHelper::log('deleted_group', 'group', $group->id, ['name' => $group->name], 'warning');
+
         $group->delete();
 
         return redirect()->route('groups.index')->with('success', 'Groupe supprimé.');
@@ -75,6 +80,8 @@ class GroupController extends Controller
 
         $group->members()->attach($user->id, ['joined_at' => now()]);
 
+        LogHelper::log('added_group_member', 'group', $group->id, ['user_id' => $user->id]);
+
         return back()->with('success', $user->name . ' ajouté au groupe.');
     }
 
@@ -85,6 +92,8 @@ class GroupController extends Controller
         }
 
         $group->members()->detach($user->id);
+
+        LogHelper::log('removed_group_member', 'group', $group->id, ['user_id' => $user->id], 'warning');
 
         return back()->with('success', 'Membre retiré du groupe.');
     }

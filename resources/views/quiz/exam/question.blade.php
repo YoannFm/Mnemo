@@ -82,6 +82,14 @@
     </div>
     <script>
     function setZoomImage(src) { document.getElementById('zoom-img').src = src; document.getElementById('zoom-modal').style.display = 'flex'; }
+
+    document.querySelectorAll('.quiz-option').forEach(label => {
+        label.addEventListener('click', function() {
+            document.querySelectorAll('.quiz-option').forEach(l => l.style.borderColor = 'var(--card-border)');
+            this.style.borderColor = 'var(--accent)';
+        });
+    });
+
     var keyMap = {'1':0,'&':0,'2':1,'é':1,'"':2,'3':2,"'":3,'4':3};
     document.addEventListener('keydown', function(e) {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;

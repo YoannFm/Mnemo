@@ -23,6 +23,17 @@
                 <div class="progress-bar" style="width:{{ $pct }}%;background:var(--accent);"></div>
             </div>
         </div>
+    @elseif(isset($question['total_count']) && $question['total_count'] > 0)
+        @php $pct = round($question['learned_count'] / $question['total_count'] * 100); @endphp
+        <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1" style="font-size:.78rem;color:var(--text-muted);">
+                <span><i class="bi bi-check-circle me-1"></i>Maîtrisés</span>
+                <span>{{ $question['learned_count'] }} / {{ $question['total_count'] }}</span>
+            </div>
+            <div class="progress" style="height:6px;">
+                <div class="progress-bar" style="width:{{ $pct }}%;background:#22c55e;"></div>
+            </div>
+        </div>
     @endif
 
     {{-- Stats --}}
@@ -51,7 +62,7 @@
 
             {{-- Recto : question --}}
             <div id="side-question" style="width:100%;text-align:center;">
-                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:1rem;">
+                <div style="font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);margin-bottom:1rem;">
                     <i class="bi bi-question-circle me-1"></i>{{ $question['question_text'] }}
                 </div>
                 @if ($question['field_question'] === 'photo_path')
@@ -78,7 +89,7 @@
 
             {{-- Verso : réponse (caché au départ) --}}
             <div id="side-answer" style="display:none;width:100%;text-align:center;">
-                <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:1rem;">
+                <div style="font-size:1rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:1rem;">
                     <i class="bi bi-lightbulb me-1"></i>Réponse
                 </div>
                 @if ($question['field_answer'] === 'photo_path')
@@ -93,6 +104,10 @@
                 @elseif ($question['field_answer'] === 'audio_path')
                     <audio controls autoplay src="{{ $question['correct_answer'] }}"
                            style="width:100%;max-width:400px;border-radius:8px;" onclick="event.stopPropagation()"></audio>
+                @elseif ($question['field_answer'] === 'name_alt')
+                    <div style="font-size:2.2rem;font-weight:700;color:var(--accent);padding:.5rem 0;line-height:1.2;">
+                        {{ $question['correct_answer'] }}
+                    </div>
                 @else
                     <div style="font-size:1.4rem;font-weight:600;color:var(--accent);padding:.5rem 0;">
                         {{ $question['correct_answer'] }}

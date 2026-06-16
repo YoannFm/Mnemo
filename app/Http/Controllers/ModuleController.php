@@ -12,6 +12,7 @@ use App\Models\ModuleRatingReply;
 use App\Models\ModuleRatingReplyReport;
 use App\Models\ModuleRatingReport;
 use App\Models\ModuleReport;
+use App\Models\AnkiSession;
 use App\Models\Mute;
 use App\Models\Progress;
 use App\Models\UserNotification;
@@ -221,6 +222,12 @@ class ModuleController extends Controller
         $oldOwnerId = $module->owner_id;
         $newOwnerId = $module->owner_id;
 
+        $old = [
+            'title'       => $module->title,
+            'description' => $module->description,
+            'is_public'   => $module->is_public,
+        ];
+
         if (!empty($validated['new_owner_email'])) {
             $newOwner = \App\Models\User::where('email', $validated['new_owner_email'])->first();
             if ($newOwner->id === $module->owner_id) {
@@ -242,6 +249,12 @@ class ModuleController extends Controller
             'field_audio'       => $fieldAudio,
         ]);
 
+        $new = [
+            'title'       => $module->title,
+            'description' => $module->description,
+            'is_public'   => $module->is_public,
+        ];
+
         if ($newOwnerId !== $oldOwnerId) {
             LogHelper::log('transferred_module', 'module', $module->id, [
                 'from_user_id'  => $oldOwnerId,
@@ -256,7 +269,7 @@ class ModuleController extends Controller
                 'type'    => 'info',
             ]);
         } else {
-            LogHelper::log('updated_module', 'module', $module->id, ['title' => $module->title]);
+            LogHelper::log('updated_module', 'module', $module->id, [], 'info', json_encode($old), json_encode($new));
         }
 
         return redirect()->route('modules.show', $module)
@@ -357,13 +370,32 @@ class ModuleController extends Controller
 
     public function resetProgress(Module $module)
     {
+        if (!$module->is_public && $module->owner_id !== Auth::id() && !Auth::user()?->is_admin) {
+            abort(403);
+        }
+
         $itemIds = $module->items()->pluck('id');
 
         Progress::where('user_id', Auth::id())
             ->whereIn('item_id', $itemIds)
             ->delete();
 
-        return redirect()->route('modules.show', $module)
+        AnkiSession::where('user_id', Auth::id())
+            ->where('module_id', $module->id)
+            ->delete();
+
+        // Nettoyer la session PHP pour eviter un etat residuel
+        if (session('anki_module_id') === $module->id) {
+            session()->forget([
+                'anki_module_id', 'anki_mode', 'anki_learn_mode',
+                'anki_learn_remaining', 'anki_learn_total',
+                'anki_session_correct', 'anki_session_wrong', 'anki_session_streak',
+            ]);
+        }
+
+        LogHelper::log('reset_progress', 'module', $module->id, ['module_title' => $module->title], 'warning');
+
+        return redirect()->route('anki.show', $module)
             ->with('success', 'Progression réinitialisée.');
     }
 
@@ -457,6 +489,8 @@ class ModuleController extends Controller
             'note'      => $validated['note'] ?? null,
             'status'    => 'pending',
         ]);
+
+        LogHelper::log('reported_module', 'module', $module->id);
 
         return response()->json(['status' => 'ok']);
     }

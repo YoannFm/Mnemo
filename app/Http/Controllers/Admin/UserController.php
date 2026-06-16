@@ -85,6 +85,8 @@ class UserController extends Controller
             'role_id'  => 'nullable|exists:roles,id',
         ]);
 
+        $old = ['name' => $user->name, 'email' => $user->email, 'role_id' => $user->role_id];
+
         $user->name  = $data['name'];
         $user->email = $data['email'];
 
@@ -100,7 +102,9 @@ class UserController extends Controller
 
         $user->save();
 
-        LogHelper::log('admin_updated_user', 'user', $user->id, ['name' => $user->name]);
+        $new = ['name' => $user->name, 'email' => $user->email, 'role_id' => $user->role_id];
+
+        LogHelper::log('admin_updated_user', 'user', $user->id, [], 'info', json_encode($old), json_encode($new));
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur ' . $user->name . ' mis a jour.');
@@ -202,15 +206,6 @@ class UserController extends Controller
 
     public function exportAll()
     {
-        $users = User::with([
-            'role',
-            'modules.items',
-            'progresses',
-            'scores',
-            'bans',
-            'userNotifications',
-        ])->get();
-
         $zip = new \ZipArchive();
         $zipPath = storage_path('app/tmp_export_users_' . time() . '.zip');
         $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
@@ -219,6 +214,14 @@ class UserController extends Controller
             ->get()
             ->groupBy('user_id');
 
+        User::with([
+            'role',
+            'modules.items',
+            'progresses',
+            'scores',
+            'bans',
+            'userNotifications',
+        ])->chunk(100, function ($users) use ($zip, $allLogs) {
         foreach ($users as $user) {
             $userLogs = ($allLogs[$user->id] ?? collect())->map(fn ($l) => [
                 'date'        => $l->created_at?->format('d/m/Y H:i'),
@@ -269,6 +272,7 @@ class UserController extends Controller
                 json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
             );
         }
+        }); // end chunk
 
         $zip->close();
 

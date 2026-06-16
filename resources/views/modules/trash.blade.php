@@ -15,13 +15,6 @@
         </a>
     </div>
 
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
     @if ($modules->isEmpty())
         <div class="card text-center py-5">
             <i class="bi bi-trash" style="font-size:3.5rem;color:var(--text-muted);"></i>

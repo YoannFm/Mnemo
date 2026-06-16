@@ -1,5 +1,141 @@
 # Changelog
 
+## 2026-06-15
+
+### Mode Anki - persistance et reprise de session
+
+**Fonctionnalité principale**
+- Nouvelle table `anki_sessions` (migration) : persiste le mode choisi et la liste d'items restants en mode apprentissage
+- La session Anki survit à la fermeture du navigateur ou à l'expiration de session PHP
+- Restauration automatique depuis la DB quand la session PHP est absente ou expirée
+- Page setup : section "Session en pause" avec bouton "Reprendre", mode actif, avancement et date de dernière activité
+- Page setup : statistiques de progression (A réviser / Maîtrisés / Total)
+- Page setup : bouton "Remettre à zéro" directement accessible, connecté au reset existant (efface progression ET session sauvegardée)
+- Mode aléatoire : les items maîtrisés ET non-dus sont exclus du pool (au lieu d'un simple poids faible)
+- Quand tous les items sont maîtrisés et non-dus : redirection vers la page setup avec message approprié
+- `quit()` sauvegarde l'état courant avant de vider la session PHP, redirige vers la page setup
+- `ModuleController::resetProgress()` efface aussi l'`AnkiSession` associée
+- `submit()` synchronise `learn_remaining` en DB à chaque bonne réponse en mode apprentissage
+- Fin de mode apprentissage : suppression de l'`AnkiSession` DB pour repartir proprement
+
+**Corrections post-déploiement**
+- Correction 405 Method Not Allowed : formulaire de reset imbriqué dans le formulaire principal (HTML invalide), déplacé hors du formulaire
+- Correction condition du bouton reset : `$dueCount < $totalCount` incorrecte (masquait le bouton même avec de la progression), remplacée par `$newCount < $totalCount`
+- Correction barre de progression manquante après reprise : `session('learn_total', 0)` retourne `null` si la clé existe avec valeur `null` (le défaut PHP n'est pas utilisé dans ce cas), ajout d'un fallback `?? count($learn_remaining)`
+- Correction sélection de mode accidentelle : le formulaire pré-sélectionne désormais le mode de la session sauvegardée, évitant un basculement non voulu vers le mode aléatoire (sans barre de progression)
+- Correction barre de progression mode aléatoire bloquée à 0 : la barre affichait `mastered_count` (streak >= 3, nécessite 3 bonnes réponses consécutives) ; remplacée par `learned_count` (success_count > 0) qui progresse dès la première bonne réponse par item
+- Unification de la définition "maîtrisé" : un item est maîtrisé dès le premier "Je sais" (success_count > 0), appliqué à la fois sur la barre de progression en session et sur le compteur "Maîtrisés" de la page setup
+- Correction mapping question mode "Description -> Traduction" : pointait vers Q11 (name_alt -> function_text) au lieu de Q12 (function_text -> name_alt), la question affichait la traduction au lieu de la description
+- Correction sécurité resetProgress() : ajout vérification d'accès au module (seul le propriétaire ou un admin peut réinitialiser)
+- Correction session PHP résiduelle après reset : les clés de session Anki sont maintenant nettoyées lors du reset, évitant un état incohérent à la prochaine visite
+- Reset redirige désormais vers la page Anki (setup) au lieu de la page module
+- Agrandissement du label de type de question sur la carte Anki (.7rem -> 1rem) pour tous les types (NOM, TRADUCTION, DÉFINITION, etc.)
+- Agrandissement du label "RÉPONSE" sur le verso de la carte (.7rem -> 1rem)
+- Agrandissement de la réponse traduction (name_alt) : 2.2rem au lieu de 1.4rem
+
+## 2026-06-12 (suite 2)
+
+### Export des logs - structure ZIP ameliorée
+
+- L'archive exportée contient désormais un dossier `logs/` structuré :
+  - `logs/latest.csv` ou `logs/latest.json` : données d'activité
+  - `logs/files/` : fichiers liés aux actions loggées (archives de mises à jour, sauvegardes)
+- Les fichiers présents dans `storage/app/updates/` et `storage/app/backups/` sont automatiquement inclus dans `logs/files/`
+
+---
+
+## 2026-06-12 (suite)
+
+### Audit du code - second passage
+
+Réalisation d'un second audit. Découverte des problèmes suivants :
+
+- 11 vues affichaient les notifications flash en double (le layout les affiche déjà)
+- Nombreuses actions non loggées : Anki, Test, Exam, Group, 2FA, export/import module, reset progression, reset mdp, vérification email, toutes les actions admin Update
+- La vue de détail d'un log (oeil) n'avait pas d'état avant/après sur les modifications de modules, items et utilisateurs
+- Mode examen : l'option sélectionnée ne montrait pas de contour visible au clic
+- Mode examen : demander 8 réponses avec moins de 8 items provoquait un comportement incorrect
+- Sécurité : `item_id` dans Anki non vérifié contre le module courant
+- Sécurité : valeurs `.env` non échappées avant écriture (risque d'injection)
+- Diverses actions non sécurisées ou mal ordonnées (log après logout, index option non vérifié, etc.)
+- Pas de moyen d'exporter les logs
+
+### Corrections et améliorations
+
+**Interface admin**
+- Header horizontal : espace ajouté entre icône et texte sur Support/Documentation
+- Header horizontal : bouton retour au site supprimé
+- Header horizontal : bouton soleil/lune déplacé juste avant le menu utilisateur, sans encadré
+- Ordre des boutons de mode inversé sur la page module : Anki en premier, puis Test
+
+**Logs d'activité - actions ajoutées**
+- Anki : `started_anki`, `completed_anki`, `started_anki_review`
+- Test : `started_test`
+- Examen : `started_exam`
+- Groupes : `created_group`, `deleted_group`, `added_group_member`, `removed_group_member`
+- Modules : `reset_progress`, `reported_module`, `exported_module`, `imported_module`
+- Profil : `2fa_enabled`, `2fa_disabled`
+- Auth : `password_reset`, `email_verified`
+- Admin Update : `downloaded_update`, `installed_update`, `backup_database`, `backup_files`
+
+**Logs d'activité - état avant/après**
+- `updated_module` : capture l'état du module avant et après modification
+- `updated_item` : capture l'état de l'item avant et après modification
+- `admin_updated_user` : capture l'état de l'utilisateur avant et après modification
+
+**Export des logs**
+- Bouton "Exporter (ZIP)" sur la page admin des logs
+- Modal avec sélecteur de format (CSV ou JSON) et champ mot de passe admin
+- Vérification du mot de passe côté serveur avant tout export
+- Téléchargement en archive `.zip`, pas de fichier temporaire laissé sur le serveur
+- L'export lui-même est loggé (`exported_logs`)
+
+**Corrections bugs**
+- Examen : contour de sélection désormais visible au clic (JS manquant)
+- Examen : nombre d'options plafonné automatiquement au nombre d'items disponibles
+- Examen/Test : information affichée dans le formulaire sur le nombre d'items requis
+- Double notifications flash supprimées dans 11 vues
+
+---
+
+## 2026-06-12
+
+### Audit du code
+
+Réalisation d'un audit complet du projet. Découverte des problèmes suivants :
+
+- Logs d'activité : `created_at` absent du `$fillable` - tous les logs s'inséraient sans date et disparaissaient de l'interface admin
+- `GuestExamController` : validation `max:3` bloquait les réponses 4-7 quand l'examen avait plus de 4 options
+- `ExamController` : `allowedTypes = []` transmis à `generateQuestion` - le mode sélectionné était ignoré, n'importe quelle question pouvait sortir
+- `ExamController` : rechargement de la page résultat créait un score `0/0` en base
+- `ExamController` : modeMap sans les 4 modes audio (Q13-Q16) - sélection silencieuse d'un mode aléatoire
+- `TestController` : mode aléatoire pouvait générer des questions avec photo/audio comme réponse, l'interface n'étant pas prévue pour ça
+- `TestController` / `ExamController` : `Score::create` exécuté sans vérifier l'authentification - insert avec `user_id = null` possible
+- `QuizGenerator` : flags `field_photo`, `field_audio`, `field_function` du module jamais vérifiés - types incompatibles toujours dans le pool
+- `Score` : pas de casts, impossible de distinguer un score de test d'un score d'examen
+- `Item` : pas de `SoftDeletes` contrairement à `Module` - progressions orphelines à la suppression d'un item
+- Vue `exam/start` : pas de filtrage par champs actifs du module, modes audio absents
+
+### Corrections apportées
+
+- **Logs d'activité** : ajout de `created_at` dans `$fillable` de `ActivityLog` - les logs s'enregistrent à nouveau correctement ; ajout des événements `completed_test` et `completed_exam`
+- **GuestExamController** : validation corrigée `max:3` - `max:7`
+- **ExamController** : `$types` correctement transmis à `generateQuestion` comme `allowedTypes`
+- **ExamController** : vérification que `$answers` n'est pas vide avant de purger la session et d'enregistrer le score
+- **ExamController** : modeMap complété avec `audio_to_name_fr`, `audio_to_name_alt`, `name_fr_to_audio`, `name_alt_to_audio`
+- **TestController** : exclusion de Q3/Q5/Q9/Q15/Q16 (photo/audio en réponse) du pool aléatoire
+- **TestController** / **ExamController** : `Score::create` et `LogHelper::log` protégés par `Auth::check()`
+- **QuizGenerator** : filtrage des types selon les flags `field_photo`, `field_audio`, `field_function` du module ; PHPDocs mis à jour (Q1-Q4 - Q1-Q16, index 0-2 - index 0-7)
+- **Score** : ajout des casts `integer`, ajout du champ `mode` (`test` / `exam`) + migration
+- **Item** : ajout de `SoftDeletes` + migration *(nécessite `php artisan migrate` sur le serveur)*
+- **Vue exam/start** : options de mode filtrées par champs actifs du module, modes audio ajoutés
+
+### Nouvelles fonctionnalités
+
+- **Bouton dupliquer sur la page module** : le propriétaire peut désormais dupliquer un module directement depuis sa page de détail, y compris les modules privés. Les autres utilisateurs connectés voient également le bouton si la duplication est autorisée sur ce module.
+
+---
+
 ## 2026-06-09 (suite 3)
 
 ### Plugins
@@ -16,7 +152,7 @@
 - **Feature flags** : page admin `/admin/settings/features` pour activer/désactiver chaque fonctionnalité avec description détaillée
 - **Raccourcis AZERTY** : touches `&` `é` `"` `'` en plus de `1` `2` `3` `4` dans tous les modes (Test, Anki, Examen)
 - **Q12** : 12ème type de question ajouté (Description → Traduction), couvrant toutes les combinaisons possibles
-- **Libellés de questions** : labels courts (1 mot) pour les 12 types — Identification, Traduction, Reconnaissance, Correspondance, Définition, etc.
+- **Libellés de questions** : labels courts (1 mot) pour les 12 types : Identification, Traduction, Reconnaissance, Correspondance, Définition, etc.
 
 ### Modifications
 

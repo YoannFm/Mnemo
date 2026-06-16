@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\LogHelper;
 use App\Models\Module;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -66,6 +67,8 @@ class ModuleExportController extends Controller
         $zip->close();
 
         $zipName = Str::slug($module->title) . '-mnemo.zip';
+
+        LogHelper::log('exported_module', 'module', $module->id, ['title' => $module->title]);
 
         return response()->download($tmpZip, $zipName)->deleteFileAfterSend(true);
     }
@@ -170,6 +173,8 @@ class ModuleExportController extends Controller
         }
 
         $this->cleanDir($tmpDir);
+
+        LogHelper::log('imported_module', 'module', $module->id, ['title' => $module->title]);
 
         return redirect()->route('modules.show', $module)
             ->with('success', "Module importé avec {$count} item(s).");

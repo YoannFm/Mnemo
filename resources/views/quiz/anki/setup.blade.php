@@ -19,11 +19,86 @@
             <div class="mb-4">
                 <h4 class="mb-1">Mode Anki</h4>
                 <p style="color:var(--text-muted);font-size:.875rem;">
-                    Choisissez comment vous voulez vous entraîner sur <strong>{{ $module->title }}</strong>.
+                    Mémorisation par répétition espacée sur <strong>{{ $module->title }}</strong>.
                 </p>
             </div>
 
-            <form method="POST" action="{{ route('anki.start', $module) }}" id="anki-form">
+            {{-- Stats de progression --}}
+            <div class="row g-2 mb-4 text-center">
+                <div class="col-4">
+                    <div class="card h-100 py-3">
+                        <div class="fs-4 fw-bold" style="color:var(--accent);">{{ $dueCount }}</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">A réviser</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card h-100 py-3">
+                        <div class="fs-4 fw-bold text-success">{{ $masteredCount }}</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Maîtrisés</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="card h-100 py-3">
+                        <div class="fs-4 fw-bold">{{ $totalCount }}</div>
+                        <div style="font-size:.75rem;color:var(--text-muted);">Total</div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Section Reprendre si session existante --}}
+            @if($ankiSession)
+            @php
+                $modeLabels = [
+                    'random'               => 'Aléatoire',
+                    'photo_to_name_fr'     => 'Photo -> Nom',
+                    'photo_to_name_alt'    => 'Photo -> Traduction',
+                    'photo_to_function'    => 'Photo -> Description',
+                    'function_to_photo'    => 'Description -> Photo',
+                    'function_to_name_fr'  => 'Description -> Nom',
+                    'function_to_name_alt' => 'Description -> Traduction',
+                    'name_fr_to_name_alt'  => 'Nom -> Traduction',
+                    'name_fr_to_photo'     => 'Nom -> Photo',
+                    'name_fr_to_function'  => 'Nom -> Description',
+                    'name_alt_to_photo'    => 'Traduction -> Photo',
+                    'name_alt_to_function' => 'Traduction -> Description',
+                    'name_alt_to_name_fr'  => 'Traduction -> Nom',
+                    'audio_to_name_fr'     => 'Son -> Nom',
+                    'audio_to_name_alt'    => 'Son -> Traduction',
+                    'name_fr_to_audio'     => 'Nom -> Son',
+                    'name_alt_to_audio'    => 'Traduction -> Son',
+                ];
+                $modeLabel = $modeLabels[$ankiSession->mode] ?? $ankiSession->mode;
+            @endphp
+            <div class="card mb-4" style="border:1px solid var(--accent);">
+                <div class="card-body p-3">
+                    <div class="fw-semibold mb-1" style="color:var(--accent);">
+                        <i class="bi bi-arrow-clockwise me-1"></i> Session en pause
+                    </div>
+                    <p class="mb-1" style="font-size:.85rem;color:var(--text-muted);">
+                        Mode : <strong>{{ $modeLabel }}</strong>
+                        @if($ankiSession->isLearnMode() && $ankiSession->learn_total)
+                            &middot; {{ count($ankiSession->learn_remaining ?? []) }} / {{ $ankiSession->learn_total }} items restants
+                        @endif
+                    </p>
+                    <p class="mb-2" style="font-size:.8rem;color:var(--text-muted);">
+                        Derniere activite : {{ $ankiSession->updated_at->diffForHumans() }}
+                    </p>
+                    <a href="{{ route('anki.question', $module) }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-play-fill me-1"></i>Reprendre
+                    </a>
+                </div>
+            </div>
+            @endif
+
+            {{-- Formulaire nouvelle session --}}
+            <div class="mb-2">
+                <h6 class="fw-semibold" style="font-size:.85rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">
+                    {{ $ankiSession ? 'Nouvelle session' : 'Démarrer' }}
+                </h6>
+            </div>
+
+            <form method="POST" action="{{ route('anki.start', $module) }}" id="anki-form"
+                  data-saved-mode="{{ $ankiSession?->mode ?? 'random' }}">
                 @csrf
                 <input type="hidden" name="mode" id="mode-value" value="random">
 
@@ -89,7 +164,6 @@
                         <i class="bi bi-exclamation-triangle me-1"></i> L'entrée et la sortie doivent être différentes.
                     </div>
 
-                    {{-- Info mode apprentissage --}}
                     <div class="card mb-2" style="border:1px solid var(--card-border);">
                         <div class="card-body p-3">
                             <div class="fw-semibold mb-1" style="font-size:.85rem;color:var(--accent);">
@@ -103,32 +177,45 @@
                     </div>
                 </div>
 
-                <div class="d-flex gap-2 mt-4">
+                <div class="d-flex gap-2 mt-4 align-items-center flex-wrap">
                     <a href="{{ route('modules.show', $module) }}" class="btn btn-sm" style="color:var(--text-muted);border:1px solid var(--card-border);">
                         Annuler
                     </a>
                     <button type="submit" class="btn btn-primary" id="start-btn">
-                        <i class="bi bi-play-fill me-1"></i>Commencer
+                        <i class="bi bi-play-fill me-1"></i>
+                        {{ $ankiSession ? 'Recommencer' : 'Commencer' }}
                     </button>
                 </div>
             </form>
+
+            {{-- Reset progression (hors du formulaire principal pour eviter l'imbrication) --}}
+            @if($newCount < $totalCount)
+            <form method="POST" action="{{ route('modules.progress.reset', $module) }}" class="mt-3"
+                  onsubmit="return confirm('Réinitialiser toute votre progression sur ce module ? Cette action est irréversible.');">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-sm" style="color:var(--danger, #dc3545);border:1px solid var(--danger, #dc3545);">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Remettre à zéro
+                </button>
+            </form>
+            @endif
 
         </div>
     </div>
 
     <script>
     var modeMap = {
-        'photo_path|name_fr':      'photo_to_name_fr',
-        'photo_path|name_alt':     'photo_to_name_alt',
-        'photo_path|function_text':'photo_to_function',
-        'audio_path|name_fr':      'audio_to_name_fr',
-        'audio_path|name_alt':     'audio_to_name_alt',
-        'name_fr|name_alt':        'name_fr_to_name_alt',
-        'name_fr|function_text':   'name_fr_to_function',
-        'name_alt|name_fr':        'name_alt_to_name_fr',
-        'name_alt|function_text':  'name_alt_to_function',
-        'function_text|name_fr':   'function_to_name_fr',
-        'function_text|name_alt':  'function_to_name_alt',
+        'photo_path|name_fr':       'photo_to_name_fr',
+        'photo_path|name_alt':      'photo_to_name_alt',
+        'photo_path|function_text': 'photo_to_function',
+        'audio_path|name_fr':       'audio_to_name_fr',
+        'audio_path|name_alt':      'audio_to_name_alt',
+        'name_fr|name_alt':         'name_fr_to_name_alt',
+        'name_fr|function_text':    'name_fr_to_function',
+        'name_alt|name_fr':         'name_alt_to_name_fr',
+        'name_alt|function_text':   'name_alt_to_function',
+        'function_text|name_fr':    'function_to_name_fr',
+        'function_text|name_alt':   'function_to_name_alt',
     };
 
     var randomToggle = document.getElementById('random-toggle');
@@ -159,6 +246,18 @@
             invalidCombo.classList.add('d-none');
             startBtn.disabled = false;
             modeValue.value = modeMap[inp + '|' + out] || 'random';
+        }
+    }
+
+    // Pré-sélectionner le mode de la session sauvegardée
+    var savedMode = document.getElementById('anki-form').dataset.savedMode;
+    if (savedMode && savedMode !== 'random') {
+        var modeEntry = Object.entries(modeMap).find(function(e) { return e[1] === savedMode; });
+        if (modeEntry) {
+            var parts = modeEntry[0].split('|');
+            randomToggle.checked = false;
+            if (inputField.querySelector('option[value="' + parts[0] + '"]')) inputField.value = parts[0];
+            if (outputField.querySelector('option[value="' + parts[1] + '"]')) outputField.value = parts[1];
         }
     }
 

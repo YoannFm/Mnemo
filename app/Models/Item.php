@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Modèle représentant un item à mémoriser.
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  */
 class Item extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /**
      * Champs que l'on peut assigner en masse.

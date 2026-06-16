@@ -8,6 +8,9 @@
                     @csrf @method('DELETE')
                     <button type="submit" class="btn btn-warning btn-sm"><i class="bi bi-trash"></i> Purger &gt; 30 jours</button>
                 </form>
+                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#exportLogsModal">
+                    <i class="bi bi-file-earmark-zip me-1"></i>Exporter (ZIP)
+                </button>
             </div>
         </div>
         <div class="card-body">
@@ -122,3 +125,46 @@
         </div>
     </div>
 </x-admin-layout>
+
+{{-- Modal export logs --}}
+<div class="modal fade" id="exportLogsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" action="{{ route('admin.logs.export') }}">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-file-earmark-zip me-2"></i>Exporter les logs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Format</label>
+                        <select name="format" class="form-select">
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mot de passe admin</label>
+                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Votre mot de passe" required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-download me-1"></i>Télécharger</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if($errors->has('password'))
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    new bootstrap.Modal(document.getElementById('exportLogsModal')).show();
+});
+</script>
+@endif

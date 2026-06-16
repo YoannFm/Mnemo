@@ -259,22 +259,21 @@
                 </a>
 
                 <div class="navbar-collapse collapse">
-                    <div class="d-flex align-items-center gap-1">
+                    <div class="d-flex align-items-center gap-2">
                         <a href="https://discord.gg/HtjPAfqUXu" class="btn btn-outline-primary btn-sm d-none d-sm-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <i class="bi bi-question-circle"></i> <span class="d-none d-md-inline">Support</span>
+                            <i class="bi bi-question-circle me-1"></i><span class="d-none d-md-inline">Support</span>
                         </a>
                         <a href="https://wiki.novadev.ovh" class="btn btn-outline-info btn-sm d-none d-sm-inline-flex" target="_blank" rel="noopener noreferrer">
-                            <i class="bi bi-book"></i> <span class="d-none d-md-inline">Documentation</span>
+                            <i class="bi bi-book me-1"></i><span class="d-none d-md-inline">Documentation</span>
                         </a>
-                        <a href="{{ route('dashboard') }}" class="btn btn-outline-secondary btn-sm mx-1" title="Retour au site">
-                            <i class="bi bi-arrow-left"></i>
-                        </a>
-                        <button id="admin-theme-toggle" class="btn btn-outline-secondary btn-sm mx-1" title="Changer le theme" aria-label="Basculer theme clair/sombre">
-                            <i class="bi bi-moon-fill"></i>
-                        </button>
                     </div>
 
                     <ul class="navbar-nav navbar-align">
+                        <li class="nav-item">
+                            <button id="admin-theme-toggle" class="nav-link border-0 bg-transparent px-2" title="Changer le theme" aria-label="Basculer theme clair/sombre">
+                                <i class="bi bi-moon-fill"></i>
+                            </button>
+                        </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#"
                                data-bs-toggle="dropdown" aria-expanded="false">

@@ -6,10 +6,6 @@
             <h5 class="card-title mb-0">Fonctionnalités</h5>
         </div>
         <div class="card-body">
-            @if(session('success'))
-                <div class="alert alert-success mb-3">{{ session('success') }}</div>
-            @endif
-
             <p class="text-muted mb-4" style="font-size:.875rem;">
                 Activez ou désactivez les fonctionnalités de l'application. Les fonctionnalités désactivées seront masquées pour tous les utilisateurs.
             </p>

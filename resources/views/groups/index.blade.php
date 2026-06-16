@@ -1,13 +1,6 @@
 <x-app-layout>
     <x-slot name="pageTitle">Mes groupes</x-slot>
 
-    @if (session('success'))
-        <div class="alert alert-success mb-3" style="font-size:.875rem;">{{ session('success') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-warning mb-3" style="font-size:.875rem;">{{ session('error') }}</div>
-    @endif
-
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
         <div>
             <h4 class="mb-1">Mes groupes</h4>

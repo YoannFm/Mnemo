@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Extensions\UpdateManager;
 use App\Helpers\ActivityLogger;
+use App\Helpers\LogHelper;
 use App\Http\Controllers\Controller;
 use App\Mnemo;
 use Throwable;
@@ -32,8 +33,10 @@ class UpdateController extends Controller
     public function download()
     {
         try {
+            $version = $this->updates->getLatestVersion();
             $this->updates->download();
-            ActivityLogger::log('Téléchargement mise à jour v' . $this->updates->getLatestVersion(), 'update');
+            ActivityLogger::log('Téléchargement mise à jour v' . $version, 'update');
+            LogHelper::log('downloaded_update', 'update', null, ['version' => $version]);
             return back()->with('success', 'Mise à jour téléchargée. Vous pouvez maintenant l\'installer.');
         } catch (Throwable $t) {
             ActivityLogger::log('Échec téléchargement mise à jour : ' . $t->getMessage(), 'update');
@@ -50,6 +53,7 @@ class UpdateController extends Controller
                 'fichier'      => $filename,
                 'download_url' => route('admin.update.backup-download', $filename),
             ]);
+            LogHelper::log('backup_files', 'update', null);
             return response()->download($path);
         } catch (Throwable $t) {
             ActivityLogger::log('Échec sauvegarde fichiers : ' . $t->getMessage(), 'update');
@@ -66,6 +70,7 @@ class UpdateController extends Controller
                 'fichier'      => $filename,
                 'download_url' => route('admin.update.backup-download', $filename),
             ]);
+            LogHelper::log('backup_database', 'update', null);
             return response()->download($path);
         } catch (Throwable $t) {
             ActivityLogger::log('Échec export base de données : ' . $t->getMessage(), 'update');
@@ -91,6 +96,7 @@ class UpdateController extends Controller
             $version = $this->updates->getLatestVersion();
             $this->updates->install();
             ActivityLogger::log('Mise à jour installée : v' . Mnemo::version() . ' -> v' . $version, 'update');
+            LogHelper::log('installed_update', 'update', null, ['version' => $version], 'warning');
             return back()->with('success', 'Mise à jour installée avec succès.');
         } catch (Throwable $t) {
             ActivityLogger::log('Échec installation mise à jour : ' . $t->getMessage(), 'update');

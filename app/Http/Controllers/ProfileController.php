@@ -94,13 +94,13 @@ class ProfileController extends Controller
         $user = $request->user();
         $userId = $user->id;
 
+        LogHelper::log('deleted_account', 'user', $userId, [], 'warning');
+
         // Déconnecter l'utilisateur avant suppression
         Auth::logout();
 
         // Supprimer le compte (cascade suppression des modules et items)
         $user->delete();
-
-        LogHelper::log('deleted_account', 'user', $userId, [], 'warning');
 
         // Invalider la session après suppression du compte
         $request->session()->invalidate();

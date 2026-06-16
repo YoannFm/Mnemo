@@ -80,6 +80,7 @@ class SettingsController extends Controller
 
     private function updateEnvTimezone(string $tz): void
     {
+        $tz = str_replace(["\n", "\r"], '', $tz);
         if (!in_array($tz, timezone_identifiers_list())) return;
         $this->writeEnv(function (string $content) use ($tz): string {
             if (str_contains($content, 'APP_TIMEZONE=')) {
@@ -197,6 +198,7 @@ class SettingsController extends Controller
 
         $this->writeEnv(function (string $env) use ($data): string {
             $replace = function (string $key, string $value) use (&$env) {
+                $value = str_replace(["\n", "\r"], '', $value);
                 $value = strpos($value, ' ') !== false ? '"' . $value . '"' : $value;
                 if (preg_match("/^{$key}=/m", $env)) {
                     $env = preg_replace("/^{$key}=.*/m", "{$key}={$value}", $env);

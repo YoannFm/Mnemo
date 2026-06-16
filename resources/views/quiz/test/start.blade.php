@@ -37,15 +37,15 @@
                                id="question_count"
                                name="question_count"
                                class="form-control @error('question_count') is-invalid @enderror"
-                               value="{{ old('question_count', min(10, $module->items()->count())) }}"
+                               value="{{ old('question_count', min(10, $itemCount)) }}"
                                min="1"
-                               max="{{ $module->items()->count() }}"
+                               max="{{ $itemCount }}"
                                required>
                         @error('question_count')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
-                            {{ $module->items()->count() }} items disponibles - entre 1 et {{ $module->items()->count() }} questions.
+                            {{ $itemCount }} items disponibles - entre 1 et {{ $itemCount }} questions.
                         </div>
 
                         <label class="form-label fw-semibold mt-3" style="font-size:.85rem;">
@@ -53,11 +53,13 @@
                         </label>
                         <select name="option_count" class="form-select">
                             @foreach([2,3,4,5,6,7,8] as $n)
-                                <option value="{{ $n }}" {{ $n === 4 ? 'selected' : '' }}>{{ $n }} réponses</option>
+                                <option value="{{ $n }}" {{ $n === 4 ? 'selected' : '' }}>
+                                    {{ $n }} réponses{{ $n > $itemCount ? ' (max ' . $itemCount . ' items disponibles)' : '' }}
+                                </option>
                             @endforeach
                         </select>
                         <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
-                            Si le module n'a pas assez d'items, certaines réponses seront répétées.
+                            Il faut au moins autant d'items que de réponses proposées. Ce module a {{ $itemCount }} item{{ $itemCount > 1 ? 's' : '' }}.
                         </div>
                     </div>
                 </div>

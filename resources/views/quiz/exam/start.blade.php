@@ -36,19 +36,41 @@
                                 <div class="col-6">
                                     <label class="form-label" style="font-size:.85rem;">Ce que je vois</label>
                                     <select id="input-field" class="form-select form-select-sm">
-                                        <option value="photo_path">Photo</option>
-                                        <option value="name_fr">Nom</option>
-                                        <option value="name_alt">Traduction</option>
-                                        <option value="function_text">Description</option>
+                                        @if($module->field_photo)
+                                            <option value="photo_path">Photo</option>
+                                        @endif
+                                        @if($module->field_audio)
+                                            <option value="audio_path">Son</option>
+                                        @endif
+                                        @if($module->field_name_fr)
+                                            <option value="name_fr">Nom</option>
+                                        @endif
+                                        @if($module->field_name_alt)
+                                            <option value="name_alt">Traduction</option>
+                                        @endif
+                                        @if($module->field_function)
+                                            <option value="function_text">Description</option>
+                                        @endif
                                     </select>
                                 </div>
                                 <div class="col-6">
                                     <label class="form-label" style="font-size:.85rem;">Ce que je réponds</label>
                                     <select id="output-field" class="form-select form-select-sm">
-                                        <option value="name_fr">Nom</option>
-                                        <option value="name_alt">Traduction</option>
-                                        <option value="function_text">Description</option>
-                                        <option value="photo_path">Photo</option>
+                                        @if($module->field_name_fr)
+                                            <option value="name_fr">Nom</option>
+                                        @endif
+                                        @if($module->field_name_alt)
+                                            <option value="name_alt">Traduction</option>
+                                        @endif
+                                        @if($module->field_function)
+                                            <option value="function_text">Description</option>
+                                        @endif
+                                        @if($module->field_photo)
+                                            <option value="photo_path">Photo</option>
+                                        @endif
+                                        @if($module->field_audio)
+                                            <option value="audio_path">Son</option>
+                                        @endif
                                     </select>
                                 </div>
                             </div>
@@ -66,11 +88,13 @@
                         </label>
                         <select name="option_count" class="form-select">
                             @foreach([2,3,4,5,6,7,8] as $n)
-                                <option value="{{ $n }}" {{ $n === 4 ? 'selected' : '' }}>{{ $n }} réponses</option>
+                                <option value="{{ $n }}" {{ $n === 4 ? 'selected' : '' }}>
+                                    {{ $n }} réponses{{ $n > $itemCount ? ' (max ' . $itemCount . ' items disponibles)' : '' }}
+                                </option>
                             @endforeach
                         </select>
                         <div style="font-size:.75rem;color:var(--text-muted);margin-top:.3rem;">
-                            Si le module n'a pas assez d'items, certaines réponses seront répétées.
+                            Il faut au moins autant d'items que de réponses proposées. Ce module a {{ $itemCount }} item{{ $itemCount > 1 ? 's' : '' }}.
                         </div>
                     </div>
                 </div>
@@ -155,18 +179,22 @@
 
     <script>
     var modeMap = {
-        'photo_path|name_fr': 'photo_to_name_fr',
-        'photo_path|name_alt': 'photo_to_name_alt',
+        'photo_path|name_fr':       'photo_to_name_fr',
+        'photo_path|name_alt':      'photo_to_name_alt',
         'photo_path|function_text': 'photo_to_function',
-        'name_fr|photo_path': 'name_fr_to_photo',
-        'name_fr|name_alt': 'name_fr_to_name_alt',
-        'name_fr|function_text': 'name_fr_to_function',
-        'name_alt|photo_path': 'name_alt_to_photo',
-        'name_alt|name_fr': 'name_alt_to_name_fr',
-        'name_alt|function_text': 'name_alt_to_function',
+        'audio_path|name_fr':       'audio_to_name_fr',
+        'audio_path|name_alt':      'audio_to_name_alt',
+        'name_fr|photo_path':       'name_fr_to_photo',
+        'name_fr|name_alt':         'name_fr_to_name_alt',
+        'name_fr|function_text':    'name_fr_to_function',
+        'name_fr|audio_path':       'name_fr_to_audio',
+        'name_alt|photo_path':      'name_alt_to_photo',
+        'name_alt|name_fr':         'name_alt_to_name_fr',
+        'name_alt|function_text':   'name_alt_to_function',
+        'name_alt|audio_path':      'name_alt_to_audio',
         'function_text|photo_path': 'function_to_photo',
-        'function_text|name_fr': 'function_to_name_fr',
-        'function_text|name_alt': 'function_to_name_alt',
+        'function_text|name_fr':    'function_to_name_fr',
+        'function_text|name_alt':   'function_to_name_alt',
     };
     var randomToggle = document.getElementById('random-toggle');
     var ioSection = document.getElementById('io-section');
