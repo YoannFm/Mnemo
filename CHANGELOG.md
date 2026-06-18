@@ -2,13 +2,26 @@
 
 ## 2026-06-18
 
-### Examens partagés - date de debut et affichage des reponses
+### Examens partagés - date de debut, affichage des reponses, score masqué
 
-- Nouveau champ `starts_at` : l'examen n'est pas accessible avant cette date, message "Examen pas encore ouvert" affiché avec la date
-- Nouveau champ `show_answers` : par defaut les reponses sont cachees apres l'examen ; le createur peut activer l'affichage du detail question par question
-- Formulaire de creation mis a jour : champs "Date de debut", "Date de fin" et case "Afficher les reponses apres l'examen"
-- Liste des liens existants : badges "Pas encore ouvert" et "Reponses visibles" ajoutes
+- Nouveau champ `starts_at` : l'examen n'est pas accessible avant cette date, message "Examen pas encore ouvert" affiché avec la date d'ouverture
+- Nouveau champ `show_answers` : par défaut score, classement et détail des réponses sont cachés après l'examen ; le créateur peut activer leur affichage
+- Si `show_answers` est désactivé : le participant voit uniquement "Vos résultats ont été transmis", sans score ni réponses
+- Formulaire de création mis à jour : champs "Date de début", "Date de fin" et case "Afficher les réponses après l'examen"
+- Liste des liens existants : badges "Pas encore ouvert" et "Réponses visibles" ajoutés
 - Migration : ajout de `starts_at` et `show_answers` sur la table `shared_exams`
+
+### Examen partagé (guest) - correction audio
+
+- Les options de type audio s'affichaient comme des URLs brutes au lieu d'un lecteur
+- Ajout du cas `audio_path` dans les options : bouton "Écouter" avec lecteur caché
+- Ajout du cas `audio_path` pour la question elle-même : lecteur audio natif avec autoplay
+
+### Logs - correction affichage des accents
+
+- Les caractères accentués s'affichaient sous forme d'échappements unicode (`é` au lieu de `é`)
+- Ajout de `JSON_UNESCAPED_UNICODE` dans la vue liste et la vue détail des logs
+- Ajout de `JSON_UNESCAPED_UNICODE` dans l'accesseur du modèle `ActivityLog` pour les futurs enregistrements
 
 ---
 
