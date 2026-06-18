@@ -12,6 +12,7 @@
                 </p>
 
                 {{-- Score --}}
+                @if ($sharedExam->show_answers)
                 <div class="card p-3 mb-3" style="background:var(--accent-light);border:none;">
                     <div style="font-size:2rem;font-weight:800;color:var(--accent);">
                         {{ $attempt->grade }}
@@ -20,9 +21,10 @@
                         {{ $attempt->score }} / {{ $attempt->total }} - {{ $attempt->percentage }}%
                     </div>
                 </div>
+                @endif
 
                 {{-- Classement --}}
-                @if(\App\Models\Setting::get('feature_exam_ranking', '1'))
+                @if ($sharedExam->show_answers && \App\Models\Setting::get('feature_exam_ranking', '1'))
                 @if ($rank && $totalParticipants > 1)
                     <div class="card p-3 mb-3">
                         <div style="font-size:.85rem;color:var(--text-muted);">
