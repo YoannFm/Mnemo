@@ -10,7 +10,19 @@ class ActivityLog extends Model
 
     protected function casts(): array
     {
-        return ['data' => 'array'];
+        return [];
+    }
+
+    public function setDataAttribute($value): void
+    {
+        $this->attributes['data'] = $value !== null
+            ? json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+            : null;
+    }
+
+    public function getDataAttribute($value): ?array
+    {
+        return $value !== null ? json_decode($value, true) : null;
     }
 
     public function getCreatedAtAttribute($value): ?\Carbon\Carbon
