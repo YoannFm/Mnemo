@@ -46,16 +46,21 @@ class NotificationController extends Controller
             $recipients = User::whereIn('role_id', $data['role_ids'])->get();
         }
 
-        foreach ($recipients as $user) {
-            UserNotification::create([
-                'user_id' => $user->id,
-                'title'   => $data['title'],
-                'message' => $data['content'] ?? null,
-                'type'    => $data['level'],
-            ]);
+        $now = now();
+        $rows = $recipients->map(fn($user) => [
+            'user_id'    => $user->id,
+            'title'      => $data['title'],
+            'message'    => $data['content'] ?? null,
+            'type'       => $data['level'],
+            'created_at' => $now,
+            'updated_at' => $now,
+        ])->all();
+
+        foreach (array_chunk($rows, 500) as $chunk) {
+            UserNotification::insert($chunk);
         }
 
-        $count = $recipients->count();
+        $count = count($rows);
 
         LogHelper::log('sent_system_notification', 'notification', null, ['target' => $data['target'], 'count' => $count]);
 

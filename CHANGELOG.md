@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-06-18 (suite)
+
+### Notifications - envoi groupé
+
+- L'envoi d'une notification à tous les utilisateurs faisait un INSERT SQL par utilisateur, causant des délais de 20-30 secondes
+- Remplacé par un `INSERT` groupé par blocs de 500 - l'envoi est maintenant quasi-instantané quel que soit le nombre d'utilisateurs
+
+---
+
 ## 2026-06-18
 
 ### Examens partagés - date de debut, affichage des reponses, score masqué
