@@ -30,20 +30,24 @@ class SharedExamController extends Controller
         ];
 
         $validated = $request->validate([
-            'mode'        => ['required', 'string', 'in:' . implode(',', $validModes)],
-            'label'       => 'nullable|string|max:255',
-            'expires_at'  => 'nullable|date|after:now',
-            'webhook_url' => ['nullable', 'url', 'regex:/^https:\/\//i'],
+            'mode'         => ['required', 'string', 'in:' . implode(',', $validModes)],
+            'label'        => 'nullable|string|max:255',
+            'starts_at'    => 'nullable|date',
+            'expires_at'   => 'nullable|date',
+            'show_answers' => 'nullable|boolean',
+            'webhook_url'  => ['nullable', 'url', 'regex:/^https:\/\//i'],
         ]);
 
         $sharedExam = SharedExam::create([
-            'uuid'        => (string) Str::uuid(),
-            'user_id'     => Auth::id(),
-            'module_id'   => $module->id,
-            'mode'        => $validated['mode'],
-            'label'       => $validated['label'] ?? null,
-            'expires_at'  => $validated['expires_at'] ?? null,
-            'webhook_url' => $validated['webhook_url'] ?? null,
+            'uuid'         => (string) Str::uuid(),
+            'user_id'      => Auth::id(),
+            'module_id'    => $module->id,
+            'mode'         => $validated['mode'],
+            'label'        => $validated['label'] ?? null,
+            'starts_at'    => $validated['starts_at'] ?? null,
+            'expires_at'   => $validated['expires_at'] ?? null,
+            'show_answers' => $request->boolean('show_answers'),
+            'webhook_url'  => $validated['webhook_url'] ?? null,
         ]);
 
         $link = route('guest.exam.show', $sharedExam->uuid);

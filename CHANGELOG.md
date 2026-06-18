@@ -1,5 +1,51 @@
 # Changelog
 
+## 2026-06-18 (suite)
+
+### Notifications - envoi groupé
+
+- L'envoi d'une notification à tous les utilisateurs faisait un INSERT SQL par utilisateur, causant des délais de 20-30 secondes
+- Remplacé par un `INSERT` groupé par blocs de 500 - l'envoi est maintenant quasi-instantané quel que soit le nombre d'utilisateurs
+
+---
+
+## 2026-06-18
+
+### Examens partagés - date de debut, affichage des reponses, score masqué
+
+- Nouveau champ `starts_at` : l'examen n'est pas accessible avant cette date, message "Examen pas encore ouvert" affiché avec la date d'ouverture
+- Nouveau champ `show_answers` : par défaut score, classement et détail des réponses sont cachés après l'examen ; le créateur peut activer leur affichage
+- Si `show_answers` est désactivé : le participant voit uniquement "Vos résultats ont été transmis", sans score ni réponses
+- Formulaire de création mis à jour : champs "Date de début", "Date de fin" et case "Afficher les réponses après l'examen"
+- Liste des liens existants : badges "Pas encore ouvert" et "Réponses visibles" ajoutés
+- Migration : ajout de `starts_at` et `show_answers` sur la table `shared_exams`
+
+### Examen partagé (guest) - correction audio
+
+- Les options de type audio s'affichaient comme des URLs brutes au lieu d'un lecteur
+- Ajout du cas `audio_path` dans les options : bouton "Écouter" avec lecteur caché
+- Ajout du cas `audio_path` pour la question elle-même : lecteur audio natif avec autoplay
+
+### Logs - correction affichage des accents
+
+- Les caractères accentués s'affichaient sous forme d'échappements unicode (`é` au lieu de `é`)
+- Ajout de `JSON_UNESCAPED_UNICODE` dans la vue liste et la vue détail des logs
+- Ajout de `JSON_UNESCAPED_UNICODE` dans l'accesseur du modèle `ActivityLog` pour les futurs enregistrements
+
+---
+
+## 2026-06-16
+
+### Examen - choix du nombre de questions
+
+- Sélecteur remplacé par un champ numérique libre (1 à N items)
+- Correction mise en page : card "Nombre de réponses" cassée après rebase, restaurée
+- Texte d'intro mis à jour pour refléter le choix du nombre de questions
+- Le contrôleur limite automatiquement au nombre d'items du module
+- Le log `started_exam` inclut le nombre de questions réelles générées
+
+---
+
 ## 2026-06-15
 
 ### Mode Anki - persistance et reprise de session
@@ -23,15 +69,13 @@
 - Correction condition du bouton reset : `$dueCount < $totalCount` incorrecte (masquait le bouton même avec de la progression), remplacée par `$newCount < $totalCount`
 - Correction barre de progression manquante après reprise : `session('learn_total', 0)` retourne `null` si la clé existe avec valeur `null` (le défaut PHP n'est pas utilisé dans ce cas), ajout d'un fallback `?? count($learn_remaining)`
 - Correction sélection de mode accidentelle : le formulaire pré-sélectionne désormais le mode de la session sauvegardée, évitant un basculement non voulu vers le mode aléatoire (sans barre de progression)
-- Correction barre de progression mode aléatoire bloquée à 0 : la barre affichait `mastered_count` (streak >= 3, nécessite 3 bonnes réponses consécutives) ; remplacée par `learned_count` (success_count > 0) qui progresse dès la première bonne réponse par item
-- Unification de la définition "maîtrisé" : un item est maîtrisé dès le premier "Je sais" (success_count > 0), appliqué à la fois sur la barre de progression en session et sur le compteur "Maîtrisés" de la page setup
-- Correction mapping question mode "Description -> Traduction" : pointait vers Q11 (name_alt -> function_text) au lieu de Q12 (function_text -> name_alt), la question affichait la traduction au lieu de la description
-- Correction sécurité resetProgress() : ajout vérification d'accès au module (seul le propriétaire ou un admin peut réinitialiser)
-- Correction session PHP résiduelle après reset : les clés de session Anki sont maintenant nettoyées lors du reset, évitant un état incohérent à la prochaine visite
+- Correction barre de progression mode aléatoire bloquée à 0 : la barre affichait `mastered_count` (streak >= 3) ; remplacée par `learned_count` (success_count > 0) qui progresse dès la première bonne réponse
+- Unification de la définition "maîtrisé" : un item est maîtrisé dès le premier "Je sais" (success_count > 0)
+- Correction mapping question mode "Description -> Traduction" : pointait vers Q11 au lieu de Q12
+- Correction sécurité resetProgress() : seul le propriétaire ou un admin peut réinitialiser
+- Correction session PHP résiduelle après reset : clés de session Anki nettoyées lors du reset
 - Reset redirige désormais vers la page Anki (setup) au lieu de la page module
-- Agrandissement du label de type de question sur la carte Anki (.7rem -> 1rem) pour tous les types (NOM, TRADUCTION, DÉFINITION, etc.)
-- Agrandissement du label "RÉPONSE" sur le verso de la carte (.7rem -> 1rem)
-- Agrandissement de la réponse traduction (name_alt) : 2.2rem au lieu de 1.4rem
+- Agrandissement des labels sur la carte Anki (.7rem -> 1rem)
 
 ## 2026-06-12 (suite 2)
 

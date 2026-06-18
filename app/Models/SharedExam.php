@@ -14,13 +14,17 @@ class SharedExam extends Model
         'module_id',
         'mode',
         'label',
+        'starts_at',
         'expires_at',
+        'show_answers',
         'max_attempts',
         'webhook_url',
     ];
 
     protected $casts = [
-        'expires_at' => 'datetime',
+        'starts_at'    => 'datetime',
+        'expires_at'   => 'datetime',
+        'show_answers' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -41,5 +45,10 @@ class SharedExam extends Model
     public function isExpired(): bool
     {
         return $this->expires_at !== null && $this->expires_at->isPast();
+    }
+
+    public function isNotStarted(): bool
+    {
+        return $this->starts_at !== null && $this->starts_at->isFuture();
     }
 }
