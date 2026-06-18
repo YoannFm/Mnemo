@@ -110,6 +110,17 @@ class UserController extends Controller
             ->with('success', 'Utilisateur ' . $user->name . ' mis a jour.');
     }
 
+    public function disable2fa(User $user)
+    {
+        $user->two_factor_secret         = null;
+        $user->two_factor_recovery_codes = null;
+        $user->save();
+
+        LogHelper::log('admin_disabled_2fa', 'user', $user->id, [], 'warning');
+
+        return back()->with('success', 'Authentification a deux facteurs desactivee pour ' . $user->name . '.');
+    }
+
     public function destroy(User $user)
     {
         if ($user->id === Auth::id()) {

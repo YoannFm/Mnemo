@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-06-18 (suite 2)
+
+### Admin - désactivation de la 2FA utilisateur
+
+- Ajout d'un bouton "Désactiver" sur la page d'édition d'un utilisateur quand la 2FA est active
+- Supprime `two_factor_secret` et `two_factor_recovery_codes`, loggé comme `admin_disabled_2fa`
+
+---
+
 ## 2026-06-18 (suite)
 
 ### Notifications - envoi groupé

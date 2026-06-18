@@ -159,9 +159,17 @@
                     <div class="mb-3">
                         <label class="form-label" for="2faInput">Authentification a deux facteurs</label>
                         @if($user->two_factor_secret)
-                            <input type="text" class="form-control text-success" id="2faInput" value="Active" disabled>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="text" class="form-control text-success" id="2faInput" value="Active" disabled>
+                                <form action="{{ route('admin.users.disable-2fa', $user) }}" method="POST" onsubmit="return confirm('Désactiver la 2FA de cet utilisateur ?')">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-danger text-nowrap">
+                                        <i class="bi bi-shield-x me-1"></i>Désactiver
+                                    </button>
+                                </form>
+                            </div>
                         @else
-                            <input type="text" class="form-control text-danger" id="2faInput" value="Non" disabled>
+                            <input type="text" class="form-control text-danger" id="2faInput" value="Non active" disabled>
                         @endif
                     </div>
 

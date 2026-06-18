@@ -239,6 +239,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
     Route::post('/users/{user}/force-password-change', [AdminUserController::class, 'forcePasswordChange'])->name('users.force-password-change');
+    Route::post('/users/{user}/disable-2fa', [AdminUserController::class, 'disable2fa'])->name('users.disable-2fa');
     Route::get('/users/{user}/export', [AdminUserController::class, 'exportData'])->name('users.export');
     // Bans (nested under user)
     Route::post('/users/{user}/bans', [\App\Http\Controllers\Admin\BanController::class, 'store'])->name('users.bans.store');
