@@ -4,7 +4,15 @@
     <div class="row justify-content-center">
         <div class="col-12 col-lg-5">
 
-            @if ($sharedExam->isExpired())
+            @if ($sharedExam->isNotStarted())
+                <div class="card text-center py-5">
+                    <i class="bi bi-hourglass-split" style="font-size:3rem;color:var(--accent);"></i>
+                    <h5 class="mt-3">Examen pas encore ouvert</h5>
+                    <p style="color:var(--text-muted);font-size:.9rem;">
+                        Cet examen commence le <strong>{{ $sharedExam->starts_at->format('d/m/Y à H:i') }}</strong>.
+                    </p>
+                </div>
+            @elseif ($sharedExam->isExpired())
                 <div class="card text-center py-5">
                     <i class="bi bi-clock-history" style="font-size:3rem;color:#ef4444;"></i>
                     <h5 class="mt-3">Lien expiré</h5>

@@ -140,8 +140,20 @@
                                 <input type="text" class="form-control form-control-sm" name="label" placeholder="Ex: Classe terminale" maxlength="255">
                             </div>
                             <div class="col-6">
-                                <label class="form-label" style="font-size:.8rem;color:var(--text-muted);">Expiration <span style="opacity:.6;">(optionnel)</span></label>
+                                <label class="form-label" style="font-size:.8rem;color:var(--text-muted);">Date de début <span style="opacity:.6;">(optionnel)</span></label>
+                                <input type="datetime-local" class="form-control form-control-sm" name="starts_at">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" style="font-size:.8rem;color:var(--text-muted);">Date de fin <span style="opacity:.6;">(optionnel)</span></label>
                                 <input type="datetime-local" class="form-control form-control-sm" name="expires_at">
+                            </div>
+                            <div class="col-6 d-flex align-items-end">
+                                <div class="form-check mb-1">
+                                    <input class="form-check-input" type="checkbox" name="show_answers" value="1" id="show-answers-check">
+                                    <label class="form-check-label" for="show-answers-check" style="font-size:.8rem;color:var(--text-muted);">
+                                        Afficher les réponses après l'examen
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -164,8 +176,13 @@
                             <div style="font-size:.83rem;">
                                 <span style="font-weight:500;">{{ $se->label ?? 'Sans étiquette' }}</span>
                                 <span style="color:var(--text-muted);font-size:.78rem;margin-left:.4rem;">&middot; {{ $se->attempts_count }} participant{{ $se->attempts_count > 1 ? 's' : '' }}</span>
-                                @if ($se->isExpired())
+                                @if ($se->isNotStarted())
+                                    <span style="background:rgba(251,191,36,.12);color:#fbbf24;font-size:.72rem;padding:.1rem .4rem;border-radius:.25rem;margin-left:.3rem;">Pas encore ouvert</span>
+                                @elseif ($se->isExpired())
                                     <span style="background:rgba(239,68,68,.12);color:#ef4444;font-size:.72rem;padding:.1rem .4rem;border-radius:.25rem;margin-left:.3rem;">Expiré</span>
+                                @endif
+                                @if ($se->show_answers)
+                                    <span style="background:rgba(34,197,94,.12);color:#22c55e;font-size:.72rem;padding:.1rem .4rem;border-radius:.25rem;margin-left:.3rem;">Réponses visibles</span>
                                 @endif
                             </div>
                             <div class="d-flex gap-2">

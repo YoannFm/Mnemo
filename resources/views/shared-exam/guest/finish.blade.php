@@ -34,12 +34,34 @@
                 @endif
                 @endif
 
-                <div class="card p-3 mb-3">
-                    <p style="color:var(--text-muted);font-size:.85rem;margin:0;">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Les résultats détaillés seront consultables après envoi par votre enseignant.
-                    </p>
-                </div>
+                @if ($sharedExam->show_answers)
+                    <div class="card mb-3 text-start" style="overflow:hidden;">
+                        <div style="padding:.6rem 1rem;border-bottom:1px solid var(--card-border);">
+                            <span style="font-size:.8rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Détail des réponses</span>
+                        </div>
+                        @foreach ($attempt->answers as $i => $ans)
+                        <div style="padding:.6rem 1rem;border-bottom:1px solid var(--card-border);font-size:.85rem;display:flex;align-items:flex-start;gap:.75rem;">
+                            <i class="bi bi-{{ $ans['is_correct'] ? 'check-circle-fill' : 'x-circle-fill' }} mt-1"
+                               style="color:{{ $ans['is_correct'] ? 'var(--success-color)' : '#ef4444' }};flex-shrink:0;"></i>
+                            <div>
+                                <div style="color:var(--text-muted);font-size:.78rem;">{{ $ans['question_text'] ?? ('Question ' . ($i + 1)) }}</div>
+                                <div>Votre réponse : <strong>{{ $ans['user_answer'] }}</strong></div>
+                                @if (!$ans['is_correct'])
+                                    <div style="color:var(--success-color);">Bonne réponse : <strong>{{ $ans['correct_answer'] }}</strong></div>
+                                @endif
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="card p-3 mb-3">
+                        <p style="color:var(--text-muted);font-size:.85rem;margin:0;">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Les résultats détaillés ne sont pas disponibles pour cet examen.
+                        </p>
+                    </div>
+                @endif
+
                 <a href="{{ route('dashboard') }}" class="btn btn-sm" style="border:1px solid var(--card-border);color:var(--text-muted);">
                     <i class="bi bi-house me-1"></i>Retour à l'accueil
                 </a>

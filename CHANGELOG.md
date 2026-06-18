@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-06-18
+
+### Examens partagés - date de debut et affichage des reponses
+
+- Nouveau champ `starts_at` : l'examen n'est pas accessible avant cette date, message "Examen pas encore ouvert" affiché avec la date
+- Nouveau champ `show_answers` : par defaut les reponses sont cachees apres l'examen ; le createur peut activer l'affichage du detail question par question
+- Formulaire de creation mis a jour : champs "Date de debut", "Date de fin" et case "Afficher les reponses apres l'examen"
+- Liste des liens existants : badges "Pas encore ouvert" et "Reponses visibles" ajoutes
+- Migration : ajout de `starts_at` et `show_answers` sur la table `shared_exams`
+
+---
+
 ## 2026-06-16
 
 ### Examen - choix du nombre de questions

@@ -29,6 +29,10 @@ class GuestExamController extends Controller
     {
         $sharedExam = SharedExam::where('uuid', $uuid)->with('user', 'module')->firstOrFail();
 
+        if ($sharedExam->isNotStarted()) {
+            return view('shared-exam.guest.start', compact('sharedExam'))->with('not_started', true);
+        }
+
         if ($sharedExam->isExpired()) {
             return view('shared-exam.guest.start', compact('sharedExam'))->with('expired', true);
         }
@@ -39,6 +43,10 @@ class GuestExamController extends Controller
     public function start(string $uuid)
     {
         $sharedExam = SharedExam::where('uuid', $uuid)->with('module')->firstOrFail();
+
+        if ($sharedExam->isNotStarted()) {
+            abort(403, 'Cet examen n\'a pas encore commencé.');
+        }
 
         if ($sharedExam->isExpired()) {
             abort(410, 'Ce lien d\'examen a expiré.');
