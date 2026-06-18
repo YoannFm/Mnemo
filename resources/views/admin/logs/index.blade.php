@@ -92,7 +92,7 @@
                                                 <i class="bi bi-download"></i>
                                             </a>
                                         @else
-                                            <span class="small text-muted">{{ Str::limit(json_encode($log->data), 80) }}</span>
+                                            <span class="small text-muted">{{ Str::limit(json_encode($log->data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 80) }}</span>
                                         @endif
                                     @else
                                         <span class="text-muted">-</span>

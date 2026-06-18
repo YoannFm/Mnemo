@@ -60,7 +60,7 @@
                             @foreach($log->data as $key => $value)
                                 <tr>
                                     <th>{{ $key }}</th>
-                                    <td>{{ is_array($value) ? json_encode($value) : $value }}</td>
+                                    <td>{{ is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : $value }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
