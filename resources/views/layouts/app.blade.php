@@ -386,6 +386,9 @@
 
         /* ── Badges ── */
         .badge-public {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
             background: rgba(34,197,94,.15);
             color: var(--success-color);
             font-size: .7rem;
@@ -395,6 +398,9 @@
         }
 
         .badge-private {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
             background: rgba(139,155,180,.1);
             color: var(--text-muted);
             font-size: .7rem;
