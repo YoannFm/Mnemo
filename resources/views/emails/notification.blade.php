@@ -31,7 +31,8 @@
         </div>
         <div class="footer">
             Vous recevez cet e-mail car les notifications par mail sont activées sur votre compte.<br>
-            Vous pouvez les désactiver dans vos <a href="{{ config('app.url') }}/profile" style="color:#999;">paramètres de profil</a>.
+            Pour ne plus recevoir ces e-mails, désactivez-les dans vos
+            <a href="{{ config('app.url') }}/profile#email-notifications" style="color:#EFB702;">paramètres de profil</a>.
         </div>
     </div>
 </body>
