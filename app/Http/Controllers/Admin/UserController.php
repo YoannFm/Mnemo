@@ -110,6 +110,16 @@ class UserController extends Controller
             ->with('success', 'Utilisateur ' . $user->name . ' mis a jour.');
     }
 
+    public function reactivate(User $user)
+    {
+        $user->deactivated_at = null;
+        $user->save();
+
+        LogHelper::log('admin_reactivated_user', 'user', $user->id, [], 'info');
+
+        return back()->with('success', 'Compte de ' . $user->name . ' réactivé.');
+    }
+
     public function disable2fa(User $user)
     {
         $user->two_factor_secret         = null;

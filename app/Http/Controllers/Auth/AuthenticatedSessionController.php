@@ -32,6 +32,12 @@ class AuthenticatedSessionController extends Controller
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
         if ($user) {
+            if ($user->isDeactivated()) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                return back()->withErrors(['email' => 'Ce compte a été désactivé.']);
+            }
             $user->last_login_at = now();
             $user->last_login_ip = $request->ip();
             $user->save();

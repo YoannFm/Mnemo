@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-06-19
+
+### Suppression de compte - désactivation au lieu de suppression
+
+- La suppression de compte n'efface plus les données : le compte est désactivé (`deactivated_at`)
+- Les notifications email sont coupées, la 2FA et le remember_token sont effacés
+- La connexion est bloquée avec le message "Ce compte a été désactivé"
+- L'admin peut voir le statut de désactivation sur la page d'édition et réactiver le compte
+- Migration : ajout de `deactivated_at` sur la table `users`
+
+---
+
 ## 2026-06-18 (suite 2)
 
 ### Admin - désactivation de la 2FA utilisateur

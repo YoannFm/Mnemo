@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'two_factor_secret', 'two_factor_recovery_codes', 'is_admin', 'role_id', 'is_banned', 'banned_at', 'last_login_at', 'last_login_ip', 'force_password_change', 'accent_color', 'email_notifications', 'onboarding_seen'])]
+#[Fillable(['name', 'email', 'password', 'two_factor_secret', 'two_factor_recovery_codes', 'is_admin', 'role_id', 'is_banned', 'banned_at', 'last_login_at', 'last_login_ip', 'deactivated_at', 'force_password_change', 'accent_color', 'email_notifications', 'onboarding_seen'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -31,9 +31,15 @@ class User extends Authenticatable
             'is_admin' => 'boolean',
             'is_banned' => 'boolean',
             'banned_at' => 'datetime',
-            'last_login_at' => 'datetime',
+            'last_login_at'   => 'datetime',
+            'deactivated_at'  => 'datetime',
             'force_password_change' => 'boolean',
         ];
+    }
+
+    public function isDeactivated(): bool
+    {
+        return $this->deactivated_at !== null;
     }
 
     protected static function booted(): void

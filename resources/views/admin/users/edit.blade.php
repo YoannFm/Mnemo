@@ -157,6 +157,23 @@
                     </div>
 
                     <div class="mb-3">
+                        <label class="form-label">Statut du compte</label>
+                        @if($user->deactivated_at)
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="text" class="form-control text-danger" value="Désactivé le {{ $user->deactivated_at->format('d/m/Y à H:i') }}" disabled>
+                                <form action="{{ route('admin.users.reactivate', $user) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-success text-nowrap">
+                                        <i class="bi bi-person-check me-1"></i>Réactiver
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            <input type="text" class="form-control text-success" value="Actif" disabled>
+                        @endif
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label" for="2faInput">Authentification a deux facteurs</label>
                         @if($user->two_factor_secret)
                             <div class="d-flex gap-2 align-items-center">

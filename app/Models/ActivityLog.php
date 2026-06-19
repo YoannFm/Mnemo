@@ -138,6 +138,7 @@ class ActivityLog extends Model
             'admin_deleted_user'           => 'Utilisateur supprimé (admin)',
             'admin_forced_password_change' => 'Changement de mot de passe forcé',
             'admin_disabled_2fa'           => '2FA désactivée (admin)',
+            'admin_reactivated_user'       => 'Compte réactivé (admin)',
             'admin_imported_users'         => 'Utilisateurs importés',
 
             // Admin themes
