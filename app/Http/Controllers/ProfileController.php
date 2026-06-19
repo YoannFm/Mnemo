@@ -105,6 +105,9 @@ class ProfileController extends Controller
         $user->remember_token      = null;
         $user->save();
 
+        // Passer tous les modules en privé
+        $user->modules()->update(['is_public' => false]);
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
