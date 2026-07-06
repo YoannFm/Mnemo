@@ -260,7 +260,7 @@ class QuizGenerator
             $photoAnsTypes = ['Q3', 'Q9'];
             $audioTypes    = ['Q13', 'Q14'];
             $audioAnsTypes = ['Q15', 'Q16'];
-            $funcTypes     = ['Q2', 'Q6', 'Q10', 'Q11'];
+            $funcTypes     = ['Q2', 'Q3', 'Q6', 'Q10', 'Q11', 'Q12'];
             $nameFrTypes   = ['Q1', 'Q4', 'Q6', 'Q7', 'Q9', 'Q10', 'Q13', 'Q15'];
             $nameAltTypes  = ['Q4', 'Q5', 'Q7', 'Q8', 'Q11', 'Q12', 'Q14', 'Q16'];
             if (in_array($t, $photoTypes) && !$module->field_photo) return false;
@@ -280,6 +280,41 @@ class QuizGenerator
     public static function getQuestionTypes(): array
     {
         return array_keys(self::$questionTypes);
+    }
+
+    /**
+     * Retourne le mapping mode -> types de questions autorisés, utilisé par
+     * tous les modes (Anki, Test, Examen, Examen partagé) pour construire
+     * leurs listes de choix.
+     */
+    public static function getModeMap(): array
+    {
+        return [
+            'photo_to_name_fr'     => ['Q1'],
+            'photo_to_name_alt'    => ['Q8'],
+            'photo_to_function'    => ['Q2'],
+            'function_to_photo'    => ['Q3'],
+            'function_to_name_fr'  => ['Q6'],
+            'function_to_name_alt' => ['Q12'],
+            'name_fr_to_name_alt'  => ['Q4'],
+            'name_fr_to_photo'     => ['Q9'],
+            'name_fr_to_function'  => ['Q10'],
+            'name_alt_to_photo'    => ['Q5'],
+            'name_alt_to_function' => ['Q11'],
+            'name_alt_to_name_fr'  => ['Q7'],
+            'audio_to_name_fr'     => ['Q13'],
+            'audio_to_name_alt'    => ['Q14'],
+            'name_fr_to_audio'     => ['Q15'],
+            'name_alt_to_audio'    => ['Q16'],
+        ];
+    }
+
+    /**
+     * Types dont la réponse est un média (photo/audio) : exclus du mode aléatoire.
+     */
+    public static function getMediaAnswerTypes(): array
+    {
+        return ['Q3', 'Q5', 'Q9', 'Q15', 'Q16'];
     }
 
     /**

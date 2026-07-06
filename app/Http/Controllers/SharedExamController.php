@@ -27,6 +27,7 @@ class SharedExamController extends Controller
             'function_to_photo', 'function_to_name_fr', 'function_to_name_alt',
             'name_fr_to_name_alt', 'name_fr_to_photo', 'name_fr_to_function',
             'name_alt_to_photo', 'name_alt_to_function', 'name_alt_to_name_fr',
+            'audio_to_name_fr', 'audio_to_name_alt', 'name_fr_to_audio', 'name_alt_to_audio',
         ];
 
         $validated = $request->validate([

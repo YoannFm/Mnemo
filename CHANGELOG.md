@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-06 (suite 4)
+
+### Génération de questions - centralisation et derniers correctifs
+
+- Le mapping mode -> types de questions (`$modeMap`) et la liste des types réponse-média (`$mediaAnswerTypes`) étaient dupliqués dans `ExamController`, `TestController`, `AnkiController` et `GuestExamController`, ce qui avait déjà causé des désynchronisations. Ces deux tableaux sont maintenant centralisés dans `QuizGenerator::getModeMap()` et `QuizGenerator::getMediaAnswerTypes()`, utilisés par les 4 contrôleurs
+- Ajout des 4 modes audio (Audio -> Nom FR, Audio -> Nom EN, Nom FR -> Audio, Nom EN -> Audio) à l'examen partagé (invité), auparavant limité aux modes photo/fonction/nom, contrairement à Anki/Test/Examen classique
+- `QuizGenerator::filterTypesByModule()` : Q3 (Fonction -> Photo) et Q12 (Fonction -> Traduction) utilisent aussi `function_text` en question et n'étaient pas filtrés quand le champ Fonction est désactivé sur le module
+- `ExamController::start()` et `GuestExamController::start()` démarraient un examen avec 0 question si aucun item du module ne pouvait générer le mode demandé, au lieu de rediriger avec un message d'erreur clair (comportement déjà correct côté Test et Anki)
+
 ## 2026-07-06 (suite 3)
 
 ### Génération de questions - correctifs complémentaires

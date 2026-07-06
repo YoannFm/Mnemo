@@ -131,27 +131,10 @@ class AnkiController extends Controller
         $mode      = session('anki_mode', 'random');
         $learnMode = session('anki_learn_mode', false);
 
-        $modeMap = [
-            'photo_to_name_fr'     => ['Q1'],
-            'photo_to_name_alt'    => ['Q8'],
-            'photo_to_function'    => ['Q2'],
-            'function_to_photo'    => ['Q3'],
-            'function_to_name_fr'  => ['Q6'],
-            'function_to_name_alt' => ['Q12'],
-            'name_fr_to_name_alt'  => ['Q4'],
-            'name_fr_to_photo'     => ['Q9'],
-            'name_fr_to_function'  => ['Q10'],
-            'name_alt_to_photo'    => ['Q5'],
-            'name_alt_to_function' => ['Q11'],
-            'name_alt_to_name_fr'  => ['Q7'],
-            'audio_to_name_fr'     => ['Q13'],
-            'audio_to_name_alt'    => ['Q14'],
-            'name_fr_to_audio'     => ['Q15'],
-            'name_alt_to_audio'    => ['Q16'],
-        ];
+        $modeMap = QuizGenerator::getModeMap();
 
         if ($mode === 'random' || !isset($modeMap[$mode])) {
-            $mediaAnswerTypes = ['Q3', 'Q5', 'Q9', 'Q15', 'Q16'];
+            $mediaAnswerTypes = QuizGenerator::getMediaAnswerTypes();
             $types = array_values(array_diff(QuizGenerator::getQuestionTypes(), $mediaAnswerTypes));
         } else {
             $types = $modeMap[$mode];

@@ -40,6 +40,10 @@
                             <option value="name_alt_to_photo">Nom EN → Photo</option>
                             <option value="name_alt_to_function">Nom EN → Fonction</option>
                             <option value="name_alt_to_name_fr">Nom EN → Nom FR</option>
+                            <option value="audio_to_name_fr">Audio → Nom FR</option>
+                            <option value="audio_to_name_alt">Audio → Nom EN</option>
+                            <option value="name_fr_to_audio">Nom FR → Audio</option>
+                            <option value="name_alt_to_audio">Nom EN → Audio</option>
                         </select>
                     </div>
                     <div class="mb-3">

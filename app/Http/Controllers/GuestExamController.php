@@ -10,21 +10,6 @@ use Illuminate\Support\Facades\Auth;
 
 class GuestExamController extends Controller
 {
-    private array $modeMap = [
-        'photo_to_name_fr'    => ['Q1'],
-        'photo_to_name_alt'    => ['Q8'],
-        'photo_to_function'   => ['Q2'],
-        'function_to_photo'   => ['Q3'],
-        'function_to_name_fr' => ['Q6'],
-        'function_to_name_alt' => ['Q12'],
-        'name_fr_to_name_alt'  => ['Q4'],
-        'name_fr_to_photo'    => ['Q9'],
-        'name_fr_to_function' => ['Q10'],
-        'name_alt_to_photo'    => ['Q5'],
-        'name_alt_to_function' => ['Q11'],
-        'name_alt_to_name_fr'  => ['Q7'],
-    ];
-
     public function show(string $uuid)
     {
         $sharedExam = SharedExam::where('uuid', $uuid)->with('user', 'module')->firstOrFail();
@@ -67,21 +52,27 @@ class GuestExamController extends Controller
         }
 
         $mode      = $sharedExam->mode;
+        $modeMap   = QuizGenerator::getModeMap();
         $items     = $allItems->shuffle();
         $questions = [];
 
         foreach ($items as $item) {
-            if ($mode === 'random' || !isset($this->modeMap[$mode])) {
-                $mediaAnswerTypes = ['Q3', 'Q5', 'Q9', 'Q15', 'Q16'];
+            if ($mode === 'random' || !isset($modeMap[$mode])) {
+                $mediaAnswerTypes = QuizGenerator::getMediaAnswerTypes();
                 $types = array_values(array_diff(QuizGenerator::getQuestionTypes(), $mediaAnswerTypes));
             } else {
-                $types = $this->modeMap[$mode];
+                $types = $modeMap[$mode];
             }
             $questionType = $types[array_rand($types)];
             $q            = QuizGenerator::generateQuestion($module, $questionType, $item, $types);
             if (!isset($q['error'])) {
                 $questions[] = $q;
             }
+        }
+
+        if (empty($questions)) {
+            return redirect()->route('guest.exam.show', $uuid)
+                ->with('error', 'Aucune question n\'a pu être générée pour ce mode avec les items de ce module.');
         }
 
         session([
