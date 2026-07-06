@@ -16,7 +16,7 @@ class GuestExamController extends Controller
         'photo_to_function'   => ['Q2'],
         'function_to_photo'   => ['Q3'],
         'function_to_name_fr' => ['Q6'],
-        'function_to_name_alt' => ['Q11'],
+        'function_to_name_alt' => ['Q12'],
         'name_fr_to_name_alt'  => ['Q4'],
         'name_fr_to_photo'    => ['Q9'],
         'name_fr_to_function' => ['Q10'],
@@ -72,12 +72,13 @@ class GuestExamController extends Controller
 
         foreach ($items as $item) {
             if ($mode === 'random' || !isset($this->modeMap[$mode])) {
-                $types = QuizGenerator::getQuestionTypes();
+                $mediaAnswerTypes = ['Q3', 'Q5', 'Q9', 'Q15', 'Q16'];
+                $types = array_values(array_diff(QuizGenerator::getQuestionTypes(), $mediaAnswerTypes));
             } else {
                 $types = $this->modeMap[$mode];
             }
             $questionType = $types[array_rand($types)];
-            $q            = QuizGenerator::generateQuestion($module, $questionType, $item);
+            $q            = QuizGenerator::generateQuestion($module, $questionType, $item, $types);
             if (!isset($q['error'])) {
                 $questions[] = $q;
             }

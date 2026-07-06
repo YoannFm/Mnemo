@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-07-06
+
+### Examens partagés - type de question qui partait en aléatoire
+
+- Sur un lien d'examen partagé, `GuestExamController::start()` ne transmettait pas les types autorisés à `QuizGenerator::generateQuestion()` : dès qu'un item ne pouvait pas générer le type demandé (ex : mode "Photo -> Nom EN" sur un item sans traduction), le type de secours était tiré parmi tous les types du module au lieu de rester dans le mode choisi
+- Correction : les types autorisés sont maintenant transmis, comme le fait déjà l'examen classique (`ExamController`)
+- Le mode `random` du lien partagé exclut désormais aussi les types réponse-média (Q3, Q5, Q9, Q15, Q16), comme pour l'examen classique
+- Correction d'un mapping incorrect : le mode "Fonction -> Traduction" pointait vers Q11 (Fonction -> Signification) au lieu de Q12 (Fonction -> Traduction)
+
+---
+
 ## 2026-06-18 (suite)
 
 ### Notifications - envoi groupé
