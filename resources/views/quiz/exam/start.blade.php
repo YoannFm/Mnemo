@@ -14,9 +14,31 @@
             <div class="mb-4">
                 <h4 class="mb-1"><i class="bi bi-pencil-square me-2" style="color:var(--accent);"></i>Mode Examen</h4>
                 <p style="color:var(--text-muted);font-size:.875rem;">
-                    Choisissez le nombre de questions parmi les <strong>{{ $itemCount }} items</strong> du module. Aucun feedback pendant l'examen. Le score s'affiche à la fin.
+                    {{ $module->title }} &middot; {{ $itemCount }} item{{ $itemCount > 1 ? 's' : '' }}
                 </p>
             </div>
+
+            @if (Auth::id() === $module->owner_id)
+            <ul class="nav nav-tabs mb-4" id="examTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab-exam-btn" data-bs-toggle="tab" data-bs-target="#tab-exam" type="button" role="tab" aria-controls="tab-exam" aria-selected="true">
+                        <i class="bi bi-pencil-square me-1"></i>Examen
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab-shared-btn" data-bs-toggle="tab" data-bs-target="#tab-shared" type="button" role="tab" aria-controls="tab-shared" aria-selected="false">
+                        <i class="bi bi-share me-1"></i>Examen partagé
+                    </button>
+                </li>
+            </ul>
+            @endif
+
+            <div class="tab-content" id="examTabsContent">
+            <div class="tab-pane fade show active" id="tab-exam" role="tabpanel" aria-labelledby="tab-exam-btn">
+
+            <p style="color:var(--text-muted);font-size:.875rem;">
+                Choisissez le nombre de questions parmi les <strong>{{ $itemCount }} items</strong> du module. Aucun feedback pendant l'examen. Le score s'affiche à la fin.
+            </p>
 
             <form method="POST" action="{{ route('exam.start', $module) }}" id="exam-form">
                 @csrf
@@ -120,8 +142,11 @@
                 </div>
             </form>
 
+            </div>
+
             @if (Auth::id() === $module->owner_id)
-            <div class="card mt-4">
+            <div class="tab-pane fade" id="tab-shared" role="tabpanel" aria-labelledby="tab-shared-btn">
+            <div class="card mt-0">
                 <div class="card-body p-3">
                     <h6 class="mb-3" style="font-size:.875rem;font-weight:600;">
                         <i class="bi bi-share me-1" style="color:var(--accent);"></i>Générer un lien d'examen partagé
@@ -259,7 +284,9 @@
                 </div>
             </div>
             @endif
+            </div>
             @endif
+            </div>
         </div>
     </div>
 

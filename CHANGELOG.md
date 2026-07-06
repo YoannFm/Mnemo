@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-06 (suite 6)
+
+### Page Examen - séparation en onglets Examen / Examen partagé
+
+- La page `quiz/exam/start.blade.php` mélangeait dans une seule colonne le formulaire pour passer l'examen soi-même et celui pour générer un lien partagé, ce qui rendait la page longue et confuse
+- Ajout de deux onglets Bootstrap : "Examen" (formulaire habituel) et "Examen partagé" (génération de lien + liste des liens existants), visibles uniquement pour le propriétaire du module
+- Aucun changement de logique : les formulaires, IDs et scripts JS restent identiques, seule la présentation change
+
 ## 2026-07-06 (suite 5)
 
 ### Examen partagé - vrai bug trouvé : le mode n'était jamais transmis
