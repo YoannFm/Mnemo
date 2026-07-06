@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-06 (suite 5)
+
+### Examen partagé - vrai bug trouvé : le mode n'était jamais transmis
+
+- Cause réelle de "les questions partent en aléatoire" malgré tous les correctifs précédents sur `QuizGenerator` : le formulaire de génération de lien dans `resources/views/quiz/exam/start.blade.php` envoyait un champ caché `mode` figé à `random`, sans aucun moyen de le changer dans l'interface
+- Le fichier `resources/views/shared-exam/create-modal.blade.php` (avec son menu déroulant de modes) n'était inclus nulle part dans l'application : code mort, jamais rendu
+- Ajout d'un vrai sélecteur de mode (bascule Aléatoire + choix "ce que je vois" / "ce que je réponds", identique à celui déjà utilisé pour démarrer un examen classique) sur le formulaire de génération de lien
+- Tous les correctifs précédents sur `QuizGenerator`/`GuestExamController` restent valides et nécessaires, mais ils ne pouvaient pas résoudre le problème tant que l'interface n'envoyait que `random`
+
 ## 2026-07-06 (suite 4)
 
 ### Génération de questions - centralisation et derniers correctifs

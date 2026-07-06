@@ -132,7 +132,63 @@
 
                     <form method="POST" action="{{ route('shared-exam.create', $module) }}">
                         @csrf
-                        <input type="hidden" name="mode" value="random">
+                        <input type="hidden" name="mode" id="share-mode-value" value="random">
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch d-flex align-items-center gap-2 mb-2" style="padding-left:0;">
+                                <input class="form-check-input" type="checkbox" id="share-random-toggle" checked style="width:2.5rem;height:1.25rem;cursor:pointer;margin:0;">
+                                <label class="form-check-label fw-semibold" for="share-random-toggle" style="cursor:pointer;font-size:.85rem;">
+                                    <i class="bi bi-shuffle me-1" style="color:var(--accent);"></i> Aléatoire
+                                </label>
+                            </div>
+                            <div id="share-io-section" class="row g-2" style="display:none;">
+                                <div class="col-6">
+                                    <label class="form-label" style="font-size:.8rem;">Ce que je vois</label>
+                                    <select id="share-input-field" class="form-select form-select-sm">
+                                        @if($module->field_photo)
+                                            <option value="photo_path">Photo</option>
+                                        @endif
+                                        @if($module->field_audio)
+                                            <option value="audio_path">Son</option>
+                                        @endif
+                                        @if($module->field_name_fr)
+                                            <option value="name_fr">Nom</option>
+                                        @endif
+                                        @if($module->field_name_alt)
+                                            <option value="name_alt">Traduction</option>
+                                        @endif
+                                        @if($module->field_function)
+                                            <option value="function_text">Description</option>
+                                        @endif
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label" style="font-size:.8rem;">Ce que je réponds</label>
+                                    <select id="share-output-field" class="form-select form-select-sm">
+                                        @if($module->field_name_fr)
+                                            <option value="name_fr">Nom</option>
+                                        @endif
+                                        @if($module->field_name_alt)
+                                            <option value="name_alt">Traduction</option>
+                                        @endif
+                                        @if($module->field_function)
+                                            <option value="function_text">Description</option>
+                                        @endif
+                                        @if($module->field_photo)
+                                            <option value="photo_path">Photo</option>
+                                        @endif
+                                        @if($module->field_audio)
+                                            <option value="audio_path">Son</option>
+                                        @endif
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <div id="share-invalid-combo" class="alert alert-warning d-none mt-1 py-2 mb-0" style="font-size:.8rem;">
+                                        <i class="bi bi-exclamation-triangle me-1"></i> L'entrée et la sortie doivent être différentes.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="row g-2 mb-3">
                             <div class="col-6">
@@ -259,6 +315,38 @@
     inputField.addEventListener('change', updateMode);
     outputField.addEventListener('change', updateMode);
     updateMode();
+
+    var shareRandomToggle = document.getElementById('share-random-toggle');
+    var shareIoSection = document.getElementById('share-io-section');
+    var shareInputField = document.getElementById('share-input-field');
+    var shareOutputField = document.getElementById('share-output-field');
+    var shareModeValue = document.getElementById('share-mode-value');
+    var shareSubmitBtn = document.getElementById('share-submit-btn');
+    var shareInvalidCombo = document.getElementById('share-invalid-combo');
+
+    function updateShareMode() {
+        if (shareRandomToggle.checked) {
+            shareIoSection.style.display = 'none';
+            shareModeValue.value = 'random';
+            shareSubmitBtn.disabled = false;
+            return;
+        }
+        shareIoSection.style.display = '';
+        var inp = shareInputField.value, out = shareOutputField.value;
+        if (inp === out) {
+            shareInvalidCombo.classList.remove('d-none');
+            shareSubmitBtn.disabled = true;
+            shareModeValue.value = '';
+        } else {
+            shareInvalidCombo.classList.add('d-none');
+            shareSubmitBtn.disabled = false;
+            shareModeValue.value = modeMap[inp + '|' + out] || 'random';
+        }
+    }
+    shareRandomToggle.addEventListener('change', updateShareMode);
+    shareInputField.addEventListener('change', updateShareMode);
+    shareOutputField.addEventListener('change', updateShareMode);
+    updateShareMode();
 
     function copyLink(url) {
         navigator.clipboard.writeText(url).then(function() {
