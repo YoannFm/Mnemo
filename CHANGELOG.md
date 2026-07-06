@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-06 (suite 7)
+
+### Footer - Copyright au lieu de la licence MIT
+
+- Le footer et sa modale affichaient "Licence MIT" avec le texte de la licence MIT ; remplacés par "Copyright - Tous droits réservés"
+- Le fichier `LICENSE` est réécrit en conséquence : propriété exclusive de Yoann LE BORGNE, reproduction/distribution/modification interdite sans autorisation écrite préalable, avec mention que des autorisations spécifiques (passe-droits) peuvent être accordées à certaines entités à la discrétion du titulaire des droits
+- `composer.json` : champ `license` passé de `MIT` à `proprietary`
+
 ## 2026-07-06 (suite 6)
 
 ### Page Examen - séparation en onglets Examen / Examen partagé
