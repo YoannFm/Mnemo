@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-06 (suite 3)
+
+### Génération de questions - correctifs complémentaires
+
+- `ExamController` et `TestController` avaient le même mapping incorrect que celui déjà corrigé ailleurs : le mode "Fonction -> Traduction" pointait vers Q11 (Fonction -> Signification) au lieu de Q12 (Fonction -> Traduction)
+- `GuestExamController::answer()` ne vérifiait pas que l'index de réponse envoyé existait bien dans les options générées (contrairement à `ExamController::submit()` et `TestController::submit()`) : un invité envoyant un index hors bornes provoquait une erreur au lieu d'un message "Réponse invalide."
+- `QuizGenerator::filterTypesByModule()` ne filtrait pas les types de questions selon les champs `field_name_alt` et `field_name_fr` : si l'un de ces champs était désactivé sur un module, des questions utilisant quand même ce champ (ex : Q4, Q7 pour name_fr / Q5, Q8 pour name_alt) pouvaient être générées
+
 ## 2026-07-06 (suite)
 
 ### Génération de questions - cause racine du passage en aléatoire

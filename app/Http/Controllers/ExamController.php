@@ -46,7 +46,7 @@ class ExamController extends Controller
             'photo_to_function'   => ['Q2'],
             'function_to_photo'   => ['Q3'],
             'function_to_name_fr' => ['Q6'],
-            'function_to_name_alt' => ['Q11'],
+            'function_to_name_alt' => ['Q12'],
             'name_fr_to_name_alt'  => ['Q4'],
             'name_fr_to_photo'    => ['Q9'],
             'name_fr_to_function' => ['Q10'],

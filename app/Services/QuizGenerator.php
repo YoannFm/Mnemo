@@ -251,7 +251,7 @@ class QuizGenerator
 
     /**
      * Filtre une liste de types de questions selon les champs activés sur le module
-     * (photo, audio, fonction).
+     * (photo, audio, fonction, nom FR, nom alternatif).
      */
     private static function filterTypesByModule(array $types, Module $module): array
     {
@@ -261,11 +261,15 @@ class QuizGenerator
             $audioTypes    = ['Q13', 'Q14'];
             $audioAnsTypes = ['Q15', 'Q16'];
             $funcTypes     = ['Q2', 'Q6', 'Q10', 'Q11'];
+            $nameFrTypes   = ['Q1', 'Q4', 'Q6', 'Q7', 'Q9', 'Q10', 'Q13', 'Q15'];
+            $nameAltTypes  = ['Q4', 'Q5', 'Q7', 'Q8', 'Q11', 'Q12', 'Q14', 'Q16'];
             if (in_array($t, $photoTypes) && !$module->field_photo) return false;
             if (in_array($t, $photoAnsTypes) && !$module->field_photo) return false;
             if (in_array($t, $audioTypes) && !$module->field_audio) return false;
             if (in_array($t, $audioAnsTypes) && !$module->field_audio) return false;
             if (in_array($t, $funcTypes) && !$module->field_function) return false;
+            if (in_array($t, $nameFrTypes) && !$module->field_name_fr) return false;
+            if (in_array($t, $nameAltTypes) && !$module->field_name_alt) return false;
             return true;
         }));
     }

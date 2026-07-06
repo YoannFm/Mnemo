@@ -132,6 +132,10 @@ class GuestExamController extends Controller
         $questions = session('guest_exam_questions', []);
         $question  = $questions[$current];
 
+        if (!isset($question['options'][$validated['answer']])) {
+            return redirect()->route('guest.exam.question', $uuid)->with('error', 'Réponse invalide.');
+        }
+
         $isCorrect = QuizGenerator::validateAnswer($question, $validated['answer']);
         $answers   = session('guest_exam_answers', []);
         $answers[$current] = [
