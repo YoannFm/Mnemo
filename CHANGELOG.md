@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-07-06 (suite)
+
+### Génération de questions - cause racine du passage en aléatoire
+
+- Le correctif précédent (transmission de `$allowedTypes` dans `GuestExamController`) ne suffisait pas : `QuizGenerator::generateQuestion()` retombait lui-même sur n'importe quel type éligible du module dès que l'item tiré au sort ne pouvait pas générer le type demandé (ex : item sans traduction pour le mode "Photo -> Nom EN"), en ignorant `$allowedTypes`
+- Correction : quand l'item tiré ne convient pas, `generateQuestion()` cherche maintenant un autre item du module qui reste dans le mode demandé, au lieu de changer de type ; si vraiment aucun item du module ne convient, la question est sautée (comportement déjà géré par tous les appelants)
+- Ce correctif est au niveau du service `QuizGenerator`, il profite donc aussi aux examens classiques, tests et sessions Anki, pas seulement aux liens partagés
+- Correction d'un bug annexe : `getEligibleTypes()` ne vérifiait pas que l'item cible avait lui-même une valeur non-vide pour le champ réponse, ce qui pouvait produire une réponse correcte vide
+
 ## 2026-07-06
 
 ### Examens partagés - type de question qui partait en aléatoire
