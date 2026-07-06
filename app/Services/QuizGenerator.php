@@ -134,19 +134,7 @@ class QuizGenerator
         }
 
         // Filtrer selon les champs actifs du module
-        $eligibleTypes = array_values(array_filter($eligibleTypes, function ($t) use ($module) {
-            $photoTypes    = ['Q1', 'Q2', 'Q8'];
-            $photoAnsTypes = ['Q3', 'Q9'];
-            $audioTypes    = ['Q13', 'Q14'];
-            $audioAnsTypes = ['Q15', 'Q16'];
-            $funcTypes     = ['Q2', 'Q6', 'Q10', 'Q11'];
-            if (in_array($t, $photoTypes) && !$module->field_photo) return false;
-            if (in_array($t, $photoAnsTypes) && !$module->field_photo) return false;
-            if (in_array($t, $audioTypes) && !$module->field_audio) return false;
-            if (in_array($t, $audioAnsTypes) && !$module->field_audio) return false;
-            if (in_array($t, $funcTypes) && !$module->field_function) return false;
-            return true;
-        }));
+        $eligibleTypes = self::filterTypesByModule($eligibleTypes, $module);
 
         if (empty($eligibleTypes)) {
             return ['error' => 'Aucun type de question compatible avec la configuration du module.'];
@@ -156,6 +144,25 @@ class QuizGenerator
             $candidates = empty($allowedTypes)
                 ? $eligibleTypes
                 : array_values(array_intersect($eligibleTypes, $allowedTypes));
+
+            if (empty($candidates) && !empty($allowedTypes)) {
+                // Aucun type du mode demandé n'est jouable avec cet item : chercher un
+                // autre item du module qui, lui, permet de rester dans le mode choisi
+                // plutôt que de basculer vers un type totalement différent.
+                foreach ($allItems as $altItem) {
+                    if ($altItem->id === $targetItem->id) {
+                        continue;
+                    }
+                    $altEligible = self::filterTypesByModule(self::getEligibleTypes($allItems, $altItem), $module);
+                    $altCandidates = array_values(array_intersect($altEligible, $allowedTypes));
+                    if (!empty($altCandidates)) {
+                        return self::generateQuestion($module, $altCandidates[array_rand($altCandidates)], $altItem, $allowedTypes, $optionCount);
+                    }
+                }
+
+                return ['error' => 'Aucun item du module ne permet de générer ce type de question.'];
+            }
+
             if (empty($candidates)) {
                 $candidates = $eligibleTypes;
             }
@@ -225,6 +232,7 @@ class QuizGenerator
      * Retourne les types de questions jouables pour un item donné dans un module.
      * Un type est éligible si :
      * - l'item cible a une valeur non-vide pour field_question
+     * - l'item cible a une valeur non-vide pour field_answer
      * - au moins 1 autre item a une valeur non-vide pour field_answer
      */
     public static function getEligibleTypes(\Illuminate\Support\Collection $allItems, Item $targetItem): array
@@ -235,8 +243,30 @@ class QuizGenerator
             $fq = $type['field_question'];
             $fa = $type['field_answer'];
             $hasQuestion    = !empty($targetItem->{$fq});
+            $hasAnswer      = !empty($targetItem->{$fa});
             $hasDistractors = $others->filter(fn($i) => !empty($i->{$fa}))->count() >= 1;
-            return $hasQuestion && $hasDistractors;
+            return $hasQuestion && $hasAnswer && $hasDistractors;
+        }));
+    }
+
+    /**
+     * Filtre une liste de types de questions selon les champs activés sur le module
+     * (photo, audio, fonction).
+     */
+    private static function filterTypesByModule(array $types, Module $module): array
+    {
+        return array_values(array_filter($types, function ($t) use ($module) {
+            $photoTypes    = ['Q1', 'Q2', 'Q8'];
+            $photoAnsTypes = ['Q3', 'Q9'];
+            $audioTypes    = ['Q13', 'Q14'];
+            $audioAnsTypes = ['Q15', 'Q16'];
+            $funcTypes     = ['Q2', 'Q6', 'Q10', 'Q11'];
+            if (in_array($t, $photoTypes) && !$module->field_photo) return false;
+            if (in_array($t, $photoAnsTypes) && !$module->field_photo) return false;
+            if (in_array($t, $audioTypes) && !$module->field_audio) return false;
+            if (in_array($t, $audioAnsTypes) && !$module->field_audio) return false;
+            if (in_array($t, $funcTypes) && !$module->field_function) return false;
+            return true;
         }));
     }
 
