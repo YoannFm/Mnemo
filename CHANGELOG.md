@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-07-06 (suite 8)
+
+### Version 1.0.1
+
+- `config/mnemo.php` : version passée de `1.0.0` à `1.0.1`
+
 ## 2026-07-06 (suite 7)
 
 ### Footer - Copyright au lieu de la licence MIT
