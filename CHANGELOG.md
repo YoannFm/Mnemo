@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-06 (suite 9)
+
+### Suppression du système de licence et de la clé du site
+
+- Retrait du lien "Copyright - Tous droits réservés" et de sa modale dans le footer (`layouts/app.blade.php` et `layouts/admin.blade.php`)
+- Retrait du champ "Clé du site" (`site_key`) des paramètres admin (`admin/settings/index.blade.php`, `SettingsController`)
+- Retrait de l'en-tête `X-Site-Key` envoyé au serveur cloud dans `UpdateManager` et `PluginManager` (les mises à jour/plugins n'envoient plus que `X-Mnemo-Version`)
+
 ## 2026-07-06 (suite 8)
 
 ### Version 1.0.1

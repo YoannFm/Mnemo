@@ -127,7 +127,6 @@ class PluginManager
     protected function cloudHeaders(): array
     {
         return [
-            'X-Site-Key'      => setting('site_key', ''),
             'X-Mnemo-Version' => \App\Mnemo::version(),
         ];
     }

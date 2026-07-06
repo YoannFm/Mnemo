@@ -182,7 +182,6 @@ class UpdateManager
     private function headers(): array
     {
         return [
-            'X-Site-Key'      => setting('site_key', ''),
             'X-Mnemo-Version' => \App\Mnemo::version(),
         ];
     }

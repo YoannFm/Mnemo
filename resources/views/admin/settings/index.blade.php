@@ -120,26 +120,15 @@
                     </div>
                 </div>
 
-                {{-- Clé du site + Webhook Discord --}}
-                <div class="row gx-3">
-                    <div class="mb-3 col-md-6">
-                        <label class="form-label" for="site_key">Clé du site</label>
-                        <input type="text" id="site_key" name="site_key"
-                               class="form-control @error('site_key') is-invalid @enderror"
-                               value="{{ old('site_key', $settings['site_key']) }}"
-                               maxlength="255">
-                        <div class="form-text">Sera utilisée pour connecter un serveur de jeu ou accéder au marketplace.</div>
-                        @error('site_key')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
-                    <div class="mb-3 col-md-6">
-                        <label class="form-label" for="posts_webhook">Webhook Discord (articles)</label>
-                        <input type="url" id="posts_webhook" name="posts_webhook"
-                               class="form-control @error('posts_webhook') is-invalid @enderror"
-                               value="{{ old('posts_webhook', $settings['posts_webhook']) }}"
-                               maxlength="500"
-                               placeholder="https://discord.com/api/webhooks/...">
-                        @error('posts_webhook')<span class="invalid-feedback">{{ $message }}</span>@enderror
-                    </div>
+                {{-- Webhook Discord --}}
+                <div class="mb-3">
+                    <label class="form-label" for="posts_webhook">Webhook Discord (articles)</label>
+                    <input type="url" id="posts_webhook" name="posts_webhook"
+                           class="form-control @error('posts_webhook') is-invalid @enderror"
+                           value="{{ old('posts_webhook', $settings['posts_webhook']) }}"
+                           maxlength="500"
+                           placeholder="https://discord.com/api/webhooks/...">
+                    @error('posts_webhook')<span class="invalid-feedback">{{ $message }}</span>@enderror
                 </div>
 
                 {{-- Examens --}}
