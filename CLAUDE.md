@@ -94,7 +94,7 @@ Toujours développer sur la branche `claude/lucid-maxwell-OTvnN`.
 
 **Push vers GitHub :**
 ```bash
-git remote set-url origin https://YoannFM-rascol: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@github.com/YoannFm/Mnemo.git && git push -u origin claude/lucid-maxwell-OTvnN 2>&1; git remote set-url origin http://local_proxy@127.0.0.1:37379/git/YoannFM-rascol/Mnemo
+git push -u origin claude/lucid-maxwell-OTvnN
 ```
 
 **Repo GitHub :** `YoannFm/Mnemo` (attention : le remote MCP est `YoannFM-rascol/Mnemo`, mais le vrai repo GitHub s'appelle `YoannFm/Mnemo`)

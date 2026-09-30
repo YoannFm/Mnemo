@@ -170,7 +170,6 @@ Le module **Pages** gère les pages d'information :
 | Nom de l'application | Affiché dans le titre de la page et les e-mails |
 | Logo | Image du logo (format PNG recommandé) |
 | Favicon | Icône de l'onglet navigateur |
-| Clé de licence | Vérification de la licence de l'application |
 
 ### Page d'accueil (`/admin/settings/home`)
 

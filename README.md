@@ -2,6 +2,8 @@
 
 Application web de mémorisation par répétition espacée, développée au Lycée Rascol (Albi).
 
+Mnemo est un projet **open source** distribué sous licence MIT (voir [LICENSE](LICENSE)). Aucune clé de licence, activation ni connexion à un serveur de licence n'est nécessaire pour l'installer ou l'utiliser.
+
 ## Présentation
 
 Mnemo permet de créer des modules thématiques contenant des items (question + réponse), puis de s'entraîner via deux modes :
@@ -46,7 +48,7 @@ Une bibliothèque publique permet de partager et dupliquer des modules entre uti
 
 ## Stack technique
 
-- **Back-end** - PHP 8.3, Laravel 11
+- **Back-end** - PHP 8.3+, Laravel 13
 - **Base de données** - SQLite (développement) / MySQL (production)
 - **Front-end** - Bootstrap 5.3, Bootstrap Icons, Alpine.js, JavaScript natif
 - **Éditeur** - TinyMCE 6 (hébergé localement)
@@ -55,7 +57,7 @@ Une bibliothèque publique permet de partager et dupliquer des modules entre uti
 
 ## Prérequis
 
-- PHP >= 8.2 avec extensions : `pdo`, `pdo_sqlite`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`
+- PHP >= 8.3 avec extensions : `pdo`, `pdo_sqlite`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `bcmath`, `fileinfo`, `gd`
 - Composer
 - Node.js >= 18
 - Git
@@ -72,7 +74,7 @@ Une bibliothèque publique permet de partager et dupliquer des modules entre uti
 
 ```bash
 # 1. Cloner le dépôt
-git clone https://github.com/YoannFM-rascol/Mnemo.git
+git clone https://github.com/YoannFm/Mnemo.git
 cd Mnemo
 
 # 2. Installer les dépendances PHP
@@ -128,6 +130,10 @@ public/
 - vendor/tinymce/           # TinyMCE 6 (local)
 - vendor/bootstrap-icons/   # Bootstrap Icons (local)
 ```
+
+## Licence
+
+Ce projet est open source, publié sous licence [MIT](LICENSE). Vous êtes libre de l'utiliser, le modifier et le redistribuer selon les termes de cette licence. L'application fonctionne entièrement sans clé de licence ni vérification en ligne.
 
 ## Auteur
 

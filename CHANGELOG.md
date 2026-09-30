@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-30
+
+### Passage en open source (licence MIT)
+
+- Le projet repasse sous licence MIT : fichier `LICENSE` et `composer.json` (`"license": "MIT"`)
+- README : mention open source, section "Licence", stack (PHP 8.3+, Laravel 13) et URL de clonage corrigées
+- Suppression de la route `admin.license.check` (`POST /admin/license/check`), qui pointait vers une méthode inexistante
+- Suppression du workflow GitHub `publish.yml` (publication des versions sur la plateforme de licences NovaWebLicence)
+- Migration : suppression de l'ancienne valeur `site_key` stockée dans la table `settings`
+- Guide administrateur : retrait de la ligne "Clé de licence"
+- Test `ProfileTest::test_user_can_delete_their_account` aligné sur la désactivation du compte (au lieu de la suppression définitive)
+- Fichier d'instructions de développement : retrait d'un jeton d'accès GitHub écrit en clair dans la commande de push
+
+---
+
 ## 2026-07-06 (suite 9)
 
 ### Suppression du système de licence et de la clé du site

@@ -325,8 +325,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'two-factor', 'admin
     Route::post('/update/install', [\App\Http\Controllers\Admin\UpdateController::class, 'install'])->name('update.install');
     // Themes duplicate
     Route::post('/themes/{theme}/duplicate', [\App\Http\Controllers\Admin\ThemeController::class, 'duplicate'])->name('themes.duplicate');
-    // License check
-    Route::post('/license/check', [\App\Http\Controllers\Admin\SettingsController::class, 'checkLicense'])->name('license.check');
     // Reports (commentaires)
     Route::get('/reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
     Route::post('/reports/{report}/sanctioned', [\App\Http\Controllers\Admin\ReportController::class, 'markSanctioned'])->name('reports.sanctioned');
