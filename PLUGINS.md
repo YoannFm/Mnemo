@@ -6,12 +6,51 @@ Les plugins permettent d'étendre les fonctionnalités de Mnemo sans modifier le
 
 ## Installation d'un plugin
 
-1. Va dans **Admin → Plugins → Disponibles**
+Les plugins présents dans le dossier `plugins/` sont fournis avec Mnemo : ils sont déjà installés, il suffit de les activer.
+
+Pour installer un plugin du catalogue :
+
+1. Va dans **Admin → Plugins**, section **Plugins disponibles**
 2. Clique sur **Installer** à côté du plugin souhaité
-3. Une fois installé, clique sur **Activer**
+3. Une fois installé, clique sur **Activer** dans la section **Plugins installés**
 4. Le plugin est immédiatement actif sur le site
 
-Pour désactiver un plugin sans le supprimer, clique sur **Désactiver** dans l'onglet **Installés**.
+Pour désactiver un plugin sans le supprimer, clique sur **Désactiver** dans la section **Plugins installés**.
+
+---
+
+## Catalogue des plugins
+
+La liste des plugins disponibles est le fichier [`plugins.json`](plugins.json) à la racine du dépôt GitHub. L'application le lit à l'adresse définie par `MNEMO_PLUGINS_CATALOG` (par défaut `https://raw.githubusercontent.com/YoannFm/Mnemo/main/plugins.json`).
+
+Format :
+
+```json
+{
+    "plugins": [
+        {
+            "slug": "mon-plugin",
+            "name": "Mon plugin",
+            "description": "Ce que fait le plugin.",
+            "author": "Auteur",
+            "version": "1.0.0",
+            "download_url": "https://github.com/auteur/mon-plugin/releases/download/v1.0.0/mon-plugin.zip"
+        }
+    ]
+}
+```
+
+| Champ | Obligatoire | Description |
+|---|---|---|
+| `slug` | oui | Identifiant du plugin (minuscules, chiffres et tirets). Doit être égal à l'`id` du `plugin.json` du plugin |
+| `name` | oui | Nom affiché |
+| `version` | oui | Dernière version publiée, comparée à celle du plugin installé pour proposer la mise à jour |
+| `download_url` | oui | URL `https://` de l'archive ZIP du plugin |
+| `description`, `author` | non | Informations affichées dans l'admin |
+
+L'archive ZIP doit contenir directement les fichiers du plugin (`plugin.json` à la racine de l'archive, sans dossier parent) : elle est extraite dans `plugins/{slug}/`. Le plus simple est de l'attacher à une release GitHub du dépôt du plugin.
+
+Pour publier un plugin ou une nouvelle version, ajoute ou modifie son entrée dans `plugins.json` et propose la modification sur le dépôt.
 
 ---
 
@@ -43,7 +82,7 @@ Envoie automatiquement les résultats d'un examen partagé vers une URL externe 
 ### Configuration
 Lors de la création d'un examen partagé, un champ **URL Webhook** est disponible. Colle l'URL fournie par ton service externe (ex : URL de scénario Zapier, webhook Make, etc.).
 
-Le champ est optionnel — si vide, aucune requête n'est envoyée.
+Le champ est optionnel - si vide, aucune requête n'est envoyée.
 
 ### Format des données envoyées
 Les données sont envoyées en JSON via une requête POST :

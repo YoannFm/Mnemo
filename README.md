@@ -103,6 +103,21 @@ php artisan serve
 
 L'application est disponible sur `http://localhost:8000`.
 
+## Mises à jour et plugins
+
+Les mises à jour et le catalogue de plugins sont distribués via GitHub, sans aucun serveur tiers :
+
+- **Mises à jour** : la page **Admin - Mises à jour** lit la dernière [release GitHub](https://github.com/YoannFm/Mnemo/releases) et installe son archive `mnemo.zip`.
+- **Plugins** : la page **Admin - Plugins** lit le catalogue [`plugins.json`](plugins.json) (voir [PLUGINS.md](PLUGINS.md)).
+
+Pour une instance basée sur un fork, les variables `MNEMO_GITHUB_REPOSITORY` et `MNEMO_PLUGINS_CATALOG` du `.env` permettent de pointer vers d'autres sources.
+
+### Publier une version
+
+1. Mettre à jour `version` dans `config/mnemo.php` (ex. `1.0.2`) et le `CHANGELOG.md`, puis pousser
+2. Créer et pousser le tag correspondant : `git tag v1.0.2 && git push origin v1.0.2`
+3. Le workflow `.github/workflows/release.yml` construit l'archive `mnemo.zip` (code, dépendances PHP, assets compilés) et publie la release. Il échoue si le tag ne correspond pas à `config/mnemo.php`.
+
 ## Mise à jour (serveur)
 
 ```bash

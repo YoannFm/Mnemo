@@ -209,6 +209,8 @@ Activer ou désactiver des fonctionnalités de la plateforme :
 
 ### Liste des plugins (`/admin/plugins`)
 
+Les plugins du dossier `plugins/` sont fournis avec Mnemo. Les autres proviennent du catalogue `plugins.json` publié sur GitHub (voir `PLUGINS.md`).
+
 Affiche tous les plugins disponibles (installés et non installés) avec leur état :
 
 | État | Description |
@@ -278,7 +280,7 @@ Chaque entrée contient :
 
 ### Vérifier les mises à jour (`/admin/update`)
 
-L'interface de mise à jour permet de mettre à jour l'application depuis le panel sans accès SSH :
+L'interface de mise à jour permet de mettre à jour l'application depuis le panel sans accès SSH. Les versions proviennent des releases GitHub du projet (archive `mnemo.zip` de la dernière release) :
 
 1. **Vérifier** si une mise à jour est disponible (bouton **Vérifier**)
 2. **Télécharger** le package de mise à jour

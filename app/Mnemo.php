@@ -8,4 +8,12 @@ class Mnemo
     {
         return config('mnemo.version', '1.0.0');
     }
+
+    /**
+     * User-Agent envoyé lors des appels HTTP sortants (requis par l'API GitHub).
+     */
+    public static function userAgent(): string
+    {
+        return 'Mnemo/' . self::version();
+    }
 }

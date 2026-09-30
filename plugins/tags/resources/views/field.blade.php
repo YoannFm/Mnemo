@@ -30,7 +30,7 @@
         @if ($availableTags->isNotEmpty())
             <div class="d-flex gap-2 align-items-center mb-2">
                 <select id="tag-attach-select-{{ $module->id }}" class="form-select form-select-sm" style="max-width:220px;">
-                    <option value="">— Ajouter un tag existant —</option>
+                    <option value="">- Ajouter un tag existant -</option>
                     @foreach ($availableTags as $tag)
                         <option value="{{ $tag->id }}" data-color="{{ $tag->color ?? '#6b7280' }}" data-name="{{ $tag->name }}">{{ $tag->name }}</option>
                     @endforeach
@@ -60,7 +60,7 @@
         <div id="tags-create-selected" class="d-flex flex-wrap gap-2 mb-2"></div>
         <div class="d-flex gap-2 align-items-center">
             <select id="tags-create-select" class="form-select form-select-sm" style="max-width:220px;">
-                <option value="">— Choisir un tag —</option>
+                <option value="">- Choisir un tag -</option>
                 @foreach ($allTags as $tag)
                     <option value="{{ $tag->id }}" data-name="{{ $tag->name }}" data-color="{{ $tag->color ?? '#6b7280' }}">
                         {{ $tag->name }}

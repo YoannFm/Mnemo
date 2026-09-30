@@ -18,19 +18,15 @@ class PluginController extends Controller
             return $plugin;
         });
 
-        try {
-            $available = $this->plugins->getAvailablePlugins();
-        } catch (Throwable) {
-            $available = collect();
-        }
+        $available = $this->plugins->getAvailablePlugins();
 
-        // Build a map of slug => latest_version from cloud data
-        $cloudVersions = $available->keyBy('slug')->map(fn ($p) => $p->latest_version ?? null);
+        // Version proposée par le catalogue pour chaque plugin (slug => version)
+        $catalogVersions = $available->pluck('version', 'slug');
 
-        $installed = $installed->map(function ($plugin) use ($cloudVersions) {
-            $cloud = $cloudVersions->get($plugin->id);
-            $plugin->has_update = $cloud && version_compare($cloud, $plugin->version ?? '0', '>');
-            $plugin->latest_version = $cloud;
+        $installed = $installed->map(function ($plugin) use ($catalogVersions) {
+            $latest = $catalogVersions->get($plugin->id);
+            $plugin->has_update = $latest && version_compare($latest, $plugin->version ?? '0', '>');
+            $plugin->latest_version = $latest;
             return $plugin;
         });
 

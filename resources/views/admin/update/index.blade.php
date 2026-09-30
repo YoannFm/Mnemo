@@ -41,7 +41,7 @@
 
             @if (!$latest)
                 <div class="text-muted small">
-                    <i class="bi bi-wifi-off me-1"></i>Impossible de contacter le serveur de mises à jour. Cliquez sur "Vérifier" pour réessayer.
+                    <i class="bi bi-wifi-off me-1"></i>Aucune version publiée sur GitHub, ou GitHub injoignable. Cliquez sur "Vérifier" pour réessayer.
                 </div>
             @elseif (!$hasUpdate)
                 <div class="alert alert-success d-flex align-items-center gap-2">

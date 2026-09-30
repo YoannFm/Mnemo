@@ -1,14 +1,14 @@
-# Documentation technique — Mnémo
+# Documentation technique - Mnémo
 
 ## Organisation du code
 
 L'application suit l'architecture MVC de Laravel :
 
 - **Contrôleurs** (`app/Http/Controllers/`) : chaque fonctionnalité majeure dispose de son propre contrôleur. `ModuleController` et `ItemController` gèrent le CRUD des données. `AnkiController` et `TestController` pilotent les deux modes d'entraînement. `LibraryController` expose les modules publics. `ProgressController` agrège les statistiques par utilisateur.
-- **Modèles** (`app/Models/`) : cinq modèles Eloquent — `User`, `Module`, `Item`, `Progress`, `Score` — avec leurs relations (`hasMany`, `belongsTo`).
+- **Modèles** (`app/Models/`) : cinq modèles Eloquent - `User`, `Module`, `Item`, `Progress`, `Score` - avec leurs relations (`hasMany`, `belongsTo`).
 - **Vues** (`resources/views/`) : organisées par domaine fonctionnel, elles utilisent le moteur Blade et héritent toutes du layout principal (`layouts/app.blade.php`).
 
-## Moteur de quiz — QuizGenerator
+## Moteur de quiz - QuizGenerator
 
 `QuizGenerator` (placé dans `app/Http/Controllers/` pour proximité avec les contrôleurs) génère les questions QCM de manière générique. Huit types de questions (Q1–Q8) couvrent toutes les combinaisons possibles entre les quatre attributs d'un item (photo, nom FR, nom EN, fonction). Pour chaque question, le générateur sélectionne un item cible, détermine le type de question selon la disponibilité des données (un item sans photo ne peut pas déclencher Q1), puis pioche trois distracteurs parmi les autres items du module. Cette généricité permet d'appliquer le même moteur à n'importe quel module sans configuration supplémentaire.
 

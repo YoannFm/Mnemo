@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-30 (suite)
+
+### Mises à jour et plugins via GitHub (fin de MnemoCloud)
+
+- **Mises à jour** : `UpdateManager` lit la dernière release GitHub (`api.github.com/repos/{dépôt}/releases/latest`) et télécharge son archive `mnemo.zip` ; le tag `vX.Y.Z` donne la version
+- **Nouveau workflow** `.github/workflows/release.yml` : à chaque tag `v*`, construit `mnemo.zip` (code, `vendor/` sans dépendances de dev, `public/build`, `public/vendor`) et publie la release ; échoue si le tag ne correspond pas à `config/mnemo.php`
+- **Plugins** : `PluginManager` lit le catalogue `plugins.json` (nouveau fichier à la racine, vide au départ) au lieu de MnemoCloud ; les entrées au slug invalide ou à l'URL non `https://` sont ignorées
+- Les plugins fournis dans `plugins/` restent installés d'office ; le bouton de mise à jour n'apparaît que pour les plugins présents dans le catalogue
+- GitHub injoignable : les pages Mises à jour et Plugins affichent un message au lieu d'une erreur 500
+- Page Mises à jour : la réponse de GitHub est interrogée une seule fois par affichage, même quand aucune release exploitable n'existe
+- `config/mnemo.php` : `cloud_url` remplacé par `github.repository`, `github.release_asset` et `github.plugins_catalog` (surchargeables via `MNEMO_GITHUB_REPOSITORY` et `MNEMO_PLUGINS_CATALOG`)
+- `App\Mnemo::userAgent()` : User-Agent des appels HTTP sortants (requis par l'API GitHub)
+- Tests : `UpdateManagerTest` et `PluginCatalogTest` (réponses GitHub simulées)
+- Documentation : README (publier une version), PLUGINS.md (format du catalogue), guides administrateur et maintenance, annexes (variables d'environnement)
+- `.gitignore` : `public/vendor/bootstrap-icons` (généré par `npm run copy-vendors`, comme TinyMCE)
+- Remplacement des tirets longs restants (docs, PLUGINS.md, plugin Tags)
+
+---
+
 ## 2026-09-30
 
 ### Passage en open source (licence MIT)

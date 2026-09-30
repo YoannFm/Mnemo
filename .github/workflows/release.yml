@@ -1,0 +1,54 @@
+name: Release
+
+# Publie une release GitHub à chaque tag vX.Y.Z, avec l'archive mnemo.zip
+# prête à installer (code + dépendances PHP + assets compilés).
+# Cette archive est celle téléchargée par la page Admin > Mises à jour.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vérifier que le tag correspond à config/mnemo.php
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          CONFIG_VERSION=$(grep -oP "'version'\s*=>\s*'\K[^']+" config/mnemo.php)
+          if [ "$TAG_VERSION" != "$CONFIG_VERSION" ]; then
+            echo "::error::Le tag $GITHUB_REF_NAME ne correspond pas à la version de config/mnemo.php ($CONFIG_VERSION)"
+            exit 1
+          fi
+
+      - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+        with:
+          php-version: '8.3'
+          extensions: gd, zip
+
+      - name: Dépendances PHP
+        run: composer install --no-dev --no-interaction --no-progress --no-scripts --prefer-dist --optimize-autoloader
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Assets front
+        run: npm ci && npm run copy-vendors && npm run build
+
+      - name: Construire l'archive
+        run: |
+          git archive --format=zip -o mnemo.zip HEAD
+          zip -qry mnemo.zip vendor public/build public/vendor -x '*/.git/*'
+
+      - name: Publier la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" mnemo.zip --title "$GITHUB_REF_NAME" --generate-notes

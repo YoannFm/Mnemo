@@ -18,7 +18,8 @@ Application web de flashcards pour apprendre et mémoriser du vocabulaire. Les u
 - `app/Models/AnkiSession.php` - session Anki persistée par utilisateur/module (`mode`, `learn_remaining` JSON, `learn_total`), unique sur `(user_id, module_id)`
 - `app/Services/QuizGenerator.php` - génère les questions Q1-Q16 (toutes combinaisons de champs)
 - `app/Helpers/LogHelper.php` - `LogHelper::log($action, $targetType, $targetId, $data, $level, $oldValue, $newValue)`
-- `app/Extensions/UpdateManager.php` - mises à jour de l'application, archives dans `storage/app/updates/`
+- `app/Extensions/UpdateManager.php` - mises à jour depuis la dernière release GitHub (archive `mnemo.zip` générée par `.github/workflows/release.yml`), archives dans `storage/app/updates/`
+- `app/Extensions/Plugin/PluginManager.php` - plugins locaux (`plugins/`) et catalogue GitHub `plugins.json`
 
 ## Mode Anki - fonctionnement
 

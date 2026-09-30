@@ -67,12 +67,14 @@
                                         </button>
                                     </form>
                                 @endif
+                                @if ($plugin->latest_version)
                                 <form method="POST" action="{{ route('admin.plugins.update', $plugin->id) }}">
                                     @csrf
-                                    <button class="btn btn-sm {{ !empty($plugin->has_update) ? 'btn-warning' : 'btn-outline-secondary' }}" title="{{ !empty($plugin->has_update) ? 'Mettre à jour' : 'Réinstaller' }}">
-                                        <i class="bi bi-arrow-up-circle{{ !empty($plugin->has_update) ? '-fill' : '' }}"></i>
+                                    <button class="btn btn-sm {{ $plugin->has_update ? 'btn-warning' : 'btn-outline-secondary' }}" title="{{ $plugin->has_update ? 'Mettre à jour' : 'Réinstaller' }}">
+                                        <i class="bi bi-arrow-up-circle{{ $plugin->has_update ? '-fill' : '' }}"></i>
                                     </button>
                                 </form>
+                                @endif
                                 @if (!$plugin->is_enabled)
                                 <form method="POST" action="{{ route('admin.plugins.delete', $plugin->id) }}"
                                       onsubmit="return confirm('Supprimer ce plugin ?')">
@@ -101,7 +103,7 @@
     {{-- Plugins disponibles --}}
     <div class="card shadow">
         <div class="card-header">
-            <h5 class="card-title mb-0"><i class="bi bi-cloud me-2"></i>Plugins disponibles</h5>
+            <h5 class="card-title mb-0"><i class="bi bi-github me-2"></i>Plugins disponibles</h5>
         </div>
 
         @if ($available->isNotEmpty())
@@ -127,7 +129,7 @@
                         <td class="fw-semibold">{{ $plugin->name }}</td>
                         <td class="text-muted small">{{ $plugin->description ?? '' }}</td>
                         <td class="text-muted small">{{ $plugin->author ?? '-' }}</td>
-                        <td><span class="badge bg-secondary">v{{ $plugin->latest_version ?? '-' }}</span></td>
+                        <td><span class="badge bg-secondary">v{{ $plugin->version }}</span></td>
                         <td class="text-end">
                             @if ($alreadyInstalled)
                                 <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Installé</span>
@@ -148,7 +150,7 @@
         @else
             <div class="card-body text-center py-5 text-muted">
                 <i class="bi bi-cloud-slash" style="font-size:2.5rem;"></i>
-                <p class="mt-3 mb-0">Impossible de contacter MnemoCloud ou aucun plugin disponible.</p>
+                <p class="mt-3 mb-0">Aucun plugin disponible dans le catalogue, ou catalogue injoignable.</p>
             </div>
         @endif
     </div>

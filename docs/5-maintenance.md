@@ -74,6 +74,8 @@ Le panel d'administration propose également des outils de sauvegarde intégrés
 
 ### Via le panel d'administration (recommandé)
 
+Les mises à jour proviennent de la dernière release GitHub du projet (voir la section "Publier une version" du README).
+
 1. Connectez-vous en tant qu'administrateur
 2. Accédez à **Admin - Mise à jour**
 3. Cliquez sur **Vérifier les mises à jour**

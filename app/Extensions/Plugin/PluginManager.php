@@ -2,7 +2,9 @@
 
 namespace App\Extensions\Plugin;
 
+use App\Mnemo;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -60,48 +62,34 @@ class PluginManager
         );
     }
 
+    /**
+     * Plugins proposés par le catalogue GitHub (voir PLUGINS.md), avec leur état d'installation.
+     */
     public function getAvailablePlugins(): Collection
     {
-        $response = Http::withHeaders($this->cloudHeaders())
-            ->get(config('mnemo.cloud_url') . '/api/v1/plugins');
-
-        if (!$response->successful()) {
-            return collect();
-        }
-
         $installed = $this->discoverPlugins()->pluck('id')->toArray();
 
-        return collect($response->json())->map(function ($p) use ($installed) {
-            $p = (object) $p;
-            $p->is_installed = in_array($p->slug, $installed);
-            return $p;
+        return $this->fetchCatalog()->map(function (object $plugin) use ($installed) {
+            $plugin->is_installed = in_array($plugin->slug, $installed);
+            return $plugin;
         });
     }
 
     public function install(string $slug): void
     {
-        $response = Http::withHeaders($this->cloudHeaders())
-            ->get(config('mnemo.cloud_url') . "/api/v1/plugins/{$slug}");
+        $plugin = $this->fetchCatalog()->firstWhere('slug', $slug);
 
-        if (!$response->successful()) {
-            throw new \RuntimeException("Plugin introuvable sur MnemoCloud.");
+        if (!$plugin) {
+            throw new \RuntimeException("Plugin introuvable dans le catalogue.");
         }
 
-        $plugin = $response->json();
-        $version = collect($plugin['versions'] ?? [])->first()['version'] ?? null;
-
-        if (!$version) {
-            throw new \RuntimeException("Aucune version disponible pour ce plugin.");
-        }
-
-        $download = Http::withHeaders($this->cloudHeaders())
-            ->get(config('mnemo.cloud_url') . "/api/v1/plugins/{$slug}/download/{$version}");
+        $download = Http::withUserAgent(Mnemo::userAgent())->timeout(60)->get($plugin->download_url);
 
         if (!$download->successful()) {
             throw new \RuntimeException("Échec du téléchargement du plugin.");
         }
 
-        $tmpZip = storage_path("app/plugins/{$slug}-{$version}.zip");
+        $tmpZip = storage_path("app/plugins/{$slug}-{$plugin->version}.zip");
         $this->files->ensureDirectoryExists(storage_path('app/plugins'));
         $this->files->put($tmpZip, $download->body());
 
@@ -124,11 +112,33 @@ class PluginManager
         DB::table('plugins')->where('slug', $slug)->delete();
     }
 
-    protected function cloudHeaders(): array
+    /**
+     * Lit le catalogue JSON des plugins. Les entrées incomplètes ou dont le slug
+     * ou l'URL ne sont pas sûrs sont ignorées.
+     */
+    protected function fetchCatalog(): Collection
     {
-        return [
-            'X-Mnemo-Version' => \App\Mnemo::version(),
-        ];
+        try {
+            $response = Http::withUserAgent(Mnemo::userAgent())
+                ->acceptJson()
+                ->timeout(15)
+                ->get(config('mnemo.github.plugins_catalog'));
+        } catch (ConnectionException) {
+            return collect();
+        }
+
+        if (!$response->successful()) {
+            return collect();
+        }
+
+        return collect($response->json('plugins', []))
+            ->filter(fn ($p) => is_array($p)
+                && preg_match('/^[a-z0-9-]+$/', $p['slug'] ?? '')
+                && !empty($p['name'])
+                && !empty($p['version'])
+                && str_starts_with($p['download_url'] ?? '', 'https://'))
+            ->map(fn (array $p) => (object) $p)
+            ->values();
     }
 
     public function isEnabled(string $slug): bool

@@ -1,4 +1,4 @@
-# Schéma de base de données — Mnémo
+# Schéma de base de données - Mnémo
 
 ## Diagramme des tables
 

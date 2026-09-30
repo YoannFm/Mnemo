@@ -2,14 +2,17 @@
 
 namespace App\Extensions;
 
+use App\Mnemo;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Http;
 
 class UpdateManager
 {
-    private string $cacheKey = 'mnemo_latest_version';
+    private string $cacheKey = 'mnemo_latest_release';
     private ?array $latestData = null;
+    private bool $fetched = false;
 
     public function __construct(private Filesystem $files) {}
 
@@ -22,7 +25,7 @@ class UpdateManager
     {
         $latest = $this->getLatestVersion();
         if (!$latest) return false;
-        return version_compare($latest, \App\Mnemo::version(), '>');
+        return version_compare($latest, Mnemo::version(), '>');
     }
 
     public function isDownloaded(): bool
@@ -36,7 +39,7 @@ class UpdateManager
     {
         if ($force) {
             cache()->forget($this->cacheKey);
-            $this->latestData = null;
+            $this->fetched = false;
         }
         $this->fetchData();
     }
@@ -47,9 +50,8 @@ class UpdateManager
         if (!$data) throw new \RuntimeException('Impossible de récupérer les informations de mise à jour.');
 
         $version = $data['version'];
-        $url = config('mnemo.cloud_url') . '/api/v1/updates/' . $version . '/download';
 
-        $response = Http::withHeaders($this->headers())->get($url);
+        $response = Http::withUserAgent(Mnemo::userAgent())->timeout(120)->get($data['download_url']);
         if (!$response->successful()) {
             throw new \RuntimeException('Échec du téléchargement : ' . $response->status());
         }
@@ -166,23 +168,43 @@ class UpdateManager
 
     private function fetchData(): ?array
     {
-        if ($this->latestData) return $this->latestData;
+        if ($this->fetched) return $this->latestData;
 
+        $this->fetched    = true;
         $this->latestData = cache()->remember($this->cacheKey, now()->addMinutes(30), function () {
-            $response = Http::withHeaders($this->headers())
-                ->get(config('mnemo.cloud_url') . '/api/v1/updates/check');
+            $repository = config('mnemo.github.repository');
+            try {
+                $response = Http::withUserAgent(Mnemo::userAgent())
+                    ->acceptJson()
+                    ->timeout(15)
+                    ->get("https://api.github.com/repos/{$repository}/releases/latest");
+            } catch (ConnectionException) {
+                return null;
+            }
 
             if (!$response->successful()) return null;
-            return $response->json();
+            return $this->parseRelease((array) $response->json());
         });
 
         return $this->latestData;
     }
 
-    private function headers(): array
+    /**
+     * Extrait la version (tag `vX.Y.Z`) et l'URL de l'archive d'une release GitHub.
+     * Retourne null si la release ne contient pas l'archive attendue.
+     */
+    private function parseRelease(array $release): ?array
     {
+        $assetName = config('mnemo.github.release_asset');
+        $asset     = collect($release['assets'] ?? [])->firstWhere('name', $assetName);
+
+        if (empty($release['tag_name']) || empty($asset['browser_download_url'])) {
+            return null;
+        }
+
         return [
-            'X-Mnemo-Version' => \App\Mnemo::version(),
+            'version'      => ltrim($release['tag_name'], 'v'),
+            'download_url' => $asset['browser_download_url'],
         ];
     }
 

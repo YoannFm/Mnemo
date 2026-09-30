@@ -423,4 +423,6 @@ Le fichier `items.json` contient les chemins relatifs vers les médias, qui sont
 | `MAIL_FROM_ADDRESS` | `hello@example.com` | Adresse d'expédition |
 | `MAIL_FROM_NAME` | `${APP_NAME}` | Nom d'expédition |
 | `TINYMCE_API_KEY` | - | Clé API TinyMCE |
+| `MNEMO_GITHUB_REPOSITORY` | `YoannFm/Mnemo` | Dépôt GitHub dont les releases fournissent les mises à jour |
+| `MNEMO_PLUGINS_CATALOG` | `https://raw.githubusercontent.com/YoannFm/Mnemo/main/plugins.json` | URL du catalogue des plugins |
 | `FILESYSTEM_DISK` | `local` | Disque de stockage des fichiers |
